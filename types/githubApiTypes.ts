@@ -8,13 +8,13 @@ export interface GithubEvent {
   installation: Installation;
 }
 
-export type GithubAction = 'closed' | 'opened' | 'reopened' | 'submitted';
+export type GithubAction = "closed" | "opened" | "reopened" | "submitted";
 
 export const GithubActions: GithubAction[] = [
-  'closed',
-  'opened',
-  'reopened',
-  'submitted',
+  "closed",
+  "opened",
+  "reopened",
+  "submitted",
 ];
 
 export interface PullRequest {
