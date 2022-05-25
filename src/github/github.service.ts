@@ -7,6 +7,8 @@ import { GithubEvent } from "types/githubApiTypes";
 export class GithubService {
   slackClient: WebClient;
 
+  channelId = "C03GBF3FCNR";
+
   // ID of the PR to ID of the message
   seenPrs: Record<string, string> = {};
 
@@ -16,43 +18,62 @@ export class GithubService {
 
   handleEvent(body: GithubEvent) {
     if (body.pull_request && body.pull_request.id) {
+      const pullRequest = body.pull_request;
       const prId = body.pull_request.id;
-      if (prId in this.seenPrs) {
+
+      if (body.action === "opened") {
         this.slackClient.chat.postMessage({
           token: process.env.SLACK_BOT_TOKEN,
           thread_ts: this.seenPrs[prId],
-          channel: "C03GBF3FCNR",
-          text: `${body.sender.login} ${body.action} <${body.pull_request.html_url}|${body.pull_request.title}>`,
+          channel: this.channelId,
+          text: `Pull request opened by <${body.sender.html_url}|${body.sender.login}>`,
           attachments: [
             {
-              author_name: "Bobby Tables",
-              color: "#2eb886",
+              author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
+              text: `+${pullRequest.additions} -${pullRequest.deletions}`,
+              color: "#6F42C1",
+              footer: pullRequest.created_at,
             },
           ],
         });
       } else {
-        this.slackClient.chat
-          .postMessage({
+        if (prId in this.seenPrs) {
+          this.slackClient.chat.postMessage({
             token: process.env.SLACK_BOT_TOKEN,
-            channel: "C03GBF3FCNR",
+            thread_ts: this.seenPrs[prId],
+            channel: this.channelId,
             text: `${body.sender.login} ${body.action} <${body.pull_request.html_url}|${body.pull_request.title}>`,
-          })
-          .then((message) => {
-            console.log(`Message thread_ts: ${message.message?.thread_ts}`);
-            if (message.message?.ts) {
-              this.seenPrs[prId] = message.message.ts;
-              console.log("Added pr id to seenPrs");
-              console.log(this.seenPrs);
-            }
+            attachments: [
+              {
+                author_name: "Bobby Tables",
+                color: "#2eb886",
+              },
+            ],
           });
+        } else {
+          this.slackClient.chat
+            .postMessage({
+              token: process.env.SLACK_BOT_TOKEN,
+              channel: this.channelId,
+              text: `${body.sender.login} ${body.action} <${body.pull_request.html_url}|${body.pull_request.title}>`,
+            })
+            .then((message) => {
+              console.log(`Message thread_ts: ${message.message?.thread_ts}`);
+              if (message.message?.ts) {
+                this.seenPrs[prId] = message.message.ts;
+                console.log("Added pr id to seenPrs");
+                console.log(this.seenPrs);
+              }
+            });
+        }
       }
     }
   }
 
   sendMessage() {
     this.slackClient.chat.postMessage({
-      channel: "C03GBF3FCNR",
-      text: "lol",
+      channel: this.channelId,
+      text: "test message",
     });
   }
 }
