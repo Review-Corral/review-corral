@@ -5,18 +5,18 @@ import {
   GithubEvent,
   PullRequest,
 } from "types/githubApiTypes";
-import { AppService } from "./app.service";
+import { GithubService } from "./github.service";
 
 // We just need to map the pull requests with the slack IDs so we can thread the messages
 const pullRequests: Record<PullRequest["id"], PullRequest> = {};
 
-@Controller()
-export class AppController {
-  constructor(private readonly appService: AppService) {}
+@Controller("/github")
+export class GithubController {
+  constructor(private readonly githubService: GithubService) {}
 
   @Get()
   getHello(): string {
-    return this.appService.getHello();
+    return this.githubService.getHello();
   }
 
   @Post("/events")
@@ -34,5 +34,10 @@ export class AppController {
     }
 
     console.log(JSON.stringify(body, null, 2));
+  }
+
+  @Post("/send-message")
+  sendMessage() {
+    this.githubService.sendMessage();
   }
 }
