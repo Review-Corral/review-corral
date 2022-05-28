@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "scrict": true,
     "module": "commonjs",
     "declaration": true,
     "removeComments": true,
