@@ -20,6 +20,9 @@ export class GithubService {
   async handleEvent(body: GithubEvent) {
     if (body.pull_request && body.pull_request.id) {
       const pullRequest = body.pull_request;
+
+      console.log(body.pull_request);
+
       const prId = body.pull_request.id;
 
       // 1. Post Open PRs to before checking
