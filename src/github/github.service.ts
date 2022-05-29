@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ChatPostMessageResponse, WebClient } from "@slack/web-api";
 import { PrismaService } from "src/prisma/prisma.service";
-import { GithubEvent, PullRequest } from "types/githubApiTypes";
+import { GithubActions, GithubEvent, PullRequest } from "types/githubApiTypes";
 // delete-this comment
 
 @Injectable()
@@ -20,15 +20,15 @@ export class GithubService {
   async handleEvent(body: GithubEvent) {
     if (body.pull_request && body.pull_request.id) {
       const pullRequest = body.pull_request;
+
       const prId = body.pull_request.id;
 
       // 1. Post Open PRs to before checking
       // try and find the id in the database
       // If it doesn't
 
-      if (body.action === "opened") {
-        this.postPrOpened(prId, body, pullRequest);
-      } else {
+      // Review comments
+      if (body.action === "submitted" && body.review) {
         const record = await this.prisma.pull_requests
           .findFirst({
             where: {
@@ -38,39 +38,100 @@ export class GithubService {
           .catch((e) => {
             console.log("Error finding pr: ", e);
           });
-
         if (record) {
-          const thread_ts = record.thread_ts;
           this.slackClient.chat.postMessage({
             token: process.env.SLACK_BOT_TOKEN,
-            thread_ts: thread_ts,
+            thread_ts: record.thread_ts,
             channel: this.channelId,
-            text: `${body.sender.login} ${body.action} <${body.pull_request.html_url}|${body.pull_request.title}>`,
+            text: `${await this.getSlackUserName(
+              body.sender.login,
+            )} Left a comment`,
             attachments: [
               {
-                author_name: "Bobby Tables",
-                color: "#2eb886",
+                author_name: body.review.user.login,
+                text: body.review.body,
+                color: "#fff",
               },
             ],
           });
-        } else {
-          this.slackClient.chat
-            .postMessage({
-              token: process.env.SLACK_BOT_TOKEN,
-              channel: this.channelId,
-              text: `${body.sender.login} ${body.action} <${body.pull_request.html_url}|${body.pull_request.title}>`,
-            })
-            .then((message) => {
-              console.log(`Message thread_ts: ${message.message?.thread_ts}`);
-              if (message.message?.ts) {
-                this.saveThreadTs(message, prId);
-                console.log("Added pr id to seenPrs");
-                console.log(this.seenPrs);
-              }
-            });
         }
+      } else if (body.action === "created" && body.comment) {
+        // toodo
+        console.log(JSON.stringify(body, null, 2));
+      } else if (GithubActions.includes(body.action) && body.pull_request) {
+        await this.handlePullRequestEvent(body, prId, pullRequest);
+      }
+    } else {
+      console.log("Got non PR body: ");
+      console.log(body);
+    }
+  }
+
+  private async handlePullRequestEvent(
+    body: GithubEvent,
+    prId: number,
+    pullRequest: PullRequest,
+  ) {
+    if (body.action === "opened") {
+      this.postPrOpened(prId, body, pullRequest);
+    } else {
+      const record = await this.prisma.pull_requests
+        .findFirst({
+          where: {
+            pr_id: prId.toString(),
+          },
+        })
+        .catch((e) => {
+          console.log("Error finding pr: ", e);
+        });
+
+      const text = `Pull request ${
+        body.action
+      } by ${await this.getSlackUserName(body.sender.login)}`;
+
+      const attachments = [
+        {
+          text: `<${body.pull_request.html_url}|${body.pull_request.title}>`,
+          color: "#2eb886",
+        },
+      ];
+
+      if (record) {
+        this.slackClient.chat.postMessage({
+          token: process.env.SLACK_BOT_TOKEN,
+          thread_ts: record.thread_ts,
+          channel: this.channelId,
+          text,
+          attachments,
+        });
+      } else {
+        this.slackClient.chat
+          .postMessage({
+            token: process.env.SLACK_BOT_TOKEN,
+            channel: this.channelId,
+            text,
+          })
+          .then((message) => {
+            if (message.message?.ts) {
+              this.saveThreadTs(message, prId);
+            }
+          });
       }
     }
+  }
+
+  private async getSlackUserName(githubLogin: string): Promise<string> {
+    const foundUsername = await this.prisma.username_mappings.findUnique({
+      where: {
+        github_username: githubLogin,
+      },
+    });
+
+    if (foundUsername) {
+      return `<@${foundUsername.slack_username}>`;
+    }
+
+    return githubLogin;
   }
 
   private saveThreadTs(message: ChatPostMessageResponse, prId: number) {
