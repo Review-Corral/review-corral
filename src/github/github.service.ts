@@ -85,38 +85,35 @@ export class GithubService {
           console.log("Error finding pr: ", e);
         });
 
+      const text = `Pull request ${
+        body.action
+      } by ${await this.getSlackUserName(body.sender.login)}`;
+
+      const attachments = [
+        {
+          text: `<${body.pull_request.html_url}|${body.pull_request.title}>`,
+          color: "#2eb886",
+        },
+      ];
+
       if (record) {
-        console.log("Action: ", body.action);
-        const thread_ts = record.thread_ts;
         this.slackClient.chat.postMessage({
           token: process.env.SLACK_BOT_TOKEN,
-          thread_ts: thread_ts,
+          thread_ts: record.thread_ts,
           channel: this.channelId,
-          text: `${await this.getSlackUserName(body.sender.login)} ${
-            body.action
-          } <${body.pull_request.html_url}|${body.pull_request.title}>`,
-          attachments: [
-            {
-              author_name: "Bobby Tables",
-              color: "#2eb886",
-            },
-          ],
+          text,
+          attachments,
         });
       } else {
         this.slackClient.chat
           .postMessage({
             token: process.env.SLACK_BOT_TOKEN,
             channel: this.channelId,
-            text: `${await this.getSlackUserName(body.sender.login)} ${
-              body.action
-            } <${body.pull_request.html_url}|${body.pull_request.title}>`,
+            text,
           })
           .then((message) => {
-            console.log(`Message thread_ts: ${message.message?.thread_ts}`);
             if (message.message?.ts) {
               this.saveThreadTs(message, prId);
-              console.log("Added pr id to seenPrs");
-              console.log(this.seenPrs);
             }
           });
       }
