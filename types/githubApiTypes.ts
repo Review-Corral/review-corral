@@ -1,6 +1,7 @@
 export interface GithubEvent {
   action: GithubAction | any;
   number: number;
+  comment?: Comment;
   review?: Review;
   pull_request: PullRequest;
   repository: Repository;
@@ -289,4 +290,65 @@ export interface Repository {
 export interface Installation {
   id: number;
   node_id: string;
+}
+
+export interface Weather {
+  action: string;
+  comment: Comment;
+  pull_request: PullRequest;
+  repository: Repository;
+  sender: UserOrOwnerOrSender;
+  installation: Installation;
+}
+export interface Comment {
+  url: string;
+  pull_request_review_id: number;
+  id: number;
+  node_id: string;
+  diff_hunk: string;
+  path: string;
+  position: number;
+  original_position: number;
+  commit_id: string;
+  original_commit_id: string;
+  user: UserOrOwnerOrSender;
+  body: string;
+  created_at: string;
+  updated_at: string;
+  html_url: string;
+  pull_request_url: string;
+  author_association: string;
+  _links: Links;
+  reactions: Reactions;
+  start_line?: null;
+  original_start_line?: null;
+  start_side?: null;
+  line: number;
+  original_line: number;
+  side: string;
+  in_reply_to_id: number;
+}
+export interface UserOrOwnerOrSender {
+  login: string;
+  id: number;
+  node_id: string;
+  avatar_url: string;
+  gravatar_id: string;
+  url: string;
+  html_url: string;
+  followers_url: string;
+  following_url: string;
+  gists_url: string;
+  starred_url: string;
+  subscriptions_url: string;
+  organizations_url: string;
+  repos_url: string;
+  events_url: string;
+  received_events_url: string;
+  type: string;
+  site_admin: boolean;
+}
+export interface Reactions {
+  url: string;
+  total_count: number;
 }
