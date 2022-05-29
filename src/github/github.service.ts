@@ -21,7 +21,7 @@ export class GithubService {
     if (body.pull_request && body.pull_request.id) {
       const pullRequest = body.pull_request;
 
-      console.log(body.pull_request);
+      console.log(body);
 
       const prId = body.pull_request.id;
 
@@ -29,9 +29,8 @@ export class GithubService {
       // try and find the id in the database
       // If it doesn't
 
-      if (body.action === "opened") {
-        this.postPrOpened(prId, body, pullRequest);
-      } else {
+      // Review comments
+      if (body.action === "submitted" && body.review) {
         const record = await this.prisma.pull_requests
           .findFirst({
             where: {
@@ -41,38 +40,70 @@ export class GithubService {
           .catch((e) => {
             console.log("Error finding pr: ", e);
           });
-
         if (record) {
-          const thread_ts = record.thread_ts;
           this.slackClient.chat.postMessage({
             token: process.env.SLACK_BOT_TOKEN,
-            thread_ts: thread_ts,
+            thread_ts: record.thread_ts,
             channel: this.channelId,
-            text: `${body.sender.login} ${body.action} <${body.pull_request.html_url}|${body.pull_request.title}>`,
+            text: `${body.sender.login} Left a comment`,
             attachments: [
               {
-                author_name: "Bobby Tables",
-                color: "#2eb886",
+                author_name: body.review.user.login,
+                text: body.review.body,
+                color: "#fff",
               },
             ],
           });
+        }
+      } else {
+        if (body.action === "opened") {
+          this.postPrOpened(prId, body, pullRequest);
         } else {
-          this.slackClient.chat
-            .postMessage({
+          const record = await this.prisma.pull_requests
+            .findFirst({
+              where: {
+                pr_id: prId.toString(),
+              },
+            })
+            .catch((e) => {
+              console.log("Error finding pr: ", e);
+            });
+
+          if (record) {
+            const thread_ts = record.thread_ts;
+            this.slackClient.chat.postMessage({
               token: process.env.SLACK_BOT_TOKEN,
+              thread_ts: thread_ts,
               channel: this.channelId,
               text: `${body.sender.login} ${body.action} <${body.pull_request.html_url}|${body.pull_request.title}>`,
-            })
-            .then((message) => {
-              console.log(`Message thread_ts: ${message.message?.thread_ts}`);
-              if (message.message?.ts) {
-                this.saveThreadTs(message, prId);
-                console.log("Added pr id to seenPrs");
-                console.log(this.seenPrs);
-              }
+              attachments: [
+                {
+                  author_name: "Bobby Tables",
+                  color: "#2eb886",
+                },
+              ],
             });
+          } else {
+            this.slackClient.chat
+              .postMessage({
+                token: process.env.SLACK_BOT_TOKEN,
+                channel: this.channelId,
+                text: `${body.sender.login} ${body.action} <${body.pull_request.html_url}|${body.pull_request.title}>`,
+              })
+              .then((message) => {
+                console.log(`Message thread_ts: ${message.message?.thread_ts}`);
+                if (message.message?.ts) {
+                  this.saveThreadTs(message, prId);
+                  console.log("Added pr id to seenPrs");
+                  console.log(this.seenPrs);
+                }
+              });
+          }
         }
       }
+    } else {
+      console.log("Got non PR body: ");
+      console.log(body);
     }
   }
 

@@ -13,3 +13,10 @@ model pull_requests {
   thread_ts  String    @unique
   pr_id      String
 }
+
+model username_mappings {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  github_username String
+  slack_username  String    @unique
+}
