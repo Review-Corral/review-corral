@@ -4,9 +4,10 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import { GithubModule } from "./github/github.module";
 import { PrismaModule } from "./prisma/prisma.module";
+import { SlackModule } from "./slack/slack.module";
 
 @Module({
-  imports: [GithubModule, PrismaModule, ConfigModule.forRoot()],
+  imports: [GithubModule, PrismaModule, ConfigModule.forRoot(), SlackModule],
   controllers: [AppController],
   providers: [AppService],
 })
