@@ -1,10 +1,13 @@
-import { Body, Controller, Get, Param } from "@nestjs/common";
+import { Body, Controller, Get, Query } from "@nestjs/common";
 
 @Controller("/slack")
 export class SlackController {
   @Get()
-  getSlackAuthEvent(@Body() body: any, @Param() params: any) {
+  getSlackAuthEvent(
+    @Body() body: any,
+    @Query() query: { name: string; state?: string },
+  ) {
     console.log(body);
-    console.log("params: ", params);
+    console.log("query: ", query);
   }
 }
