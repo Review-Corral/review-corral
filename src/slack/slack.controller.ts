@@ -1,9 +1,9 @@
-import { Body, Controller, Post } from "@nestjs/common";
+import { Body, Controller, Get } from "@nestjs/common";
 
 @Controller("/slack")
 export class SlackController {
-  @Post()
-  postGithubEvents(@Body() body: any) {
+  @Get()
+  getSlackAuthEvent(@Body() body: any) {
     console.log(body);
   }
 }
