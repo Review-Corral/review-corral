@@ -31,7 +31,7 @@ export class SlackController {
       >("https://slack.com/api/oauth.v2.access", {
         client_id: process.env.SLACK_BOT_ID,
         code: query.code,
-        client_secret: process.env.SLACK_SIGNING_SECRET,
+        client_secret: process.env.SLACK_CLIENT_SECRET,
       })
       .then((response) => console.log(response))
       .catch((e) => console.log(e));
