@@ -27,7 +27,7 @@ model slack_integration {
   created_at   DateTime? @default(now()) @db.Timestamptz(6)
   access_token String?
   channel_id   String?
-  team         DateTime? @db.Timestamptz(6)
+  team         String?   @db.Uuid
 }
 
 model team {
