@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS public.slack_integration
     created_at timestamp with time zone DEFAULT now(),
     access_token text COLLATE pg_catalog."default",
     channel_id text COLLATE pg_catalog."default",
-    team timestamp with time zone,
+    team uuid,
     CONSTRAINT slack_integration_pkey PRIMARY KEY (id)
 )
 
