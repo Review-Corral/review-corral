@@ -19,4 +19,19 @@ model username_mappings {
   created_at      DateTime? @default(now()) @db.Timestamptz(6)
   github_username String    @unique
   slack_username  String    @unique
+  team            String?   @db.Uuid
+}
+
+model slack_integration {
+  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at   DateTime? @default(now()) @db.Timestamptz(6)
+  access_token String?
+  channel_id   String?
+  team         DateTime? @db.Timestamptz(6)
+}
+
+model team {
+  created_at DateTime? @default(now()) @db.Timestamptz(6)
+  Name       String?
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
 }
