@@ -7,7 +7,7 @@ import { PrismaModule } from "./prisma/prisma.module";
 import { SlackModule } from "./slack/slack.module";
 
 @Module({
-  imports: [GithubModule, PrismaModule, ConfigModule.forRoot(), SlackModule],
+  imports: [GithubModule, PrismaModule, SlackModule, ConfigModule.forRoot()],
   controllers: [AppController],
   providers: [AppService],
 })

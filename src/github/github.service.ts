@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { ChatPostMessageResponse, WebClient } from "@slack/web-api";
-import { PrismaService } from "src/prisma/prisma.service";
 import { GithubActions, GithubEvent, PullRequest } from "types/githubApiTypes";
+import { PrismaService } from "../prisma/prisma.service";
 // delete-this comment
 
 @Injectable()

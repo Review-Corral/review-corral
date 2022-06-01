@@ -1,8 +1,12 @@
 import { Injectable } from "@nestjs/common";
 import axios from "axios";
-import { PrismaService } from "src/prisma/prisma.service";
 import { SlackAuthEvent } from "types/slackAuthTypes";
-import { SlackAuthQueryParams } from "./slack.controller";
+import { PrismaService } from "../prisma/prisma.service";
+
+export interface SlackAuthQueryParams {
+  code: string;
+  state?: string;
+}
 // delete-this comment
 
 @Injectable()

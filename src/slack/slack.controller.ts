@@ -1,10 +1,5 @@
 import { Body, Controller, Get, Query } from "@nestjs/common";
-import { SlackService } from "./slack.service";
-
-export interface SlackAuthQueryParams {
-  code: string;
-  state?: string;
-}
+import { SlackAuthQueryParams, SlackService } from "./slack.service";
 
 @Controller("/slack")
 export class SlackController {
