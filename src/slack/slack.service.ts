@@ -34,7 +34,7 @@ export class SlackService {
             data: {
               access_token: data.access_token,
               channel_id: data.incoming_webhook.channel_id,
-              team: "7b6a702e-b3ab-43e1-805f-30bed457b5dc",
+              team: "7611d060-35ee-401f-8e99-58b2f7a9849d",
             },
           })
           .catch((e) => console.error("Error creating slack_integration: ", e));
