@@ -10,5 +10,5 @@
 ```
 
 ```
-https://slack.com/oauth/v2/authorize?scope=chat%3Awrite%2Ccommands%2Cincoming-webhook%2Cchannels%3Ahistory&user_scope=&redirect_uri=https%3A%2F%2Fseal-app-xuqd9.ondigitalocean.app%2Fslack&client_id=3571046828385.3558423656162
+https://slack.com/oauth/v2/authorize?scope=channels%3Ahistory%2Cchat%3Awrite%2Ccommands%2Cgroups%3Ahistory%2Cincoming-webhook%2Cusers%3Aread&user_scope=&redirect_uri=https%3A%2F%2Fseal-app-xuqd9.ondigitalocean.app%2Fslack&client_id=3571046828385.3558423656162
 ```
