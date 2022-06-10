@@ -14,6 +14,10 @@ export class SlackService {
   constructor(private prisma: PrismaService) {}
 
   async subscribeTeam(queryParams: SlackAuthQueryParams) {
+    if (!queryParams.state) {
+      throw Error("Trying to subscribe team without state query param");
+    }
+
     axios
       .postForm<
         {
@@ -35,7 +39,7 @@ export class SlackService {
               access_token: data.access_token,
               channel_id: data.incoming_webhook.channel_id,
               channel_name: data.incoming_webhook.channel,
-              team: "7611d060-35ee-401f-8e99-58b2f7a9849d",
+              team: queryParams.state,
             },
           })
           .catch((e) => console.error("Error creating slack_integration: ", e));

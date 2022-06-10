@@ -4,6 +4,7 @@ import Image from "next/image";
 import styles from "../styles/Home.module.css";
 
 const Home: NextPage = () => {
+  const id = "7611d060-35ee-401f-8e99-58b2f7a9849d";
   return (
     <div className={styles.container}>
       <Head>
@@ -14,7 +15,9 @@ const Home: NextPage = () => {
 
       <main className={styles.main}>
         <h1>Hello</h1>
-        <a href="https://slack.com/oauth/v2/authorize?scope=channels%3Ahistory%2Cchat%3Awrite%2Ccommands%2Cgroups%3Ahistory%2Cincoming-webhook%2Cusers%3Aread%2Cuser_scope=%2Credirect_uri=https%3A%2F%2Fseal-app-xuqd9.ondigitalocean.app%2Fslack%2Cclient_id=3571046828385.3558423656162">
+        <a
+          href={`https://slack.com/oauth/v2/authorize?scope=channels%3Ahistory%2Cchat%3Awrite%2Ccommands%2Cgroups%3Ahistory%2Cincoming-webhook%2Cusers%3Aread&user_scope=&redirect_uri=https%3A%2F%2Fseal-app-xuqd9.ondigitalocean.app%2Fslack&state=${id}&client_id=3571046828385.3558423656162`}
+        >
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 122.8 122.8">
             <path
               d="M25.8 77.6c0 7.1-5.8 12.9-12.9 12.9S0 84.7 0 77.6s5.8-12.9 12.9-12.9h12.9v12.9zm6.5 0c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9v32.3c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V77.6z"
