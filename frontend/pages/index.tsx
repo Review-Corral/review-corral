@@ -4,7 +4,8 @@ import Image from "next/image";
 import styles from "../styles/Home.module.css";
 
 const Home: NextPage = () => {
-  const id = "7611d060-35ee-401f-8e99-58b2f7a9849d";
+  // const id = "7611d060-35ee-401f-8e99-58b2f7a9849d";
+  const id = "abc";
   return (
     <div className={styles.container}>
       <Head>
