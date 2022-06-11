@@ -26,17 +26,13 @@ const Home: NextPage = () => {
         {isLoading ? <h1>Loading...</h1> : <h1>Loaded!</h1>}
         <button
           onClick={() => {
-            supabaseClient.auth.signIn({ provider: "github" });
+            supabaseClient.auth.signIn(
+              { provider: "github" },
+              { scopes: "repo" },
+            );
           }}
         >
           GitHub with scopes
-        </button>
-        <button
-          onClick={() => {
-            supabaseClient.auth.signUp({ provider: "github" });
-          }}
-        >
-          signup
         </button>
         <Auth
           // view="update_password"
