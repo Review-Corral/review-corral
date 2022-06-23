@@ -9,6 +9,12 @@ const pullRequests: Record<PullRequest["id"], PullRequest> = {};
 export class GithubController {
   constructor(private readonly githubService: GithubService) {}
 
+  @Post("/auth")
+  handleGithubAuth(@Body() body: unknown) {
+    console.log(JSON.stringify(body, null, 2));
+    console.log("Got github event");
+  }
+
   @Post("/events")
   postGithubEvents(@Body() body: GithubEvent) {
     this.githubService.handleEvent(body);
