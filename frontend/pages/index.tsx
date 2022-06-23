@@ -3,21 +3,11 @@ import { useUser } from "@supabase/auth-helpers-react";
 import { Auth } from "@supabase/ui";
 import type { NextPage } from "next";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { FC } from "react";
+import GithubButton from "../components/GithubButton";
 
-const Home: NextPage = () => {
-  // const id = "7611d060-35ee-401f-8e99-58b2f7a9849d";
-  const id = "abc";
+const Content: FC = () => {
   const { isLoading, user, error } = useUser();
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    async function loadData() {
-      const { data } = await supabaseClient.from("test").select("*").single();
-      setData(data);
-    }
-    if (user) loadData();
-  }, [user]);
 
   if (!user)
     return (
@@ -60,10 +50,26 @@ const Home: NextPage = () => {
       </p>
       {isLoading ? <h1>Loading...</h1> : <h1>Loaded!</h1>}
       <p>user:</p>
+      <div>
+        Github button
+        <GithubButton state={"1234"} />
+      </div>
       <pre>{JSON.stringify(user, null, 2)}</pre>
       <p>client-side data fetching with RLS</p>
-      <pre>{JSON.stringify(data, null, 2)}</pre>
     </>
+  );
+};
+
+const Home: NextPage = () => {
+  // const id = "7611d060-35ee-401f-8e99-58b2f7a9849d";
+  const id = "abc";
+
+  return (
+    <div className="h-screen w-screen flex flex-col items-center pt-20 bg-white">
+      <div className="max-w-2xl border border-gray-500 rounded-md bg-gray-50 p-6">
+        <Content />
+      </div>
+    </div>
   );
 };
 
