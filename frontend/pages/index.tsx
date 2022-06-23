@@ -50,7 +50,8 @@ const Content: FC = () => {
       </p>
       {isLoading ? <h1>Loading...</h1> : <h1>Loaded!</h1>}
       <p>user:</p>
-      <div>
+      <p>Gracias</p>
+      <div className="bg-blue-500 h-20 w-20">
         Github button
         <GithubButton state={"1234"} />
       </div>
