@@ -1,8 +1,14 @@
 import { Injectable } from "@nestjs/common";
 import { ChatPostMessageResponse, WebClient } from "@slack/web-api";
+import axios from "axios";
 import { GithubActions, GithubEvent, PullRequest } from "types/githubApiTypes";
 import { PrismaService } from "../prisma/prisma.service";
-// delete-this comment
+
+export interface TokenResponse {
+  access_token: string;
+  scope: string;
+  token_type: string;
+}
 
 @Injectable()
 export class GithubService {
@@ -176,5 +182,29 @@ export class GithubService {
       channel: this.channelId,
       text: "test message",
     });
+  }
+
+  async getAccessToken(code: string, teamId: string) {
+    const params = new URLSearchParams();
+    params.append("client_id", process.env.GITHUB_CLIENT_ID ?? "");
+    params.append("client_secret", process.env.GITHUB_CLIENT_SECRET ?? "");
+    params.append("code", code);
+
+    const url = new URL("https://github.com/login/oauth/access_token");
+    url.search = params.toString();
+
+    axios
+      .post(url.toString(), undefined, {
+        headers: { accept: "application/json" },
+      })
+      .then((response) => {
+        console.log("Got access token: ", response.data.access_token);
+        this.prisma.github_integration.create({
+          data: {
+            team_id: teamId,
+            access_token: response.data.access_token,
+          },
+        });
+      });
   }
 }
