@@ -205,6 +205,7 @@ export class GithubService {
             access_token: response.data.access_token,
           },
         });
-      });
+      })
+      .catch((error) => console.log("Error getting access token: ", error));
   }
 }
