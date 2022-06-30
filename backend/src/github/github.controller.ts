@@ -17,6 +17,10 @@ export class GithubController {
   @Get("/auth")
   async handleGithubAuth(@Query() query: GithubAuthQueryParams) {
     this.githubService.getAccessToken(query.code, query.state);
+
+    return {
+      url: process.env.BASE_FE_URL,
+    };
   }
 
   @Post("/events")

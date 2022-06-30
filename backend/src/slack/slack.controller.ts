@@ -11,7 +11,7 @@ export class SlackController {
     this.slackService.subscribeTeam(query);
 
     return {
-      url: "https://www.google.com",
+      url: process.env.BASE_FE_URL,
     };
   }
 }
