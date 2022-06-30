@@ -1,4 +1,5 @@
 import React from "react";
+import Button from "./buttons/Button";
 
 interface GithubButtonProps {
   state: string;
@@ -18,7 +19,7 @@ const GithubButton: React.FC<GithubButtonProps> = ({ state }) => {
 
   return (
     <div>
-      <button onClick={() => window.open(url)}>Connect Github</button>
+      <Button onClick={() => window.open(url)}>Connect to Github</Button>
     </div>
   );
 };

@@ -1,6 +1,8 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@headlessui/react': ^1.6.5
+  '@heroicons/react': ^1.0.6
   '@supabase/auth-helpers-nextjs': ^0.2.0
   '@supabase/auth-helpers-react': ^0.2.0
   '@supabase/supabase-js': ^1.35.3
@@ -12,6 +14,7 @@ specifiers:
   eslint: 8.17.0
   eslint-config-next: 12.1.6
   next: 12.1.6
+  outline: link:@heroicons/react/outline
   postcss: ^8.4.14
   react: 18.1.0
   react-dom: 18.1.0
@@ -19,11 +22,14 @@ specifiers:
   typescript: 4.7.3
 
 dependencies:
+  '@headlessui/react': 1.6.5_ef5jwxihqo6n7gxfmzogljlgcm
+  '@heroicons/react': 1.0.6_react@18.1.0
   '@supabase/auth-helpers-nextjs': 0.2.0
   '@supabase/auth-helpers-react': 0.2.0
   '@supabase/supabase-js': 1.35.3
   '@supabase/ui': 0.36.5_ef5jwxihqo6n7gxfmzogljlgcm
   next: 12.1.6_ef5jwxihqo6n7gxfmzogljlgcm
+  outline: link:@heroicons/react/outline
   react: 18.1.0
   react-dom: 18.1.0_react@18.1.0
 
@@ -71,6 +77,25 @@ packages:
     transitivePeerDependencies:
       - supports-color
     dev: true
+
+  /@headlessui/react/1.6.5_ef5jwxihqo6n7gxfmzogljlgcm:
+    resolution: {integrity: sha512-3VkKteDxlxf3fE0KbfO9t60KC1lM7YNpZggLpwzVNg1J/zwL+h+4N7MBlFDVpInZI3rKlZGpNx0PWsG/9c2vQg==}
+    engines: {node: '>=10'}
+    peerDependencies:
+      react: ^16 || ^17 || ^18
+      react-dom: ^16 || ^17 || ^18
+    dependencies:
+      react: 18.1.0
+      react-dom: 18.1.0_react@18.1.0
+    dev: false
+
+  /@heroicons/react/1.0.6_react@18.1.0:
+    resolution: {integrity: sha512-JJCXydOFWMDpCP4q13iEplA503MQO3xLoZiKum+955ZCtHINWnx26CUxVxxFQu/uLb4LW3ge15ZpzIkXKkJ8oQ==}
+    peerDependencies:
+      react: '>= 16'
+    dependencies:
+      react: 18.1.0
+    dev: false
 
   /@humanwhocodes/config-array/0.9.5:
     resolution: {integrity: sha512-ObyMyWxZiCu/yTisA7uzx81s40xR2fD5Cg/2Kq7G02ajkNubJf6BopgDTmDyc3U7sXpNKM8cYOw7s7Tyr+DnCw==}

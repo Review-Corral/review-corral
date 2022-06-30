@@ -5,6 +5,7 @@ import type { NextPage } from "next";
 import Link from "next/link";
 import { FC } from "react";
 import GithubButton from "../components/GithubButton";
+import { DashboardLayout } from "../components/layout/DashboardLayout";
 
 const Content: FC = () => {
   const { isLoading, user, error } = useUser();
@@ -51,7 +52,6 @@ const Content: FC = () => {
       </p>
       {isLoading ? <h1>Loading...</h1> : <h1>Loaded!</h1>}
       <p>user:</p>
-      <p>Gracias</p>
       <div className="bg-blue-500 h-20 w-20">
         Github button
         <GithubButton state={teamId} />
@@ -64,11 +64,9 @@ const Content: FC = () => {
 
 const Home: NextPage = () => {
   return (
-    <div className="h-screen w-screen flex flex-col items-center pt-20 bg-white">
-      <div className="max-w-2xl border border-gray-500 rounded-md bg-gray-50 p-6">
-        <Content />
-      </div>
-    </div>
+    <DashboardLayout>
+      <Content />
+    </DashboardLayout>
   );
 };
 
