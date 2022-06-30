@@ -186,8 +186,8 @@ export class GithubService {
 
   async getAccessToken(code: string, teamId: string) {
     const params = new URLSearchParams();
-    params.append("client_id", process.env.GITHUB_CLIENT_ID ?? "");
-    params.append("client_secret", process.env.GITHUB_CLIENT_SECRET ?? "");
+    params.append("client_id", process.env.GITHUB_CLIENT_ID);
+    params.append("client_secret", process.env.GITHUB_CLIENT_SECRET);
     params.append("code", code);
 
     const url = new URL("https://github.com/login/oauth/access_token");
@@ -199,12 +199,15 @@ export class GithubService {
       })
       .then((response) => {
         console.log("Got access token: ", response.data.access_token);
-        this.prisma.github_integration.create({
-          data: {
-            team_id: teamId,
-            access_token: response.data.access_token,
-          },
-        });
+        this.prisma.github_integration
+          .create({
+            data: {
+              team_id: teamId,
+              access_token: response.data.access_token,
+            },
+          })
+          .then(() => console.log("success creating gihub integration"))
+          .catch((e) => console.log("Error creating integration: ", e));
       })
       .catch((error) => console.log("Error getting access token: ", error));
   }
