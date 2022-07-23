@@ -24,6 +24,7 @@ export class GithubService {
   }
 
   async handleEvent(body: GithubEvent) {
+    console.log(body);
     if (body.pull_request && body.pull_request.id) {
       const pullRequest = body.pull_request;
 
@@ -164,7 +165,9 @@ export class GithubService {
         token: process.env.SLACK_BOT_TOKEN,
         thread_ts: this.seenPrs[prId],
         channel: this.channelId,
-        text: `Pull request opened by <${body.sender.html_url}|${body.sender.login}>`,
+        text: `Pull request opened by <${
+          body.sender.html_url
+        }|${this.getSlackUserName(body.sender.login)}>`,
         attachments: [
           {
             author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,

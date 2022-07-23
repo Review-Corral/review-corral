@@ -25,6 +25,7 @@ export class GithubController {
 
   @Post("/events")
   postGithubEvents(@Body() body: GithubEvent) {
+    console.log("Got event!");
     this.githubService.handleEvent(body);
   }
 
