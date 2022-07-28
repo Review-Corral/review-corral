@@ -38,7 +38,7 @@ const Auth: NextPage = () => {
 
   useEffect(() => {
     if (user) {
-      console.error("You're already signed in!");
+      router.push("/");
     }
   }, [user]);
 
@@ -140,6 +140,18 @@ const Auth: NextPage = () => {
               </button>
             </div>
           </form>
+
+          {loginError && (
+            <div className="mt-6">
+              <div className="relative">
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-2 bg-white text-red-500">
+                    Error logging in
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="mt-6">
             <div className="relative">
