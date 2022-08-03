@@ -1,5 +1,6 @@
-import { Controller, Get } from "@nestjs/common";
+import { Controller, Get, Post, Request, UseGuards } from "@nestjs/common";
 import { AppService } from "./app.service";
+import { LocalAuthGuard } from "./auth/local-auth.guard";
 
 // We just need to map the pull requests with the slack IDs so we can thread the messages
 
@@ -10,5 +11,11 @@ export class AppController {
   @Get()
   getHello(): string {
     return this.appService.getHello();
+  }
+
+  @UseGuards(LocalAuthGuard)
+  @Post("auth/login")
+  async login(@Request() req) {
+    return req.user;
   }
 }

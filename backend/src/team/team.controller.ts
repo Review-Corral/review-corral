@@ -5,7 +5,7 @@ import { TeamService } from "./team.service";
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
-  @Get()
+  @Get()  
   @Redirect()
   getTeam() {
     // this.slackService.subscribeTeam(query);
