@@ -1,16 +1,14 @@
-import { Controller, Get, Redirect } from "@nestjs/common";
+import { Controller, Get, Request, UseGuards } from "@nestjs/common";
+import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { TeamService } from "./team.service";
 
-@Controller("/team")
+@Controller("/teams")
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}
 
-  @Get()  
-  @Redirect()
-  getTeam() {
-    // this.slackService.subscribeTeam(query);
-    // return {
-    //   url: process.env.BASE_FE_URL,
-    // };
+  @UseGuards(LocalAuthGuard)
+  @Get()
+  getTeam(@Request() req) {
+    return this.teamService.getTeams(req.user);
   }
 }

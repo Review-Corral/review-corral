@@ -24,7 +24,6 @@ const Auth: NextPage = () => {
   const onSubmit = handleSubmit(async (data) => {
     const result = await supabaseClient.auth.signIn({
       email: data.email,
-      password: data.password,
     });
     if (result.error) {
       console.error(result.error);

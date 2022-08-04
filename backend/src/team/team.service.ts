@@ -1,15 +1,28 @@
 import { Injectable } from "@nestjs/common";
+import { team } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 import { PrismaService } from "../prisma/prisma.service";
 
 @Injectable()
 export class TeamService {
   constructor(private prisma: PrismaService) {}
 
-  async getTeam(query: any) {
-    // return this.prisma.team.findOne({
-    //   where: {
-    //     id: query.id,
-    //   },
-    // });
+  async getTeams(user: User): Promise<team[]> {
+    const usersAndTeams = await this.prisma.users_and_teams.findMany({
+      where: {
+        user: user.id,
+      },
+    });
+
+    return await Promise.all(
+      usersAndTeams.map(
+        async (userAndTeam) =>
+          await this.prisma.team.findUnique({
+            where: {
+              id: userAndTeam.team,
+            },
+          }),
+      ),
+    );
   }
 }
