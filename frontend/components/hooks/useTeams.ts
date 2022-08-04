@@ -3,6 +3,6 @@ import axios from "axios";
 
 export const useTeams = () => {
   return useQuery(["getTeams"], async () => {
-    axios.get("/api/proxy/teams");
+    return (await axios.get("/api/proxy/teams")).data;
   });
 };
