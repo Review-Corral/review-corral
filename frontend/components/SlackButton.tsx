@@ -1,14 +1,16 @@
 import React from "react";
+import { Team } from "./teams/useTeams";
 
-interface SlackButtonProps {}
+interface SlackButtonProps {
+  teamId: Team["id"];
+}
 
-const SlackButton: React.FC<SlackButtonProps> = () => {
-  const id = "abc";
+const SlackButton: React.FC<SlackButtonProps> = ({ teamId }) => {
   return (
     <div className="h-10 w-40">
       <a
         className="flex flex-row items-center gap-3"
-        href={`https://slack.com/oauth/v2/authorize?scope=channels%3Ahistory%2Cchat%3Awrite%2Ccommands%2Cgroups%3Ahistory%2Cincoming-webhook%2Cusers%3Aread&user_scope=&redirect_uri=https%3A%2F%2Fseal-app-xuqd9.ondigitalocean.app%2Fslack&state=${id}&client_id=3571046828385.3558423656162`}
+        href={`https://slack.com/oauth/v2/authorize?scope=channels%3Ahistory%2Cchat%3Awrite%2Ccommands%2Cgroups%3Ahistory%2Cincoming-webhook%2Cusers%3Aread&user_scope=&redirect_uri=https%3A%2F%2Fseal-app-xuqd9.ondigitalocean.app%2Fslack&state=${teamId}&client_id=3571046828385.3558423656162`}
       >
         <svg
           className="h-8 w-8"
