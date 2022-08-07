@@ -1,3 +1,24 @@
 {
-  "extends": "next/core-web-vitals"
+  "root": true,
+  "extends": [
+    "next/core-web-vitals",
+    "plugin:security/recommended",
+    "prettier"
+  ],
+  "plugins": ["jest", "security", "storybook"],
+  "overrides": [
+    {
+      "files": ["components/**/*.stories.ts?(x)"],
+      "extends": ["plugin:storybook/recommended"]
+    },
+    {
+      "files": ["**/__tests__/**/*.ts?(x)", "**/?(*.)+(spec|test).ts?(x)"],
+      "env": { "jest/globals": true },
+      "extends": ["plugin:jest/recommended"]
+    }
+  ],
+  "rules": {
+    "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "security/detect-object-injection": "off"
+  }
 }
