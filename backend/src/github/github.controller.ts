@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Post,
+  Query,
+  Redirect,
+  Res,
+} from "@nestjs/common";
 import { GithubEvent } from "types/githubApiTypes";
 import { GithubService } from "./github.service";
 
@@ -12,10 +20,11 @@ export class GithubController {
   constructor(private readonly githubService: GithubService) {}
 
   @Get("/auth")
+  @Redirect("https://docs.nestjs.com", 301)
   async handleGithubAuth(@Query() query: GithubAuthQueryParams, @Res() res) {
     this.githubService.getAccessToken(query.code, query.state);
 
-    return res.redirect(process.env.BASE_FE_URL);
+    return { url: process.env.BASE_FE_URL };
   }
 
   @Post("/events")
