@@ -7,8 +7,10 @@ export type Team = {
   name: string | null;
 };
 
+export const USE_TEAMS_QUERY_KEY = "getTeams";
+
 export const useTeams = () => {
-  return useQuery<Team[], AxiosError>(["getTeams"], async () => {
+  return useQuery<Team[], AxiosError>([USE_TEAMS_QUERY_KEY], async () => {
     return (await axios.get("/api/proxy/teams")).data;
   });
 };

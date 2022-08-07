@@ -25,4 +25,27 @@ export class TeamService {
       ),
     );
   }
+
+  async createTeam({
+    user,
+    name,
+  }: {
+    user: User;
+    name: string;
+  }): Promise<team> {
+    const team = await this.prisma.team.create({
+      data: {
+        name,
+      },
+    });
+
+    await this.prisma.users_and_teams.create({
+      data: {
+        user: user.id,
+        team: team.id,
+      },
+    });
+
+    return team;
+  }
 }
