@@ -1,9 +1,6 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
-import { GithubEvent, PullRequest } from "types/githubApiTypes";
+import { Body, Controller, Get, Post, Query, Res } from "@nestjs/common";
+import { GithubEvent } from "types/githubApiTypes";
 import { GithubService } from "./github.service";
-
-// We just need to map the pull requests with the slack IDs so we can thread the messages
-const pullRequests: Record<PullRequest["id"], PullRequest> = {};
 
 export interface GithubAuthQueryParams {
   code: string;
@@ -15,12 +12,10 @@ export class GithubController {
   constructor(private readonly githubService: GithubService) {}
 
   @Get("/auth")
-  async handleGithubAuth(@Query() query: GithubAuthQueryParams) {
+  async handleGithubAuth(@Query() query: GithubAuthQueryParams, @Res() res) {
     this.githubService.getAccessToken(query.code, query.state);
 
-    return {
-      url: process.env.BASE_FE_URL,
-    };
+    return res.redirect(process.env.BASE_FE_URL);
   }
 
   @Post("/events")

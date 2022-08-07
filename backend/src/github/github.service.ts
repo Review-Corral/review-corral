@@ -202,16 +202,36 @@ export class GithubService {
       })
       .then((response) => {
         console.log("Got access token: ", response.data.access_token);
-        this.prisma.github_integration
-          .create({
+
+        const foundIntegration = this.prisma.github_integration.findFirst({
+          where: { id: teamId },
+        });
+
+        if (foundIntegration) {
+          this.prisma.github_integration.update({
+            where: { id: teamId },
             data: {
-              team_id: teamId,
               access_token: response.data.access_token,
             },
-          })
-          .then(() => console.log("success creating gihub integration"))
-          .catch((e) => console.log("Error creating integration: ", e));
+          });
+        } else {
+          this.prisma.github_integration
+            .create({
+              data: {
+                team_id: teamId,
+                access_token: response.data.access_token,
+              },
+            })
+            .then(() => console.log("success creating gihub integration"))
+            .catch((error) => {
+              console.log("Error creating integration: ", error);
+              throw error;
+            });
+        }
       })
-      .catch((error) => console.log("Error getting access token: ", error));
+      .catch((error) => {
+        console.log("Error getting access token: ", error);
+        throw error;
+      });
   }
 }
