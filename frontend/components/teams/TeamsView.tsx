@@ -10,7 +10,7 @@ export const TeamsView: FC<TeamsViewProps> = ({ teams }) => {
   return (
     <div>
       {teams.map((team) => (
-        <div className="space-y-6">
+        <div key={team.id} className="space-y-6">
           <GithubButton state={team.id} />
           {/* <SlackButton /> */}
         </div>

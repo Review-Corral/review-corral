@@ -1,15 +1,11 @@
 import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import type { NextPage } from "next";
-import { useRouter } from "next/router";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { CreateTeamForm } from "../components/teams/CreateTeamForm";
 import { TeamsView } from "../components/teams/TeamsView";
 import { useTeams } from "../components/teams/useTeams";
 
-const teamId = "7611d060-35ee-401f-8e99-58b2f7a9849d";
-
 const Home: NextPage = () => {
-  const router = useRouter();
   const teams = useTeams();
 
   if (teams.isLoading) {
