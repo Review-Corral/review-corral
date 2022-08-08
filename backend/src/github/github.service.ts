@@ -92,16 +92,17 @@ export class GithubService {
           console.log("Error finding pr: ", e);
         });
 
-      const text = `Pull request ${
-        body.action
-      } by ${await this.getSlackUserName(body.sender.login)}`;
-
-      const attachments = [
-        {
-          text: `<${body.pull_request.html_url}|${body.pull_request.title}>`,
-          color: "#2eb886",
-        },
-      ];
+      let text: string;
+      if (body.action === "review_requested" && body.requested_reviewer) {
+        console.log(body);
+        text = `Review request for ${await this.getSlackUserName(
+          body.requested_reviewer.login,
+        )}`;
+      } else {
+        text = `Pull request ${body.action} by ${await this.getSlackUserName(
+          body.sender.login,
+        )}`;
+      }
 
       if (record) {
         this.slackClient.chat.postMessage({
@@ -109,7 +110,6 @@ export class GithubService {
           thread_ts: record.thread_ts,
           channel: this.channelId,
           text,
-          attachments,
         });
       } else {
         this.slackClient.chat
@@ -173,7 +173,6 @@ export class GithubService {
             author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
             text: `+${pullRequest.additions} -${pullRequest.deletions}`,
             color: "#6F42C1",
-            footer: pullRequest.created_at,
           },
         ],
       })
