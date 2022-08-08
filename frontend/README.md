@@ -33,6 +33,4 @@ The easiest way to deploy your Next.js app is to use the [Vercel Platform](https
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
 
-
-### Store URL with state
-https://github.com/apps/review-corral/installations/new?state=969e4eb4-5709-496f-9afa-65d382351ccf
+## Uh Oh!
