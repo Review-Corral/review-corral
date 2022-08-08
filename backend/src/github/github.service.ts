@@ -155,7 +155,7 @@ export class GithubService {
       .catch((e) => console.log("error: ", e));
   }
 
-  private postPrOpened(
+  private async postPrOpened(
     prId: number,
     body: GithubEvent,
     pullRequest: PullRequest,
@@ -167,7 +167,7 @@ export class GithubService {
         channel: this.channelId,
         text: `Pull request opened by <${
           body.sender.html_url
-        }|${this.getSlackUserName(body.sender.login)}>`,
+        }|${await this.getSlackUserName(body.sender.login)}>`,
         attachments: [
           {
             author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
