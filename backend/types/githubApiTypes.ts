@@ -7,6 +7,11 @@ export interface GithubEvent {
   repository: Repository;
   sender: OwnerOrUserOrSender;
   installation: Installation;
+  requested_reviewer?: ReviewRequested;
+}
+
+export interface ReviewRequested {
+  login: string;
 }
 
 export type GithubAction =
