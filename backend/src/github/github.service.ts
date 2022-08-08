@@ -165,9 +165,9 @@ export class GithubService {
         token: process.env.SLACK_BOT_TOKEN,
         thread_ts: this.seenPrs[prId],
         channel: this.channelId,
-        text: `Pull request opened by <${
-          body.sender.html_url
-        }|${await this.getSlackUserName(body.sender.login)}>`,
+        text: `Pull request opened by ${await this.getSlackUserName(
+          body.sender.login,
+        )}`,
         attachments: [
           {
             author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
