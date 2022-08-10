@@ -1,7 +1,13 @@
 import { Injectable } from "@nestjs/common";
+import { pull_requests } from "@prisma/client";
 import { ChatPostMessageResponse, WebClient } from "@slack/web-api";
 import axios from "axios";
-import { GithubActions, GithubEvent, PullRequest } from "types/githubApiTypes";
+import {
+  GithubActions,
+  GithubEvent,
+  PullRequest,
+  Review,
+} from "types/githubApiTypes";
 import { PrismaService } from "../prisma/prisma.service";
 
 export interface TokenResponse {
@@ -14,10 +20,8 @@ export interface TokenResponse {
 export class GithubService {
   slackClient: WebClient;
 
+  // TODO: need to get this from the prisma client
   channelId = "C03GBF3FCNR";
-
-  // ID of the PR to ID of the message
-  seenPrs: Record<string, string> = {};
 
   constructor(private prisma: PrismaService) {
     this.slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
@@ -27,44 +31,19 @@ export class GithubService {
     console.log(body);
     if (body.pull_request && body.pull_request.id) {
       const pullRequest = body.pull_request;
-
       const prId = body.pull_request.id;
-
-      // 1. Post Open PRs to before checking
-      // try and find the id in the database
-      // If it doesn't
 
       // Review comments
       if (body.action === "submitted" && body.review) {
-        const record = await this.prisma.pull_requests
-          .findFirst({
-            where: {
-              pr_id: prId.toString(),
-            },
-          })
-          .catch((e) => {
-            console.log("Error finding pr: ", e);
-          });
-        if (record) {
-          this.slackClient.chat.postMessage({
-            token: process.env.SLACK_BOT_TOKEN,
-            thread_ts: record.thread_ts,
-            channel: this.channelId,
-            text: `${await this.getSlackUserName(
-              body.sender.login,
-            )} Left a comment`,
-            attachments: [
-              {
-                author_name: body.review.user.login,
-                text: body.review.body,
-                color: "#fff",
-              },
-            ],
-          });
-        }
+        this.postReview(body.pull_request.id, body.review, body.sender.login);
+
+        // Comments
       } else if (body.action === "created" && body.comment) {
-        // toodo
-        console.log(JSON.stringify(body, null, 2));
+        this.postComment(
+          body.pull_request.id,
+          body.comment.body,
+          body.sender.login,
+        );
       } else if (GithubActions.includes(body.action) && body.pull_request) {
         await this.handlePullRequestEvent(body, prId, pullRequest);
       }
@@ -82,15 +61,7 @@ export class GithubService {
     if (body.action === "opened") {
       this.postPrOpened(prId, body, pullRequest);
     } else {
-      const record = await this.prisma.pull_requests
-        .findFirst({
-          where: {
-            pr_id: prId.toString(),
-          },
-        })
-        .catch((e) => {
-          console.log("Error finding pr: ", e);
-        });
+      const record = await this.findPr(prId);
 
       let text: string;
       if (body.action === "review_requested" && body.requested_reviewer) {
@@ -98,6 +69,13 @@ export class GithubService {
         text = `Review request for ${await this.getSlackUserName(
           body.requested_reviewer.login,
         )}`;
+      } else if (body.action === "closed") {
+        if (body.pull_request.merged) {
+          this.postPrMerged(prId, body);
+        } else {
+          this.postPrClosed(prId, body);
+        }
+        return;
       } else {
         text = `Pull request ${body.action} by ${await this.getSlackUserName(
           body.sender.login,
@@ -127,6 +105,19 @@ export class GithubService {
     }
   }
 
+  private async findPr(prId: number): Promise<pull_requests | null> {
+    return await this.prisma.pull_requests
+      .findFirst({
+        where: {
+          pr_id: prId.toString(),
+        },
+      })
+      .catch((e) => {
+        console.log("Error finding pr: ", e);
+        return null;
+      });
+  }
+
   private async getSlackUserName(githubLogin: string): Promise<string> {
     const foundUsername = await this.prisma.username_mappings.findUnique({
       where: {
@@ -142,8 +133,6 @@ export class GithubService {
   }
 
   private saveThreadTs(message: ChatPostMessageResponse, prId: number) {
-    console.log("Posting message ts: ", message.message.ts);
-    console.log("PR id: ", prId);
     this.prisma.pull_requests
       .create({
         data: {
@@ -163,7 +152,6 @@ export class GithubService {
     this.slackClient.chat
       .postMessage({
         token: process.env.SLACK_BOT_TOKEN,
-        thread_ts: this.seenPrs[prId],
         channel: this.channelId,
         text: `Pull request opened by ${await this.getSlackUserName(
           body.sender.login,
@@ -179,10 +167,86 @@ export class GithubService {
       .then((message) => this.saveThreadTs(message, prId));
   }
 
-  sendMessage() {
+  private async postPrMerged(prId: number, body: GithubEvent) {
+    this.slackClient.chat
+      .postMessage({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: this.channelId,
+        text: `Pull request merged by ${await this.getSlackUserName(
+          body.sender.login,
+        )}`,
+        attachments: [
+          {
+            author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
+            color: "#8839FB",
+          },
+        ],
+      })
+      .then((message) => this.saveThreadTs(message, prId));
+  }
+
+  private async postPrClosed(prId: number, body: GithubEvent) {
+    this.slackClient.chat
+      .postMessage({
+        token: process.env.SLACK_BOT_TOKEN,
+        channel: this.channelId,
+        text: `Pull request closed by ${await this.getSlackUserName(
+          body.sender.login,
+        )}`,
+        attachments: [
+          {
+            author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
+            color: "#FB0909",
+          },
+        ],
+      })
+      .then((message) => this.saveThreadTs(message, prId));
+  }
+
+  private async postComment(prId: number, comment: string, login: string) {
+    const thread = await this.findPr(prId);
+
     this.slackClient.chat.postMessage({
+      token: process.env.SLACK_BOT_TOKEN,
+      thread_ts: thread.thread_ts,
       channel: this.channelId,
-      text: "test message",
+      text: `${await this.getSlackUserName(login)} left a comment`,
+      attachments: [
+        {
+          text: comment,
+        },
+      ],
+    });
+  }
+
+  private async postReview(prId: number, review: Review, login: string) {
+    const thread = await this.findPr(prId);
+
+    const getReviewText = (review: Review) => {
+      switch (review.state) {
+        case "approved": {
+          return "approved the pull request";
+        }
+        case "changes_requested": {
+          return "requested changes to the pull request";
+        }
+        case "commented": {
+          return "left a review comment on the pull request";
+        }
+      }
+    };
+
+    this.slackClient.chat.postMessage({
+      token: process.env.SLACK_BOT_TOKEN,
+      thread_ts: thread.thread_ts,
+      channel: this.channelId,
+      text: `${await this.getSlackUserName(login)} ${getReviewText(review)}`,
+      attachments: [
+        {
+          text: review.body,
+          color: "#fff",
+        },
+      ],
     });
   }
 
