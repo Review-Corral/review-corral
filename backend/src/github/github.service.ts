@@ -1,6 +1,10 @@
 import { Injectable } from "@nestjs/common";
 import { pull_requests } from "@prisma/client";
-import { ChatPostMessageResponse, WebClient } from "@slack/web-api";
+import {
+  ChatPostMessageArguments,
+  ChatPostMessageResponse,
+  WebClient,
+} from "@slack/web-api";
 import axios from "axios";
 import {
   GithubActions,
@@ -105,6 +109,12 @@ export class GithubService {
     }
   }
 
+  private async postMessage(message: ChatPostMessageArguments, prId: number) {
+    this.slackClient.chat
+      .postMessage(message)
+      .then((response) => this.saveThreadTs(response, prId));
+  }
+
   private async findPr(prId: number): Promise<pull_requests | null> {
     return await this.prisma.pull_requests
       .findFirst({
@@ -149,8 +159,8 @@ export class GithubService {
     body: GithubEvent,
     pullRequest: PullRequest,
   ) {
-    this.slackClient.chat
-      .postMessage({
+    this.postMessage(
+      {
         token: process.env.SLACK_BOT_TOKEN,
         channel: this.channelId,
         text: `Pull request opened by ${await this.getSlackUserName(
@@ -160,16 +170,17 @@ export class GithubService {
           {
             author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
             text: `+${pullRequest.additions} -${pullRequest.deletions}`,
-            color: "#6F42C1",
+            color: "#106D04",
           },
         ],
-      })
-      .then((message) => this.saveThreadTs(message, prId));
+      },
+      prId,
+    );
   }
 
   private async postPrMerged(prId: number, body: GithubEvent) {
-    this.slackClient.chat
-      .postMessage({
+    this.postMessage(
+      {
         token: process.env.SLACK_BOT_TOKEN,
         channel: this.channelId,
         text: `Pull request merged by ${await this.getSlackUserName(
@@ -181,13 +192,14 @@ export class GithubService {
             color: "#8839FB",
           },
         ],
-      })
-      .then((message) => this.saveThreadTs(message, prId));
+      },
+      prId,
+    );
   }
 
   private async postPrClosed(prId: number, body: GithubEvent) {
-    this.slackClient.chat
-      .postMessage({
+    this.postMessage(
+      {
         token: process.env.SLACK_BOT_TOKEN,
         channel: this.channelId,
         text: `Pull request closed by ${await this.getSlackUserName(
@@ -199,24 +211,28 @@ export class GithubService {
             color: "#FB0909",
           },
         ],
-      })
-      .then((message) => this.saveThreadTs(message, prId));
+      },
+      prId,
+    );
   }
 
   private async postComment(prId: number, comment: string, login: string) {
     const thread = await this.findPr(prId);
 
-    this.slackClient.chat.postMessage({
-      token: process.env.SLACK_BOT_TOKEN,
-      thread_ts: thread.thread_ts,
-      channel: this.channelId,
-      text: `${await this.getSlackUserName(login)} left a comment`,
-      attachments: [
-        {
-          text: comment,
-        },
-      ],
-    });
+    this.postMessage(
+      {
+        token: process.env.SLACK_BOT_TOKEN,
+        thread_ts: thread.thread_ts,
+        channel: this.channelId,
+        text: `${await this.getSlackUserName(login)} left a comment`,
+        attachments: [
+          {
+            text: comment,
+          },
+        ],
+      },
+      prId,
+    );
   }
 
   private async postReview(prId: number, review: Review, login: string) {
@@ -236,18 +252,21 @@ export class GithubService {
       }
     };
 
-    this.slackClient.chat.postMessage({
-      token: process.env.SLACK_BOT_TOKEN,
-      thread_ts: thread.thread_ts,
-      channel: this.channelId,
-      text: `${await this.getSlackUserName(login)} ${getReviewText(review)}`,
-      attachments: [
-        {
-          text: review.body,
-          color: "#fff",
-        },
-      ],
-    });
+    this.postMessage(
+      {
+        token: process.env.SLACK_BOT_TOKEN,
+        thread_ts: thread.thread_ts,
+        channel: this.channelId,
+        text: `${await this.getSlackUserName(login)} ${getReviewText(review)}`,
+        attachments: [
+          {
+            text: review.body,
+            color: "#fff",
+          },
+        ],
+      },
+      prId,
+    );
   }
 
   async getAccessToken(code: string, teamId: string) {
