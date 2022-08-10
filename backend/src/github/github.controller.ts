@@ -32,9 +32,4 @@ export class GithubController {
     console.log("Got event!");
     this.githubService.handleEvent(body);
   }
-
-  @Post("/send-message")
-  sendMessage() {
-    this.githubService.sendMessage();
-  }
 }

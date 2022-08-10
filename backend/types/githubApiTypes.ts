@@ -93,7 +93,7 @@ export interface Review {
   body: string;
   commit_id: string;
   submitted_at: string;
-  state: string;
+  state: "changes_requested" | "commented" | "approved";
   html_url: string;
   pull_request_url: string;
   author_association: string;

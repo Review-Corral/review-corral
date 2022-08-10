@@ -36,6 +36,3 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/deploym
 
 ### Store URL with state
 https://github.com/apps/review-corral/installations/new?state=969e4eb4-5709-496f-9afa-65d382351ccf
-
-
-Fake comment
