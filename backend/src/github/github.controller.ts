@@ -7,8 +7,9 @@ import {
   Redirect,
   Res,
 } from "@nestjs/common";
-import { GithubEvent } from "types/githubApiTypes";
+import { GithubEvent } from "types/githubEventTypes";
 import { GithubService } from "./github.service";
+import { GithubAppService } from "./githubApp.service";
 
 export interface GithubAuthQueryParams {
   code: string;
@@ -17,7 +18,10 @@ export interface GithubAuthQueryParams {
 
 @Controller("/github")
 export class GithubController {
-  constructor(private readonly githubService: GithubService) {}
+  constructor(
+    private readonly githubService: GithubService,
+    private readonly githubAppService: GithubAppService,
+  ) {}
 
   @Get("/auth")
   @Redirect("https://docs.nestjs.com", 301)
@@ -31,5 +35,10 @@ export class GithubController {
   postGithubEvents(@Body() body: GithubEvent) {
     console.log("Got event!");
     this.githubService.handleEvent(body);
+  }
+
+  @Get("/repositories")
+  async getRepositories(@Query("teamId") teamId: string) {
+    return this.githubAppService.getRepositories(teamId);
   }
 }
