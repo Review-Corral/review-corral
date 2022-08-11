@@ -50,17 +50,18 @@ export class GithubAppService {
       .post(url.toString(), undefined, {
         headers: { accept: "application/json" },
       })
-      .then((response) => {
+      .then(async (response) => {
         console.log("Got access token: ", response.data.access_token);
 
-        const foundIntegration = this.prisma.github_integration.findUnique({
-          where: { team_id: teamId },
-        });
+        const foundIntegration =
+          await this.prisma.github_integration.findUnique({
+            where: { team_id: teamId },
+          });
 
         if (foundIntegration) {
           this.prisma.github_integration
             .update({
-              where: { team_id: teamId },
+              where: { id: foundIntegration.id },
               data: {
                 access_token: response.data.access_token,
               },
