@@ -26,19 +26,19 @@ export class GithubController {
   @Get("/auth")
   @Redirect("https://docs.nestjs.com", 301)
   async handleGithubAuth(@Query() query: GithubAuthQueryParams, @Res() res) {
-    this.githubService.getAccessToken(query.code, query.state);
+    this.githubAppService.getAccessToken(query.code, query.state);
 
     return { url: process.env.BASE_FE_URL };
+  }
+
+  @Get("/repositories")
+  async getRepositories(@Query("teamId") teamId: string) {
+    return this.githubAppService.getRepositories(teamId);
   }
 
   @Post("/events")
   postGithubEvents(@Body() body: GithubEvent) {
     console.log("Got event!");
     this.githubService.handleEvent(body);
-  }
-
-  @Get("/repositories")
-  async getRepositories(@Query("teamId") teamId: string) {
-    return this.githubAppService.getRepositories(teamId);
   }
 }
