@@ -11,7 +11,7 @@ import {
   GithubEvent,
   PullRequest,
   Review,
-} from "types/githubApiTypes";
+} from "types/githubEventTypes";
 import { PrismaService } from "../prisma/prisma.service";
 
 export interface TokenResponse {
@@ -263,6 +263,12 @@ export class GithubService {
             text: review.body,
             color: "#fff",
           },
+          ...[
+            review.state === "approved" && {
+              text: ":white_check_mark:",
+              color: "#00BB00",
+            },
+          ],
         ],
       },
       prId,
@@ -285,17 +291,23 @@ export class GithubService {
       .then((response) => {
         console.log("Got access token: ", response.data.access_token);
 
-        const foundIntegration = this.prisma.github_integration.findFirst({
-          where: { id: teamId },
+        const foundIntegration = this.prisma.github_integration.findUnique({
+          where: { team_id: teamId },
         });
 
         if (foundIntegration) {
-          this.prisma.github_integration.update({
-            where: { id: teamId },
-            data: {
-              access_token: response.data.access_token,
-            },
-          });
+          this.prisma.github_integration
+            .update({
+              where: { team_id: teamId },
+              data: {
+                access_token: response.data.access_token,
+              },
+            })
+            .then(() => console.log("Successfully updated Github Integration"))
+            .catch((error) => {
+              console.log("Error updating Github Integration: ", error);
+              throw error;
+            });
         } else {
           this.prisma.github_integration
             .create({
