@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from "@nestjs/common";
 import axios from "axios";
+import * as nJwt from "njwt";
 import { PrismaService } from "src/prisma/prisma.service";
 import { Repositories } from "types/githubAppTypes";
 import { Team } from "types/slackAuthTypes";
@@ -37,7 +38,7 @@ export class GithubAppService {
     return response.data;
   }
 
-  async getAccessToken(code: string, teamId: string) {
+  async getUserAccessToken(code: string, teamId: string) {
     const params = new URLSearchParams();
     params.append("client_id", process.env.GITHUB_CLIENT_ID);
     params.append("client_secret", process.env.GITHUB_CLIENT_SECRET);
@@ -90,5 +91,27 @@ export class GithubAppService {
         console.log("Error getting access token: ", error);
         throw error;
       });
+  }
+
+  async getJwt(): Promise<string> {
+    const now = Math.floor(Date.now() / 1000) - 30;
+    const expiration = now + 120; // JWT expiration time (10 minute maximum)
+    const claims = {
+      // issued at time, 60 seconds in the past to allow for clock drift
+      iat: now,
+      // JWT expiration time (10 minute maximum)
+      exp: expiration,
+      iss: process.env.GITHUB_APP_ID,
+    };
+
+    let jwt = nJwt.create(
+      claims,
+      process.env.GITHUB_APP_JWT_SIGNING_SECRET,
+      "RS256",
+    );
+
+    jwt = jwt.setExpiration(new Date().getTime() + 60 * 2);
+
+    return jwt.toString();
   }
 }

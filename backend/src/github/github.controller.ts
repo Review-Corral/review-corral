@@ -26,7 +26,7 @@ export class GithubController {
   @Get("/auth")
   @Redirect("https://docs.nestjs.com", 301)
   async handleGithubAuth(@Query() query: GithubAuthQueryParams, @Res() res) {
-    await this.githubAppService.getAccessToken(query.code, query.state);
+    await this.githubAppService.getUserAccessToken(query.code, query.state);
 
     return { url: process.env.BASE_FE_URL };
   }
@@ -40,5 +40,10 @@ export class GithubController {
   postGithubEvents(@Body() body: GithubEvent) {
     console.log("Got event!");
     this.githubService.handleEvent(body);
+  }
+
+  @Get("/jwt")
+  async getJwt() {
+    return this.githubAppService.getJwt();
   }
 }
