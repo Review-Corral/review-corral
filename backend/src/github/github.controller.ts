@@ -9,7 +9,7 @@ import {
 } from "@nestjs/common";
 import { GithubEvent } from "types/githubEventTypes";
 import { GithubService } from "./github.service";
-import { GithubAppService } from "./githubApp.service";
+import { CreateTeamRepoBody, GithubAppService } from "./githubApp.service";
 
 export interface GithubAuthQueryParams {
   code: string;
@@ -39,8 +39,12 @@ export class GithubController {
 
   @Post("/events")
   postGithubEvents(@Body() body: GithubEvent) {
-    console.log("Got event!");
     this.githubService.handleEvent(body);
+  }
+
+  @Post("/add-repository")
+  async addRepository(@Body() body: CreateTeamRepoBody) {
+    this.githubAppService.addTeamRepository(body);
   }
 
   @Get("/jwt")

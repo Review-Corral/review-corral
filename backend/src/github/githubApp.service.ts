@@ -5,9 +5,31 @@ import { PrismaService } from "src/prisma/prisma.service";
 import { InstalledRepository } from "types/githubAppTypes";
 import { InstallationAccessResponse, Installations } from "./types";
 
+export interface CreateTeamRepoBody {
+  teamId: string;
+  repositoryName: string;
+  repositoryId: number;
+}
+
 @Injectable()
 export class GithubAppService {
   constructor(private prisma: PrismaService) {}
+
+  async addTeamRepository(body: CreateTeamRepoBody) {
+    await this.prisma.github_repositories
+      .create({
+        data: {
+          team_id: body.teamId,
+          repository_id: body.repositoryId.toString(),
+          repository_name: body.repositoryName,
+        },
+      })
+      .then(() => console.log("Successfully created team repository"))
+      .catch((error) => {
+        console.log("Error creating team repository: ", error);
+        throw error;
+      });
+  }
 
   async getUserAccessToken(code: string, teamId: string) {
     const params = new URLSearchParams();
