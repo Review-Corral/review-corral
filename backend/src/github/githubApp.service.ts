@@ -1,42 +1,13 @@
-import { Injectable, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import axios from "axios";
 import * as nJwt from "njwt";
 import { PrismaService } from "src/prisma/prisma.service";
-import { Repositories } from "types/githubAppTypes";
-import { Team } from "types/slackAuthTypes";
+import { InstalledRepository } from "types/githubAppTypes";
+import { InstallationAccessResponse, Installations } from "./types";
 
 @Injectable()
 export class GithubAppService {
   constructor(private prisma: PrismaService) {}
-
-  async getRepositories(teamId: Team["id"]): Promise<Repositories> {
-    console.log("Got team id:", teamId);
-    const github_integration = await this.prisma.github_integration.findUnique({
-      where: {
-        team_id: teamId,
-      },
-    });
-
-    console.log("github_integration:", github_integration);
-
-    if (!github_integration || !github_integration.access_token) {
-      throw new NotFoundException("No github integration found");
-    }
-
-    const response = await axios.get<Repositories>(
-      "https://api.github.com/user/installations",
-      {
-        headers: {
-          Accept: "application/vnd.github+json",
-          Authorization: `token ${github_integration.access_token}`,
-        },
-      },
-    );
-
-    console.log(response.data);
-
-    return response.data;
-  }
 
   async getUserAccessToken(code: string, teamId: string) {
     const params = new URLSearchParams();
@@ -93,7 +64,64 @@ export class GithubAppService {
       });
   }
 
-  async getJwt(): Promise<string> {
+  async getTeamInstaledRepos(
+    teamId: string,
+  ): Promise<InstalledRepository[] | undefined> {
+    const foundIntegration = await this.prisma.github_integration.findUnique({
+      where: { team_id: teamId },
+    });
+
+    if (!foundIntegration?.access_token) {
+      throw new BadRequestException("No Github integration found");
+    }
+
+    const jwt = await this.getJwt();
+
+    return axios
+      .get<Installations>("https://api.github.com/user/installations", {
+        headers: {
+          Authorization: `token ${foundIntegration.access_token}`,
+        },
+      })
+      .then(
+        async (installations): Promise<InstalledRepository[] | undefined> => {
+          if (installations.data.total_count > 0) {
+            const r = installations.data.installations.map(
+              async (installation) => {
+                return await this.getInstallationAccessToken(
+                  installation.id.toString(),
+                  jwt,
+                )
+                  .then(async (accessResponse) => {
+                    console.log("Got installation access token");
+                    return await this.getInstalledRepositoryInfo(
+                      accessResponse.token,
+                    );
+                  })
+                  .catch((error) => {
+                    console.log(
+                      "Got error getting installation access token: ",
+                      error,
+                    );
+                    throw new BadRequestException(error);
+                  });
+              },
+            );
+            return Promise.all(r);
+          } else {
+            return undefined;
+          }
+        },
+      )
+      .catch((error) => {
+        console.log("Got error getting user installations: ", error);
+        throw new BadRequestException(error);
+      });
+
+    return undefined;
+  }
+
+  async getJwt(): Promise<nJwt.Jwt> {
     const now = Math.floor(Date.now() / 1000) - 30;
     const expiration = now + 120; // JWT expiration time (10 minute maximum)
     const claims = {
@@ -104,14 +132,48 @@ export class GithubAppService {
       iss: process.env.GITHUB_APP_ID,
     };
 
-    let jwt = nJwt.create(
+    const jwt = nJwt.create(
       claims,
       process.env.GITHUB_APP_JWT_SIGNING_SECRET,
       "RS256",
     );
 
-    jwt = jwt.setExpiration(new Date().getTime() + 60 * 2);
+    return jwt.setExpiration(new Date().getTime() + 60 * 2);
+  }
 
-    return jwt.toString();
+  private async getInstallationAccessToken(
+    installationId: string,
+    jwt: nJwt.Jwt,
+  ): Promise<InstallationAccessResponse> {
+    return (
+      await axios.post<InstallationAccessResponse>(
+        `https://api.github.com/app/installations/${installationId}/access_tokens`,
+        null,
+        {
+          headers: { Authorization: `Bearer ${jwt.compact()}` },
+        },
+      )
+    ).data;
+  }
+
+  private async getInstalledRepositoryInfo(
+    installationAccessToken: string,
+  ): Promise<InstalledRepository> {
+    return axios
+      .get<InstalledRepository>(
+        "https://api.github.com/installation/repositories",
+        {
+          headers: {
+            Authorization: `bearer ${installationAccessToken}`,
+          },
+        },
+      )
+      .then((repository) => {
+        return repository.data;
+      })
+      .catch((error) => {
+        console.log("Got error getting repository info: ", error);
+        throw error;
+      });
   }
 }

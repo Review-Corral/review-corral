@@ -33,7 +33,8 @@ export class GithubController {
 
   @Get("/repositories")
   async getRepositories(@Query("teamId") teamId: string) {
-    return this.githubAppService.getRepositories(teamId);
+    const result = await this.githubAppService.getTeamInstaledRepos(teamId);
+    return result;
   }
 
   @Post("/events")
@@ -44,6 +45,6 @@ export class GithubController {
 
   @Get("/jwt")
   async getJwt() {
-    return this.githubAppService.getJwt();
+    return (await this.githubAppService.getJwt()).compact();
   }
 }
