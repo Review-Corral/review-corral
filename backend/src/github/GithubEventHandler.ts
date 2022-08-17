@@ -69,31 +69,37 @@ export class GithubEventHandler {
       }
 
       if (record) {
-        this.slackClient.chat.postMessage({
-          token: process.env.SLACK_BOT_TOKEN,
-          thread_ts: record.thread_ts,
-          channel: this.channelId,
-          text,
-        });
+        this.postMessage(
+          {
+            token: process.env.SLACK_BOT_TOKEN,
+            thread_ts: record.thread_ts,
+            channel: this.channelId,
+          },
+          prId,
+        );
       } else {
-        this.slackClient.chat
-          .postMessage({
+        this.postMessage(
+          {
             token: process.env.SLACK_BOT_TOKEN,
             channel: this.channelId,
             text,
-          })
-          .then((message) => {
-            if (message.message?.ts) {
-              this.saveThreadTs(message, prId);
-            }
-          });
+          },
+          prId,
+        );
       }
     }
   }
 
-  private async postMessage(message: ChatPostMessageArguments, prId: number) {
+  private async postMessage(
+    message: ChatPostMessageArguments,
+    prId: number,
+    getThreadTs = true,
+  ) {
     this.slackClient.chat
-      .postMessage(message)
+      .postMessage({
+        ...message,
+        ...(getThreadTs && { thread_ts: (await this.findPr(prId))?.thread_ts }),
+      })
       .then((response) => this.saveThreadTs(response, prId));
   }
 
@@ -157,6 +163,7 @@ export class GithubEventHandler {
         ],
       },
       prId,
+      false,
     );
   }
 
@@ -199,12 +206,9 @@ export class GithubEventHandler {
   }
 
   private async postComment(prId: number, comment: string, login: string) {
-    const thread = await this.findPr(prId);
-
     this.postMessage(
       {
         token: process.env.SLACK_BOT_TOKEN,
-        thread_ts: thread.thread_ts,
         channel: this.channelId,
         text: `${await this.getSlackUserName(login)} left a comment`,
         attachments: [
@@ -218,8 +222,6 @@ export class GithubEventHandler {
   }
 
   private async postReview(prId: number, review: Review, login: string) {
-    const thread = await this.findPr(prId);
-
     const getReviewText = (review: Review) => {
       switch (review.state) {
         case "approved": {
@@ -237,7 +239,6 @@ export class GithubEventHandler {
     this.postMessage(
       {
         token: process.env.SLACK_BOT_TOKEN,
-        thread_ts: thread.thread_ts,
         channel: this.channelId,
         text: `${await this.getSlackUserName(login)} ${getReviewText(review)}`,
         attachments: [
