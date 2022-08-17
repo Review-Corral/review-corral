@@ -27,16 +27,17 @@ model slack_integration {
   created_at   DateTime? @default(now()) @db.Timestamptz(6)
   access_token String?
   channel_id   String?
-  team         String?   @db.Uuid
+  team         String    @unique @db.Uuid
   channel_name String
 }
 
 model team {
-  created_at         DateTime?           @default(now()) @db.Timestamptz(6)
-  id                 String              @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  name               String
-  github_integration github_integration?
-  users_and_teams    users_and_teams[]
+  created_at          DateTime?             @default(now()) @db.Timestamptz(6)
+  id                  String                @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  name                String
+  github_integration  github_integration?
+  github_repositories github_repositories[]
+  users_and_teams     users_and_teams[]
 }
 
 model github_integration {
@@ -60,4 +61,14 @@ model users_and_teams {
   users                      users  @relation(fields: [user], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@id([user, team])
+}
+
+model github_repositories {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  updated_at      DateTime? @default(now()) @db.Timestamptz(6)
+  team_id         String    @db.Uuid
+  repository_id   String    @unique
+  repository_name String
+  team            team      @relation(fields: [team_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
