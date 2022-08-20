@@ -3,9 +3,9 @@ lockfileVersion: 5.4
 specifiers:
   '@headlessui/react': ^1.6.5
   '@heroicons/react': ^1.0.6
-  '@supabase/auth-helpers-nextjs': ^0.2.2
+  '@supabase/auth-helpers-nextjs': ^0.2.7
   '@supabase/auth-helpers-react': ^0.2.2
-  '@supabase/supabase-js': ^1.35.3
+  '@supabase/supabase-js': ^1.35.6
   '@supabase/ui': ^0.36.5
   '@tanstack/react-query': ^4.0.10
   '@types/node': 17.0.41
@@ -31,9 +31,9 @@ specifiers:
 dependencies:
   '@headlessui/react': 1.6.5_ef5jwxihqo6n7gxfmzogljlgcm
   '@heroicons/react': 1.0.6_react@18.1.0
-  '@supabase/auth-helpers-nextjs': 0.2.2
+  '@supabase/auth-helpers-nextjs': 0.2.7
   '@supabase/auth-helpers-react': 0.2.2
-  '@supabase/supabase-js': 1.35.3
+  '@supabase/supabase-js': 1.35.6
   '@supabase/ui': 0.36.5_ef5jwxihqo6n7gxfmzogljlgcm
   '@tanstack/react-query': 4.0.10_ef5jwxihqo6n7gxfmzogljlgcm
   axios: 0.27.2
@@ -55,7 +55,7 @@ devDependencies:
   eslint: 8.17.0
   eslint-config-next: 12.1.6_qwqcuvhue6diaz4jqbkm5dp3pa
   postcss: 8.4.14
-  tailwindcss: 3.1.4
+  tailwindcss: 3.1.4_postcss@8.4.14
   typescript: 4.7.3
 
 packages:
@@ -253,11 +253,10 @@ packages:
     resolution: {integrity: sha512-WiBSI6JBIhC6LRIsB2Kwh8DsGTlbBU+mLRxJmAe3LjHTdkDpwIbEOZgoXBbZilk/vlfjK8i6nKRAvIRn1XaIMw==}
     dev: true
 
-  /@supabase/auth-helpers-nextjs/0.2.2:
-    resolution: {integrity: sha512-j8T6uKtAjLnBaV3CtcL0aGakv0IUilwTiw+HvQPtXL55oEKS9W4PF49nmGvqyg+Vzn/fi/wkcLps6XPgT1ebEA==}
+  /@supabase/auth-helpers-nextjs/0.2.7:
+    resolution: {integrity: sha512-3+UMfE+wXBKswnzVL/hg1IYt3+POay+/B/Fn2hV8MaiffRpDdOG8zDSOIwsiNUz4KVZYOVa8IPvyh2AJqXwfMQ==}
     dependencies:
-      '@supabase/auth-helpers-shared': 0.1.2
-      loglevel: 1.8.0
+      '@supabase/auth-helpers-shared': 0.1.3
     dev: false
 
   /@supabase/auth-helpers-react/0.2.2:
@@ -272,32 +271,38 @@ packages:
       jose: 4.8.3
     dev: false
 
-  /@supabase/functions-js/1.3.3:
-    resolution: {integrity: sha512-35vO9niHRtzGe1QSvXKdOfvGPiX2KC44dGpWU6y0/gZCfTIgog/soU9HqABzQC/maVowO3hGLWfez5aN0MKfow==}
+  /@supabase/auth-helpers-shared/0.1.3:
+    resolution: {integrity: sha512-Rwpa8LG21guoJ+CC/6bXObHjuhnNygV/9QqdNFA9a3pEJL6R/fGBxMaV3/6uEdnYIjY1V4CUpcqEzC1BC3mVfw==}
+    dependencies:
+      jose: 4.9.0
+    dev: false
+
+  /@supabase/functions-js/1.3.4:
+    resolution: {integrity: sha512-yYVgkECjv7IZEBKBI3EB5Q7R1p0FJ10g8Q9N7SWKIHUU6i6DnbEGHIMFLyQRm1hmiNWD8fL7bRVEYacmTRJhHw==}
     dependencies:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@supabase/gotrue-js/1.22.16:
-    resolution: {integrity: sha512-t/tR87anihvyc9ePk53NF2CG8yzTDiWOt0ReZpr7sRKV91sHNLbghVMsMDwPONWnVQ9V2/qfKutuAvPGTB/Dew==}
+  /@supabase/gotrue-js/1.22.22:
+    resolution: {integrity: sha512-exbCopLo4tLawKZR25wEdipm+IRVujuqFRR4h2wiXd11YA+N8rfgg/4S4L6BTFHmzV+KMjy0kDF3yMbsjIR/xA==}
     dependencies:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@supabase/postgrest-js/0.37.3:
-    resolution: {integrity: sha512-Iqwv9D80YGkCi60Zl2lsV04WxOmjFqxpFmxoZ5xUqsVZHvIoAbJ9tMM3+0F7VkZZbsjnaYHrpJ58xLxU7cgy2w==}
+  /@supabase/postgrest-js/0.37.4:
+    resolution: {integrity: sha512-x+c2rk1fz9s6f1PrGxCJ0QTUgXPDI0G3ngIqD5sSiXhhCyfl8Q5V92mXl2EYtlDhkiUkjFNrOZFhXVbXOHgvDw==}
     dependencies:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@supabase/realtime-js/1.7.2:
-    resolution: {integrity: sha512-DMUaFIKj7KszGtWTTQbhMmUzZf7UnwYqySsmY+G8HgYxvY3ZaVa+DZD0I6ofgr4OLNr0po/ODM2a4lf5m5GNBg==}
+  /@supabase/realtime-js/1.7.4:
+    resolution: {integrity: sha512-h/Jk3PCLkIVonsNavof/LvHbvF41UD+D+mWcA3m8yHzJ2TLbV3S4XDYId+A3AkvFOAork7Ns/9O8rK0uY4F4zw==}
     dependencies:
       '@types/phoenix': 1.5.4
       websocket: 1.0.34
@@ -305,22 +310,22 @@ packages:
       - supports-color
     dev: false
 
-  /@supabase/storage-js/1.7.1:
-    resolution: {integrity: sha512-0ZlKlGgB3Qzhu07fts5pr2Y+c4xW58d7sDOB9m6nSfltS6SSfBPmqtdhU0zV9vy3vAjC74XeqUcpMhHP5E+aoA==}
+  /@supabase/storage-js/1.7.3:
+    resolution: {integrity: sha512-jnIZWqOc9TGclOozgX9v/RWGFCgJAyW/yvmauexgRZhWknUXoA4b2i8tj7vfwE0WTvNRuA5JpXID98rfJeSG7Q==}
     dependencies:
       cross-fetch: 3.1.5
     transitivePeerDependencies:
       - encoding
     dev: false
 
-  /@supabase/supabase-js/1.35.3:
-    resolution: {integrity: sha512-uwO8OVdMFsGZNZ1xQhFz22+PSW0EWYZ5xVq+jQeGz8nhabEu+Q9Uyep/bcNzOpyPJRzbGfxSPRzgAdAxfJgFhw==}
+  /@supabase/supabase-js/1.35.6:
+    resolution: {integrity: sha512-KDRXRr+kdGwruIUizZPALbe5YccMYFVyZJf1sFWKLncaLYSFiM6iKFnqCrNeQ4JFoZZiICkiTl1FUuai62jVpg==}
     dependencies:
-      '@supabase/functions-js': 1.3.3
-      '@supabase/gotrue-js': 1.22.16
-      '@supabase/postgrest-js': 0.37.3
-      '@supabase/realtime-js': 1.7.2
-      '@supabase/storage-js': 1.7.1
+      '@supabase/functions-js': 1.3.4
+      '@supabase/gotrue-js': 1.22.22
+      '@supabase/postgrest-js': 0.37.4
+      '@supabase/realtime-js': 1.7.4
+      '@supabase/storage-js': 1.7.3
     transitivePeerDependencies:
       - encoding
       - supports-color
@@ -653,7 +658,7 @@ packages:
     engines: {node: '>=6.14.2'}
     requiresBuild: true
     dependencies:
-      node-gyp-build: 4.4.0
+      node-gyp-build: 4.5.0
     dev: false
 
   /call-bind/1.0.2:
@@ -756,7 +761,7 @@ packages:
   /d/1.0.1:
     resolution: {integrity: sha512-m62ShEObQ39CfralilEQRjH6oAMtNCV1xJyEx5LpRYUVN+EviphDgUc/F3hnYbADmkiNs67Y+3ylmlG7Lnu+FA==}
     dependencies:
-      es5-ext: 0.10.61
+      es5-ext: 0.10.62
       type: 1.2.0
     dev: false
 
@@ -901,8 +906,8 @@ packages:
       is-date-object: 1.0.5
       is-symbol: 1.0.4
 
-  /es5-ext/0.10.61:
-    resolution: {integrity: sha512-yFhIqQAzu2Ca2I4SE2Au3rxVfmohU9Y7wqGR+s7+H7krk26NXhIRAZDgqd6xqjCEFUomDEA3/Bo/7fKmIkW1kA==}
+  /es5-ext/0.10.62:
+    resolution: {integrity: sha512-BHLqn0klhEpnOKSrzn/Xsz2UIW8j+cGmo9JLzr8BiUapV8hPL9+FliFqjwr9ngW7jWdnxv6eO+/LqyhJVqgrjA==}
     engines: {node: '>=0.10'}
     requiresBuild: true
     dependencies:
@@ -915,7 +920,7 @@ packages:
     resolution: {integrity: sha512-zw4SRzoUkd+cl+ZoE15A9o1oQd920Bb0iOJMQkQhl3jNc03YqVjAhG7scf9C5KWRU/R13Orf588uCC6525o02g==}
     dependencies:
       d: 1.0.1
-      es5-ext: 0.10.61
+      es5-ext: 0.10.62
       es6-symbol: 3.1.3
     dev: false
 
@@ -1201,7 +1206,7 @@ packages:
   /ext/1.6.0:
     resolution: {integrity: sha512-sdBImtzkq2HpkdRLtlLWDa6w4DX22ijZLKx8BMPUuKe1c5lbN6xwQDQCxSfxBQnHZ13ls/FH0MQZx/q/gr6FQg==}
     dependencies:
-      type: 2.6.0
+      type: 2.7.2
     dev: false
 
   /fast-deep-equal/3.1.3:
@@ -1555,6 +1560,10 @@ packages:
     resolution: {integrity: sha512-7rySkpW78d8LBp4YU70Wb7+OTgE3OwAALNVZxhoIhp4Kscp+p/fBkdpxGAMKxvCAMV4QfXBU9m6l9nX/vGwd2g==}
     dev: false
 
+  /jose/4.9.0:
+    resolution: {integrity: sha512-RgaqEOZLkVO+ViN3KkN44XJt9g7+wMveUv59sVLaTxONcUPc8ZpfqOCeLphVBZyih2dgkvZ0Ap1CNcokvY7Uyw==}
+    dev: false
+
   /js-tokens/4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
 
@@ -1619,11 +1628,6 @@ packages:
 
   /lodash/4.17.21:
     resolution: {integrity: sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==}
-    dev: false
-
-  /loglevel/1.8.0:
-    resolution: {integrity: sha512-G6A/nJLRgWOuuwdNuA6koovfEV1YpqqAG4pRUlFaz3jj2QNZ8M4vBqnVA+HBTmU/AMNUtlOsMmSpF6NyOjztbA==}
-    engines: {node: '>= 0.6.0'}
     dev: false
 
   /loose-envify/1.4.0:
@@ -1758,8 +1762,8 @@ packages:
       whatwg-url: 5.0.0
     dev: false
 
-  /node-gyp-build/4.4.0:
-    resolution: {integrity: sha512-amJnQCcgtRVw9SvoebO3BKGESClrfXGCUTX9hSn1OuGQTQBOZmVd0Z0OlecpuRksKvbsUqALE8jls/ErClAPuQ==}
+  /node-gyp-build/4.5.0:
+    resolution: {integrity: sha512-2iGbaQBV+ITgCz76ZEjmhUKAKVf7xfY1sRl4UiKQspfZMH2h06SyhNsnSVy50cwkFQDGLyif6m/6uFXHkOZ6rg==}
     hasBin: true
     dev: false
 
@@ -2229,10 +2233,12 @@ packages:
     engines: {node: '>= 0.4'}
     dev: true
 
-  /tailwindcss/3.1.4:
+  /tailwindcss/3.1.4_postcss@8.4.14:
     resolution: {integrity: sha512-NrxbFV4tYsga/hpWbRyUfIaBrNMXDxx5BsHgBS4v5tlyjf+sDsgBg5m9OxjrXIqAS/uR9kicxLKP+bEHI7BSeQ==}
     engines: {node: '>=12.13.0'}
     hasBin: true
+    peerDependencies:
+      postcss: ^8.0.9
     dependencies:
       arg: 5.0.2
       chokidar: 3.5.3
@@ -2311,8 +2317,8 @@ packages:
     resolution: {integrity: sha512-+5nt5AAniqsCnu2cEQQdpzCAh33kVx8n0VoFidKpB1dVVLAN/F+bgVOqOJqOnEnrhp222clB5p3vUlD+1QAnfg==}
     dev: false
 
-  /type/2.6.0:
-    resolution: {integrity: sha512-eiDBDOmkih5pMbo9OqsqPRGMljLodLcwd5XD5JbtNB0o89xZAwynY9EdCDsJU7LtcVCClu9DvM7/0Ep1hYX3EQ==}
+  /type/2.7.2:
+    resolution: {integrity: sha512-dzlvlNlt6AXU7EBSfpAscydQ7gXB+pPGsPnfJnZpiNJBDj7IaJzQlBZYGdEi4R9HmPdBv2XmWJ6YUtoTa7lmCw==}
     dev: false
 
   /typedarray-to-buffer/3.1.5:
@@ -2364,7 +2370,7 @@ packages:
     engines: {node: '>=6.14.2'}
     requiresBuild: true
     dependencies:
-      node-gyp-build: 4.4.0
+      node-gyp-build: 4.5.0
     dev: false
 
   /util-deprecate/1.0.2:
@@ -2375,7 +2381,7 @@ packages:
     resolution: {integrity: sha512-l8lCEmLcLYZh4nbunNZvQCJc5pv7+RCwa8q/LdUx8u7lsWvPDKmpodJAJNwkAhJC//dFY48KuIEmjtd4RViDrA==}
 
   /webidl-conversions/3.0.1:
-    resolution: {integrity: sha1-JFNCdeKnvGvnvIZhHMFq4KVlSHE=}
+    resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==}
     dev: false
 
   /websocket/1.0.34:
@@ -2384,7 +2390,7 @@ packages:
     dependencies:
       bufferutil: 4.0.6
       debug: 2.6.9
-      es5-ext: 0.10.61
+      es5-ext: 0.10.62
       typedarray-to-buffer: 3.1.5
       utf-8-validate: 5.0.9
       yaeti: 0.0.6
@@ -2393,7 +2399,7 @@ packages:
     dev: false
 
   /whatwg-url/5.0.0:
-    resolution: {integrity: sha1-lmRU6HZUYuN2RNNib2dCzotwll0=}
+    resolution: {integrity: sha512-saE57nupxk6v3HY35+jzBwYa0rKSy0XR8JSxZPwgLr7ys0IBzhGviA1/TUGJLmSVqs8pb9AnvICXEuOHLprYTw==}
     dependencies:
       tr46: 0.0.3
       webidl-conversions: 3.0.1
@@ -2428,7 +2434,7 @@ packages:
     dev: true
 
   /yaeti/0.0.6:
-    resolution: {integrity: sha1-8m9ITXJoTPQr7ft2lwqhYI+/lXc=}
+    resolution: {integrity: sha512-MvQa//+KcZCUkBTIC9blM+CU9J2GzuTytsOUwf2lidtvkx/6gnEp1QvJv34t9vdjhFmha/mUiNDbN0D0mJWdug==}
     engines: {node: '>=0.10.32'}
     dev: false
 
