@@ -20,6 +20,7 @@ export class GithubEventHandler {
   ) {}
 
   async handleEvent(body: GithubEvent) {
+    console.log("Got event with action: ", body.action);
     const pullRequest = body.pull_request;
     const prId = body.pull_request.id;
 
@@ -47,11 +48,9 @@ export class GithubEventHandler {
     if (body.action === "opened") {
       this.postPrOpened(prId, body, pullRequest);
     } else {
-      const record = await this.findPr(prId);
-
       let text: string;
       if (body.action === "review_requested" && body.requested_reviewer) {
-        console.log(body);
+        console.debug(body);
         text = `Review request for ${await this.getSlackUserName(
           body.requested_reviewer.login,
         )}`;
@@ -68,25 +67,14 @@ export class GithubEventHandler {
         )}`;
       }
 
-      if (record) {
-        this.postMessage(
-          {
-            token: process.env.SLACK_BOT_TOKEN,
-            thread_ts: record.thread_ts,
-            channel: this.channelId,
-          },
-          prId,
-        );
-      } else {
-        this.postMessage(
-          {
-            token: process.env.SLACK_BOT_TOKEN,
-            channel: this.channelId,
-            text,
-          },
-          prId,
-        );
-      }
+      this.postMessage(
+        {
+          token: process.env.SLACK_BOT_TOKEN,
+          channel: this.channelId,
+          text,
+        },
+        prId,
+      );
     }
   }
 
