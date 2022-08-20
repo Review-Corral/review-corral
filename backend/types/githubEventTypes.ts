@@ -21,7 +21,6 @@ export type GithubAction =
   | "submitted"
   | "converted_to_draft"
   | "ready_for_review"
-  | "reopened"
   | "review_requested";
 
 export const GithubActions: GithubAction[] = [
@@ -31,7 +30,6 @@ export const GithubActions: GithubAction[] = [
   "submitted",
   "converted_to_draft",
   "ready_for_review",
-  "reopened",
   "review_requested",
 ];
 

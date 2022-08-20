@@ -34,6 +34,10 @@ const Auth: NextPage = () => {
     }
   });
 
+  if (loginError) {
+    console.log("login error", loginError);
+  }
+
   useEffect(() => {
     if (user) {
       router.push("/");
