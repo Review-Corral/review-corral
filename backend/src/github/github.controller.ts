@@ -6,7 +6,9 @@ import {
   Query,
   Redirect,
   Res,
+  UseGuards,
 } from "@nestjs/common";
+import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { GithubEvent } from "types/githubEventTypes";
 import { GithubService } from "./github.service";
 import { CreateTeamRepoBody, GithubAppService } from "./githubApp.service";
@@ -31,8 +33,10 @@ export class GithubController {
     return { url: process.env.BASE_FE_URL };
   }
 
+  @UseGuards(LocalAuthGuard)
   @Get("/repositories")
   async getRepositories(@Query("teamId") teamId: string) {
+    // TODO: verify that the teamId is valid for the user
     const result = await this.githubAppService.getTeamInstaledRepos(teamId);
     return result;
   }

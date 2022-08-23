@@ -1,15 +1,23 @@
 import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import type { NextPage } from "next";
+import { useRouter } from "next/router";
+import { useEffect } from "react";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
 import { CreateTeamForm } from "../components/teams/CreateTeamForm";
-import { TeamsView } from "../components/teams/TeamsView";
 import { useTeams } from "../components/teams/useTeams";
 
 const Home: NextPage = () => {
   const teams = useTeams();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (teams.data && teams.data.length > 0) {
+      router.push(`/teams/${teams.data[0].id}`);
+    }
+  }, [teams]);
 
   if (teams.isLoading) {
-    return <div>Loading...</div>;
+    return <div>Loading Teams...</div>;
   }
 
   return (
@@ -19,7 +27,7 @@ const Home: NextPage = () => {
         {!teams.data || teams.data.length < 1 ? (
           <CreateTeamForm />
         ) : (
-          <TeamsView teams={teams.data} />
+          <div>Loading Teams...</div>
         )}
       </div>
     </DashboardLayout>
