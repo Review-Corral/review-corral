@@ -40,12 +40,21 @@ export class GithubAppService {
     const url = new URL("https://github.com/login/oauth/access_token");
     url.search = params.toString();
 
+    console.log("Got code in getUserAccessToken: ", code);
+
     axios
       .post(url.toString(), undefined, {
         headers: { accept: "application/json" },
       })
       .then(async (response) => {
+        console.log("Got response access token resposne: ", response);
         console.log("Got access token: ", response.data.access_token);
+
+        if (!response.data.access_token) {
+          throw Error(
+            `Didn't get access token in getUserAccessToken. Response: ${response}`,
+          );
+        }
 
         const foundIntegration =
           await this.prisma.github_integration.findUnique({

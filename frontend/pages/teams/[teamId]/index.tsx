@@ -43,9 +43,16 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
         </div>
 
         {getInstalledRepos.isLoading && <span>Loading repos...</span>}
-        {getInstalledRepos.data && (
-          <div>{JSON.stringify(getInstalledRepos.data, null, 2)}</div>
-        )}
+        {getInstalledRepos.data &&
+          getInstalledRepos.data[0].total_count > 0 && (
+            <div>
+              {getInstalledRepos.data.map((installation) =>
+                installation.repositories.map((repo) => (
+                  <div key={repo.id}>{repo.name}</div>
+                )),
+              )}
+            </div>
+          )}
       </div>
     </DashboardLayout>
   );

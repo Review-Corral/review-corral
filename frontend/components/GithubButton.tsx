@@ -17,6 +17,8 @@ const GithubButton: React.FC<GithubButtonProps> = ({ state }) => {
   const url = new URL("https://github.com/login/oauth/authorize");
   url.search = params.toString();
 
+  console.log("client_id: ", process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID);
+
   return (
     <div>
       <Button onClick={() => window.open(url)}>Connect to Github</Button>

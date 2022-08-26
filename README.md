@@ -1,0 +1,9 @@
+## Testing locally
+
+Use the "Review Corral - Test" Github app to test things locally
+
+Run `./ngrok http 8080` to get a public URL to forward Github events to. You may
+have to update the "Webhook URL" property in the Github app settings [here](https://github.com/settings/apps/review-corral-test).
+
+Run the frontend with `cd ./frontend && p dev`
+Run the backend with `cd ./backend && yarn dev`
