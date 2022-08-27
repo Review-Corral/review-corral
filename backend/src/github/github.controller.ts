@@ -28,6 +28,7 @@ export class GithubController {
   @Get("/auth")
   @Redirect("https://docs.nestjs.com", 301)
   async handleGithubAuth(@Query() query: GithubAuthQueryParams, @Res() res) {
+    console.log("Hit auth endpoint");
     await this.githubAppService.getUserAccessToken(query.code, query.state);
 
     return { url: process.env.BASE_FE_URL };

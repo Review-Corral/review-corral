@@ -98,6 +98,7 @@ export class GithubAppService {
   async getTeamInstaledRepos(
     teamId: string,
   ): Promise<InstalledRepository[] | undefined> {
+    console.log("Getting team repositories for team: ", teamId);
     const foundIntegration = await this.prisma.github_integration.findUnique({
       where: { team_id: teamId },
     });
@@ -116,6 +117,7 @@ export class GithubAppService {
       })
       .then(
         async (installations): Promise<InstalledRepository[] | undefined> => {
+          console.log("Got ibstallations: ", installations);
           if (installations.data.total_count > 0) {
             const r = installations.data.installations.map(
               async (installation) => {
@@ -165,7 +167,7 @@ export class GithubAppService {
 
     const jwt = nJwt.create(
       claims,
-      process.env.GITHUB_APP_JWT_SIGNING_SECRET,
+      process.env.GITHUB_APP_JWT_SIGNING_SECRET.replace(/\\n/g, "\n"),
       "RS256",
     );
 
