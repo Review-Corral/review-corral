@@ -1,3 +1,12 @@
+export type SyncedRepository = {
+  id: string;
+  created_at: Date | null;
+  updated_at: Date | null;
+  team_id: string;
+  repository_id: string;
+  repository_name: string;
+};
+
 export interface InstalledRepository {
   total_count: number;
   repository_selection: string;

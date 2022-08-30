@@ -4,7 +4,7 @@ import { useRouter } from "next/router";
 import GithubButton from "../../../components/GithubButton";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import SlackButton from "../../../components/SlackButton";
-import { useGetInstalledRepos } from "../../../components/teams/repos/useGetInstalledRepos";
+import { InstalledRepos } from "../../../components/teams/repos/InstalledRepos";
 import { useTeams } from "../../../components/teams/useTeams";
 import { flattenParam } from "../../../components/utils/flattenParam";
 
@@ -15,7 +15,7 @@ interface indexProps {
 
 const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
   const router = useRouter();
-  const getInstalledRepos = useGetInstalledRepos(teamId);
+
   const teams = useTeams();
 
   if (teams.isLoading) {
@@ -36,23 +36,7 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
         <GithubButton state={team.id} />
         <SlackButton teamId={team.id} />
 
-        <div>
-          <button onClick={() => getInstalledRepos.mutate()}>
-            Get installed repos
-          </button>
-        </div>
-
-        {getInstalledRepos.isLoading && <span>Loading repos...</span>}
-        {getInstalledRepos.data &&
-          getInstalledRepos.data[0].total_count > 0 && (
-            <div>
-              {getInstalledRepos.data.map((installation) =>
-                installation.repositories.map((repo) => (
-                  <div key={repo.id}>{repo.name}</div>
-                )),
-              )}
-            </div>
-          )}
+        <InstalledRepos teamId={teamId} />
       </div>
     </DashboardLayout>
   );

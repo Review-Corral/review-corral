@@ -1,4 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
+import { github_repositories } from "@prisma/client";
 import axios from "axios";
 import * as nJwt from "njwt";
 import { PrismaService } from "src/prisma/prisma.service";
@@ -15,6 +16,12 @@ export interface CreateTeamRepoBody {
 export class GithubAppService {
   constructor(private prisma: PrismaService) {}
 
+  async getTeamSyncedRepos(teamId: string): Promise<github_repositories[]> {
+    return this.prisma.github_repositories.findMany({
+      where: { team_id: teamId },
+    });
+  }
+
   async addTeamRepository(body: CreateTeamRepoBody) {
     await this.prisma.github_repositories
       .create({
@@ -27,6 +34,18 @@ export class GithubAppService {
       .then(() => console.log("Successfully created team repository"))
       .catch((error) => {
         console.log("Error creating team repository: ", error);
+        throw error;
+      });
+  }
+
+  async deleteSyncedTeamRepo(repoId: string) {
+    await this.prisma.github_repositories
+      .delete({
+        where: { repository_id: repoId },
+      })
+      .then(() => console.log("Successfully deleted team repository"))
+      .catch((error) => {
+        console.log("Error deleting team repository: ", error);
         throw error;
       });
   }

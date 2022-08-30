@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Post,
   Query,
@@ -34,23 +35,38 @@ export class GithubController {
     return { url: process.env.BASE_FE_URL };
   }
 
-  @UseGuards(LocalAuthGuard)
-  @Get("/repositories")
-  async getRepositories(@Query("teamId") teamId: string) {
-    // TODO: verify that the teamId is valid for the user
-    const result = await this.githubAppService.getTeamInstaledRepos(teamId);
-    return result;
-  }
-
   @Post("/events")
   postGithubEvents(@Body() body: GithubEvent) {
     console.log("Got event");
     this.githubService.handleEvent(body);
   }
 
-  @Post("/add-repository")
+  // For getting repos that the Github App is installed on
+  @UseGuards(LocalAuthGuard)
+  @Get("/installed-repositories")
+  async getRepositories(@Query("teamId") teamId: string) {
+    // TODO: verify that the teamId is valid for the user
+    return await this.githubAppService.getTeamInstaledRepos(teamId);
+  }
+
+  // For getting repos that the user is sycning with
+  @UseGuards(LocalAuthGuard)
+  @Get("/synced-repositories")
+  async getSyncedRepositories(@Query("teamId") teamId: string) {
+    // TODO: verify that the teamId is valid for the user
+    return await this.githubAppService.getTeamSyncedRepos(teamId);
+  }
+
+  @Post("/synced-repositories")
   async addRepository(@Body() body: CreateTeamRepoBody) {
     this.githubAppService.addTeamRepository(body);
+  }
+
+  @Delete("/synced-repositories")
+  async deleteRepository(
+    @Body() body: { repoId: CreateTeamRepoBody["repositoryId"] },
+  ) {
+    this.githubAppService.deleteSyncedTeamRepo(body.repoId.toString());
   }
 
   @Get("/jwt")
