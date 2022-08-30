@@ -83,12 +83,18 @@ export class GithubEventHandler {
     prId: number,
     getThreadTs = true,
   ) {
-    this.slackClient.chat
-      .postMessage({
-        ...message,
-        ...(getThreadTs && { thread_ts: (await this.findPr(prId))?.thread_ts }),
-      })
-      .then((response) => this.saveThreadTs(response, prId));
+    try {
+      this.slackClient.chat
+        .postMessage({
+          ...message,
+          ...(getThreadTs && {
+            thread_ts: (await this.findPr(prId))?.thread_ts,
+          }),
+        })
+        .then((response) => this.saveThreadTs(response, prId));
+    } catch (error) {
+      console.log("Error posting message: ", error);
+    }
   }
 
   private async findPr(prId: number): Promise<pull_requests | null> {
