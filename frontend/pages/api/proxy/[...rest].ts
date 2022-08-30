@@ -14,7 +14,6 @@ function prepareAppBaseUrl(appBaseUrl: string): string {
 const handleApiRequest: NextApiHandler = async (req, res) => {
   const accessToken = await getAccessTokenSafe(req);
 
-  console.log("Got access token:", accessToken);
   const hasUserSession = !req.headers.authorization && !!accessToken;
 
   return httpProxyMiddleware(req, res, {

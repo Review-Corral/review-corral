@@ -66,9 +66,6 @@ export class GithubAppService {
         headers: { accept: "application/json" },
       })
       .then(async (response) => {
-        console.log("Got response access token resposne: ", response);
-        console.log("Got access token: ", response.data.access_token);
-
         if (!response.data.access_token) {
           throw Error(
             `Didn't get access token in getUserAccessToken. Response: ${response}`,
@@ -136,7 +133,6 @@ export class GithubAppService {
       })
       .then(
         async (installations): Promise<InstalledRepository[] | undefined> => {
-          console.log("Got ibstallations: ", installations);
           if (installations.data.total_count > 0) {
             const r = installations.data.installations.map(
               async (installation) => {

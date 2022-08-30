@@ -6,11 +6,13 @@ interface SlackButtonProps {
 }
 
 const SlackButton: React.FC<SlackButtonProps> = ({ teamId }) => {
+  const redirectURI = process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL;
+  console.log("Slack button redirect URI", redirectURI);
   return (
     <div className="h-10 w-40">
       <a
         className="flex flex-row items-center gap-3"
-        href={`https://slack.com/oauth/v2/authorize?scope=channels%3Ahistory%2Cchat%3Awrite%2Ccommands%2Cgroups%3Ahistory%2Cincoming-webhook%2Cusers%3Aread&user_scope=&redirect_uri=https%3A%2F%2Fseal-app-xuqd9.ondigitalocean.app%2Fslack&state=${teamId}&client_id=3571046828385.3558423656162`}
+        href={`https://slack.com/oauth/v2/authorize?scope=channels%3Ahistory%2Cchat%3Awrite%2Ccommands%2Cgroups%3Ahistory%2Cincoming-webhook%2Cusers%3Aread&user_scope=&redirect_uri=${redirectURI}&state=${teamId}&client_id=3571046828385.3558423656162`}
       >
         <svg
           className="h-8 w-8"

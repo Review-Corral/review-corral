@@ -35,15 +35,17 @@ export class SlackService {
               client_id: string;
               code: string;
               client_secret: string;
+              redirect_uri: string;
             },
             { data: SlackAuthEvent }
           >("https://slack.com/api/oauth.v2.access", {
             client_id: process.env.SLACK_BOT_ID,
             code: queryParams.code,
             client_secret: process.env.SLACK_CLIENT_SECRET,
+            redirect_uri: process.env.SLACK_REDIRECT_URL,
           })
           .then(({ data }) => {
-            console.log(data);
+            console.log("Data back from slack oauthv2: ", data);
             this.prisma.slack_integration
               .create({
                 data: {
@@ -57,7 +59,7 @@ export class SlackService {
                 console.error("Error creating slack_integration: ", e),
               );
           })
-          .catch((e) => console.log(e));
+          .catch((e) => console.log("Error posting slack auth: ", e));
       });
   }
 }

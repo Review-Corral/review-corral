@@ -14,8 +14,6 @@ interface indexProps {
 }
 
 const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
-  const router = useRouter();
-
   const teams = useTeams();
 
   if (teams.isLoading) {

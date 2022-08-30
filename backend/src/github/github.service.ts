@@ -42,6 +42,8 @@ export class GithubService {
     if (body.pull_request && body.pull_request.id && body.repository.id) {
       const channelId = await this.getChannelId(body.repository.id);
 
+      console.log("Found channel id: ", channelId);
+
       new GithubEventHandler(
         this.prisma,
         this.slackClient,
