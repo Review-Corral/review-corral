@@ -8,6 +8,7 @@ export class SlackController {
   @Get()
   @Redirect()
   getSlackAuthEvent(@Query() query: SlackAuthQueryParams) {
+    console.log("got slack auth event");
     this.slackService.subscribeTeam(query);
 
     return {
