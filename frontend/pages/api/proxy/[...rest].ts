@@ -2,8 +2,10 @@ import { NextApiHandler } from "next";
 import httpProxyMiddleware from "next-http-proxy-middleware";
 import { getAccessTokenSafe } from "../../../lib/supabase/getAccessTokenSafe";
 
-const apiBaseUrl = process.env.API_BASE_URL || "http://localhost:8080";
-const appBaseUrl = process.env.APP_BASE_URL || "http://localhost:3000";
+const apiBaseUrl =
+  process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:8080";
+const appBaseUrl =
+  process.env.NEXT_PUBLIC_APP_BASE_URL || "http://localhost:3000";
 
 function prepareAppBaseUrl(appBaseUrl: string): string {
   if (/^https?:\/\//.test(appBaseUrl)) return appBaseUrl;
