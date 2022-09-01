@@ -14,6 +14,7 @@ function MyApp({ Component, pageProps }: AppProps) {
           queries: {
             refetchOnWindowFocus: false,
             refetchOnReconnect: false,
+            retry: 0,
           },
         },
       }),
