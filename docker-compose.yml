@@ -5,3 +5,4 @@ services:
     # Run a command against the development stage of the image
     ports:
       - 8080:8080
+      

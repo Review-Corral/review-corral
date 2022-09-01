@@ -7,3 +7,8 @@ have to update the "Webhook URL" property in the Github app settings [here](http
 
 Run the frontend with `cd ./frontend && p dev`
 Run the backend with `cd ./backend && yarn dev`
+
+
+### Pem files
+Github gives PEM files for signing. To get these into environment variables, run
+`base64 ${pem-file-path}` and then save that result to an env variable.

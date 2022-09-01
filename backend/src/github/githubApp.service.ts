@@ -182,7 +182,7 @@ export class GithubAppService {
 
     const jwt = nJwt.create(
       claims,
-      process.env.GITHUB_APP_JWT_SIGNING_SECRET.replace(/\\n/g, "\n"),
+      Buffer.from(process.env.GITHUB_APP_JWT_SIGNING_SECRET, "base64"),
       "RS256",
     );
 
