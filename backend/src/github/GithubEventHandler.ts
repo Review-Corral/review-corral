@@ -17,6 +17,7 @@ export class GithubEventHandler {
     private readonly prisma: PrismaService,
     private readonly slackClient: WebClient,
     private readonly channelId: string,
+    private readonly slackToken: string,
   ) {}
 
   async handleEvent(body: GithubEvent) {
@@ -69,8 +70,6 @@ export class GithubEventHandler {
 
       this.postMessage(
         {
-          token: process.env.SLACK_BOT_TOKEN,
-          channel: this.channelId,
           text,
         },
         prId,
@@ -79,7 +78,7 @@ export class GithubEventHandler {
   }
 
   private async postMessage(
-    message: ChatPostMessageArguments,
+    message: Omit<ChatPostMessageArguments, "token" | "channel">,
     prId: number,
     getThreadTs = true,
   ) {
@@ -90,6 +89,8 @@ export class GithubEventHandler {
           ...(getThreadTs && {
             thread_ts: (await this.findPr(prId))?.thread_ts,
           }),
+          channel: this.channelId,
+          token: this.slackToken,
         })
         .then((response) => this.saveThreadTs(response, prId));
     } catch (error) {
@@ -143,8 +144,6 @@ export class GithubEventHandler {
   ) {
     this.postMessage(
       {
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: this.channelId,
         text: `Pull request opened by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
@@ -164,8 +163,6 @@ export class GithubEventHandler {
   private async postPrMerged(prId: number, body: GithubEvent) {
     this.postMessage(
       {
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: this.channelId,
         text: `Pull request merged by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
@@ -183,8 +180,6 @@ export class GithubEventHandler {
   private async postPrClosed(prId: number, body: GithubEvent) {
     this.postMessage(
       {
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: this.channelId,
         text: `Pull request closed by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
@@ -202,8 +197,6 @@ export class GithubEventHandler {
   private async postComment(prId: number, comment: string, login: string) {
     this.postMessage(
       {
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: this.channelId,
         text: `${await this.getSlackUserName(login)} left a comment`,
         attachments: [
           {
@@ -232,8 +225,6 @@ export class GithubEventHandler {
 
     this.postMessage(
       {
-        token: process.env.SLACK_BOT_TOKEN,
-        channel: this.channelId,
         text: `${await this.getSlackUserName(login)} ${getReviewText(review)}`,
         attachments: [
           {
