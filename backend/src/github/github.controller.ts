@@ -38,7 +38,12 @@ export class GithubController {
   @Post("/events")
   postGithubEvents(@Body() body: GithubEvent) {
     console.log("Got event");
-    this.githubService.handleEvent(body);
+
+    try {
+      this.githubService.handleEvent(body);
+    } catch (error) {
+      console.log("Error handling event: ", error);
+    }
   }
 
   // For getting repos that the Github App is installed on
