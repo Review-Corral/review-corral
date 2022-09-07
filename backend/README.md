@@ -20,3 +20,8 @@ you're trying to see what repositories they have installed. This will give you t
  will give you an installation `access_token`.
 5. Use the installation access token to hit `https://api.github.com/app/installations`
 where you will get the information about the installed apps.
+
+
+## Dockerizing
+Got the docker image working, but live updating isnt' working. Need to get the saved files
+to map over to the container somehow. 
