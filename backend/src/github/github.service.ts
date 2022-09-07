@@ -29,7 +29,7 @@ export class GithubService {
       },
     });
 
-    const slackIntegration = await this.prisma.slack_integration.findUnique({
+    const slackIntegration = await this.prisma.slack_integration.findFirst({
       where: {
         team: githubRepository.team_id,
       },

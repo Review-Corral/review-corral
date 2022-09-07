@@ -80,14 +80,15 @@ export class GithubEventHandler {
   private async postMessage(
     message: Omit<ChatPostMessageArguments, "token" | "channel">,
     prId: number,
-    getThreadTs = true,
   ) {
+    const threadTs = (await this.findPr(prId))?.thread_ts;
+
     try {
       this.slackClient.chat
         .postMessage({
           ...message,
-          ...(getThreadTs && {
-            thread_ts: (await this.findPr(prId))?.thread_ts,
+          ...(threadTs && {
+            thread_ts: threadTs,
           }),
           channel: this.channelId,
           token: this.slackToken,
@@ -156,7 +157,6 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      false,
     );
   }
 

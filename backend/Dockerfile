@@ -11,5 +11,7 @@ RUN yarn install
 
 COPY . .
 
+RUN yarn build
+RUN yarn generate-prisma
 
 CMD ["yarn", "dev"]
