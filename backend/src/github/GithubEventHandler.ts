@@ -22,22 +22,22 @@ export class GithubEventHandler {
 
   async handleEvent(body: GithubEvent) {
     console.log("Got event with action: ", body.action);
-    const pullRequest = body.pull_request;
     const prId = body.pull_request.id;
 
     // Review comments
     if (body.action === "submitted" && body.review) {
-      this.postReview(body.pull_request.id, body.review, body.sender.login);
+      this.postReview(
+        body.pull_request.id,
+        body.review,
+        body.sender.login,
+        body,
+      );
 
       // Comments
     } else if (body.action === "created" && body.comment) {
-      this.postComment(
-        body.pull_request.id,
-        body.comment.body,
-        body.sender.login,
-      );
+      this.postComment(prId, body.comment.body, body.sender.login, body);
     } else if (GithubActions.includes(body.action) && body.pull_request) {
-      await this.handlePullRequestEvent(body, prId, pullRequest);
+      await this.handlePullRequestEvent(body, prId, body.pull_request);
     }
   }
 
@@ -51,7 +51,6 @@ export class GithubEventHandler {
     } else {
       let text: string;
       if (body.action === "review_requested" && body.requested_reviewer) {
-        console.debug(body);
         text = `Review request for ${await this.getSlackUserName(
           body.requested_reviewer.login,
         )}`;
@@ -62,6 +61,8 @@ export class GithubEventHandler {
           this.postPrClosed(prId, body);
         }
         return;
+      } else if (body.action === "ready_for_review") {
+        this.postReadyForReview(prId, body);
       } else {
         text = `Pull request ${body.action} by ${await this.getSlackUserName(
           body.sender.login,
@@ -73,6 +74,7 @@ export class GithubEventHandler {
           text,
         },
         prId,
+        pullRequest,
       );
     }
   }
@@ -80,8 +82,9 @@ export class GithubEventHandler {
   private async postMessage(
     message: Omit<ChatPostMessageArguments, "token" | "channel">,
     prId: number,
+    pullRequest: PullRequest,
   ) {
-    const threadTs = (await this.findPr(prId))?.thread_ts;
+    const threadTs: string | undefined = (await this.findPr(prId))?.thread_ts;
 
     try {
       this.slackClient.chat
@@ -90,6 +93,18 @@ export class GithubEventHandler {
           ...(threadTs && {
             thread_ts: threadTs,
           }),
+          // If there is no thread
+          ...(!threadTs &&
+            !message.attachments && {
+              attachments: [
+                {
+                  author_name: `<${pullRequest.html_url}|#${pullRequest.number} ${pullRequest.title}>`,
+                  text: `+${pullRequest.additions} -${pullRequest.deletions}`,
+                  color: "#106D04",
+                },
+                ...((message.attachments as Array<unknown>) ?? []),
+              ],
+            }),
           channel: this.channelId,
           token: this.slackToken,
         })
@@ -157,6 +172,7 @@ export class GithubEventHandler {
         ],
       },
       prId,
+      pullRequest,
     );
   }
 
@@ -174,6 +190,19 @@ export class GithubEventHandler {
         ],
       },
       prId,
+      body.pull_request,
+    );
+  }
+
+  private async postReadyForReview(prId: number, body: GithubEvent) {
+    this.postMessage(
+      {
+        text: `Pull request marked ready for review by ${await this.getSlackUserName(
+          body.sender.login,
+        )}`,
+      },
+      prId,
+      body.pull_request,
     );
   }
 
@@ -191,10 +220,16 @@ export class GithubEventHandler {
         ],
       },
       prId,
+      body.pull_request,
     );
   }
 
-  private async postComment(prId: number, comment: string, login: string) {
+  private async postComment(
+    prId: number,
+    comment: string,
+    login: string,
+    body: GithubEvent,
+  ) {
     this.postMessage(
       {
         text: `${await this.getSlackUserName(login)} left a comment`,
@@ -205,10 +240,16 @@ export class GithubEventHandler {
         ],
       },
       prId,
+      body.pull_request,
     );
   }
 
-  private async postReview(prId: number, review: Review, login: string) {
+  private async postReview(
+    prId: number,
+    review: Review,
+    login: string,
+    body: GithubEvent,
+  ) {
     const getReviewText = (review: Review) => {
       switch (review.state) {
         case "approved": {
@@ -240,6 +281,7 @@ export class GithubEventHandler {
         ],
       },
       prId,
+      body.pull_request,
     );
   }
 }
