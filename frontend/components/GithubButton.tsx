@@ -1,3 +1,4 @@
+import { useRouter } from "next/router";
 import React from "react";
 import Button from "./buttons/Button";
 
@@ -6,6 +7,7 @@ interface GithubButtonProps {
 }
 
 const GithubButton: React.FC<GithubButtonProps> = ({ state }) => {
+  const router = useRouter();
   const params = new URLSearchParams();
   params.append("client_id", process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID ?? "");
   params.append(
@@ -21,7 +23,7 @@ const GithubButton: React.FC<GithubButtonProps> = ({ state }) => {
 
   return (
     <div>
-      <Button onClick={() => window.open(url)}>Connect to Github</Button>
+      <Button onClick={() => router.push(url)}>Connect to Github</Button>
     </div>
   );
 };

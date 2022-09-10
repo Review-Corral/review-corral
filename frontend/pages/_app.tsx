@@ -24,7 +24,7 @@ function MyApp({ Component, pageProps }: AppProps) {
     <UserProvider supabaseClient={supabaseClient}>
       <QueryClientProvider client={queryClient}>
         <Component {...pageProps} />
-        <Toaster />
+        <Toaster position="top-right" />
       </QueryClientProvider>
     </UserProvider>
   );

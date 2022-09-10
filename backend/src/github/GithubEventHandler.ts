@@ -74,7 +74,7 @@ export class GithubEventHandler {
           text,
         },
         prId,
-        pullRequest,
+        body,
       );
     }
   }
@@ -82,9 +82,11 @@ export class GithubEventHandler {
   private async postMessage(
     message: Omit<ChatPostMessageArguments, "token" | "channel">,
     prId: number,
-    pullRequest: PullRequest,
+    body: GithubEvent,
   ) {
     const threadTs: string | undefined = (await this.findPr(prId))?.thread_ts;
+
+    const { pull_request: pullRequest, repository } = body;
 
     try {
       this.slackClient.chat
@@ -100,6 +102,7 @@ export class GithubEventHandler {
                 {
                   author_name: `<${pullRequest.html_url}|#${pullRequest.number} ${pullRequest.title}>`,
                   text: `+${pullRequest.additions} -${pullRequest.deletions}`,
+                  title: repository.name,
                   color: "#106D04",
                 },
                 ...((message.attachments as Array<unknown>) ?? []),
@@ -167,12 +170,13 @@ export class GithubEventHandler {
           {
             author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
             text: `+${pullRequest.additions} -${pullRequest.deletions}`,
+            title: body.repository.name,
             color: "#106D04",
           },
         ],
       },
       prId,
-      pullRequest,
+      body,
     );
   }
 
@@ -190,7 +194,7 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      body.pull_request,
+      body,
     );
   }
 
@@ -202,7 +206,7 @@ export class GithubEventHandler {
         )}`,
       },
       prId,
-      body.pull_request,
+      body,
     );
   }
 
@@ -220,7 +224,7 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      body.pull_request,
+      body,
     );
   }
 
@@ -240,7 +244,7 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      body.pull_request,
+      body,
     );
   }
 
@@ -281,7 +285,7 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      body.pull_request,
+      body,
     );
   }
 }
