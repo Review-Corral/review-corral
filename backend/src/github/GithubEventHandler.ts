@@ -95,7 +95,6 @@ export class GithubEventHandler {
   ) {
     const foundPr = await this.findPr(prId);
     const threadTs = foundPr?.thread_ts;
-    const messageId = foundPr?.message_id;
 
     const { pull_request: pullRequest, repository } = body;
 
@@ -124,11 +123,11 @@ export class GithubEventHandler {
 
     // If there's a message ID and we're merging the PR, update the original
     // message to say it's been merged
-    if (messageId && body.pull_request.merged) {
+    if (threadTs && body.pull_request.merged) {
       try {
         this.slackClient.chat
           .update({
-            ts: messageId, // message id is actually the timestamp of the message
+            ts: threadTs, // message id is actually the timestamp of the message
             channel: this.channelId,
             token: this.slackToken,
             attachments: [
