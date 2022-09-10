@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { slack_integration } from "@prisma/client";
 import { WebClient } from "@slack/web-api";
 import { GithubEvent } from "types/githubEventTypes";
@@ -29,11 +29,23 @@ export class GithubService {
       },
     });
 
+    if (!githubRepository) {
+      throw new NotFoundException(
+        `Couldn't find repository for repository id of ${repositoryId}`,
+      );
+    }
+
     const slackIntegration = await this.prisma.slack_integration.findFirst({
       where: {
         team: githubRepository.team_id,
       },
     });
+
+    if (!slackIntegration) {
+      throw new NotFoundException(
+        `Couldn't find slack integration for team id of ${githubRepository.team_id}`,
+      );
+    }
 
     return slackIntegration;
   }
