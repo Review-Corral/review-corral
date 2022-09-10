@@ -79,12 +79,23 @@ export class GithubEventHandler {
     }
   }
 
+  private getOpenedPrAttachment(pullRequest: PullRequest, repoName: string) {
+    return {
+      author_name: `<${pullRequest.html_url}|#${pullRequest.number} ${pullRequest.title}>`,
+      text: `+${pullRequest.additions} -${pullRequest.deletions}`,
+      title: repoName,
+      color: "#106D04",
+    };
+  }
+
   private async postMessage(
     message: Omit<ChatPostMessageArguments, "token" | "channel">,
     prId: number,
     body: GithubEvent,
   ) {
-    const threadTs: string | undefined = (await this.findPr(prId))?.thread_ts;
+    const foundPr = await this.findPr(prId);
+    const threadTs = foundPr?.thread_ts;
+    const messageId = foundPr?.message_id;
 
     const { pull_request: pullRequest, repository } = body;
 
@@ -99,12 +110,7 @@ export class GithubEventHandler {
           ...(!threadTs &&
             !message.attachments && {
               attachments: [
-                {
-                  author_name: `<${pullRequest.html_url}|#${pullRequest.number} ${pullRequest.title}>`,
-                  text: `+${pullRequest.additions} -${pullRequest.deletions}`,
-                  title: repository.name,
-                  color: "#106D04",
-                },
+                this.getOpenedPrAttachment(pullRequest, repository.name),
                 ...((message.attachments as Array<unknown>) ?? []),
               ],
             }),
@@ -114,6 +120,29 @@ export class GithubEventHandler {
         .then((response) => this.saveThreadTs(response, prId));
     } catch (error) {
       console.log("Error posting message: ", error);
+    }
+
+    // If there's a message ID and we're merging the PR, update the original
+    // message to say it's been merged
+    if (messageId && body.pull_request.merged) {
+      try {
+        this.slackClient.chat
+          .update({
+            ts: messageId, // message id is actually the timestamp of the message
+            channel: this.channelId,
+            token: this.slackToken,
+            attachments: [
+              this.getOpenedPrAttachment(pullRequest, repository.name),
+              {
+                author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
+                color: "#8839FB",
+              },
+            ],
+          })
+          .then((response) => console.log("Updated message: ", response));
+      } catch (error) {
+        console.log("Error updating message: ", error);
+      }
     }
   }
 
