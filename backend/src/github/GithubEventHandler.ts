@@ -133,7 +133,9 @@ export class GithubEventHandler {
             attachments: [
               this.getOpenedPrAttachment(pullRequest, repository.name),
               {
-                author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
+                author_name: `Pull request merged by ${await this.getSlackUserName(
+                  body.sender.login,
+                )}`,
                 color: "#8839FB",
               },
             ],
