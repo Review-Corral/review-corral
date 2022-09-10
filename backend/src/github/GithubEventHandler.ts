@@ -192,7 +192,7 @@ export class GithubEventHandler {
   ) {
     this.postMessage(
       {
-        text: `Pull request opened by ${await this.getSlackUserName(
+        message: `Pull request opened by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
         attachments: [
