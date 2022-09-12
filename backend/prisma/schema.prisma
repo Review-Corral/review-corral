@@ -12,7 +12,6 @@ model pull_requests {
   created_at DateTime? @default(now()) @db.Timestamptz(6)
   thread_ts  String    @unique
   pr_id      String
-  message_id String?
 }
 
 model username_mappings {
