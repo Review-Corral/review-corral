@@ -109,7 +109,7 @@ export class GithubEventHandler {
           ...(!threadTs &&
             !message.attachments && {
               attachments: [
-                this.getOpenedPrAttachment(pullRequest, repository.name),
+                // this.getOpenedPrAttachment(pullRequest, repository.name),
                 ...((message.attachments as Array<unknown>) ?? []),
               ],
             }),
