@@ -130,6 +130,9 @@ export class GithubEventHandler {
             ts: threadTs, // message id is actually the timestamp of the message
             channel: this.channelId,
             token: this.slackToken,
+            text: `Pull request opened by ${await this.getSlackUserName(
+              body.sender.login,
+            )}`,
             attachments: [
               this.getOpenedPrAttachment(pullRequest, repository.name),
               {
