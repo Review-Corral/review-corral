@@ -109,7 +109,7 @@ export class GithubEventHandler {
           ...(!threadTs &&
             !message.attachments && {
               attachments: [
-                this.getOpenedPrAttachment(pullRequest, repository.name),
+                // this.getOpenedPrAttachment(pullRequest, repository.name),
                 ...((message.attachments as Array<unknown>) ?? []),
               ],
             }),
@@ -192,7 +192,7 @@ export class GithubEventHandler {
   ) {
     this.postMessage(
       {
-        message: `Pull request opened by ${await this.getSlackUserName(
+        text: `Pull request opened by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
         attachments: [
