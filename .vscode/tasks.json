@@ -1,0 +1,83 @@
+{
+    "version": "2.0.0",
+    "presentation": {
+      "echo": false,
+      "reveal": "always",
+      "focus": false,
+      "panel": "dedicated",
+      "showReuseMessage": true
+    },
+    "tasks": [
+      {
+        "label": "Create terminals",
+        "dependsOn": [
+          "Backend", "Frontend", "Supabase", "zsh"
+        ],
+        // Mark as the default build task so cmd/ctrl+shift+b will create them
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        // Try start the task on folder open
+        "runOptions": {
+          "runOn": "folderOpen"
+        },
+        "icon": {
+          "id": "paintcan",
+          "color": "terminal.ansiCyan"
+        }
+      },
+      {
+        "label": "Backend",
+        "type": "shell",
+        "command": 
+          ["cd backend && yarn dev"],
+        "isBackground": true,
+        "problemMatcher": [],
+        "presentation": {
+          "group": "dev-group"
+        },
+        "icon": {
+          "id": "server",
+          "color": "terminal.ansiMagenta"
+        }
+      },
+      {
+        "label": "Frontend",
+        "type": "shell",
+        "command": 
+          ["cd frontend && pnpm dev"],
+        "isBackground": true,
+        "problemMatcher": [],
+        "presentation": {
+          "group": "dev-group"
+        }
+      },
+      {
+        "label": "Supabase",
+        "type": "shell",
+        "command": 
+          ["cd backend && supabase status"],
+        "isBackground": true,
+        "problemMatcher": [],
+        "presentation": {
+          "group": "db-group"
+        },
+        "icon": {
+          "id": "database",
+          "color": "terminal.ansiGreen"
+        }
+      },
+      // {
+      //   "label": "zsh",
+      //   "type": "shell",
+      //   "command": 
+      //     [],
+      //   "isBackground": true,
+      //   "icon": {
+      //     "id": "terminal-powershell",
+      //     "color": "terminal.ansiBlack"
+      //   }
+      // },
+    ]
+  }
