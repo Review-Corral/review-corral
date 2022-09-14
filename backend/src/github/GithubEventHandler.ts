@@ -46,7 +46,7 @@ export class GithubEventHandler {
     prId: number,
     pullRequest: PullRequest,
   ) {
-    if (body.action === "opened") {
+    if (body.action === "opened" && pullRequest.draft === false) {
       this.postPrOpened(prId, body, pullRequest);
     } else {
       let text: string;
