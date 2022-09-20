@@ -11,7 +11,7 @@
       {
         "label": "Create terminals",
         "dependsOn": [
-          "Backend", "Frontend", "Supabase", "zsh"
+          "Backend", "Frontend", "Supabase", "ngrok"
         ],
         // Mark as the default build task so cmd/ctrl+shift+b will create them
         "group": {
@@ -68,16 +68,16 @@
           "color": "terminal.ansiGreen"
         }
       },
-      // {
-      //   "label": "zsh",
-      //   "type": "shell",
-      //   "command": 
-      //     [],
-      //   "isBackground": true,
-      //   "icon": {
-      //     "id": "terminal-powershell",
-      //     "color": "terminal.ansiBlack"
-      //   }
-      // },
+      {
+        "label": "ngrok",
+        "type": "shell",
+        "command": 
+          ["ngrok http 8080 --subdomain reviewcorral"],
+        "isBackground": true,
+        "icon": {
+          "id": "globe",
+          "color": "terminal.ansiRed"
+        }
+      },
     ]
   }
