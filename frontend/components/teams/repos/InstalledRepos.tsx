@@ -50,6 +50,7 @@ export const InstalledRepos: FC<InstalledReposProps> = ({ teamId }) => {
                         teamId,
                         repositoryName: repo.name,
                         repositoryId: repo.id,
+                        installationId: installation.installationId,
                       });
                     } else {
                       deleteSyncedRepo.mutate({ repoId: repo.id.toString() });

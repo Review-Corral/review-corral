@@ -10,6 +10,12 @@ export interface CreateTeamRepoBody {
   teamId: string;
   repositoryName: string;
   repositoryId: number;
+  installationId: number;
+}
+
+export interface InstalledRepositoryWithInstallationId
+  extends InstalledRepository {
+  installationId: number;
 }
 
 @Injectable()
@@ -29,6 +35,7 @@ export class GithubAppService {
           team_id: body.teamId,
           repository_id: body.repositoryId.toString(),
           repository_name: body.repositoryName,
+          installation_id: body.installationId,
         },
       })
       .then(() => console.log("Successfully created team repository"))
@@ -58,8 +65,6 @@ export class GithubAppService {
 
     const url = new URL("https://github.com/login/oauth/access_token");
     url.search = params.toString();
-
-    console.log("Got code in getUserAccessToken: ", code);
 
     axios
       .post(url.toString(), undefined, {
@@ -113,7 +118,7 @@ export class GithubAppService {
 
   async getTeamInstaledRepos(
     teamId: string,
-  ): Promise<InstalledRepository[] | undefined> {
+  ): Promise<InstalledRepositoryWithInstallationId[] | undefined> {
     console.log("Getting team repositories for team: ", teamId);
     const foundIntegration = await this.prisma.github_integration.findUnique({
       where: { team_id: teamId },
@@ -132,7 +137,9 @@ export class GithubAppService {
         },
       })
       .then(
-        async (installations): Promise<InstalledRepository[] | undefined> => {
+        async (
+          installations,
+        ): Promise<InstalledRepositoryWithInstallationId[] | undefined> => {
           if (installations.data.total_count > 0) {
             const r = installations.data.installations.map(
               async (installation) => {
@@ -142,9 +149,12 @@ export class GithubAppService {
                 )
                   .then(async (accessResponse) => {
                     console.log("Got installation access token");
-                    return await this.getInstalledRepositoryInfo(
-                      accessResponse.token,
-                    );
+                    return {
+                      ...(await this.getInstalledRepositoryInfo(
+                        accessResponse.token,
+                      )),
+                      installationId: installation.id,
+                    };
                   })
                   .catch((error) => {
                     console.log(
