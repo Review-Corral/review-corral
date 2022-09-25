@@ -13,6 +13,7 @@ import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { GithubEvent } from "types/githubEventTypes";
 import { GithubService } from "./github.service";
 import { CreateTeamRepoBody, GithubAppService } from "./githubApp.service";
+import { getJwt } from "./utils";
 
 export interface GithubAuthQueryParams {
   code: string;
@@ -76,6 +77,6 @@ export class GithubController {
 
   @Get("/jwt")
   async getJwt() {
-    return (await this.githubAppService.getJwt()).compact();
+    return (await getJwt()).compact();
   }
 }

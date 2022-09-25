@@ -4,13 +4,15 @@ import {
   ChatPostMessageResponse,
   WebClient,
 } from "@slack/web-api";
+import axios from "axios";
 import { PrismaService } from "src/prisma/prisma.service";
 import {
-  GithubActions,
   GithubEvent,
   PullRequest,
+  PullRequestComment,
   Review,
 } from "types/githubEventTypes";
+import { getInstallationAccessToken } from "./utils";
 
 export class GithubEventHandler {
   constructor(
@@ -18,137 +20,180 @@ export class GithubEventHandler {
     private readonly slackClient: WebClient,
     private readonly channelId: string,
     private readonly slackToken: string,
+    private readonly installationId: number,
   ) {}
 
   async handleEvent(body: GithubEvent) {
     console.log("Got event with action: ", body.action);
     const prId = body.pull_request.id;
 
-    // Review comments
+    // New PR, should be the only two threads that create a new thread
+    if (
+      body.action === "created" ||
+      (body.action === "ready_for_review" && body.pull_request)
+    ) {
+      this.handleNewPr(prId, body);
+    }
+
+    await this.handleOtherEvent(body, prId);
+  }
+
+  private async handleNewPr(prId: number, body: GithubEvent) {
+    const { ts: threadTs } = await this.postPrOpened(
+      prId,
+      body,
+      body.pull_request,
+    );
+
+    if (threadTs) {
+      // Get all comments and post
+      axios
+        .get<PullRequestComment[]>(body.pull_request.comments_url, {
+          headers: {
+            Authorization: `bearer ${getInstallationAccessToken(
+              this.installationId.toString(),
+            )}`,
+          },
+        })
+        .then((response) => {
+          response.data.forEach((comment) => {
+            this.postComment(prId, comment.body, comment.user.login, threadTs);
+          });
+        });
+
+      // Get all requested Reviews and post
+      body.pull_request.requested_reviewers.map(async (requested_reviewer) => {
+        await this.postMessage({
+          message: {
+            text: `Review request for ${await this.getSlackUserName(
+              requested_reviewer.login,
+            )}`,
+          },
+          prId,
+          threadTs: threadTs,
+        });
+      });
+    } else {
+      console.error(
+        "Error posting new thread message to Slack: Didn't get message response back to thread messages",
+      );
+    }
+  }
+
+  private async handleOtherEvent(body: GithubEvent, prId: number) {
+    const threadTs = await this.getThreadTs(prId);
+
+    if (!threadTs) {
+      // No thread found, so log and return
+      console.error(
+        `Got non-created event (${body.action}) for PR id of ${prId}`,
+      );
+      return;
+    }
+
     if (body.action === "submitted" && body.review) {
       this.postReview(
         body.pull_request.id,
         body.review,
         body.sender.login,
-        body,
+        threadTs,
       );
-
+      return;
       // Comments
-    } else if (body.action === "created" && body.comment) {
-      this.postComment(prId, body.comment.body, body.sender.login, body);
-    } else if (GithubActions.includes(body.action) && body.pull_request) {
-      await this.handlePullRequestEvent(body, prId, body.pull_request);
     }
-  }
 
-  private async handlePullRequestEvent(
-    body: GithubEvent,
-    prId: number,
-    pullRequest: PullRequest,
-  ) {
-    if (body.action === "opened") {
-      if (pullRequest.draft === false) {
-        this.postPrOpened(prId, body, pullRequest);
+    if (body.action === "created" && body.comment) {
+      this.postComment(prId, body.comment.body, body.sender.login, threadTs);
+      return;
+    }
+
+    if (body.action === "closed") {
+      if (body.pull_request.merged) {
+        this.postPrMerged(prId, body, threadTs);
+      } else {
+        this.postPrClosed(prId, body, threadTs);
       }
     } else {
       let text: string;
+
       if (body.action === "review_requested" && body.requested_reviewer) {
         text = `Review request for ${await this.getSlackUserName(
           body.requested_reviewer.login,
         )}`;
-      } else if (body.action === "closed") {
-        if (body.pull_request.merged) {
-          this.postPrMerged(prId, body);
-        } else {
-          this.postPrClosed(prId, body);
-        }
-        return;
       } else if (body.action === "ready_for_review") {
-        this.postReadyForReview(prId, body);
+        this.postReadyForReview(prId, body, threadTs);
       } else {
         text = `Pull request ${body.action} by ${await this.getSlackUserName(
           body.sender.login,
         )}`;
       }
 
-      this.postMessage(
-        {
+      this.postMessage({
+        message: {
           text,
         },
         prId,
-        body,
-      );
+        threadTs: undefined,
+      });
     }
   }
 
-  private getOpenedPrAttachment(pullRequest: PullRequest, repoName: string) {
-    return {
-      author_name: `<${pullRequest.html_url}|#${pullRequest.number} ${pullRequest.title}>`,
-      text: `+${pullRequest.additions} -${pullRequest.deletions}`,
-      title: repoName,
-      color: "#106D04",
-    };
-  }
-
-  private async postMessage(
-    message: Omit<ChatPostMessageArguments, "token" | "channel">,
-    prId: number,
-    body: GithubEvent,
-  ) {
-    const foundPr = await this.findPr(prId);
-    const threadTs = foundPr?.thread_ts;
-
-    const { pull_request: pullRequest, repository } = body;
-
+  private async postMessage({
+    message,
+    prId,
+    threadTs,
+  }: {
+    message: Omit<ChatPostMessageArguments, "token" | "channel">;
+    prId: number;
+    threadTs: string | undefined;
+  }): Promise<ChatPostMessageResponse | undefined> {
     try {
       this.slackClient.chat
         .postMessage({
           ...message,
           ...(threadTs && {
-            thread_ts: threadTs,
+            threadTs: threadTs,
           }),
-          // If there is no thread
-          ...(!threadTs &&
-            !message.attachments && {
-              attachments: [
-                // this.getOpenedPrAttachment(pullRequest, repository.name),
-                ...((message.attachments as Array<unknown>) ?? []),
-              ],
-            }),
+          attachments: [...((message.attachments as Array<unknown>) ?? [])],
           channel: this.channelId,
           token: this.slackToken,
         })
-        .then((response) => this.saveThreadTs(response, prId));
+        .then((response) => {
+          this.saveThreadTs(response, prId);
+          return response;
+        });
     } catch (error) {
       console.log("Error posting message: ", error);
+      return undefined;
     }
 
+    // TODO: pull this out of this function
     // If there's a message ID and we're merging the PR, update the original
     // message to say it's been merged
-    if (threadTs && body.pull_request.merged) {
-      try {
-        this.slackClient.chat
-          .update({
-            ts: threadTs, // message id is actually the timestamp of the message
-            channel: this.channelId,
-            token: this.slackToken,
-            text: `Pull request opened by ${await this.getSlackUserName(
-              body.sender.login,
-            )}`,
-            attachments: [
-              this.getOpenedPrAttachment(pullRequest, repository.name),
-              {
-                author_name: `Pull request merged`,
-                text: `Timestamp: ${new Date().toISOString()}`,
-                color: "#8839FB",
-              },
-            ],
-          })
-          .then((response) => console.log("Updated message: ", response));
-      } catch (error) {
-        console.log("Error updating message: ", error);
-      }
-    }
+    // if (threadTs && body.pull_request.merged) {
+    //   try {
+    //     this.slackClient.chat
+    //       .update({
+    //         ts: threadTs, // message id is actually the timestamp of the message
+    //         channel: this.channelId,
+    //         token: this.slackToken,
+    //         text: `Pull request opened by ${await this.getSlackUserName(
+    //           body.sender.login,
+    //         )}`,
+    //         attachments: [
+    //           this.getOpenedPrAttachment(pullRequest, repository.name),
+    //           {
+    //             author_name: `Pull request merged`,
+    //             text: `Timestamp: ${new Date().toISOString()}`,
+    //             color: "#8839FB",
+    //           },
+    //         ],
+    //       })
+    //       .then((response) => console.log("Updated message: ", response));
+    //   } catch (error) {
+    //     console.log("Error updating message: ", error);
+    //   }
+    // }
   }
 
   private async findPr(prId: number): Promise<pull_requests | null> {
@@ -195,8 +240,8 @@ export class GithubEventHandler {
     body: GithubEvent,
     pullRequest: PullRequest,
   ) {
-    this.postMessage(
-      {
+    return this.postMessage({
+      message: {
         text: `Pull request opened by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
@@ -210,13 +255,17 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      body,
-    );
+      threadTs: undefined,
+    });
   }
 
-  private async postPrMerged(prId: number, body: GithubEvent) {
-    this.postMessage(
-      {
+  private async postPrMerged(
+    prId: number,
+    body: GithubEvent,
+    threadTs: string,
+  ) {
+    this.postMessage({
+      message: {
         text: `Pull request merged by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
@@ -228,25 +277,33 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      body,
-    );
+      threadTs,
+    });
   }
 
-  private async postReadyForReview(prId: number, body: GithubEvent) {
-    this.postMessage(
-      {
+  private async postReadyForReview(
+    prId: number,
+    body: GithubEvent,
+    threadTs: string,
+  ) {
+    this.postMessage({
+      message: {
         text: `Pull request marked ready for review by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
       },
       prId,
-      body,
-    );
+      threadTs,
+    });
   }
 
-  private async postPrClosed(prId: number, body: GithubEvent) {
-    this.postMessage(
-      {
+  private async postPrClosed(
+    prId: number,
+    body: GithubEvent,
+    threadTs: string,
+  ) {
+    this.postMessage({
+      message: {
         text: `Pull request closed by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
@@ -258,18 +315,18 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      body,
-    );
+      threadTs,
+    });
   }
 
   private async postComment(
     prId: number,
     comment: string,
     login: string,
-    body: GithubEvent,
+    threadTs: string,
   ) {
-    this.postMessage(
-      {
+    this.postMessage({
+      message: {
         text: `${await this.getSlackUserName(login)} left a comment`,
         attachments: [
           {
@@ -278,15 +335,15 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      body,
-    );
+      threadTs,
+    });
   }
 
   private async postReview(
     prId: number,
     review: Review,
     login: string,
-    body: GithubEvent,
+    threadTs: string,
   ) {
     const getReviewText = (review: Review) => {
       switch (review.state) {
@@ -302,8 +359,8 @@ export class GithubEventHandler {
       }
     };
 
-    this.postMessage(
-      {
+    this.postMessage({
+      message: {
         text: `${await this.getSlackUserName(login)} ${getReviewText(review)}`,
         attachments: [
           {
@@ -319,7 +376,17 @@ export class GithubEventHandler {
         ],
       },
       prId,
-      body,
-    );
+      threadTs,
+    });
+  }
+
+  private async getThreadTs(prId: number): Promise<string | undefined> {
+    return (
+      await this.prisma.pull_requests.findFirst({
+        where: {
+          pr_id: prId.toString(),
+        },
+      })
+    )?.thread_ts;
   }
 }

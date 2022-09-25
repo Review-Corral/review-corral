@@ -1,10 +1,11 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { github_repositories } from "@prisma/client";
 import axios from "axios";
-import * as nJwt from "njwt";
+
 import { PrismaService } from "src/prisma/prisma.service";
 import { InstalledRepository } from "types/githubAppTypes";
-import { InstallationAccessResponse, Installations } from "./types";
+import { Installations } from "./types";
+import { getInstallationAccessToken } from "./utils";
 
 export interface CreateTeamRepoBody {
   teamId: string;
@@ -128,8 +129,6 @@ export class GithubAppService {
       throw new BadRequestException("No Github integration found");
     }
 
-    const jwt = await this.getJwt();
-
     return axios
       .get<Installations>("https://api.github.com/user/installations", {
         headers: {
@@ -143,9 +142,8 @@ export class GithubAppService {
           if (installations.data.total_count > 0) {
             const r = installations.data.installations.map(
               async (installation) => {
-                return await this.getInstallationAccessToken(
+                return await getInstallationAccessToken(
                   installation.id.toString(),
-                  jwt,
                 )
                   .then(async (accessResponse) => {
                     console.log("Got installation access token");
@@ -175,43 +173,6 @@ export class GithubAppService {
         console.log("Got error getting user installations: ", error);
         throw new BadRequestException(error);
       });
-
-    return undefined;
-  }
-
-  async getJwt(): Promise<nJwt.Jwt> {
-    const now = Math.floor(Date.now() / 1000) - 30;
-    const expiration = now + 120; // JWT expiration time (10 minute maximum)
-    const claims = {
-      // issued at time, 60 seconds in the past to allow for clock drift
-      iat: now,
-      // JWT expiration time (10 minute maximum)
-      exp: expiration,
-      iss: process.env.GITHUB_APP_ID,
-    };
-
-    const jwt = nJwt.create(
-      claims,
-      Buffer.from(process.env.GITHUB_APP_JWT_SIGNING_SECRET, "base64"),
-      "RS256",
-    );
-
-    return jwt.setExpiration(new Date().getTime() + 60 * 2);
-  }
-
-  private async getInstallationAccessToken(
-    installationId: string,
-    jwt: nJwt.Jwt,
-  ): Promise<InstallationAccessResponse> {
-    return (
-      await axios.post<InstallationAccessResponse>(
-        `https://api.github.com/app/installations/${installationId}/access_tokens`,
-        null,
-        {
-          headers: { Authorization: `Bearer ${jwt.compact()}` },
-        },
-      )
-    ).data;
   }
 
   private async getInstalledRepositoryInfo(
