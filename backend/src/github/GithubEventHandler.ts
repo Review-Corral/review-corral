@@ -117,6 +117,7 @@ export class GithubEventHandler {
             }),
           channel: this.channelId,
           token: this.slackToken,
+          mrkdwn: true,
         })
         .then((response) => this.saveThreadTs(response, prId));
     } catch (error) {
