@@ -1,5 +1,5 @@
 export interface GithubEvent {
-  action: GithubAction | any;
+  action: GithubAction;
   number: number;
   comment?: Comment;
   review?: Review;

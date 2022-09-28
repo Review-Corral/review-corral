@@ -29,7 +29,7 @@ export class GithubEventHandler {
 
     // New PR, should be the only two threads that create a new thread
     if (
-      body.action === "created" ||
+      body.action === "opened" ||
       (body.action === "ready_for_review" && body.pull_request)
     ) {
       this.handleNewPr(prId, body);
@@ -102,7 +102,7 @@ export class GithubEventHandler {
       // Comments
     }
 
-    if (body.action === "created" && body.comment) {
+    if (body.action === "opened" && body.comment) {
       this.postComment(prId, body.comment.body, body.sender.login, threadTs);
       return;
     }
