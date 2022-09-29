@@ -28,8 +28,9 @@ export class GithubEventHandler {
 
     // New PR, should be the only two threads that create a new thread
     if (
-      body.action === "opened" ||
-      (body.action === "ready_for_review" && body.pull_request)
+      ((body.action === "opened" && body.pull_request?.draft === false) ||
+        body.action === "ready_for_review") &&
+      body.pull_request
     ) {
       await this.handleNewPr(prId, body);
     } else {
