@@ -110,7 +110,11 @@ export class GithubEventHandler {
       // Comments
     }
 
-    if (body.action === "opened" && body.comment) {
+    if (
+      body.action === "opened" &&
+      body.comment &&
+      body.comment.user.type === "User"
+    ) {
       this.postComment(prId, body.comment.body, body.sender.login, threadTs);
       return;
     }
