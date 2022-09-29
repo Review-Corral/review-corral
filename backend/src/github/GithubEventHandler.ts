@@ -146,7 +146,7 @@ export class GithubEventHandler {
           text,
         },
         prId,
-        threadTs: undefined,
+        threadTs: threadTs,
       });
     }
   }
