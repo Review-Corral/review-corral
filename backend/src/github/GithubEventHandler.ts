@@ -112,7 +112,7 @@ export class GithubEventHandler {
     }
 
     if (
-      body.action === "opened" &&
+      (body.action === "opened" || body.action === "created") &&
       body.comment &&
       body.comment.user.type === "User"
     ) {
@@ -127,6 +127,12 @@ export class GithubEventHandler {
         this.postPrClosed(prId, body, threadTs);
       }
     } else {
+      // TODO: Improve this block
+
+      if (body.action === "synchronize") {
+        return;
+      }
+
       let text: string;
 
       if (body.action === "review_requested" && body.requested_reviewer) {

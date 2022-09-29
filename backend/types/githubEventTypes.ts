@@ -16,9 +16,11 @@ export interface ReviewRequested {
 
 export type GithubAction =
   | "closed"
+  | "created"
   | "opened"
   | "reopened"
   | "submitted"
+  | "synchronize"
   | "converted_to_draft"
   | "ready_for_review"
   | "review_requested";
