@@ -12,3 +12,6 @@ Run the backend with `cd ./backend && yarn dev`
 ### Pem files
 Github gives PEM files for signing. To get these into environment variables, run
 `base64 ${pem-file-path}` and then save that result to an env variable.
+
+
+
