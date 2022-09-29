@@ -74,6 +74,6 @@ model github_repositories {
   team_id         String    @db.Uuid
   repository_id   String    @unique
   repository_name String
-  installation_id BigInt?
+  installation_id Int
   team            team      @relation(fields: [team_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
 }
