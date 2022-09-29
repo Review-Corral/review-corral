@@ -101,6 +101,10 @@ export class GithubEventHandler {
     }
 
     if (body.action === "submitted" && body.review) {
+      if (body.review.state === "commented" && body.review.body === null) {
+        // This means they left a comment on the PR, not an actual review comment
+        return;
+      }
       this.postReview(
         body.pull_request.id,
         body.review,
