@@ -232,24 +232,28 @@ export class GithubEventHandler {
     prId: number,
     body: GithubEvent,
     pullRequest: PullRequest,
-  ) {
-    return this.postMessage({
-      message: {
-        text: `Pull request opened by ${await this.getSlackUserName(
-          body.sender.login,
-        )}`,
-        attachments: [
-          {
-            author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
-            text: `+${pullRequest.additions} -${pullRequest.deletions}`,
-            title: body.repository.name,
-            color: "#106D04",
-          },
-        ],
-      },
-      prId,
-      threadTs: undefined,
-    });
+  ): Promise<ChatPostMessageResponse> {
+    try {
+      return this.postMessage({
+        message: {
+          text: `Pull request opened by ${await this.getSlackUserName(
+            body.sender.login,
+          )}`,
+          attachments: [
+            {
+              author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
+              text: `+${pullRequest.additions} -${pullRequest.deletions}`,
+              title: body.repository.name,
+              color: "#106D04",
+            },
+          ],
+        },
+        prId,
+        threadTs: undefined,
+      });
+    } catch (error) {
+      console.error("Got error posting to channel: ", error);
+    }
   }
 
   private async postPrMerged(
