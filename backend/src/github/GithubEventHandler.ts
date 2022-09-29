@@ -1,4 +1,3 @@
-import { pull_requests } from "@prisma/client";
 import {
   ChatPostMessageArguments,
   ChatPostMessageResponse,
@@ -32,33 +31,42 @@ export class GithubEventHandler {
       body.action === "opened" ||
       (body.action === "ready_for_review" && body.pull_request)
     ) {
-      this.handleNewPr(prId, body);
+      await this.handleNewPr(prId, body);
+    } else {
+      await this.handleOtherEvent(body, prId);
     }
-
-    await this.handleOtherEvent(body, prId);
   }
 
   private async handleNewPr(prId: number, body: GithubEvent) {
-    const { ts: threadTs } = await this.postPrOpened(
-      prId,
-      body,
-      body.pull_request,
-    );
+    const threadTs = (await this.postPrOpened(prId, body, body.pull_request))
+      .ts;
 
     if (threadTs) {
       // Get all comments and post
+      console.info("Installation ID: ", this.installationId);
+      const accessToken = await getInstallationAccessToken(
+        this.installationId.toString(),
+      );
       axios
         .get<PullRequestComment[]>(body.pull_request.comments_url, {
           headers: {
-            Authorization: `bearer ${getInstallationAccessToken(
-              this.installationId.toString(),
-            )}`,
+            Authorization: `bearer ${accessToken.token}`,
           },
         })
         .then((response) => {
           response.data.forEach((comment) => {
-            this.postComment(prId, comment.body, comment.user.login, threadTs);
+            if (comment.user.type === "User") {
+              this.postComment(
+                prId,
+                comment.body,
+                comment.user.login,
+                threadTs,
+              );
+            }
           });
+        })
+        .catch((error) => {
+          console.error("Error getting comments: ", error);
         });
 
       // Get all requested Reviews and post
@@ -148,12 +156,10 @@ export class GithubEventHandler {
     threadTs: string | undefined;
   }): Promise<ChatPostMessageResponse | undefined> {
     try {
-      this.slackClient.chat
+      return this.slackClient.chat
         .postMessage({
           ...message,
-          ...(threadTs && {
-            threadTs: threadTs,
-          }),
+          thread_ts: threadTs,
           attachments: [...((message.attachments as Array<unknown>) ?? [])],
           channel: this.channelId,
           token: this.slackToken,
@@ -194,19 +200,6 @@ export class GithubEventHandler {
     //     console.log("Error updating message: ", error);
     //   }
     // }
-  }
-
-  private async findPr(prId: number): Promise<pull_requests | null> {
-    return await this.prisma.pull_requests
-      .findFirst({
-        where: {
-          pr_id: prId.toString(),
-        },
-      })
-      .catch((e) => {
-        console.log("Error finding pr: ", e);
-        return null;
-      });
   }
 
   private async getSlackUserName(githubLogin: string): Promise<string> {
