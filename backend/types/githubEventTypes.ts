@@ -17,6 +17,7 @@ export interface ReviewRequested {
 export type GithubAction =
   | "closed"
   | "created"
+  | "deleted"
   | "opened"
   | "reopened"
   | "submitted"

@@ -100,6 +100,11 @@ export class GithubEventHandler {
       return;
     }
 
+    if (body.action === "deleted") {
+      // Ingore, this is probably a comment or review that was deleted
+      return;
+    }
+
     if (body.action === "submitted" && body.review) {
       if (body.review.state === "commented" && body.review.body === null) {
         // This means they left a comment on the PR, not an actual review comment
