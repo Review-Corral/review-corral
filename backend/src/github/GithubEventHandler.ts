@@ -175,20 +175,18 @@ export class GithubEventHandler {
     prId: number;
     threadTs: string | undefined;
   }): Promise<ChatPostMessageResponse | undefined> {
+    const payload = {
+      ...message,
+      thread_ts: threadTs,
+      channel: this.channelId,
+      token: this.slackToken,
+      mrkdwn: true,
+    };
     try {
-      return this.slackClient.chat
-        .postMessage({
-          ...message,
-          thread_ts: threadTs,
-          attachments: [...((message.attachments as Array<unknown>) ?? [])],
-          channel: this.channelId,
-          token: this.slackToken,
-          mrkdwn: true,
-        })
-        .then((response) => {
-          this.saveThreadTs(response, prId);
-          return response;
-        });
+      return this.slackClient.chat.postMessage(payload).then((response) => {
+        this.saveThreadTs(response, prId);
+        return response;
+      });
     } catch (error) {
       console.log("Error posting message: ", error);
       return undefined;
@@ -255,19 +253,105 @@ export class GithubEventHandler {
     pullRequest: PullRequest,
   ): Promise<ChatPostMessageResponse> {
     try {
+      // const attachmentsPayload = [
+      //   {
+      //     color: "#106D04",
+      //     blocks: [
+      //       {
+      //         type: "section",
+      //         elements: [
+      //           {
+      //             type: "image",
+      //             image_url: body.repository?.owner?.avatar_url,
+      //             alt_text: "repo owner url",
+      //           },
+      //           {
+      //             type: "mrkdwn",
+      //             text: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
+      //           },
+      //         ],
+      //       },
+      //       {
+      //         type: "section",
+      //         elements: [
+      //           {
+      //             type: "mrkdwn",
+      //             text: `+${pullRequest.additions} -${pullRequest.deletions}`,
+      //           },
+      //         ],
+      //       },
+      //       {
+      //         type: "context",
+      //         elements: [
+      //           {
+      //             type: "mrkdwn",
+      //             text: `${body.repository.name}`,
+      //           },
+      //         ],
+      //       },
+      //     ],
+      //   },
+      // ];
+
+      const attachmentsPayload = [
+        {
+          color: "#f2c744",
+          blocks: [
+            {
+              type: "context",
+              elements: [
+                {
+                  type: "image",
+                  image_url:
+                    "https://avatars.githubusercontent.com/u/113743432?v=4",
+                  alt_text: "cute cat",
+                },
+                {
+                  type: "mrkdwn",
+                  text: "<https://www.stackoverflow.com|Review Corral>",
+                },
+              ],
+            },
+            {
+              type: "context",
+              elements: [
+                {
+                  type: "image",
+                  image_url:
+                    "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg",
+                  alt_text: "cute cat",
+                },
+                {
+                  type: "mrkdwn",
+                  text: "*Cat* has approved this message.",
+                },
+              ],
+            },
+          ],
+        },
+        {
+          color: "#FF453A",
+          blocks: [
+            {
+              type: "section",
+              text: {
+                type: "plain_text",
+                text: "This is a plain text section block.",
+                emoji: true,
+              },
+            },
+          ],
+        },
+      ];
+
+      console.log(JSON.stringify(attachmentsPayload, null, 2));
+
       return this.postMessage({
         message: {
           text: `Pull request opened by ${await this.getSlackUserName(
             body.sender.login,
           )}`,
-          attachments: [
-            {
-              author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
-              text: `+${pullRequest.additions} -${pullRequest.deletions}`,
-              title: body.repository.name,
-              color: "#106D04",
-            },
-          ],
+          attachments: attachmentsPayload,
         },
         prId,
         threadTs: undefined,

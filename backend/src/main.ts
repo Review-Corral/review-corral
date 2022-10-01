@@ -9,6 +9,9 @@ async function bootstrap() {
   });
   await app.listen(8080);
 
+  const url = await app.getUrl();
+  console.log(`App is running on port ${url}`);
+
   if (module.hot) {
     module.hot.accept();
     module.hot.dispose(() => app.close());
