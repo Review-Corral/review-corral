@@ -238,6 +238,12 @@ export class GithubEventHandler {
     }
   }
 
+  private async getLocalTimeString(date: string): Promise<string> {
+    return `${new Date(Date.parse(date)).toLocaleString("en-US", {
+      timeZone: "America/New_York",
+    })} Eastern`;
+  }
+
   private async postPrMerged(
     prId: number,
     body: GithubEvent,
@@ -256,7 +262,9 @@ export class GithubEventHandler {
                 type: "section",
                 text: {
                   type: "mrkdwn",
-                  text: `Pull Request merged\n ${body.pull_request.merged_at}`,
+                  text: `Merged at:\n ${await this.getLocalTimeString(
+                    body.pull_request.merged_at,
+                  )}`,
                 },
               },
             ],
