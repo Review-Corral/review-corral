@@ -175,52 +175,22 @@ export class GithubEventHandler {
     prId: number;
     threadTs: string | undefined;
   }): Promise<ChatPostMessageResponse | undefined> {
+    const payload = {
+      ...message,
+      thread_ts: threadTs,
+      channel: this.channelId,
+      token: this.slackToken,
+      mrkdwn: true,
+    };
     try {
-      return this.slackClient.chat
-        .postMessage({
-          ...message,
-          thread_ts: threadTs,
-          attachments: [...((message.attachments as Array<unknown>) ?? [])],
-          channel: this.channelId,
-          token: this.slackToken,
-          mrkdwn: true,
-        })
-        .then((response) => {
-          this.saveThreadTs(response, prId);
-          return response;
-        });
+      return this.slackClient.chat.postMessage(payload).then((response) => {
+        this.saveThreadTs(response, prId);
+        return response;
+      });
     } catch (error) {
       console.log("Error posting message: ", error);
       return undefined;
     }
-
-    // TODO: pull this out of this function
-    // If there's a message ID and we're merging the PR, update the original
-    // message to say it's been merged
-    // if (threadTs && body.pull_request.merged) {
-    //   try {
-    //     this.slackClient.chat
-    //       .update({
-    //         ts: threadTs, // message id is actually the timestamp of the message
-    //         channel: this.channelId,
-    //         token: this.slackToken,
-    //         text: `Pull request opened by ${await this.getSlackUserName(
-    //           body.sender.login,
-    //         )}`,
-    //         attachments: [
-    //           this.getOpenedPrAttachment(pullRequest, repository.name),
-    //           {
-    //             author_name: `Pull request merged`,
-    //             text: `Timestamp: ${new Date().toISOString()}`,
-    //             color: "#8839FB",
-    //           },
-    //         ],
-    //       })
-    //       .then((response) => console.log("Updated message: ", response));
-    //   } catch (error) {
-    //     console.log("Error updating message: ", error);
-    //   }
-    // }
   }
 
   private async getSlackUserName(githubLogin: string): Promise<string> {
@@ -257,17 +227,8 @@ export class GithubEventHandler {
     try {
       return this.postMessage({
         message: {
-          text: `Pull request opened by ${await this.getSlackUserName(
-            body.sender.login,
-          )}`,
-          attachments: [
-            {
-              author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
-              text: `+${pullRequest.additions} -${pullRequest.deletions}`,
-              title: body.repository.name,
-              color: "#106D04",
-            },
-          ],
+          text: await this.getPrOpenedMessage(body),
+          attachments: [await this.getPrOpenedBaseAttachment(body)],
         },
         prId,
         threadTs: undefined,
@@ -297,6 +258,35 @@ export class GithubEventHandler {
       prId,
       threadTs,
     });
+
+    if (threadTs) {
+      try {
+        this.slackClient.chat.update({
+          channel: this.channelId,
+          ts: threadTs,
+          message: {
+            text: this.getPrOpenedMessage(body),
+            attachments: [
+              this.getPrOpenedBaseAttachment(body),
+              {
+                color: "#8839FB",
+                blocks: [
+                  {
+                    type: "section",
+                    text: {
+                      type: "mrkdwn",
+                      text: "Pull Request merged",
+                    },
+                  },
+                ],
+              },
+            ],
+          },
+        });
+      } catch (error) {
+        console.error("Got error updating thread: ", error);
+      }
+    }
   }
 
   private async postReadyForReview(
@@ -406,5 +396,98 @@ export class GithubEventHandler {
         },
       })
     )?.thread_ts;
+  }
+
+  private async getPrOpenedMessage(body: GithubEvent) {
+    `Pull request opened by ${await this.getSlackUserName(body.sender.login)}`;
+  }
+
+  private async getPrOpenedBaseAttachment(body: GithubEvent) {
+    return {
+      // color: "#106D04",
+      blocks: [
+        {
+          type: "header",
+          text: {
+            type: "plain_text",
+            text: `#${body.pull_request.number} ${body.pull_request.title}`,
+          },
+        },
+        {
+          type: "actions",
+          elements: [
+            {
+              type: "button",
+              text: {
+                type: "plain_text",
+                text: "View",
+              },
+              url: body.pull_request.html_url,
+              action_id: "button-action",
+            },
+          ],
+        },
+        {
+          type: "section",
+          fields: [
+            {
+              type: "mrkdwn",
+              text: `*Additions*\n +${body.pull_request.additions}`,
+            },
+            {
+              type: "mrkdwn",
+              text: `*Additions*\n +${body.pull_request.deletions}`,
+            },
+
+            {
+              type: "mrkdwn",
+              text: `*Target branch*\n ${body.pull_request.base.ref}`,
+            },
+            {
+              type: "mrkdwn",
+              text: `*Source Branch*\n ${body.pull_request.head.ref}`,
+            },
+          ],
+        },
+
+        ...(!!body.pull_request?.body
+          ? [
+              {
+                type: "divider",
+              },
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `${body.pull_request.body}`,
+                },
+              },
+            ]
+          : []),
+        {
+          type: "context",
+          elements: [
+            {
+              type: "image",
+              image_url: body.repository?.owner?.avatar_url,
+              alt_text: "repo owner url",
+            },
+            {
+              type: "mrkdwn",
+              text: `${body.repository.full_name}`,
+            },
+            {
+              type: "image",
+              image_url: body.pull_request.user.avatar_url,
+              alt_text: "user url",
+            },
+            {
+              type: "mrkdwn",
+              text: `${await this.getSlackUserName(body.sender.login)}`,
+            },
+          ],
+        },
+      ],
+    };
   }
 }
