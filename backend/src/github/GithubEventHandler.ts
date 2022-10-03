@@ -253,26 +253,93 @@ export class GithubEventHandler {
     pullRequest: PullRequest,
   ): Promise<ChatPostMessageResponse> {
     try {
-      const attachmentsPayload = [
-        {
-          color: "#106D04",
+      return this.postMessage({
+        message: {
+          text: `Pull request opened by ${await this.getSlackUserName(
+            body.sender.login,
+          )}`,
+          // attachments: [
+          //   {
+          //     color: "#106D04",
+          //     blocks: [
+          //       {
+          //         type: "section",
+          //         text: {
+          //           type: "mrkdwn",
+          //           text: `:white_check_mark: 0 of 1 required approvals`,
+          //         },
+          //       },
+          //     ],
+          //   },
+          // ],
           blocks: [
             {
               type: "section",
-              text: {
-                type: "mrkdwn",
-                text: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
-              },
-            },
-            {
-              type: "context",
-              elements: [
+              fields: [
                 {
                   type: "mrkdwn",
-                  text: `+${pullRequest.additions} -${pullRequest.deletions}`,
+                  text: `New Pull Request Opened:`,
                 },
               ],
             },
+            {
+              type: "header",
+              text: {
+                type: "plain_text",
+                text: `#${body.pull_request.number} ${body.pull_request.title}`,
+              },
+            },
+            {
+              type: "actions",
+              elements: [
+                {
+                  type: "button",
+                  text: {
+                    type: "plain_text",
+                    text: "View",
+                  },
+                  url: body.pull_request.html_url,
+                  action_id: "button-action",
+                },
+              ],
+            },
+            {
+              type: "section",
+              fields: [
+                {
+                  type: "mrkdwn",
+                  text: `*Additions*\n +${pullRequest.additions}`,
+                },
+                {
+                  type: "mrkdwn",
+                  text: `*Additions*\n +${pullRequest.deletions}`,
+                },
+
+                {
+                  type: "mrkdwn",
+                  text: `*Target branch*\n ${body.pull_request.base.ref}`,
+                },
+                {
+                  type: "mrkdwn",
+                  text: `*Source Branch*\n ${body.pull_request.head.ref}`,
+                },
+              ],
+            },
+
+            ...(!!body.pull_request?.body
+              ? [
+                  {
+                    type: "divider",
+                  },
+                  {
+                    type: "section",
+                    text: {
+                      type: "mrkdwn",
+                      text: `${body.pull_request.body}`,
+                    },
+                  },
+                ]
+              : []),
             {
               type: "context",
               elements: [
@@ -283,29 +350,25 @@ export class GithubEventHandler {
                 },
                 {
                   type: "mrkdwn",
-                  text: `<${body.repository.url}|${body.repository.full_name}>`,
+                  text: `${body.repository.full_name}`,
+                },
+                {
+                  type: "image",
+                  image_url: body.pull_request.user.avatar_url,
+                  alt_text: "user url",
+                },
+                {
+                  type: "mrkdwn",
+                  text: `${await this.getSlackUserName(body.sender.login)}`,
                 },
               ],
             },
-            ...(!!body.pull_request.body && [
-              {
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text: `<${body.pull_request.body}`,
-                },
-              },
-            ]),
-          ],
-        },
-      ];
 
-      return this.postMessage({
-        message: {
-          text: `Pull request opened by ${await this.getSlackUserName(
-            body.sender.login,
-          )}`,
-          attachments: attachmentsPayload,
+            // {
+            //   type: "context",
+            //   elements: [],
+            // },
+          ],
         },
         prId,
         threadTs: undefined,
