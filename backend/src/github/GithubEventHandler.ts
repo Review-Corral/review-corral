@@ -265,24 +265,21 @@ export class GithubEventHandler {
           channel: this.channelId,
           ts: threadTs,
           text: await this.getPrOpenedMessage(body),
-          message: {
-            text: await this.getPrOpenedMessage(body),
-            attachments: [
-              await this.getPrOpenedBaseAttachment(body),
-              {
-                color: "#8839FB",
-                blocks: [
-                  {
-                    type: "section",
-                    text: {
-                      type: "mrkdwn",
-                      text: "Pull Request merged",
-                    },
+          attachments: [
+            await this.getPrOpenedBaseAttachment(body),
+            {
+              color: "#8839FB",
+              blocks: [
+                {
+                  type: "section",
+                  text: {
+                    type: "mrkdwn",
+                    text: "Pull Request merged",
                   },
-                ],
-              },
-            ],
-          },
+                },
+              ],
+            },
+          ],
         });
       } catch (error) {
         console.error("Got error updating thread: ", error);
