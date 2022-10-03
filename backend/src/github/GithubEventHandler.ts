@@ -250,8 +250,16 @@ export class GithubEventHandler {
         )}`,
         attachments: [
           {
-            author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
             color: "#8839FB",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `Pull Request merged\n ${body.pull_request.merged_at}`,
+                },
+              },
+            ],
           },
         ],
       },
