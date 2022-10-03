@@ -265,9 +265,9 @@ export class GithubEventHandler {
           channel: this.channelId,
           ts: threadTs,
           message: {
-            text: this.getPrOpenedMessage(body),
+            text: await this.getPrOpenedMessage(body),
             attachments: [
-              this.getPrOpenedBaseAttachment(body),
+              await this.getPrOpenedBaseAttachment(body),
               {
                 color: "#8839FB",
                 blocks: [
