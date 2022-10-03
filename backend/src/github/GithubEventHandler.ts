@@ -264,6 +264,7 @@ export class GithubEventHandler {
         this.slackClient.chat.update({
           channel: this.channelId,
           ts: threadTs,
+          text: await this.getPrOpenedMessage(body),
           message: {
             text: await this.getPrOpenedMessage(body),
             attachments: [
@@ -398,7 +399,7 @@ export class GithubEventHandler {
     )?.thread_ts;
   }
 
-  private async getPrOpenedMessage(body: GithubEvent) {
+  private async getPrOpenedMessage(body: GithubEvent): Promise<string> {
     return `Pull request opened by ${await this.getSlackUserName(
       body.sender.login,
     )}`;
