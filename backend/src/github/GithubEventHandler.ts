@@ -399,7 +399,9 @@ export class GithubEventHandler {
   }
 
   private async getPrOpenedMessage(body: GithubEvent) {
-    `Pull request opened by ${await this.getSlackUserName(body.sender.login)}`;
+    return `Pull request opened by ${await this.getSlackUserName(
+      body.sender.login,
+    )}`;
   }
 
   private async getPrOpenedBaseAttachment(body: GithubEvent) {
