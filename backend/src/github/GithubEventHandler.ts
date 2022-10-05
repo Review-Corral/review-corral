@@ -215,8 +215,10 @@ export class GithubEventHandler {
           pr_id: prId.toString(),
         },
       })
-      .then(() => console.log("success"))
-      .catch((e) => console.log("error: ", e));
+      .then(() =>
+        console.log(`Succesfully saved thread ts: ${message.message.ts}`),
+      )
+      .catch((e) => console.log("error saving thread ts: ", e));
   }
 
   private async postPrOpened(
@@ -276,8 +278,8 @@ export class GithubEventHandler {
     });
 
     if (threadTs) {
-      try {
-        this.slackClient.chat.update({
+      this.slackClient.chat
+        .update({
           channel: this.channelId,
           ts: threadTs,
           text: await this.getPrOpenedMessage(body),
@@ -296,10 +298,16 @@ export class GithubEventHandler {
               ],
             },
           ],
-        });
-      } catch (error) {
-        console.error("Got error updating thread: ", error);
-      }
+        })
+        .then(() =>
+          console.log("Succesfully updated message with merged status"),
+        )
+        .catch((error) =>
+          console.error(
+            "Got error updating thread with merged status: ",
+            error,
+          ),
+        );
     }
   }
 

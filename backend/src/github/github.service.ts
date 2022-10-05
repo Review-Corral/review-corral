@@ -15,9 +15,6 @@ export interface TokenResponse {
 export class GithubService {
   slackClient: WebClient;
 
-  // TODO: need to get this from the prisma client
-  // channelId = "C03GBF3FCNR";
-
   constructor(private prisma: PrismaService) {
     this.slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
   }
