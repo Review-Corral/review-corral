@@ -142,27 +142,22 @@ export class GithubEventHandler {
         return;
       }
 
-      let text: string;
-
       if (body.action === "review_requested" && body.requested_reviewer) {
-        text = `Review request for ${await this.getSlackUserName(
-          body.requested_reviewer.login,
-        )}`;
+        this.postMessage({
+          message: {
+            text: `Review request for ${await this.getSlackUserName(
+              body.requested_reviewer.login,
+            )}`,
+          },
+          prId,
+          threadTs: threadTs,
+        });
       } else if (body.action === "ready_for_review") {
         this.postReadyForReview(prId, body, threadTs);
       } else {
-        text = `Pull request ${body.action} by ${await this.getSlackUserName(
-          body.sender.login,
-        )}`;
+        // Event we're not handling currently
+        console.info("Got unspuported event: ", body.action);
       }
-
-      this.postMessage({
-        message: {
-          text,
-        },
-        prId,
-        threadTs: threadTs,
-      });
     }
   }
 
