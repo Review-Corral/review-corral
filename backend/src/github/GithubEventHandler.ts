@@ -455,7 +455,7 @@ export class GithubEventHandler {
             },
             {
               type: "mrkdwn",
-              text: `*Additions*\n +${body.pull_request.deletions}`,
+              text: `*Deletions*\n -${body.pull_request.deletions}`,
             },
 
             {
