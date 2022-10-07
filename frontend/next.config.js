@@ -4,12 +4,7 @@ const nextConfig = {
   redirects: [
     {
       source: "/logout",
-      destination: "/api/auth/logout",
-      permanent: true,
-    },
-    {
-      source: "/signout",
-      destination: "/api/auth/logout",
+      destination: "/signout",
       permanent: true,
     },
   ],

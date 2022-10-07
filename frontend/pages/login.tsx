@@ -1,3 +1,4 @@
+import { CheckCircleIcon } from "@heroicons/react/outline";
 import { supabaseClient } from "@supabase/auth-helpers-nextjs";
 import { useUser } from "@supabase/auth-helpers-react";
 import { NextPage } from "next";
@@ -15,6 +16,7 @@ const Auth: NextPage = () => {
   const { isLoading, user, error } = useUser();
   const [loginError, setLoginError] = useState<string | undefined>(undefined);
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
+  const [emailSent, setEmailSent] = useState<boolean>(false);
 
   const {
     register,
@@ -23,22 +25,27 @@ const Auth: NextPage = () => {
   } = useForm<FormData>();
 
   const onSubmit = handleSubmit(async (data) => {
+    setLoginLoading(true);
+    setEmailSent(false);
+
     const result = await supabaseClient.auth.signIn({
       email: data.email,
     });
+
     if (result.error) {
       console.error(result.error);
       setLoginError(result.error.message);
+    } else {
+      setEmailSent(true);
     }
     if (result.user) {
-      console.log(result.user);
       router.push("/team");
     }
+
+    setLoginLoading(false);
   });
 
-  if (loginError) {
-    console.log("login error", loginError);
-  }
+  console.log("user is loading: ", isLoading);
 
   useEffect(() => {
     if (user) {
@@ -93,13 +100,15 @@ const Auth: NextPage = () => {
             <div>
               <WithLoadingButton
                 className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                isLoading={isLoading}
+                isLoading={loginLoading}
                 type="submit"
               >
                 Send magic link
               </WithLoadingButton>
             </div>
           </form>
+
+          {emailSent && <EmailSentSuccess />}
 
           {loginError && (
             <div className="mt-6">
@@ -117,5 +126,28 @@ const Auth: NextPage = () => {
     </div>
   );
 };
+
+export function EmailSentSuccess() {
+  return (
+    <div className="rounded-md bg-green-50 p-4 mt-6">
+      <div className="flex">
+        <div className="flex-shrink-0">
+          <CheckCircleIcon
+            className="h-5 w-5 text-green-400"
+            aria-hidden="true"
+          />
+        </div>
+        <div className="ml-3">
+          <h3 className="text-sm font-medium text-green-800">
+            Magic link sent!
+          </h3>
+          <div className="mt-2 text-sm text-green-700">
+            <p>Check your inbox for your login link</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default Auth;

@@ -7,7 +7,6 @@ import axios from "axios";
 import { PrismaService } from "src/prisma/prisma.service";
 import {
   GithubEvent,
-  PullRequest,
   PullRequestComment,
   Review,
 } from "types/githubEventTypes";
@@ -39,8 +38,7 @@ export class GithubEventHandler {
   }
 
   private async handleNewPr(prId: number, body: GithubEvent) {
-    const threadTs = (await this.postPrOpened(prId, body, body.pull_request))
-      .ts;
+    const threadTs = (await this.postPrOpened(prId, body)).ts;
 
     if (threadTs) {
       // Get all comments and post
@@ -219,7 +217,6 @@ export class GithubEventHandler {
   private async postPrOpened(
     prId: number,
     body: GithubEvent,
-    pullRequest: PullRequest,
   ): Promise<ChatPostMessageResponse> {
     try {
       return this.postMessage({
@@ -273,6 +270,9 @@ export class GithubEventHandler {
     });
 
     if (threadTs) {
+      console.info(
+        `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
+      );
       this.slackClient.chat
         .update({
           channel: this.channelId,
