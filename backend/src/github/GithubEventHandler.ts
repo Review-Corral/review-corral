@@ -243,7 +243,7 @@ export class GithubEventHandler {
     body: GithubEvent,
     threadTs: string,
   ) {
-    this.postMessage({
+    await this.postMessage({
       message: {
         text: `Pull request merged by ${await this.getSlackUserName(
           body.sender.login,

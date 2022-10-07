@@ -45,7 +45,7 @@ dependencies:
   react: 18.1.0
   react-dom: 18.1.0_react@18.1.0
   react-hook-form: 7.33.1_react@18.1.0
-  react-hot-toast: 2.3.0_2bum4g2y5s4cgzgzu5mbjuolai
+  react-hot-toast: 2.3.0_xb3noawg3grui6hzaob7jwa63y
 
 devDependencies:
   '@types/node': 17.0.41
@@ -757,6 +757,11 @@ packages:
 
   /csstype/3.1.0:
     resolution: {integrity: sha512-uX1KG+x9h5hIJsaKR9xHUeUraxf8IODOwq9JLNPq6BwB04a/xgpq3rcx47l5BZu5zBPlgD342tdke3Hom/nJRA==}
+    dev: true
+
+  /csstype/3.1.1:
+    resolution: {integrity: sha512-DJR/VvkAvSZW9bTouZue2sSxDwdTN92uHjqeKVm+0dAqdfNykRzQ95tay8aXMBAAPpUiq4Qcug2L7neoRh2Egw==}
+    dev: false
 
   /d/1.0.1:
     resolution: {integrity: sha512-m62ShEObQ39CfralilEQRjH6oAMtNCV1xJyEx5LpRYUVN+EviphDgUc/F3hnYbADmkiNs67Y+3ylmlG7Lnu+FA==}
@@ -1382,12 +1387,12 @@ packages:
       slash: 3.0.0
     dev: true
 
-  /goober/2.1.10_csstype@3.1.0:
+  /goober/2.1.10_csstype@3.1.1:
     resolution: {integrity: sha512-7PpuQMH10jaTWm33sQgBQvz45pHR8N4l3Cu3WMGEWmHShAcTuuP7I+5/DwKo39fwti5A80WAjvqgz6SSlgWmGA==}
     peerDependencies:
       csstype: ^3.0.10
     dependencies:
-      csstype: 3.1.0
+      csstype: 3.1.1
     dev: false
 
   /has-bigints/1.0.2:
@@ -2031,14 +2036,14 @@ packages:
       react: 18.1.0
     dev: false
 
-  /react-hot-toast/2.3.0_2bum4g2y5s4cgzgzu5mbjuolai:
+  /react-hot-toast/2.3.0_xb3noawg3grui6hzaob7jwa63y:
     resolution: {integrity: sha512-/RxV+bfjld7tSJR1SCLzMAXgFuNW7fCpK6+vbYqfmbGSWcqTMz2rizrvfWKvtcPH5HK0NqxmBaC5SrAy1F42zA==}
     engines: {node: '>=10'}
     peerDependencies:
       react: '>=16'
       react-dom: '>=16'
     dependencies:
-      goober: 2.1.10_csstype@3.1.0
+      goober: 2.1.10_csstype@3.1.1
       react: 18.1.0
       react-dom: 18.1.0_react@18.1.0
     transitivePeerDependencies:

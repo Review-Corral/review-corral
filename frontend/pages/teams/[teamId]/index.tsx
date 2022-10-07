@@ -1,6 +1,5 @@
 import { User, withPageAuth } from "@supabase/auth-helpers-nextjs";
 import { NextPage } from "next";
-import { useRouter } from "next/router";
 import GithubButton from "../../../components/GithubButton";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import SlackButton from "../../../components/SlackButton";
@@ -27,10 +26,8 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout teamName={team.name ?? undefined}>
       <div className="space-y-6 flex flex-col">
-        <h1>{team.name}</h1>
-        <span>{user.id}</span>
         <GithubButton state={team.id} />
         <SlackButton teamId={team.id} />
 
