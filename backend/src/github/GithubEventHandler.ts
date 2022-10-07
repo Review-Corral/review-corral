@@ -275,36 +275,38 @@ export class GithubEventHandler {
       console.info(
         `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
       );
-      this.slackClient.chat
-        .update({
-          channel: this.channelId,
-          ts: threadTs,
-          text: await this.getPrOpenedMessage(body),
-          attachments: [
-            await this.getPrOpenedBaseAttachment(body),
-            {
-              color: "#8839FB",
-              blocks: [
-                {
-                  type: "section",
-                  text: {
-                    type: "mrkdwn",
-                    text: "Pull Request merged",
-                  },
+      const payload = {
+        channel: this.channelId,
+        ts: threadTs,
+        text: await this.getPrOpenedMessage(body),
+        attachments: [
+          await this.getPrOpenedBaseAttachment(body),
+          {
+            color: "#8839FB",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: "Pull Request merged",
                 },
-              ],
-            },
-          ],
-        })
+              },
+            ],
+          },
+        ],
+      };
+      this.slackClient.chat
+        .update(payload)
         .then(() =>
           console.log("Succesfully updated message with merged status"),
         )
-        .catch((error) =>
+        .catch((error) => {
           console.error(
             "Got error updating thread with merged status: ",
             error,
           ),
-        );
+            console.error("Error payload: ", JSON.stringify(payload, null, 2));
+        });
     }
   }
 
