@@ -177,7 +177,9 @@ export class GithubEventHandler {
     };
     try {
       return this.slackClient.chat.postMessage(payload).then((response) => {
-        this.saveThreadTs(response, prId);
+        if (!threadTs) {
+          this.saveThreadTs(response, prId);
+        }
         return response;
       });
     } catch (error) {
