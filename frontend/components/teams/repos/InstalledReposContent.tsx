@@ -1,4 +1,5 @@
 import { FC } from "react";
+import toast from "react-hot-toast";
 import { ErrorAlert } from "../../common/alerts/Error";
 import { Toggle } from "../../common/Toggle";
 import { useDeleteSyncedRepo } from "./useDeleteSyncedRepo";
@@ -47,19 +48,23 @@ export const InstalledReposContent: FC<InstalledReposContentProps> = ({
             );
             return (
               <div key={repo.id} className="grid grid-cols-2">
-                <div>{repo.name}</div>
+                <div>{repo.full_name}</div>
                 <Toggle
                   isEnabled={!!syncedRepo}
                   onToggle={(isEnabled) => {
                     if (isEnabled) {
-                      syncRepo.mutate({
-                        teamId,
-                        repositoryName: repo.name,
-                        repositoryId: repo.id,
-                        installationId: installation.installationId,
-                      });
+                      syncRepo
+                        .mutateAsync({
+                          teamId,
+                          repositoryName: repo.name,
+                          repositoryId: repo.id,
+                          installationId: installation.installationId,
+                        })
+                        .catch(() => toast.error("Error turning on repo"));
                     } else {
-                      deleteSyncedRepo.mutate({ repoId: repo.id.toString() });
+                      deleteSyncedRepo
+                        .mutateAsync({ repoId: repo.id.toString() })
+                        .catch(() => toast.error("Error turning off repo"));
                     }
                   }}
                 />
