@@ -21,7 +21,7 @@ const Home: NextPage = () => {
   }
 
   return (
-    <DashboardLayout>
+    <DashboardLayout title="Onboarding">
       <div className="space-y-6">
         <h1>Welcome to Review Corral!</h1>
         {!teams.data || teams.data.length < 1 ? (
