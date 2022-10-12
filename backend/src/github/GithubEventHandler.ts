@@ -175,6 +175,7 @@ export class GithubEventHandler {
       token: this.slackToken,
       mrkdwn: true,
     };
+    console.debug("Posting message: ", payload);
     try {
       return this.slackClient.chat.postMessage(payload).then((response) => {
         if (!threadTs) {
