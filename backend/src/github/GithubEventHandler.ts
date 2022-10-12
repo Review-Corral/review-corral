@@ -181,6 +181,10 @@ export class GithubEventHandler {
         if (!threadTs) {
           this.saveThreadTs(response, prId);
         }
+        console.debug(
+          "Posted message response payload: ",
+          JSON.stringify(response, null, 2),
+        );
         return response;
       });
     } catch (error) {
