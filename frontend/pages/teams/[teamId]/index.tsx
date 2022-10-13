@@ -4,6 +4,7 @@ import GithubButton from "../../../components/GithubButton";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import SlackButton from "../../../components/SlackButton";
 import { InstalledRepos } from "../../../components/teams/repos/InstalledRepos";
+import { SlackIntegrations } from "../../../components/teams/slack/SlackIntegrations";
 import { useTeams } from "../../../components/teams/useTeams";
 import { flattenParam } from "../../../components/utils/flattenParam";
 
@@ -30,7 +31,7 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
       <div className="space-y-6 flex flex-col">
         <GithubButton state={team.id} />
         <SlackButton teamId={team.id} />
-
+        <SlackIntegrations teamId={team.id} />
         <InstalledRepos teamId={teamId} />
       </div>
     </DashboardLayout>

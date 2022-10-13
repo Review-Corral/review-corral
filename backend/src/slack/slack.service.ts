@@ -13,6 +13,12 @@ export interface SlackAuthQueryParams {
 export class SlackService {
   constructor(private prisma: PrismaService) {}
 
+  async getIntegrations(teamId: string) {
+    return await this.prisma.slack_integration.findMany({
+      where: { team: teamId },
+    });
+  }
+
   async subscribeTeam(queryParams: SlackAuthQueryParams) {
     if (!queryParams.state) {
       throw new BadRequestException(
