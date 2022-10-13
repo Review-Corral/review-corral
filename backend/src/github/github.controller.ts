@@ -12,7 +12,11 @@ import {
 import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { GithubEvent } from "types/githubEventTypes";
 import { GithubService } from "./github.service";
-import { CreateTeamRepoBody, GithubAppService } from "./githubApp.service";
+import {
+  CreateTeamRepoBody,
+  GithubAppService,
+  InstalledRepositoryWithInstallationId,
+} from "./githubApp.service";
 import { getJwt } from "./utils";
 
 export interface GithubAuthQueryParams {
@@ -50,7 +54,9 @@ export class GithubController {
   // For getting repos that the Github App is installed on
   @UseGuards(LocalAuthGuard)
   @Get("/installed-repositories")
-  async getRepositories(@Query("teamId") teamId: string) {
+  async getRepositories(
+    @Query("teamId") teamId: string,
+  ): Promise<InstalledRepositoryWithInstallationId[]> {
     // TODO: verify that the teamId is valid for the user
     return await this.githubAppService.getTeamInstaledRepos(teamId);
   }
