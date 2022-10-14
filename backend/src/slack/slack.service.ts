@@ -15,7 +15,7 @@ export class SlackService {
 
   async getIntegrations(teamId: string) {
     return await this.prisma.slack_integration.findMany({
-      where: { team: teamId },
+      where: { team_id: teamId },
     });
   }
 
@@ -58,7 +58,8 @@ export class SlackService {
                   access_token: data.access_token,
                   channel_id: data.incoming_webhook.channel_id,
                   channel_name: data.incoming_webhook.channel,
-                  team: queryParams.state,
+                  team_id: queryParams.state,
+                  slack_team: data.team.name,
                 },
               })
               .catch((e) =>

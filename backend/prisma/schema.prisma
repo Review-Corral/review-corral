@@ -28,9 +28,10 @@ model slack_integration {
   created_at   DateTime? @default(now()) @db.Timestamptz(6)
   access_token String?
   channel_id   String?
-  team         String?   @db.Uuid
+  team_id      String?   @db.Uuid
   channel_name String
   updated_at   DateTime? @db.Timestamptz(6)
+  slack_team   String?
 }
 
 model team {
@@ -55,6 +56,7 @@ model github_integration {
 model users {
   id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  email           String?
   users_and_teams users_and_teams[]
 }
 

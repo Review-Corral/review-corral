@@ -4,7 +4,7 @@
 -- Please report an issue for any failure with the reproduction steps.
 
 ALTER TABLE IF EXISTS public.slack_integration 
-    RENAME COLUMN public.slack_integration.team to public.slack_integration.team_id;
+    RENAME COLUMN team to team_id;
 
 ALTER TABLE IF EXISTS public.slack_integration
     ADD COLUMN slack_team text COLLATE pg_catalog."default";

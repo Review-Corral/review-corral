@@ -12,5 +12,9 @@ export const SlackIntegrations: FC<SlackIntegrationsProps> = ({ teamId }) => {
     return <div>Loading...</div>;
   }
 
-  return <div>{slackIntegrations.data![0].channel_name}</div>;
+  if (!slackIntegrations.data || slackIntegrations.data.length < 1) {
+    return <div>No data... </div>;
+  }
+
+  return <div>{slackIntegrations.data[0].channel_name}</div>;
 };

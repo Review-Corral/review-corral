@@ -20,6 +20,8 @@ const Home: NextPage = () => {
     return <div>Loading Teams...</div>;
   }
 
+  // return <div>Hello</div>;
+
   return (
     <DashboardLayout title="Onboarding">
       <div className="space-y-6">

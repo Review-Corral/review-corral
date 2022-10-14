@@ -52,7 +52,7 @@ export class GithubService {
     if (githubRepository) {
       const slackIntegration = await this.prisma.slack_integration.findFirst({
         where: {
-          team: githubRepository.team_id,
+          team_id: githubRepository.team_id,
         },
       });
 

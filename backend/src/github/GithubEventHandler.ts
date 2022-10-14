@@ -283,6 +283,7 @@ export class GithubEventHandler {
       const payload = {
         channel: this.channelId,
         ts: threadTs,
+        token: this.slackToken,
         text: await this.getPrOpenedMessage(body),
         attachments: [
           await this.getPrOpenedBaseAttachment(body),
