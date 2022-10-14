@@ -58,10 +58,9 @@ export default TeamPage;
 export const getServerSideProps = withPageAuth({
   redirectTo: "/login",
   async getServerSideProps({ params }) {
-    // Run queries with RLS on the server
     const teamId = flattenParam(params?.teamId);
 
-    console.log("Got teamID", teamId);
+    console.log("Got teamId", teamId);
 
     return {
       props: {
