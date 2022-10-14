@@ -7,5 +7,10 @@ interface SlackIntegrationsProps {
 
 export const SlackIntegrations: FC<SlackIntegrationsProps> = ({ teamId }) => {
   const slackIntegrations = useSlackIntegrations(teamId);
-  return <div></div>;
+
+  if (slackIntegrations.isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return <div>{slackIntegrations.data![0].channel_name}</div>;
 };

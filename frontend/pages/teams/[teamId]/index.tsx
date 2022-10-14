@@ -4,6 +4,7 @@ import { Github } from "../../../components/assets/icons/Github";
 import { Slack } from "../../../components/assets/icons/Slack";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { InstalledRepos } from "../../../components/teams/repos/InstalledRepos";
+import { SlackIntegrations } from "../../../components/teams/slack/SlackIntegrations";
 import { useTeams } from "../../../components/teams/useTeams";
 import { flattenParam } from "../../../components/utils/flattenParam";
 
@@ -45,7 +46,9 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
               <Slack className="h-8 w-8 fill-black" />
               <span className="font-semibold text-lg">Slack Integration</span>
             </div>
-            <div className="px-4 py-6">Slack integration...</div>
+            <div className="px-4 py-6">
+              <SlackIntegrations teamId={teamId} />
+            </div>
           </div>
         </div>
       </div>
