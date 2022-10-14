@@ -31,7 +31,7 @@ export class SlackService {
         where: { id: queryParams.state },
         rejectOnNotFound: true,
       })
-      .catch((e) => {
+      .catch(() => {
         throw new BadRequestException("Invalid team id provided");
       })
       .then(() => {
