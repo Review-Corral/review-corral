@@ -59,7 +59,8 @@ export class SlackService {
                   channel_id: data.incoming_webhook.channel_id,
                   channel_name: data.incoming_webhook.channel,
                   team_id: queryParams.state,
-                  slack_team: data.team.name,
+                  slack_team_name: data.team.name,
+                  slack_team_id: data.team.id,
                 },
               })
               .catch((e) =>
