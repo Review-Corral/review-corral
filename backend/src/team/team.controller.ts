@@ -1,9 +1,11 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
   Post,
-  Query,
+  Put,
   Request,
   UseGuards,
 } from "@nestjs/common";
@@ -27,11 +29,38 @@ export class TeamController {
     return this.teamService.createTeam({ user: req.user, name: body.name });
   }
 
-  @Get("/username-mappings")
+  @Get("/username-mappings/:teamId")
   @UseGuards(LocalAuthGuard)
   getUsernameMappings(
-    @Query("teamId") teamId: string,
+    @Param("teamId") teamId: string,
   ): Promise<username_mappings[]> {
     return this.teamService.getUsernameMappings(teamId);
+  }
+
+  @Post("/username-mappings")
+  @UseGuards(LocalAuthGuard)
+  postUsernameMapping(
+    @Request() req,
+    @Body() body: username_mappings,
+  ): Promise<username_mappings> {
+    return this.teamService.createUsernameMapping(req.user, body);
+  }
+
+  @Put("/username-mappings")
+  @UseGuards(LocalAuthGuard)
+  putUsernameMapping(
+    @Request() req,
+    @Body() body: username_mappings,
+  ): Promise<username_mappings> {
+    return this.teamService.updateUsernameMapping(req.user, body);
+  }
+
+  @Delete("/username-mappings")
+  @UseGuards(LocalAuthGuard)
+  deleteUsernameMapping(
+    @Request() req,
+    @Body() body: username_mappings,
+  ): Promise<username_mappings> {
+    return this.teamService.deleteUsernameMapping(req.user, body);
   }
 }
