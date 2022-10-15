@@ -6,9 +6,9 @@ import {
   Post,
   Query,
   Redirect,
-  Res,
   UseGuards,
 } from "@nestjs/common";
+import { github_integration } from "@prisma/client";
 import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { GithubEvent } from "types/githubEventTypes";
 import { GithubService } from "./github.service";
@@ -31,9 +31,15 @@ export class GithubController {
     private readonly githubAppService: GithubAppService,
   ) {}
 
+  @Get("/integration")
+  @UseGuards(LocalAuthGuard)
+  getIntegration(@Query("teamId") teamId: string): Promise<github_integration> {
+    return this.githubAppService.getIntegration(teamId);
+  }
+
   @Get("/auth")
   @Redirect("https://docs.nestjs.com", 301)
-  async handleGithubAuth(@Query() query: GithubAuthQueryParams, @Res() res) {
+  async handleGithubAuth(@Query() query: GithubAuthQueryParams) {
     console.log("Hit auth endpoint");
     await this.githubAppService.getUserAccessToken(query.code, query.state);
 

@@ -1,5 +1,5 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
-import { github_repositories } from "@prisma/client";
+import { github_integration, github_repositories } from "@prisma/client";
 import axios from "axios";
 
 import { PrismaService } from "src/prisma/prisma.service";
@@ -22,6 +22,14 @@ export interface InstalledRepositoryWithInstallationId
 @Injectable()
 export class GithubAppService {
   constructor(private prisma: PrismaService) {}
+
+  async getIntegration(teamId: string): Promise<github_integration> {
+    return await this.prisma.github_integration.findUnique({
+      where: {
+        team_id: teamId,
+      },
+    });
+  }
 
   async getTeamSyncedRepos(teamId: string): Promise<github_repositories[]> {
     return this.prisma.github_repositories.findMany({
