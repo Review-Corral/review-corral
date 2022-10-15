@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { team } from "@prisma/client";
+import { team, username_mappings } from "@prisma/client";
 import { User } from "@supabase/supabase-js";
 import { PrismaService } from "../prisma/prisma.service";
 
@@ -47,5 +47,11 @@ export class TeamService {
     });
 
     return team;
+  }
+
+  async getUsernameMappings(teamId: string): Promise<username_mappings[]> {
+    return this.prisma.username_mappings.findMany({
+      where: { team_id: teamId },
+    });
   }
 }

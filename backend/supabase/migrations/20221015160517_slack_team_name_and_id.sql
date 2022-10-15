@@ -15,4 +15,5 @@ ALTER TABLE IF EXISTS public.username_mappings
 COMMENT ON COLUMN public.slack_integration.slack_team_id
     IS 'The Slack team id';
 
-
+ALTER TABLE IF EXISTS public.username_mappings 
+    RENAME COLUMN team to team_id;
