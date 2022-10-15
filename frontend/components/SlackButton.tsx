@@ -17,7 +17,7 @@ const SlackButton: React.FC<SlackButtonProps> = ({ teamId }) => {
     <div>
       <Button
         onClick={() =>
-          router.push(
+          window.open(
             `https://slack.com/oauth/v2/authorize?scope=channels%3Ahistory%2Cchat%3Awrite%2Ccommands%2Cgroups%3Ahistory%2Cincoming-webhook%2Cusers%3Aread&user_scope=&redirect_uri=${redirectURI}&state=${teamId}&client_id=3571046828385.3558423656162`,
           )
         }

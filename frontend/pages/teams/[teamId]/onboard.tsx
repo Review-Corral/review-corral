@@ -1,7 +1,9 @@
+import { CheckCircleIcon } from "@heroicons/react/outline";
 import { User, withPageAuth } from "@supabase/auth-helpers-nextjs";
 import { NextPage } from "next";
 import { Github } from "../../../components/assets/icons/Github";
 import { Slack } from "../../../components/assets/icons/Slack";
+import Button from "../../../components/buttons/Button";
 import GithubButton from "../../../components/GithubButton";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import SlackButton from "../../../components/SlackButton";
@@ -33,6 +35,14 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
     throw Error("Couldn't find team");
   }
 
+  const connectedToGithub = githubIntegration.data && githubIntegration.data.id;
+  const connectedToSlack =
+    slackIntegration.data &&
+    slackIntegration.data.length > 0 &&
+    slackIntegration.data[0].id;
+
+  console.log(githubIntegration.data);
+
   return (
     <DashboardLayout title="Onboard" teamName={team.name ?? undefined}>
       <h4>let's get your integrations setup</h4>
@@ -45,7 +55,16 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
                 Connect Review Corral with Github
               </span>
             </div>
-            <GithubButton state={teamId} />
+            {connectedToGithub ? (
+              <Button color="green">
+                <div className="flex gap-2 items-center">
+                  <CheckCircleIcon className="h-5" />
+                  Connected to Github
+                </div>
+              </Button>
+            ) : (
+              <GithubButton state={teamId} />
+            )}
           </div>
         </div>
         <div className="grow basis-6/12 flex flex-col space-y-6 min-w-[20rem]">
@@ -56,10 +75,20 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
                 Connect Review Corral with Slack
               </span>
             </div>
-            <SlackButton teamId={teamId} />
+            {connectedToSlack ? (
+              <Button color="green">
+                <div className="flex gap-2 items-center">
+                  <CheckCircleIcon className="h-5" />
+                  Connected to Slack
+                </div>
+              </Button>
+            ) : (
+              <SlackButton teamId={teamId} />
+            )}
           </div>
         </div>
       </div>
+      {connectedToGithub && connectedToSlack && <div>You're all setup!</div>}
     </DashboardLayout>
   );
 };
