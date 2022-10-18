@@ -262,7 +262,7 @@ export class GithubAppService {
   ): Promise<OrgMember[]> {
     return (
       await axios.get<OrgMember[]>(
-        `https://api.github.com/orgs/${orgName}/members`,
+        `https://api.github.com/orgs/${orgName}/members?per_page=100`,
         {
           headers: {
             Authorization: `bearer ${installationAccessToken}`,

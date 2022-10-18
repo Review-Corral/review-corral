@@ -18,6 +18,7 @@ import {
   GithubAppService,
   InstalledRepositoryWithInstallationId,
 } from "./githubApp.service";
+import { OrgMember } from "./types";
 import { getJwt } from "./utils";
 
 export interface GithubAuthQueryParams {
@@ -95,7 +96,7 @@ export class GithubController {
 
   @Get("/members")
   @UseGuards(LocalAuthGuard)
-  async getMemebers(@Request() req) {
+  async getMemebers(@Request() req): Promise<OrgMember[]> {
     return await this.githubAppService.getMembers(req.user);
   }
 }

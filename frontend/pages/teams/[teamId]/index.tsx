@@ -5,6 +5,7 @@ import { Slack } from "../../../components/assets/icons/Slack";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { InstalledRepos } from "../../../components/teams/repos/InstalledRepos";
 import { SlackIntegrations } from "../../../components/teams/slack/SlackIntegrations";
+import { UsernameMappings } from "../../../components/teams/slack/username-mappings/UsernameMappings";
 import { useTeams } from "../../../components/teams/useTeams";
 import { flattenParam } from "../../../components/utils/flattenParam";
 
@@ -28,7 +29,7 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
 
   return (
     <DashboardLayout title="Dashboard" teamName={team.name ?? undefined}>
-      <div className="flex flex-col sm:flex-row gap-8 sm:gap-x-64 mt-6">
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-x-64 mt-6">
         <div className="flex grow basis-6/12 flex-col space-y-6">
           <div className="rounded-md border border-gray-200">
             <div className="flex p-4 bg-gray-100 rounded-t-md justify-between">
@@ -51,6 +52,9 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
             </div>
           </div>
         </div>
+      </div>
+      <div className="mt-6">
+        <UsernameMappings teamId={teamId} />
       </div>
     </DashboardLayout>
   );

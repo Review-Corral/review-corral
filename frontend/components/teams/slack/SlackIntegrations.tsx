@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { useGetUsernameMappings } from "./username-mappings/useGetUsernameMappings";
 import { useSlackIntegrations } from "./useSlackIntegrations";
 
 interface SlackIntegrationsProps {
@@ -7,6 +8,7 @@ interface SlackIntegrationsProps {
 
 export const SlackIntegrations: FC<SlackIntegrationsProps> = ({ teamId }) => {
   const slackIntegrations = useSlackIntegrations(teamId);
+  const usernameMapping = useGetUsernameMappings(teamId);
 
   if (slackIntegrations.isLoading) {
     return <div>Loading...</div>;
