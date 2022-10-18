@@ -146,17 +146,17 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
           </div>
         </div>
       </td>
-      <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+      <td className="px-3 py-4 text-sm text-gray-500">
         {!isEditable ? (
           <>{member.mapping?.slack_user_id}</>
         ) : (
-          <div className="relative mt-1 rounded-md shadow-sm">
+          <div className="">
             <input
               type="text"
               className={cntl`
                 block 
                 w-full 
-                max-w-[11rem] 
+                max-w-[13rem] 
                 py-2 
                 rounded-md border
                 focus:outline-none
@@ -181,9 +181,9 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
               {...register("slackId", { required: true })}
             />
             {errors.slackId && (
-              <span className="text-sm text-red-500 pl-1">
+              <div className=" inline-block text-[0.75rem] text-red-500 pl-1 mt-2">
                 {errors.slackId.message}
-              </span>
+              </div>
             )}
           </div>
         )}
