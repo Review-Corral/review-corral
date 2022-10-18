@@ -1,10 +1,12 @@
 import { BadRequestException, HttpException, Injectable } from "@nestjs/common";
 import { github_integration, github_repositories } from "@prisma/client";
+import { User } from "@supabase/supabase-js";
 import axios, { AxiosError } from "axios";
 
 import { PrismaService } from "src/prisma/prisma.service";
+import { TeamService } from "src/team/team.service";
 import { InstalledRepository } from "types/githubAppTypes";
-import { Installations } from "./types";
+import { Installations, OrgMember } from "./types";
 import { getInstallationAccessToken } from "./utils";
 
 export interface CreateTeamRepoBody {
@@ -21,7 +23,10 @@ export interface InstalledRepositoryWithInstallationId
 
 @Injectable()
 export class GithubAppService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private teamService: TeamService,
+  ) {}
 
   async getIntegration(teamId: string): Promise<github_integration> {
     return await this.prisma.github_integration.findUnique({
@@ -150,9 +155,7 @@ export class GithubAppService {
           if (installations.data.total_count > 0) {
             const r = installations.data.installations.map(
               async (installation) => {
-                return await getInstallationAccessToken(
-                  installation.id.toString(),
-                )
+                return await getInstallationAccessToken(installation.id)
                   .then(async (accessResponse) => {
                     console.log("Got installation access token");
                     return {
@@ -210,5 +213,62 @@ export class GithubAppService {
         console.log("Got error getting repository info: ", error);
         throw error;
       });
+  }
+
+  async getMembers(user: User): Promise<OrgMember[]> {
+    const teams = await this.teamService.getTeams(user);
+
+    const members = [];
+
+    // Iterate all repos for all installations for all teams to get
+    // unique organization names
+    for (const team of teams) {
+      const installations = await this.getTeamInstaledRepos(team.id);
+      if (installations.length > 0) {
+        for (const installation of installations) {
+          if (installation.repositories.length > 0) {
+            const organizationNames = [];
+
+            for (const repository of installation.repositories) {
+              const orgName = repository.full_name.split("/")[0];
+              if (!organizationNames.includes(orgName)) {
+                organizationNames.push(orgName);
+              }
+            }
+
+            const accessToken = await getInstallationAccessToken(
+              installation.installationId,
+            );
+
+            for (const organizationName of organizationNames) {
+              const orgMembers = await this.getOrganizationMembers(
+                organizationName,
+                accessToken.token,
+              );
+
+              members.push(...orgMembers);
+            }
+          }
+        }
+      }
+    }
+
+    return members;
+  }
+
+  private async getOrganizationMembers(
+    orgName: string,
+    installationAccessToken: string,
+  ): Promise<OrgMember[]> {
+    return (
+      await axios.get<OrgMember[]>(
+        `https://api.github.com/orgs/${orgName}/members`,
+        {
+          headers: {
+            Authorization: `bearer ${installationAccessToken}`,
+          },
+        },
+      )
+    ).data;
   }
 }

@@ -43,9 +43,7 @@ export class GithubEventHandler {
     if (threadTs) {
       // Get all comments and post
       console.info("Installation ID: ", this.installationId);
-      const accessToken = await getInstallationAccessToken(
-        this.installationId.toString(),
-      );
+      const accessToken = await getInstallationAccessToken(this.installationId);
       axios
         .get<PullRequestComment[]>(body.pull_request.comments_url, {
           headers: {

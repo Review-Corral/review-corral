@@ -6,6 +6,7 @@ import {
   Post,
   Query,
   Redirect,
+  Request,
   UseGuards,
 } from "@nestjs/common";
 import { github_integration } from "@prisma/client";
@@ -90,5 +91,11 @@ export class GithubController {
   @Get("/jwt")
   async getJwt() {
     return (await getJwt()).compact();
+  }
+
+  @Get("/members")
+  @UseGuards(LocalAuthGuard)
+  async getMemebers(@Request() req) {
+    return await this.githubAppService.getMembers(req.user);
   }
 }
