@@ -7,7 +7,11 @@ export interface ButtonProps
   variant?: "solid" | "outline";
 }
 
-export const Button: FC<ButtonProps> = ({ color, variant, ...props }) => {
+export const Button: FC<ButtonProps> = ({
+  color = "green",
+  variant = "solid",
+  ...props
+}) => {
   const baseCn = cntl`
     inline-flex
     items-center
