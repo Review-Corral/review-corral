@@ -28,7 +28,7 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
 
   return (
     <DashboardLayout title="Dashboard" teamName={team.name ?? undefined}>
-      <div className="flex gap-x-64 mt-6">
+      <div className="flex flex-col sm:flex-row gap-8 sm:gap-x-64 mt-6">
         <div className="flex grow basis-6/12 flex-col space-y-6">
           <div className="rounded-md border border-gray-200">
             <div className="flex p-4 bg-gray-100 rounded-t-md justify-between">

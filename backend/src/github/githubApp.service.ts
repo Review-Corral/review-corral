@@ -1,6 +1,6 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, HttpException, Injectable } from "@nestjs/common";
 import { github_integration, github_repositories } from "@prisma/client";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 
 import { PrismaService } from "src/prisma/prisma.service";
 import { InstalledRepository } from "types/githubAppTypes";
@@ -178,8 +178,16 @@ export class GithubAppService {
         },
       )
       .catch((error) => {
+        // TODO: add Sentry here
         console.log("Got error getting user installations: ", error);
-        throw new BadRequestException(error);
+        if (error.isAxiosError) {
+          const axiosError = error as AxiosError;
+          throw new HttpException(
+            axiosError.response.data,
+            axiosError.response.status,
+          );
+        }
+        throw error;
       });
   }
 
