@@ -13,6 +13,12 @@ export interface SlackAuthQueryParams {
 export class SlackService {
   constructor(private prisma: PrismaService) {}
 
+  async getIntegrations(teamId: string) {
+    return await this.prisma.slack_integration.findMany({
+      where: { team_id: teamId },
+    });
+  }
+
   async subscribeTeam(queryParams: SlackAuthQueryParams) {
     if (!queryParams.state) {
       throw new BadRequestException(
@@ -25,7 +31,7 @@ export class SlackService {
         where: { id: queryParams.state },
         rejectOnNotFound: true,
       })
-      .catch((e) => {
+      .catch(() => {
         throw new BadRequestException("Invalid team id provided");
       })
       .then(() => {
@@ -52,7 +58,9 @@ export class SlackService {
                   access_token: data.access_token,
                   channel_id: data.incoming_webhook.channel_id,
                   channel_name: data.incoming_webhook.channel,
-                  team: queryParams.state,
+                  team_id: queryParams.state,
+                  slack_team_name: data.team.name,
+                  slack_team_id: data.team.id,
                 },
               })
               .catch((e) =>

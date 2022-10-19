@@ -23,7 +23,7 @@ export async function getJwt(): Promise<nJwt.Jwt> {
 }
 
 export async function getInstallationAccessToken(
-  installationId: string,
+  installationId: number,
   jwt?: nJwt.Jwt,
 ): Promise<InstallationAccessResponse> {
   const jwtToken = jwt || (await getJwt());

@@ -25,3 +25,12 @@ where you will get the information about the installed apps.
 ## Dockerizing
 Got the docker image working, but live updating isnt' working. Need to get the saved files
 to map over to the container somehow. 
+
+## Getting a dump file
+
+Steps here: https://supabase.com/docs/guides/database/migrating-between-projects#migrate-the-database
+### OLD:
+Using `pg_dump` will result in a `pg_dump: error: server version: 14.5 (Debian 14.5-1.pgdg110+1); pg_dump version: 13.8`
+
+Use:
+`/usr/local/Cellar/postgresql@14/14.5/bin/pg_dump postgresql://postgres:postgres@localhost:54322/postgres  > data.sql`

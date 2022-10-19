@@ -2,6 +2,7 @@ import { FC } from "react";
 import toast from "react-hot-toast";
 import { ErrorAlert } from "../../common/alerts/Error";
 import { Toggle } from "../../common/Toggle";
+import { getGithubAuthorizationUrl } from "../../GithubButton";
 import { useDeleteSyncedRepo } from "./useDeleteSyncedRepo";
 import { useGetInstalledRepos } from "./useGetInstalledRepos";
 import { useGetSyncedRepos } from "./useGetSyncedRepos";
@@ -24,7 +25,24 @@ export const InstalledReposContent: FC<InstalledReposContentProps> = ({
   }
 
   if (getInstalledRepos.error) {
-    return <ErrorAlert message={"Error getting installed repositories"} />;
+    return (
+      <ErrorAlert
+        message={"Error getting installed repositories"}
+        subMessage={
+          getInstalledRepos.error.response?.status === 401 && (
+            <>
+              Try{" "}
+              <a
+                className="underline cursor-pointer"
+                href={getGithubAuthorizationUrl(teamId).toString()}
+              >
+                re-authenticating
+              </a>
+            </>
+          )
+        }
+      />
+    );
   }
 
   if (!getInstalledRepos.data || getInstalledRepos.data.length === 0) {

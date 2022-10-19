@@ -18,19 +18,21 @@ model username_mappings {
   id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   created_at      DateTime? @default(now()) @db.Timestamptz(6)
   github_username String    @unique
-  slack_username  String    @unique
-  team            String?   @db.Uuid
+  slack_user_id   String    @unique(map: "username_mappings_slack_username_key")
+  team_id         String?   @db.Uuid
   updated_at      DateTime? @db.Timestamptz(6)
 }
 
 model slack_integration {
-  id           String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
-  created_at   DateTime? @default(now()) @db.Timestamptz(6)
-  access_token String?
-  channel_id   String?
-  team         String?   @db.Uuid
-  channel_name String
-  updated_at   DateTime? @db.Timestamptz(6)
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  created_at      DateTime? @default(now()) @db.Timestamptz(6)
+  access_token    String?
+  channel_id      String?
+  team_id         String?   @db.Uuid
+  channel_name    String
+  updated_at      DateTime? @db.Timestamptz(6)
+  slack_team_name String?
+  slack_team_id   String?
 }
 
 model team {
@@ -55,6 +57,7 @@ model github_integration {
 model users {
   id              String            @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   created_at      DateTime?         @default(now()) @db.Timestamptz(6)
+  email           String?
   users_and_teams users_and_teams[]
 }
 

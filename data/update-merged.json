@@ -1,0 +1,88 @@
+{
+  "channel": "C0408FT08CS",
+  "ts": "1665186079.077469",
+  "text": "Pull request opened by <@U03E7E7UESH>",
+  "attachments": [
+    {
+      "blocks": [
+        {
+          "type": "header",
+          "text": {
+            "type": "plain_text",
+            "text": "#399 move tasks to top and small screen office hours card to bottom"
+          }
+        },
+        {
+          "type": "actions",
+          "elements": [
+            {
+              "type": "button",
+              "text": {
+                "type": "plain_text",
+                "text": "View"
+              },
+              "url": "https://github.com/FarmRaise/farmer-app/pull/399",
+              "action_id": "button-action"
+            }
+          ]
+        },
+        {
+          "type": "section",
+          "fields": [
+            {
+              "type": "mrkdwn",
+              "text": "*Additions*\n +5"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Deletions*\n -5"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Target branch*\n main"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "*Source Branch*\n far-787-move-in-progress-tasks-up-on-the-page"
+            }
+          ]
+        },
+        {
+          "type": "context",
+          "elements": [
+            {
+              "type": "image",
+              "image_url": "https://avatars.githubusercontent.com/u/69972175?v=4",
+              "alt_text": "repo owner url"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "FarmRaise/farmer-app"
+            },
+            {
+              "type": "image",
+              "image_url": "https://avatars.githubusercontent.com/u/98073123?v=4",
+              "alt_text": "user url"
+            },
+            {
+              "type": "mrkdwn",
+              "text": "<@U03E7E7UESH>"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "color": "#8839FB",
+      "blocks": [
+        {
+          "type": "section",
+          "text": {
+            "type": "mrkdwn",
+            "text": "Pull Request merged"
+          }
+        }
+      ]
+    }
+  ]
+}
