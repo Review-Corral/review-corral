@@ -51,7 +51,6 @@ export class SlackService {
             redirect_uri: process.env.SLACK_REDIRECT_URL,
           })
           .then(({ data }) => {
-            console.log("Data back from slack oauthv2: ", data);
             this.prisma.slack_integration
               .create({
                 data: {

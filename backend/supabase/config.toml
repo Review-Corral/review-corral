@@ -33,12 +33,16 @@ port = 54324
 smtp_port = 54325
 pop3_port = 54326
 
+[storage]
+# The maximum file size allowed (e.g. "5MB", "500KB").
+file_size_limit = "50MiB"
+
 [auth]
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
 site_url = "http://localhost:3000"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://localhost:3000"]
+additional_redirect_urls = ["https://localhost:3000", "http://localhost:54321/auth/v1/callback", "https://reviewcorralauth.ngrok.io"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 seconds (one
 # week).
 jwt_expiry = 3600
@@ -60,3 +64,12 @@ enable_confirmations = false
 enabled = false
 client_id = ""
 secret = ""
+# Overrides the default auth provider URL. Used to support self-hosted gitlab, single-tenant Azure,
+# or any other third-party OIDC providers.
+url = ""
+
+[auth.external.github]
+enabled=true
+client_id="434667972d95e52c1cf9"
+secret="d925d736b8520d06a6e41ed554bc416879d56806"
+# redirect_uri="https://reviewcorralauth.ngrok.io/auth/v1/callback"

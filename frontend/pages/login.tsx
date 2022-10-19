@@ -1,9 +1,12 @@
 import { CheckCircleIcon } from "@heroicons/react/outline";
-import { supabaseClient } from "@supabase/auth-helpers-nextjs";
-import { useUser } from "@supabase/auth-helpers-react";
+import {
+  useSessionContext,
+  useSupabaseClient,
+} from "@supabase/auth-helpers-react";
+import { Button } from "@supabase/ui";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { WithLoadingButton } from "../components/buttons/WithLoadingButton";
 
@@ -13,7 +16,10 @@ type FormData = {
 
 const Auth: NextPage = () => {
   const router = useRouter();
-  const { isLoading, user, error } = useUser();
+
+  const { isLoading, session, error } = useSessionContext();
+  const supabaseClient = useSupabaseClient();
+
   const [loginError, setLoginError] = useState<string | undefined>(undefined);
   const [loginLoading, setLoginLoading] = useState<boolean>(false);
   const [emailSent, setEmailSent] = useState<boolean>(false);
@@ -24,7 +30,7 @@ const Auth: NextPage = () => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onEmailSubmit = handleSubmit(async (data) => {
     setLoginLoading(true);
     setEmailSent(false);
 
@@ -46,12 +52,13 @@ const Auth: NextPage = () => {
   });
 
   console.log("user is loading: ", isLoading);
+  console.log("user is: ", session?.user);
 
-  useEffect(() => {
-    if (user) {
-      router.push("/");
-    }
-  }, [user]);
+  // useEffect(() => {
+  //   if (user) {
+  //     router.push("/");
+  //   }
+  // }, [user]);
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
@@ -77,7 +84,34 @@ const Auth: NextPage = () => {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          <form className="space-y-6" onSubmit={onSubmit}>
+          <Button
+            onClick={async () => {
+              setLoginLoading(true);
+              console.log("going to log in with Github");
+              const result = await supabaseClient.auth.signInWithOAuth({
+                provider: "github",
+                options: {
+                  scopes: "repo",
+                  redirectTo: "http://localhost:3000",
+                },
+              });
+              console.log("Got result: ", result);
+              if (result.error) {
+                console.error(result.error);
+                setLoginError(result.error.message);
+              } else if (result.user) {
+                console.log("Got user: ", result.user);
+                router.push("/team");
+              } else {
+                console.log("No error or user");
+              }
+
+              setLoginLoading(false);
+            }}
+          >
+            Github login
+          </Button>
+          <form className="space-y-6" onSubmit={onEmailSubmit}>
             <div>
               <label
                 htmlFor="email"
