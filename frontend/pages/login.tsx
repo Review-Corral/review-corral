@@ -6,9 +6,8 @@ import {
 import { Button } from "@supabase/ui";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import { WithLoadingButton } from "../components/buttons/WithLoadingButton";
 
 type FormData = {
   email: string;
@@ -30,35 +29,14 @@ const Auth: NextPage = () => {
     formState: { errors },
   } = useForm<FormData>();
 
-  const onEmailSubmit = handleSubmit(async (data) => {
-    setLoginLoading(true);
-    setEmailSent(false);
-
-    const result = await supabaseClient.auth.signIn({
-      email: data.email,
-    });
-
-    if (result.error) {
-      console.error(result.error);
-      setLoginError(result.error.message);
-    } else {
-      setEmailSent(true);
-    }
-    if (result.user) {
-      router.push("/team");
-    }
-
-    setLoginLoading(false);
-  });
-
   console.log("user is loading: ", isLoading);
   console.log("user is: ", session?.user);
 
-  // useEffect(() => {
-  //   if (user) {
-  //     router.push("/");
-  //   }
-  // }, [user]);
+  useEffect(() => {
+    if (session?.user) {
+      router.push("/");
+    }
+  }, [session?.user]);
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
@@ -95,15 +73,14 @@ const Auth: NextPage = () => {
                   redirectTo: "http://localhost:3000",
                 },
               });
-              console.log("Got result: ", result);
+
+              console.log("Got result: ", JSON.stringify(result.data, null, 2));
+
               if (result.error) {
                 console.error(result.error);
                 setLoginError(result.error.message);
-              } else if (result.user) {
-                console.log("Got user: ", result.user);
-                router.push("/team");
               } else {
-                console.log("No error or user");
+                router.push("/");
               }
 
               setLoginLoading(false);
@@ -111,36 +88,6 @@ const Auth: NextPage = () => {
           >
             Github login
           </Button>
-          <form className="space-y-6" onSubmit={onEmailSubmit}>
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email address
-              </label>
-              <div className="mt-1">
-                <input
-                  id="email"
-                  type="email"
-                  {...register("email")}
-                  autoComplete="email"
-                  required
-                  className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-                />
-              </div>
-            </div>
-
-            <div>
-              <WithLoadingButton
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                isLoading={loginLoading}
-                type="submit"
-              >
-                Send magic link
-              </WithLoadingButton>
-            </div>
-          </form>
 
           {emailSent && <EmailSentSuccess />}
 

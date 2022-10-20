@@ -1,3 +1,7 @@
+import {
+  useSessionContext,
+  useSupabaseClient,
+} from "@supabase/auth-helpers-react";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -7,9 +11,11 @@ interface SignoutPageProps {}
 
 const SignoutPage: NextPage<SignoutPageProps> = () => {
   const router = useRouter();
+  const { isLoading, session, error } = useSessionContext();
+  const supabaseClient = useSupabaseClient();
 
   useEffect(() => {
-    router.push("/api/auth/logout");
+    supabaseClient.auth.signOut().then(() => router.push("/login"));
   }, []);
 
   return <LoadingView />;

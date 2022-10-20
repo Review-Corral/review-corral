@@ -1,3 +1,4 @@
+import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect } from "react";
@@ -37,7 +38,7 @@ const Home: NextPage = () => {
 
 export default Home;
 
-// export const getServerSideProps = withPageAuth({
-//   authRequired: true,
-//   redirectTo: "/login",
-// });
+export const getServerSideProps = withPageAuth({
+  authRequired: true,
+  redirectTo: "/login",
+});
