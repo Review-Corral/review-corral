@@ -1,8 +1,15 @@
 # Review Corral Slack Bot
 
 ## Development
-1. Install hookdeck and run it to forward events to port 4000 for testing events from Github `hookdeck listen 8080`
+1. You can only run 1 ngrok instance at a time:
+    a. For doing Github Auth through local host: `ngrok http 54321 --subdomain reviewcorralauth`
+    b. For testing Github Events: `ngrok http 8080 --subdomain reviewcorral`
+2. Get Supabase started with:
+    i. Running `source ./supabase/.env` to load the github auth client creds
+    ii. Run `supabase start`
 2. Run the server with `yarn dev`
+
+
 
 ## Github Access tokens
 

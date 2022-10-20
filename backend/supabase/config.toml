@@ -70,6 +70,8 @@ url = ""
 
 [auth.external.github]
 enabled=true
-client_id="434667972d95e52c1cf9"
-secret="d925d736b8520d06a6e41ed554bc416879d56806"
-# redirect_uri="https://reviewcorralauth.ngrok.io/auth/v1/callback"
+# client_id="Iv1.75a4bc12eb42f566"
+# secret="3bd2710a83e4e5373f2ec985fec1ec08fc3f1c84"
+client_id="env(GITHUB_CLIENT_ID)"
+secret="env(GITHUB_CLIENT_SECRET)"
+redirect_uri="https://reviewcorralauth.ngrok.io/auth/v1/callback"
