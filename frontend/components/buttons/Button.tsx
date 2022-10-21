@@ -1,8 +1,11 @@
 import cntl from "cntl";
 import { FC } from "react";
+import { Spinner } from "../assets/icons/Spinner";
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement> {
+  leftIcon?: React.ReactNode;
+  isLoading?: boolean;
   color?: "indigo" | "green";
   variant?: "solid" | "outline";
 }
@@ -10,10 +13,12 @@ export interface ButtonProps
 export const Button: FC<ButtonProps> = ({
   color = "green",
   variant = "solid",
+  isLoading = false,
+  leftIcon,
   ...props
 }) => {
   const baseCn = cntl`
-    inline-flex
+    inline-block
     items-center
     px-4
     py-2
@@ -27,28 +32,16 @@ export const Button: FC<ButtonProps> = ({
     focus:ring-offset-2
   `;
 
-  if (props.disabled) {
-    return (
-      <button
-        type="button"
-        className={cntl`
+  const getClassName = (): string => {
+    if (props.disabled) {
+      return cntl`
         ${baseCn}
         text-white
         bg-gray-300
         border-gray-300
-      `}
-        {...props}
-      >
-        {props.children}
-      </button>
-    );
-  }
-
-  if (variant === "solid") {
-    return (
-      <button
-        type="button"
-        className={cntl`
+      `;
+    } else {
+      return cntl`
         ${baseCn}
         border-transparent
         text-white
@@ -65,47 +58,23 @@ export const Button: FC<ButtonProps> = ({
               focus:ring-indigo-500
               `
         }
-      `}
-        {...props}
-      >
-        {props.children}
-      </button>
-    );
-  }
+      `;
+    }
+  };
 
-  if (variant === "outline") {
-    return (
-      <button
-        type="button"
-        className={cntl`
-        ${baseCn}
-        border-transparent
-        bg-white
-        border
-        ${
-          color === "green"
-            ? `
-              text-green-600
-              hover:bg-green-50
-              focus:ring-green-500
-              border-green-600
-              `
-            : `
-              text-indigo-600
-              hover:bg-indigo-50
-              focus:ring-indigo-500
-              border-indigo-600
-              `
-        }
-      `}
-        {...props}
-      >
+  return (
+    <button type="button" className={getClassName()} {...props}>
+      <div className="flex items-center space-x-3">
+        {isLoading && (
+          <div>
+            <Spinner className="h-4 animate-spin" />
+          </div>
+        )}
+        {!isLoading && leftIcon && leftIcon}
         {props.children}
-      </button>
-    );
-  }
-
-  throw Error("Unsupported button");
+      </div>
+    </button>
+  );
 };
 
 export default Button;
