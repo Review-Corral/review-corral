@@ -1,7 +1,3 @@
-
-ALTER TABLE public.users 
-    ADD COLUMN gh_access_token TEXT;
-
 ALTER TABLE public.users
     ADD COLUMN updated_at timestamp with time zone;
 

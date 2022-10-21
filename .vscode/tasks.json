@@ -57,7 +57,7 @@
         "label": "Supabase",
         "type": "shell",
         "command": 
-          ["cd backend && supabase status"],
+          ["cd backend && source ./supabase/.env && supabase status"],
         "isBackground": true,
         "problemMatcher": [],
         "presentation": {
