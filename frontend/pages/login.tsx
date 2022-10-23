@@ -5,7 +5,6 @@ import {
 import { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { Github } from "../components/assets/icons/Github";
 import Button from "../components/buttons/Button";
 import { Database } from "../dabatabase-types";
@@ -17,32 +16,25 @@ type FormData = {
 const Auth: NextPage = () => {
   const router = useRouter();
 
-  const { isLoading, session, error } = useSessionContext();
+  const { isLoading, session } = useSessionContext();
   const supabaseClient = useSupabaseClient<Database>();
 
   const [loginError, setLoginError] = useState<string | undefined>(undefined);
-  const [loginLoading, setLoginLoading] = useState<boolean>(false);
-  const [emailSent, setEmailSent] = useState<boolean>(false);
-
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>();
-
-  console.log("user is loading: ", isLoading);
-  console.log("user is: ", session?.user);
 
   useEffect(() => {
     if (session?.user) {
+      // Store the provider token and refresh token (if exist) since these
+      // will not persist in the session permanently.
       supabaseClient
         .from("users")
         .update({
           gh_access_token: session.provider_token,
           gh_refresh_token: session.refresh_token,
         })
-        .eq("id", session.user.id);
-      router.push("/");
+        .eq("id", session.user.id)
+        .then(() => {
+          router.push("/");
+        });
     }
   }, [session?.user]);
 
@@ -60,8 +52,6 @@ const Auth: NextPage = () => {
             color="indigo"
             leftIcon={<Github className="fill-white h-4" />}
             onClick={async () => {
-              setLoginLoading(true);
-              console.log("going to log in with Github");
               const result = await supabaseClient.auth.signInWithOAuth({
                 provider: "github",
                 options: {
@@ -70,16 +60,12 @@ const Auth: NextPage = () => {
                 },
               });
 
-              console.log("Got result: ", JSON.stringify(result.data, null, 2));
-
               if (result.error) {
                 console.error(result.error);
                 setLoginError(result.error.message);
               } else {
                 router.push("/");
               }
-
-              setLoginLoading(false);
             }}
           >
             <div className="flex items-center gap-x-2">
