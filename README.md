@@ -18,3 +18,6 @@ Github gives PEM files for signing. To get these into environment variables, run
 - User authenticates with GH
 - [Next screen] User then onboards with creating GH access token (installing in some place)
 - [Next screen] For all installations, a team is created
+
+#### DB Diagram
+- https://dbdiagram.io/d/635572f84709410195c2cdc4

@@ -8,11 +8,22 @@ const HomeView = () => {
   console.log("Got data: ", data);
   return (
     <DashboardLayout title="Home">
-      {data?.installations.map((installation) => (
-        <a href={`/org/${installation.id}`}>
-          <div key={installation.id}>{installation.id}</div>
-        </a>
-      ))}
+      <div className="flex flex-col gap-2">
+        {data?.installations.map((installation) => (
+          <a key={installation.id} href={`/org/${installation.id}`}>
+            <div className="flex items-center space-x-2">
+              <div className="rounded-md overflow-hidden">
+                <img
+                  src={installation.account.avatar_url}
+                  width={32}
+                  height={32}
+                />
+              </div>
+              <div>{installation.account.login}</div>
+            </div>
+          </a>
+        ))}
+      </div>
     </DashboardLayout>
   );
 };
