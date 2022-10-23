@@ -3,16 +3,15 @@ import { SelectorIcon } from "@heroicons/react/outline";
 import { FC, Fragment } from "react";
 
 export interface NavbarProps {
-  teamName?: string;
+  orgName?: string;
 }
 
 const userNavigation = [
   { name: "Your Profile", href: "/profile" },
-  // { name: "Settings", href: "#" },
   { name: "Sign out", href: "/signout" },
 ];
 
-export const Navbar: FC<NavbarProps> = ({ teamName }) => {
+export const Navbar: FC<NavbarProps> = ({ orgName }) => {
   return (
     <Disclosure as="nav" className="bg-[#f4f4f4]">
       {({ open }) => (
@@ -33,9 +32,9 @@ export const Navbar: FC<NavbarProps> = ({ teamName }) => {
                 <div className="md:block">
                   <div className="ml-10 flex items-baseline space-x-4"></div>
                 </div>
-                {teamName && (
+                {orgName && (
                   <div className="rounded-md border border-gray-200 bg-gray-200 px-2 py-2 flex gap-2 items-center cursor-pointer">
-                    <span className="whitespace-nowrap">{teamName}</span>
+                    <span className="whitespace-nowrap">{orgName}</span>
                     <SelectorIcon className="h-5 w-5" />
                   </div>
                 )}

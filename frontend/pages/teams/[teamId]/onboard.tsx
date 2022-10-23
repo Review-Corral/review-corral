@@ -44,7 +44,7 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
   console.log(githubIntegration.data);
 
   return (
-    <DashboardLayout title="Onboard" teamName={team.name ?? undefined}>
+    <DashboardLayout title="Onboard" orgName={team.name ?? undefined}>
       <h4>let's get your integrations setup</h4>
       <div className="flex flex-col gap-y-6 mt-6">
         <div className="flex grow basis-6/12 flex-col space-y-6">

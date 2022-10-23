@@ -119,7 +119,7 @@ export interface Permissions {
 // Installations
 // ============================================================
 
-export interface Installations {
+export interface InstallationsResponse {
   total_count: number;
   installations: Installation[];
 }
