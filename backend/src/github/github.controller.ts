@@ -12,13 +12,13 @@ import {
 import { github_integration } from "@prisma/client";
 import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { GithubEvent } from "types/githubEventTypes";
+import { OrgMember } from "../../../frontend/github-types";
 import { GithubService } from "./github.service";
 import {
   CreateTeamRepoBody,
   GithubAppService,
   InstalledRepositoryWithInstallationId,
 } from "./githubApp.service";
-import { OrgMember } from "./types";
 import { getJwt } from "./utils";
 
 export interface GithubAuthQueryParams {

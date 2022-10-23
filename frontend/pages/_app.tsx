@@ -4,10 +4,13 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { AppProps } from "next/app";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
+import { Database } from "../dabatabase-types";
 import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
-  const [supabaseClient] = useState(() => createBrowserSupabaseClient());
+  const [supabaseClient] = useState(() =>
+    createBrowserSupabaseClient<Database>(),
+  );
   const [queryClient] = useState(
     () =>
       new QueryClient({

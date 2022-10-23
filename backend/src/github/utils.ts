@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as nJwt from "njwt";
-import { InstallationAccessResponse } from "./types";
+import { InstallationAccessResponse } from "../../../frontend/github-types";
 
 export async function getJwt(): Promise<nJwt.Jwt> {
   const now = Math.floor(Date.now() / 1000) - 30;

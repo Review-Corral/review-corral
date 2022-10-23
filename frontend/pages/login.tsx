@@ -8,6 +8,7 @@ import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Github } from "../components/assets/icons/Github";
 import Button from "../components/buttons/Button";
+import { Database } from "../dabatabase-types";
 
 type FormData = {
   email: string;
@@ -17,7 +18,7 @@ const Auth: NextPage = () => {
   const router = useRouter();
 
   const { isLoading, session, error } = useSessionContext();
-  const supabaseClient = useSupabaseClient();
+  const supabaseClient = useSupabaseClient<Database>();
 
   const [loginError, setLoginError] = useState<string | undefined>(undefined);
   const [loginLoading, setLoginLoading] = useState<boolean>(false);

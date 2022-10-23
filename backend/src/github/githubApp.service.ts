@@ -6,7 +6,7 @@ import axios, { AxiosError } from "axios";
 import { PrismaService } from "src/prisma/prisma.service";
 import { TeamService } from "src/team/team.service";
 import { InstalledRepository } from "types/githubAppTypes";
-import { Installations, OrgMember } from "./types";
+import { Installations, OrgMember } from "../../../frontend/github-types";
 import { getInstallationAccessToken } from "./utils";
 
 export interface CreateTeamRepoBody {
