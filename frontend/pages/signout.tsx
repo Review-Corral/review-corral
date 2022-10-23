@@ -15,7 +15,12 @@ const SignoutPage: NextPage<SignoutPageProps> = () => {
   const supabaseClient = useSupabaseClient();
 
   useEffect(() => {
-    supabaseClient.auth.signOut().then(() => router.push("/login"));
+    supabaseClient.auth
+      .signOut()
+      .then(() => router.push("/login"))
+      .catch((error) => {
+        console.error("Error signing out", error);
+      });
   }, []);
 
   return <LoadingView />;

@@ -35,6 +35,13 @@ const Auth: NextPage = () => {
 
   useEffect(() => {
     if (session?.user) {
+      supabaseClient
+        .from("users")
+        .update({
+          gh_access_token: session.provider_token,
+          gh_refresh_token: session.refresh_token,
+        })
+        .eq("id", session.user.id);
       router.push("/");
     }
   }, [session?.user]);

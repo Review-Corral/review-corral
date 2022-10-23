@@ -173,22 +173,25 @@ export interface Database {
           id: string;
           created_at: string | null;
           email: string | null;
-          gh_access_token: string | null;
           updated_at: string | null;
+          gh_access_token: string | null;
+          gh_refresh_token: string | null;
         };
         Insert: {
           id?: string;
           created_at?: string | null;
           email?: string | null;
-          gh_access_token?: string | null;
           updated_at?: string | null;
+          gh_access_token?: string | null;
+          gh_refresh_token?: string | null;
         };
         Update: {
           id?: string;
           created_at?: string | null;
           email?: string | null;
-          gh_access_token?: string | null;
           updated_at?: string | null;
+          gh_access_token?: string | null;
+          gh_refresh_token?: string | null;
         };
       };
       users_and_teams: {
