@@ -9,10 +9,6 @@ import { Github } from "../components/assets/icons/Github";
 import Button from "../components/buttons/Button";
 import { Database } from "../dabatabase-types";
 
-type FormData = {
-  email: string;
-};
-
 const Auth: NextPage = () => {
   const router = useRouter();
 

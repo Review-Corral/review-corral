@@ -1,125 +1,280 @@
-export type SyncedRepository = {
-  id: string;
-  created_at: Date | null;
-  updated_at: Date | null;
-  team_id: string;
-  repository_id: string;
-  repository_name: string;
-};
+export type Json =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: Json }
+  | Json[];
 
-export interface InstalledRepository {
-  total_count: number;
-  repository_selection: string;
-  repositories: Repository[];
-}
-
-export interface Repository {
-  id: number;
-  node_id: string;
-  name: string;
-  full_name: string;
-  private: boolean;
-  owner: Owner;
-  html_url: string;
-  description: any;
-  fork: boolean;
-  url: string;
-  forks_url: string;
-  keys_url: string;
-  collaborators_url: string;
-  teams_url: string;
-  hooks_url: string;
-  issue_events_url: string;
-  events_url: string;
-  assignees_url: string;
-  branches_url: string;
-  tags_url: string;
-  blobs_url: string;
-  git_tags_url: string;
-  git_refs_url: string;
-  trees_url: string;
-  statuses_url: string;
-  languages_url: string;
-  stargazers_url: string;
-  contributors_url: string;
-  subscribers_url: string;
-  subscription_url: string;
-  commits_url: string;
-  git_commits_url: string;
-  comments_url: string;
-  issue_comment_url: string;
-  contents_url: string;
-  compare_url: string;
-  merges_url: string;
-  archive_url: string;
-  downloads_url: string;
-  issues_url: string;
-  pulls_url: string;
-  milestones_url: string;
-  notifications_url: string;
-  labels_url: string;
-  releases_url: string;
-  deployments_url: string;
-  created_at: string;
-  updated_at: string;
-  pushed_at: string;
-  git_url: string;
-  ssh_url: string;
-  clone_url: string;
-  svn_url: string;
-  homepage: string;
-  size: number;
-  stargazers_count: number;
-  watchers_count: number;
-  language: string;
-  has_issues: boolean;
-  has_projects: boolean;
-  has_downloads: boolean;
-  has_wiki: boolean;
-  has_pages: boolean;
-  forks_count: number;
-  mirror_url: any;
-  archived: boolean;
-  disabled: boolean;
-  open_issues_count: number;
-  license: any;
-  allow_forking: boolean;
-  is_template: boolean;
-  web_commit_signoff_required: boolean;
-  topics: any[];
-  visibility: string;
-  forks: number;
-  open_issues: number;
-  watchers: number;
-  default_branch: string;
-  permissions: Permissions;
-}
-
-export interface Owner {
-  login: string;
-  id: number;
-  node_id: string;
-  avatar_url: string;
-  gravatar_id: string;
-  url: string;
-  html_url: string;
-  followers_url: string;
-  following_url: string;
-  gists_url: string;
-  starred_url: string;
-  subscriptions_url: string;
-  organizations_url: string;
-  repos_url: string;
-  events_url: string;
-  received_events_url: string;
-  type: string;
-  site_admin: boolean;
-}
-
-export interface Permissions {
-  admin: boolean;
-  maintain: boolean;
-  push: boolean;
-  triage: boolean;
-  pull: boolean;
+export interface Database {
+  public: {
+    Tables: {
+      github_integration: {
+        Row: {
+          team_id: string;
+          access_token: string;
+          id: string;
+          created_at: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          team_id: string;
+          access_token: string;
+          id?: string;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          team_id?: string;
+          access_token?: string;
+          id?: string;
+          created_at?: string | null;
+          updated_at?: string | null;
+        };
+      };
+      github_repositories: {
+        Row: {
+          updated_at: string | null;
+          team_id: string;
+          repository_id: string;
+          repository_name: string;
+          id: string;
+          created_at: string | null;
+          installation_id: number;
+        };
+        Insert: {
+          updated_at?: string | null;
+          team_id: string;
+          repository_id: string;
+          repository_name: string;
+          id?: string;
+          created_at?: string | null;
+          installation_id: number;
+        };
+        Update: {
+          updated_at?: string | null;
+          team_id?: string;
+          repository_id?: string;
+          repository_name?: string;
+          id?: string;
+          created_at?: string | null;
+          installation_id?: number;
+        };
+      };
+      organizations: {
+        Row: {
+          id: string;
+          account_name: string;
+          account_id: string;
+          avatar_url: string;
+          updated_at: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id: string;
+          account_name: string;
+          account_id: string;
+          avatar_url: string;
+          updated_at?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          account_name?: string;
+          account_id?: string;
+          avatar_url?: string;
+          updated_at?: string | null;
+          created_at?: string | null;
+        };
+      };
+      pull_requests: {
+        Row: {
+          thread_ts: string;
+          created_at: string | null;
+          pr_id: string;
+          id: string;
+          organization_id: string | null;
+        };
+        Insert: {
+          thread_ts: string;
+          created_at?: string | null;
+          pr_id: string;
+          id?: string;
+          organization_id?: string | null;
+        };
+        Update: {
+          thread_ts?: string;
+          created_at?: string | null;
+          pr_id?: string;
+          id?: string;
+          organization_id?: string | null;
+        };
+      };
+      slack_integration: {
+        Row: {
+          access_token: string | null;
+          channel_id: string | null;
+          id: string;
+          created_at: string | null;
+          channel_name: string;
+          team_id: string | null;
+          slack_team_name: string | null;
+          slack_team_id: string | null;
+          organization_id: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          access_token?: string | null;
+          channel_id?: string | null;
+          id?: string;
+          created_at?: string | null;
+          channel_name: string;
+          team_id?: string | null;
+          slack_team_name?: string | null;
+          slack_team_id?: string | null;
+          organization_id?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          access_token?: string | null;
+          channel_id?: string | null;
+          id?: string;
+          created_at?: string | null;
+          channel_name?: string;
+          team_id?: string | null;
+          slack_team_name?: string | null;
+          slack_team_id?: string | null;
+          organization_id?: string | null;
+          updated_at?: string | null;
+        };
+      };
+      team: {
+        Row: {
+          created_at: string | null;
+          id: string;
+          name: string;
+          updated_at: string | null;
+          installation_id: string | null;
+          installation_image_url: string | null;
+        };
+        Insert: {
+          created_at?: string | null;
+          id?: string;
+          name: string;
+          updated_at?: string | null;
+          installation_id?: string | null;
+          installation_image_url?: string | null;
+        };
+        Update: {
+          created_at?: string | null;
+          id?: string;
+          name?: string;
+          updated_at?: string | null;
+          installation_id?: string | null;
+          installation_image_url?: string | null;
+        };
+      };
+      username_mappings: {
+        Row: {
+          github_username: string;
+          id: string;
+          created_at: string | null;
+          slack_user_id: string;
+          team_id: string | null;
+          organization_id: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          github_username: string;
+          id?: string;
+          created_at?: string | null;
+          slack_user_id: string;
+          team_id?: string | null;
+          organization_id?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          github_username?: string;
+          id?: string;
+          created_at?: string | null;
+          slack_user_id?: string;
+          team_id?: string | null;
+          organization_id?: string | null;
+          updated_at?: string | null;
+        };
+      };
+      users: {
+        Row: {
+          id: string;
+          created_at: string | null;
+          email: string | null;
+          gh_access_token: string | null;
+          gh_refresh_token: string | null;
+          updated_at: string | null;
+        };
+        Insert: {
+          id?: string;
+          created_at?: string | null;
+          email?: string | null;
+          gh_access_token?: string | null;
+          gh_refresh_token?: string | null;
+          updated_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          created_at?: string | null;
+          email?: string | null;
+          gh_access_token?: string | null;
+          gh_refresh_token?: string | null;
+          updated_at?: string | null;
+        };
+      };
+      users_and_organizations: {
+        Row: {
+          id: string;
+          user_id: string;
+          org_id: string;
+          updated_at: string | null;
+          created_at: string | null;
+        };
+        Insert: {
+          id: string;
+          user_id: string;
+          org_id: string;
+          updated_at?: string | null;
+          created_at?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          org_id?: string;
+          updated_at?: string | null;
+          created_at?: string | null;
+        };
+      };
+      users_and_teams: {
+        Row: {
+          user: string;
+          team: string;
+        };
+        Insert: {
+          user: string;
+          team: string;
+        };
+        Update: {
+          user?: string;
+          team?: string;
+        };
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+  };
 }

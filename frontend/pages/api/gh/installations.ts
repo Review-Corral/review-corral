@@ -27,5 +27,29 @@ export default withApiAuth<Database>(async function ProtectedRoute(
     },
   );
 
+  const organizations = await supabaseServerClient
+    .from("users_and_organizations")
+    .select("user_id, organizations(account_id)")
+    .eq("user_id", data?.session?.user?.id);
+
+  const organizationsToAdd = [];
+
+  if (organizations.data !== null) {
+    for (const installation of reponse.data.installations) {
+      for (const organization of organizations.data) {
+        if (!Array.isArray(organization.organizations)) {
+          if (
+            organization.organizations?.account_id ===
+            installation.account.id.toString()
+          ) {
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  const exists = () => {};
+
   res.json(reponse.data);
 });
