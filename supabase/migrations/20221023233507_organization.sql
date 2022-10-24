@@ -1,5 +1,5 @@
 CREATE TABLE "organizations" (
-  "id" uuid PRIMARY KEY,
+  "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   "account_name" text NOT NULL,
   "account_id" text UNIQUE NOT NULL,
   "installation_id" text UNIQUE NOT NULL,
@@ -12,7 +12,7 @@ create trigger organizations_updated_at before update on public.organizations
   for each row execute procedure moddatetime (updated_at);
 
 CREATE TABLE "users_and_organizations" (
-  "id" uuid PRIMARY KEY,
+  "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   "user_id" uuid NOT NULL references public.users(id),
   "org_id" uuid NOT NULL references public.organizations(id),
   "updated_at" timestamptz DEFAULT (now()),

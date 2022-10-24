@@ -63,29 +63,29 @@ export interface Database {
       };
       organizations: {
         Row: {
-          id: string;
           account_name: string;
           account_id: string;
           installation_id: string;
           avatar_url: string;
+          id: string;
           updated_at: string | null;
           created_at: string | null;
         };
         Insert: {
-          id: string;
           account_name: string;
           account_id: string;
           installation_id: string;
           avatar_url: string;
+          id?: string;
           updated_at?: string | null;
           created_at?: string | null;
         };
         Update: {
-          id?: string;
           account_name?: string;
           account_id?: string;
           installation_id?: string;
           avatar_url?: string;
+          id?: string;
           updated_at?: string | null;
           created_at?: string | null;
         };
@@ -234,23 +234,23 @@ export interface Database {
       };
       users_and_organizations: {
         Row: {
-          id: string;
           user_id: string;
           org_id: string;
+          id: string;
           updated_at: string | null;
           created_at: string | null;
         };
         Insert: {
-          id: string;
           user_id: string;
           org_id: string;
+          id?: string;
           updated_at?: string | null;
           created_at?: string | null;
         };
         Update: {
-          id?: string;
           user_id?: string;
           org_id?: string;
+          id?: string;
           updated_at?: string | null;
           created_at?: string | null;
         };
