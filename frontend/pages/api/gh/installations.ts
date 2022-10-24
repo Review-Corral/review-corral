@@ -16,6 +16,8 @@ export default withApiAuth<Database>(async function ProtectedRoute(
     return res.status(401).json({ error: "Unauthorized" });
   }
 
+  console.log("in api!!");
+
   const result = await supabaseServerClient
     .from("users")
     .select("*")
