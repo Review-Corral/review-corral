@@ -1,83 +1,103 @@
 {
-    "version": "2.0.0",
-    "presentation": {
-      "echo": false,
-      "reveal": "always",
-      "focus": false,
-      "panel": "dedicated",
-      "showReuseMessage": true
+  "version": "2.0.0",
+  "presentation": {
+    "echo": false,
+    "reveal": "always",
+    "focus": false,
+    "panel": "dedicated",
+    "showReuseMessage": true
+  },
+  "tasks": [
+    {
+      "label": "Create terminals",
+      "dependsOn": [
+        //  "Backend",
+        "Supabase",
+        "ngrok",
+        "zsh",
+        "Frontend"
+      ],
+      // Mark as the default build task so cmd/ctrl+shift+b will create them
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      // Try start the task on folder open
+      "runOptions": {
+        "runOn": "folderOpen"
+      },
+      "icon": {
+        "id": "paintcan",
+        "color": "terminal.ansiCyan"
+      }
     },
-    "tasks": [
-      {
-        "label": "Create terminals",
-        "dependsOn": [
-          "Backend", "Frontend", "Supabase", "ngrok"
-        ],
-        // Mark as the default build task so cmd/ctrl+shift+b will create them
-        "group": {
-          "kind": "build",
-          "isDefault": true
-        },
-        // Try start the task on folder open
-        "runOptions": {
-          "runOn": "folderOpen"
-        },
-        "icon": {
-          "id": "paintcan",
-          "color": "terminal.ansiCyan"
-        }
+    // {
+    //   "label": "Backend",
+    //   "type": "shell",
+    //   "command":
+    //     ["cd backend && yarn dev"],
+    //   "isBackground": true,
+    //   "problemMatcher": [],
+    //   "presentation": {
+    //     "group": "dev-group"
+    //   },
+    //   "icon": {
+    //     "id": "server",
+    //     "color": "terminal.ansiMagenta"
+    //   }
+    // },
+    {
+      "label": "ngrok",
+      "type": "shell",
+      "command": ["ngrok http 8080 --subdomain reviewcorral"],
+      "isBackground": true,
+      "presentation": {
+        "group": "db-group"
       },
-      {
-        "label": "Backend",
-        "type": "shell",
-        "command": 
-          ["cd backend && yarn dev"],
-        "isBackground": true,
-        "problemMatcher": [],
-        "presentation": {
-          "group": "dev-group"
-        },
-        "icon": {
-          "id": "server",
-          "color": "terminal.ansiMagenta"
-        }
+      "icon": {
+        "id": "globe",
+        "color": "terminal.ansiRed"
+      }
+    },
+    {
+      "label": "zsh",
+      "type": "process",
+      "command": ["zsh"],
+      "isBackground": true,
+      "presentation": {
+        "group": "main",
+        "focus": true,
+        "panel": "dedicated"
       },
-      {
-        "label": "Frontend",
-        "type": "shell",
-        "command": 
-          ["cd frontend && pnpm dev"],
-        "isBackground": true,
-        "problemMatcher": [],
-        "presentation": {
-          "group": "dev-group"
-        }
+      "icon": {
+        "id": "terminal",
+        "color": "terminal.ansiWhite"
+      }
+    },
+    {
+      "label": "Supabase",
+      "type": "shell",
+      "command": ["source ./supabase/.env && supabase status"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "group": "main"
       },
-      {
-        "label": "Supabase",
-        "type": "shell",
-        "command": 
-          ["cd backend && source ./supabase/.env && supabase status"],
-        "isBackground": true,
-        "problemMatcher": [],
-        "presentation": {
-          "group": "db-group"
-        },
-        "icon": {
-          "id": "database",
-          "color": "terminal.ansiGreen"
-        }
-      },
-      {
-        "label": "ngrok",
-        "type": "shell",
-        "command": 
-          ["ngrok http 8080 --subdomain reviewcorral"],
-        "isBackground": true,
-        "icon": {
-          "id": "globe",
-          "color": "terminal.ansiRed"
-        }
-      },
-    ]
-  }
+      "icon": {
+        "id": "database",
+        "color": "terminal.ansiGreen"
+      }
+    },
+    {
+      "label": "Frontend",
+      "type": "process",
+      "command": ["zsh"],
+      "isBackground": true,
+      "problemMatcher": [],
+      "presentation": {
+        "panel": "dedicated",
+        "group": "dev-group"
+      }
+    }
+  ]
+}
