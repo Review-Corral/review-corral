@@ -8,6 +8,7 @@
     "showReuseMessage": true
   },
   "tasks": [
+    // Auto stuff
     {
       "label": "Create terminals",
       "dependsOn": [

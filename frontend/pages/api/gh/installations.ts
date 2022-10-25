@@ -2,7 +2,7 @@
 import { withApiAuth } from "@supabase/auth-helpers-nextjs";
 import { PostgrestResponse } from "@supabase/supabase-js";
 import axios from "axios";
-import { Database } from "../../../dabatabase-types";
+import { Database } from "../../../database-types";
 import { InstallationsResponse } from "../../../github-types";
 
 export default withApiAuth<Database>(async function ProtectedRoute(

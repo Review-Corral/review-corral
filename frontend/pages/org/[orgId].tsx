@@ -2,7 +2,7 @@ import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import type { NextPage } from "next";
 import { useInstallations } from "../../components/hooks/useInstallations";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
-import { Database } from "../../dabatabase-types";
+import { Database } from "../../database-types";
 
 export const OrgView: NextPage<{ orgId: string }> = ({ orgId }) => {
   const installations = useInstallations();

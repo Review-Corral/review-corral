@@ -8,7 +8,7 @@ import {
 import type { AppProps } from "next/app";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
-import { Database } from "../dabatabase-types";
+import { Database } from "../database-types";
 import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }: AppProps) {

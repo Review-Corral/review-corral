@@ -7,7 +7,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { Github } from "../components/assets/icons/Github";
 import Button from "../components/buttons/Button";
-import { Database } from "../dabatabase-types";
+import { Database } from "../database-types";
 
 const Auth: NextPage = () => {
   const router = useRouter();
