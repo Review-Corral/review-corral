@@ -8,13 +8,10 @@
     "showReuseMessage": true
   },
   "tasks": [
-    // Auto stuff
     {
       "label": "Create terminals",
       "dependsOn": [
-        //  "Backend",
         "Supabase",
-        "ngrok",
         "zsh",
         "Frontend"
       ],
@@ -30,34 +27,6 @@
       "icon": {
         "id": "paintcan",
         "color": "terminal.ansiCyan"
-      }
-    },
-    // {
-    //   "label": "Backend",
-    //   "type": "shell",
-    //   "command":
-    //     ["cd backend && yarn dev"],
-    //   "isBackground": true,
-    //   "problemMatcher": [],
-    //   "presentation": {
-    //     "group": "dev-group"
-    //   },
-    //   "icon": {
-    //     "id": "server",
-    //     "color": "terminal.ansiMagenta"
-    //   }
-    // },
-    {
-      "label": "ngrok",
-      "type": "shell",
-      "command": ["ngrok http 8080 --subdomain reviewcorral"],
-      "isBackground": true,
-      "presentation": {
-        "group": "db-group"
-      },
-      "icon": {
-        "id": "globe",
-        "color": "terminal.ansiRed"
       }
     },
     {
@@ -99,6 +68,26 @@
         "panel": "dedicated",
         "group": "dev-group"
       }
-    }
+    },
+    {
+      "label": "ngrok github events",
+      "type": "shell",
+      "command": ["ngrok http 8080 --subdomain reviewcorral"],
+      "isBackground": true,
+      "icon": {
+        "id": "globe",
+        "color": "terminal.ansiRed"
+      }
+    },
+    {
+      "label": "ngrok github auth",
+      "type": "shell",
+      "command": ["ngrok http 54321 --subdomain reviewcorralauth"],
+      "isBackground": true,
+      "icon": {
+        "id": "globe",
+        "color": "terminal.ansiRed"
+      }
+    },
   ]
 }

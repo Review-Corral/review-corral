@@ -1,4 +1,3 @@
-// pages/api/protected-route.js
 import { withApiAuth } from "@supabase/auth-helpers-nextjs";
 import { PostgrestResponse } from "@supabase/supabase-js";
 import axios from "axios";
@@ -43,7 +42,7 @@ export default withApiAuth<Database>(async function ProtectedRoute(
   if (organizations.data !== null) {
     for (const installation of reponse.data.installations) {
       const foundInstallation = foundOrganization(
-        installation.account.id.toString(),
+        installation.account.id,
         organizations,
       );
 
@@ -51,11 +50,11 @@ export default withApiAuth<Database>(async function ProtectedRoute(
       // update it
       if (
         foundInstallation &&
-        foundInstallation.installationId !== installation.id.toString()
+        foundInstallation.installationId !== installation.id
       ) {
         const { error } = await supabaseServerClient
           .from("organizations")
-          .update({ installation_id: installation.id.toString() })
+          .update({ installation_id: installation.id })
           .eq("id", foundInstallation.orgId);
 
         if (error) {
@@ -69,8 +68,8 @@ export default withApiAuth<Database>(async function ProtectedRoute(
         const { data: newOrg, error } = await supabaseServerClient
           .from("organizations")
           .insert({
-            account_id: installation.account.id.toString(),
-            installation_id: installation.id.toString(),
+            account_id: installation.account.id,
+            installation_id: installation.id,
             account_name: installation.account.login,
             avatar_url: installation.account.avatar_url,
           })
@@ -99,40 +98,40 @@ export default withApiAuth<Database>(async function ProtectedRoute(
 });
 
 const foundOrganization = (
-  installationId: string,
+  accountId: number,
   organization: PostgrestResponse<
     {
       user_id: string;
     } & {
       organizations:
         | ({
-            account_id: string;
+            account_id: number;
           } & {
             id: string;
           } & {
-            installation_id: string;
+            installation_id: number;
           })
         | ({
-            account_id: string;
+            account_id: number;
           } & {
             id: string;
           } & {
-            installation_id: string;
+            installation_id: number;
           })[]
         | null;
     }
   >,
-): { orgId: string; installationId: string } | undefined => {
+): { orgId: string; installationId: number } | undefined => {
   if (organization.data) {
     for (const org of organization.data) {
       if (Array.isArray(org.organizations)) {
         for (const org2 of org.organizations) {
-          if (org2.account_id === installationId) {
+          if (org2.account_id === accountId) {
             return { orgId: org2.id, installationId: org2.installation_id };
           }
         }
       } else {
-        if (org.organizations?.account_id === installationId) {
+        if (org.organizations?.account_id === accountId) {
           return {
             orgId: org.organizations.id,
             installationId: org.organizations.installation_id,

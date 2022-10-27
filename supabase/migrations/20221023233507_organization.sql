@@ -1,8 +1,8 @@
 CREATE TABLE "organizations" (
   "id" uuid PRIMARY KEY DEFAULT uuid_generate_v4(),
   "account_name" text NOT NULL,
-  "account_id" text UNIQUE NOT NULL,
-  "installation_id" text UNIQUE NOT NULL,
+  "account_id" bigint UNIQUE NOT NULL,
+  "installation_id" bigint UNIQUE NOT NULL,
   "avatar_url" text NOT NULL,
   "updated_at" timestamptz DEFAULT (now()),
   "created_at" timestamptz DEFAULT (now())
