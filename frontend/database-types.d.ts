@@ -34,31 +34,28 @@ export interface Database {
       }
       github_repositories: {
         Row: {
-          updated_at: string | null
-          team_id: string
-          repository_id: string
           repository_name: string
           id: string
           created_at: string | null
           installation_id: number
+          updated_at: string | null
+          repository_id: number
         }
         Insert: {
-          updated_at?: string | null
-          team_id: string
-          repository_id: string
           repository_name: string
           id?: string
           created_at?: string | null
           installation_id: number
+          updated_at?: string | null
+          repository_id: number
         }
         Update: {
-          updated_at?: string | null
-          team_id?: string
-          repository_id?: string
           repository_name?: string
           id?: string
           created_at?: string | null
           installation_id?: number
+          updated_at?: string | null
+          repository_id?: number
         }
       }
       organizations: {
@@ -183,7 +180,6 @@ export interface Database {
           id: string
           created_at: string | null
           slack_user_id: string
-          team_id: string | null
           organization_id: string | null
           updated_at: string | null
         }
@@ -192,7 +188,6 @@ export interface Database {
           id?: string
           created_at?: string | null
           slack_user_id: string
-          team_id?: string | null
           organization_id?: string | null
           updated_at?: string | null
         }
@@ -201,7 +196,6 @@ export interface Database {
           id?: string
           created_at?: string | null
           slack_user_id?: string
-          team_id?: string | null
           organization_id?: string | null
           updated_at?: string | null
         }

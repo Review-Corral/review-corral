@@ -42,3 +42,13 @@ ALTER TABLE "username_mappings" ALTER COLUMN "updated_at" SET DEFAULT now();
 ALTER TABLE "slack_integration" ALTER COLUMN "updated_at" SET DEFAULT now();
 
 ALTER TABLE "users" ALTER COLUMN "updated_at" SET DEFAULT now();
+
+-- 
+-- Remove team stuff
+--
+ALTER TABLE "username_mappings" DROP COLUMN "team_id";
+
+ALTER TABLE "github_repositories" DROP COLUMN "team_id";
+
+ALTER TABLE "github_repositories" ALTER COLUMN "updated_at" SET DEFAULT now();
+ALTER TABLE "github_repositories" ALTER COLUMN "repository_id" TYPE bigint USING (repository_id::bigint);

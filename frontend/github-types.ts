@@ -1,4 +1,4 @@
-export interface InstallationReposiroties {
+export interface InstallationRepositories {
   total_count: number;
   repository_selection: string;
   repositories: Repository[];
