@@ -43,13 +43,20 @@ export async function getInstallationAccessToken(
 ): Promise<InstallationAccessResponse> {
   const jwtToken = jwt || (await getJwt());
 
-  return (
-    await axios.post<InstallationAccessResponse>(
+  console.log("Got JWT token: ");
+  console.log(jwtToken.compact());
+
+  return axios
+    .post<InstallationAccessResponse>(
       `https://api.github.com/app/installations/${installationId}/access_tokens`,
       null,
       {
         headers: { Authorization: `Bearer ${jwtToken.compact()}` },
       },
     )
-  ).data;
+    .then((response) => response.data)
+    .catch((error) => {
+      console.error("Got error getting installation access token: ", error);
+      throw Error("Issue getting installation access token");
+    });
 }

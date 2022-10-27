@@ -6,12 +6,14 @@ import { withInstallations } from "../views/withInstallations";
 const HomeView = () => {
   const { data, isLoading } = useInstallations();
 
+  // TODO: should load organizations here instead
+
   console.log("Got data: ", data);
   return (
     <DashboardLayout title="Home">
       <div className="flex flex-col gap-2">
         {data?.installations.map((installation) => (
-          <Link key={installation.id} href={`/org/${installation.id}`}>
+          <Link key={installation.id} href={`/org/${installation.account.id}`}>
             <div className="flex items-center space-x-2">
               <div className="rounded-md overflow-hidden">
                 <img

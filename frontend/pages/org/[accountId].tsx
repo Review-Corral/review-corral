@@ -1,13 +1,20 @@
 import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import type { NextPage } from "next";
 import { Github } from "../../components/assets/icons/Github";
-import { useInstallations } from "../../components/hooks/useInstallations";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
-import { InstalledRepos } from "../../components/teams/repos/InstalledRepos";
+import { useGetInstallationRepos } from "../../components/teams/repos/useGetInstallationRepos";
+import { flattenParam } from "../../components/utils/flattenParam";
 import { Database } from "../../database-types";
 
-export const OrgView: NextPage<{ orgId: string }> = ({ orgId }) => {
-  const installations = useInstallations();
+export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
+
+export const OrgView: NextPage<{ organization: Organization }> = ({
+  organization,
+}) => {
+  // const installations = useInstallations();
+  const repositories = useGetInstallationRepos(organization.installation_id);
+
+  console.log("Got organization", organization);
 
   return (
     <DashboardLayout title={"Org View"}>
@@ -19,7 +26,7 @@ export const OrgView: NextPage<{ orgId: string }> = ({ orgId }) => {
               <span className="font-semibold text-lg">Github Integration</span>
             </div>
             <div className="px-4 py-6">
-              <InstalledRepos teamId={teamId} />
+              {/* <InstalledRepos teamId={teamId} /> */}
             </div>
           </div>
         </div>
@@ -46,9 +53,35 @@ export default OrgView;
 
 export const getServerSideProps = withPageAuth<Database, "public">({
   redirectTo: "/login",
-  async getServerSideProps(ctx, _) {
-    const orgId = ctx.params?.["orgId"];
+  async getServerSideProps(ctx, supabaseClient) {
+    const accountId = flattenParam(ctx.params?.["accountId"]);
 
-    return { props: { orgId } };
+    console.log("In getserversideprops", accountId);
+
+    if (!accountId) {
+      return {
+        notFound: true,
+      };
+    }
+
+    const { data, error } = await supabaseClient
+      .from("organizations")
+      .select("*")
+      .eq("account_id", accountId);
+
+    console.log("Got data", data);
+    console.log("Got error: ", error);
+
+    if (error) return ctx.res.status(500).json({ error: error.message });
+
+    if (!data || data.length === 0) {
+      return {
+        notFound: true,
+      };
+    }
+
+    console.log("Going to return organization: ", data[0]);
+
+    return { props: { organization: data[0] } };
   },
 });

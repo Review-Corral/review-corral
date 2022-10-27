@@ -4,7 +4,7 @@ import { ErrorAlert } from "../../common/alerts/Error";
 import { Toggle } from "../../common/Toggle";
 import { getGithubAuthorizationUrl } from "../../GithubButton";
 import { useDeleteSyncedRepo } from "./useDeleteSyncedRepo";
-import { useGetInstalledRepos } from "./useGetInstalledRepos";
+import { useGetInstallationRepos } from "./useGetInstallationRepos";
 import { useGetSyncedRepos } from "./useGetSyncedRepos";
 import { useSyncRepo } from "./useSyncRepo";
 
@@ -15,7 +15,7 @@ interface InstalledReposContentProps {
 export const InstalledReposContent: FC<InstalledReposContentProps> = ({
   teamId,
 }) => {
-  const getInstalledRepos = useGetInstalledRepos(teamId);
+  const getInstalledRepos = useGetInstallationRepos(teamId);
   const getSyncedRepos = useGetSyncedRepos(teamId);
   const syncRepo = useSyncRepo(teamId);
   const deleteSyncedRepo = useDeleteSyncedRepo(teamId);
