@@ -2,7 +2,7 @@ import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import type { NextPage } from "next";
 import { Github } from "../../components/assets/icons/Github";
 import { DashboardLayout } from "../../components/layout/DashboardLayout";
-import { useGetInstallationRepos } from "../../components/teams/repos/useGetInstallationRepos";
+import { InstalledRepos } from "../../components/teams/repos/InstalledRepos";
 import { flattenParam } from "../../components/utils/flattenParam";
 import { Database } from "../../database-types";
 
@@ -12,7 +12,7 @@ export const OrgView: NextPage<{ organization: Organization }> = ({
   organization,
 }) => {
   // const installations = useInstallations();
-  const repositories = useGetInstallationRepos(organization.installation_id);
+  // const repositories = useGetInstallationRepos(organization.installation_id);
 
   console.log("Got organization", organization);
 
@@ -26,7 +26,7 @@ export const OrgView: NextPage<{ organization: Organization }> = ({
               <span className="font-semibold text-lg">Github Integration</span>
             </div>
             <div className="px-4 py-6">
-              {/* <InstalledRepos teamId={teamId} /> */}
+              <InstalledRepos installationId={organization.installation_id} />
             </div>
           </div>
         </div>
@@ -72,7 +72,7 @@ export const getServerSideProps = withPageAuth<Database, "public">({
     console.log("Got data", data);
     console.log("Got error: ", error);
 
-    if (error) return ctx.res.status(500).json({ error: error.message });
+    // if (error) return ctx.res.s(500).json({ error: error.message });
 
     if (!data || data.length === 0) {
       return {

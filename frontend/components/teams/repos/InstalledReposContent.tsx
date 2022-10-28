@@ -1,95 +1,88 @@
 import { FC } from "react";
-import toast from "react-hot-toast";
-import { ErrorAlert } from "../../common/alerts/Error";
 import { Toggle } from "../../common/Toggle";
-import { getGithubAuthorizationUrl } from "../../GithubButton";
-import { useDeleteSyncedRepo } from "./useDeleteSyncedRepo";
 import { useGetInstallationRepos } from "./useGetInstallationRepos";
-import { useGetSyncedRepos } from "./useGetSyncedRepos";
-import { useSyncRepo } from "./useSyncRepo";
 
 interface InstalledReposContentProps {
-  teamId: string;
+  installationId: number;
 }
 
 export const InstalledReposContent: FC<InstalledReposContentProps> = ({
-  teamId,
+  installationId,
 }) => {
-  const getInstalledRepos = useGetInstallationRepos(teamId);
-  const getSyncedRepos = useGetSyncedRepos(teamId);
-  const syncRepo = useSyncRepo(teamId);
-  const deleteSyncedRepo = useDeleteSyncedRepo(teamId);
+  const getInstalledRepos = useGetInstallationRepos(installationId);
+  // const getSyncedRepos = useGetSyncedRepos(installationId);
+  // const syncRepo = useSyncRepo(installationId);
+  // const deleteSyncedRepo = useDeleteSyncedRepo(installationId);
 
-  if (getSyncedRepos.isLoading && getInstalledRepos.isLoading) {
-    return <div>Loading installed &amp; repods</div>;
-  }
+  // if (getSyncedRepos.isLoading && getInstalledRepos.isLoading) {
+  //   return <div>Loading installed &amp; repods</div>;
+  // }
 
-  if (getInstalledRepos.error) {
-    return (
-      <ErrorAlert
-        message={"Error getting installed repositories"}
-        subMessage={
-          getInstalledRepos.error.response?.status === 401 && (
-            <>
-              Try{" "}
-              <a
-                className="underline cursor-pointer"
-                href={getGithubAuthorizationUrl(teamId).toString()}
-              >
-                re-authenticating
-              </a>
-            </>
-          )
-        }
-      />
-    );
-  }
+  // if (getInstalledRepos.error) {
+  //   return (
+  //     <ErrorAlert
+  //       message={"Error getting installed repositories"}
+  //       subMessage={
+  //         getInstalledRepos.error.response?.status === 401 && (
+  //           <>
+  //             Try{" "}
+  //             <a
+  //               className="underline cursor-pointer"
+  //               href={getGithubAuthorizationUrl(installationId).toString()}
+  //             >
+  //               re-authenticating
+  //             </a>
+  //           </>
+  //         )
+  //       }
+  //     />
+  //   );
+  // }
 
   if (!getInstalledRepos.data || getInstalledRepos.data.length === 0) {
     return <div>No installed repositories found</div>;
   }
 
-  if (!getSyncedRepos.data) {
-    throw Error("Finding synchronized repos failed.");
-  }
+  // if (!getSyncedRepos.data) {
+  //   throw Error("Finding synchronized repos failed.");
+  // }
 
   const installedRepos = getInstalledRepos.data;
-  const syncedRepos = getSyncedRepos.data;
+  // const syncedRepos = getSyncedRepos.data;
 
   return (
     <div>
       <div className="space-y-2 max-w-lg">
-        {installedRepos.map((installation) =>
-          installation.repositories.map((repo) => {
-            const syncedRepo = syncedRepos.find(
-              (s) => s.repository_id === repo.id.toString(),
-            );
-            return (
-              <div key={repo.id} className="grid grid-cols-2">
-                <div>{repo.full_name}</div>
-                <Toggle
-                  isEnabled={!!syncedRepo}
-                  onToggle={(isEnabled) => {
-                    if (isEnabled) {
-                      syncRepo
-                        .mutateAsync({
-                          teamId,
-                          repositoryName: repo.name,
-                          repositoryId: repo.id,
-                          installationId: installation.installationId,
-                        })
-                        .catch(() => toast.error("Error turning on repo"));
-                    } else {
-                      deleteSyncedRepo
-                        .mutateAsync({ repoId: repo.id.toString() })
-                        .catch(() => toast.error("Error turning off repo"));
-                    }
-                  }}
-                />
-              </div>
-            );
-          }),
-        )}
+        {installedRepos.map((repository) => {
+          // const syncedRepo = syncedRepos.find(
+          //   (s) => s.repository_id === repository.id.toString(),
+          // );
+          return (
+            <div key={repository.id} className="grid grid-cols-2">
+              <div>{repository.repository_name}</div>
+              <Toggle
+                isEnabled={true}
+                // isEnabled={!!syncedRepo}
+                onToggle={(isEnabled) => {
+                  // if (isEnabled) {
+                  //   syncRepo
+                  //     .mutateAsync({
+                  //       teamId,
+                  //       repositoryName: repo.name,
+                  //       repositoryId: repo.id,
+                  //       installationId: installation.installationId,
+                  //     })
+                  //     .catch(() => toast.error("Error turning on repo"));
+                  // } else {
+                  //   deleteSyncedRepo
+                  //     .mutateAsync({ repoId: repo.id.toString() })
+                  //     .catch(() => toast.error("Error turning off repo"));
+                  // }
+                }}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
