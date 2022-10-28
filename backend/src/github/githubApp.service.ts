@@ -6,7 +6,10 @@ import axios, { AxiosError } from "axios";
 import { PrismaService } from "src/prisma/prisma.service";
 import { TeamService } from "src/team/team.service";
 import { InstalledRepository } from "types/githubAppTypes";
-import { Installations, OrgMember } from "../../../frontend/github-types";
+import {
+  InstallationsResponse,
+  OrgMember,
+} from "../../../frontend/github-types";
 import { getInstallationAccessToken } from "./utils";
 
 export interface CreateTeamRepoBody {
@@ -143,7 +146,7 @@ export class GithubAppService {
     }
 
     return axios
-      .get<Installations>("https://api.github.com/user/installations", {
+      .get<InstallationsResponse>("https://api.github.com/user/installations", {
         headers: {
           Authorization: `token ${foundIntegration.access_token}`,
         },

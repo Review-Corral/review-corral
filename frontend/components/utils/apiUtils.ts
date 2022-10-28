@@ -43,9 +43,6 @@ export async function getInstallationAccessToken(
 ): Promise<InstallationAccessResponse> {
   const jwtToken = jwt || (await getJwt());
 
-  console.log("Got JWT token: ");
-  console.log(jwtToken.compact());
-
   return axios
     .post<InstallationAccessResponse>(
       `https://api.github.com/app/installations/${installationId}/access_tokens`,

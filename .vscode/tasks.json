@@ -15,12 +15,10 @@
         "zsh",
         "Frontend"
       ],
-      // Mark as the default build task so cmd/ctrl+shift+b will create them
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      // Try start the task on folder open
       "runOptions": {
         "runOn": "folderOpen"
       },
@@ -32,7 +30,9 @@
     {
       "label": "zsh",
       "type": "process",
-      "command": ["zsh"],
+      "command": [
+        "zsh"
+      ],
       "isBackground": true,
       "presentation": {
         "group": "main",
@@ -47,7 +47,9 @@
     {
       "label": "Supabase",
       "type": "shell",
-      "command": ["source ./supabase/.env && supabase status"],
+      "command": [
+        "source ./supabase/.env && supabase status"
+      ],
       "isBackground": true,
       "problemMatcher": [],
       "presentation": {
@@ -61,7 +63,9 @@
     {
       "label": "Frontend",
       "type": "process",
-      "command": ["zsh"],
+      "command": [
+        "zsh"
+      ],
       "isBackground": true,
       "problemMatcher": [],
       "presentation": {
@@ -72,7 +76,9 @@
     {
       "label": "ngrok github events",
       "type": "shell",
-      "command": ["ngrok http 8080 --subdomain reviewcorral"],
+      "command": [
+        "ngrok http 8080 --subdomain reviewcorral"
+      ],
       "isBackground": true,
       "icon": {
         "id": "globe",
@@ -82,12 +88,15 @@
     {
       "label": "ngrok github auth",
       "type": "shell",
-      "command": ["ngrok http 54321 --subdomain reviewcorralauth"],
+      "command": [
+        "ngrok http 54321 --subdomain reviewcorralauth"
+      ],
       "isBackground": true,
       "icon": {
         "id": "globe",
         "color": "terminal.ansiRed"
-      }
-    },
+      },
+      "problemMatcher": []
+    }
   ]
 }
