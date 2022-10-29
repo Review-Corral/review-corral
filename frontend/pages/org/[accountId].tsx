@@ -17,7 +17,10 @@ export const OrgView: NextPage<{ organization: Organization }> = ({
   console.log("Got organization", organization);
 
   return (
-    <DashboardLayout title={"Org View"}>
+    <DashboardLayout
+      title={organization.account_name}
+      activeOrganizationAccountId={organization.account_id}
+    >
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-x-64 mt-6">
         <div className="flex grow basis-6/12 flex-col space-y-6">
           <div className="rounded-md border border-gray-200">

@@ -2,9 +2,10 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { SelectorIcon } from "@heroicons/react/outline";
 import Link from "next/link";
 import { FC, Fragment } from "react";
+import { useInstallations } from "../hooks/useInstallations";
 
 export interface NavbarProps {
-  orgName?: string;
+  activeOrganizationAccountId?: number;
 }
 
 const userNavigation = [
@@ -12,7 +13,18 @@ const userNavigation = [
   { name: "Sign out", href: "/signout" },
 ];
 
-export const Navbar: FC<NavbarProps> = ({ orgName }) => {
+export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
+  const installations = useInstallations(
+    activeOrganizationAccountId !== undefined,
+  );
+
+  const activeInstallation =
+    installations.data &&
+    activeOrganizationAccountId &&
+    installations.data.installations.find(
+      (installation) => installation.account.id === activeOrganizationAccountId,
+    );
+
   return (
     <Disclosure as="nav" className="bg-[#f4f4f4]">
       {({ open }) => (
@@ -33,9 +45,18 @@ export const Navbar: FC<NavbarProps> = ({ orgName }) => {
                 <div className="md:block">
                   <div className="ml-10 flex items-baseline space-x-4"></div>
                 </div>
-                {orgName && (
+                {activeInstallation && (
                   <div className="rounded-md border border-gray-200 bg-gray-200 px-2 py-2 flex gap-2 items-center cursor-pointer">
-                    <span className="whitespace-nowrap">{orgName}</span>
+                    <div className="flex items-center space-x-2">
+                      <div className="rounded-md overflow-hidden">
+                        <img
+                          src={activeInstallation.account.avatar_url}
+                          width={32}
+                          height={32}
+                        />
+                      </div>
+                      <div>{activeInstallation.account.login}</div>
+                    </div>
                     <SelectorIcon className="h-5 w-5" />
                   </div>
                 )}

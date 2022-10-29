@@ -61,7 +61,7 @@ export const InstalledReposContent: FC<InstalledReposContentProps> = ({
             <div key={repository.id} className="grid grid-cols-2">
               <div>{repository.repository_name}</div>
               <Toggle
-                isEnabled={true}
+                isEnabled={repository.is_active}
                 // isEnabled={!!syncedRepo}
                 onToggle={(isEnabled) => {
                   // if (isEnabled) {

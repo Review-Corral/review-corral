@@ -1,0 +1,2 @@
+ALTER TABLE public.github_repositories
+    ADD COLUMN IF NOT EXISTS is_active BOOLEAN NOT NULL DEFAULT FALSE;

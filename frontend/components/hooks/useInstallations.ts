@@ -4,7 +4,7 @@ import { InstallationsResponse } from "../../github-types";
 
 export const USE_INSTALLATIONS_QUERY = "getInstallations";
 
-export const useInstallations = () => {
+export const useInstallations = (isEnabled: boolean = true) => {
   return useQuery<InstallationsResponse, AxiosError>(
     ["getInstallations"],
     async () => {
@@ -16,6 +16,7 @@ export const useInstallations = () => {
       staleTime: 1000 * 60 * 10, // 10 minutes
       cacheTime: 1000 * 60 * 60, // 60 minutes
       refetchOnMount: false,
+      enabled: isEnabled,
     },
   );
 };

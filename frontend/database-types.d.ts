@@ -40,6 +40,7 @@ export interface Database {
           installation_id: number
           updated_at: string | null
           repository_id: number
+          is_active: boolean
         }
         Insert: {
           repository_name: string
@@ -48,6 +49,7 @@ export interface Database {
           installation_id: number
           updated_at?: string | null
           repository_id: number
+          is_active?: boolean
         }
         Update: {
           repository_name?: string
@@ -56,6 +58,7 @@ export interface Database {
           installation_id?: number
           updated_at?: string | null
           repository_id?: number
+          is_active?: boolean
         }
       }
       organizations: {

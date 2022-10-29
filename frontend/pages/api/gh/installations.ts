@@ -15,7 +15,7 @@ export default withApiAuth<Database>(async function ProtectedRoute(
     return res.status(401).json({ error: "Unauthorized" });
   }
 
-  console.log("in api!!");
+  console.log("Getting installations for user", data.session.user.id);
 
   const result = await supabaseServerClient
     .from("users")

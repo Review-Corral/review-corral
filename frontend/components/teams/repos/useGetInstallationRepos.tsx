@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { Database } from "./types";
+import { Database } from "../../../database-types";
 
 type GithubRepositories =
   Database["public"]["Tables"]["github_repositories"]["Row"];
