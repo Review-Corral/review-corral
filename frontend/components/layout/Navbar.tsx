@@ -31,34 +31,36 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
         <>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between h-16">
-              <div className="flex items-center">
-                <Link href="/">
-                  <div className="flex-shrink-0">
+              <div className="flex items-center gap-4">
+                <Link href="/" className="">
+                  <div className="flex-shrink-0 hover:cursor-pointer">
                     <img
-                      className="h-8 w-8"
-                      src="https://tailwindui.com/img/logos/workflow-mark-indigo-500.svg"
+                      className="h-12 w-12"
+                      src="https://avatars.githubusercontent.com/in/203068?s=120&u=4f27b80d54a1405e10756a1dc0175d1ef3866422&v=4"
                       alt="Workflow"
                     />
                   </div>
                 </Link>
 
-                <div className="md:block">
-                  <div className="ml-10 flex items-baseline space-x-4"></div>
-                </div>
                 {activeInstallation && (
-                  <div className="rounded-md border border-gray-200 bg-gray-200 px-2 py-2 flex gap-2 items-center cursor-pointer">
-                    <div className="flex items-center space-x-2">
-                      <div className="rounded-md overflow-hidden">
-                        <img
-                          src={activeInstallation.account.avatar_url}
-                          width={32}
-                          height={32}
-                        />
-                      </div>
-                      <div>{activeInstallation.account.login}</div>
+                  <>
+                    <div className="-mt-0.5 text-3xl text-gray-400 font-extralight">
+                      /
                     </div>
-                    <SelectorIcon className="h-5 w-5" />
-                  </div>
+                    <div className="rounded-md px-2 py-2 hover:bg-gray-200 flex gap-2 items-center cursor-pointer">
+                      <div className="flex items-center space-x-2">
+                        <div className="rounded-md overflow-hidden">
+                          <img
+                            src={activeInstallation.account.avatar_url}
+                            width={32}
+                            height={32}
+                          />
+                        </div>
+                        <div>{activeInstallation.account.login}</div>
+                      </div>
+                      <SelectorIcon className="h-5 w-5" />
+                    </div>
+                  </>
                 )}
               </div>
               <div className="block">
