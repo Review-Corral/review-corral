@@ -1,5 +1,6 @@
 {
 	"dependencies": {
+		"immer": "^9.0.16",
 		"react-hot-toast": "^2.4.0"
 	}
 }
