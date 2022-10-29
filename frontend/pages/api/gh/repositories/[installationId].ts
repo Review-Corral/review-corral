@@ -14,7 +14,7 @@ export default withApiAuth<Database>(async function ProtectedRoute(
   res,
   supabaseServerClient,
 ) {
-  const installationId = Number(flattenParam(req.query.installationId));
+  const installationId: number = Number(flattenParam(req.query.installationId));
 
   if (!installationId) {
     return res.status(404);
@@ -46,29 +46,58 @@ export default withApiAuth<Database>(async function ProtectedRoute(
     );
 
     if (installationRepos.repositories.length > 0) {
-      const { data: repositories, error } = await supabaseServerClient
-        .from("github_repositories")
-        .insert(
-          installationRepos.repositories.map((repo) => {
-            return {
-              repository_id: repo.id,
-              repository_name: repo.name,
-              installation_id: installationId,
-            };
-          }),
-        )
-        .select();
+      const { data: currentRepos, error: currentReposError } =
+        await supabaseServerClient
+          .from("github_repositories")
+          .select("*")
+          .eq("installation_id", installationId);
 
-      if (error) {
-        return res.status(500);
+      if (currentReposError) {
+        console.error(
+          "Got error getting current repositories for installation: ",
+          installationId,
+          currentReposError,
+        );
+        return res.status(500).send({ error: currentReposError });
       }
 
-      return res.status(200).json(repositories);
+      type RepositoryInsertArgs =
+        Database["public"]["Tables"]["github_repositories"]["Insert"];
+
+      const { data: insertedRepositories, error: InsertReposError } =
+        await supabaseServerClient
+          .from("github_repositories")
+          .insert(
+            installationRepos.repositories
+              .map((repo) => {
+                if (!currentRepos?.find((r) => r.repository_id === repo.id)) {
+                  return {
+                    repository_id: repo.id,
+                    repository_name: repo.name,
+                    installation_id: installationId,
+                  };
+                }
+
+                return undefined;
+              })
+              .filter((r): r is RepositoryInsertArgs => r !== undefined),
+          )
+          .select();
+
+      if (InsertReposError) {
+        console.error("Got error adding new repositories: ", InsertReposError);
+        return res.status(500).end(InsertReposError);
+      }
+      const payload = [...currentRepos, ...insertedRepositories];
+      console.info("Going to return payload: ", payload);
+      return res.status(200).send(payload);
     }
 
     console.warn("No repositories found for installation");
-    return res.status(200).json([]);
+    return res.status(200).send([]);
   }
+
+  return res.status(404).end();
 });
 
 const _getReposForInstallation = async (
