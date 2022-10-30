@@ -4,7 +4,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import {
   getInstallationAccessToken,
   isValidBody,
-} from "../../../../components/utils/apiUtils";
+} from "../../../../components/api/utils/apiUtils";
 import { flattenParam } from "../../../../components/utils/flattenParam";
 import { Database } from "../../../../database-types";
 import { InstallationRepositories } from "../../../../github-types";
