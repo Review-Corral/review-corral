@@ -24,6 +24,7 @@
     "next-http-proxy-middleware": "^1.2.4",
     "njwt": "^1.2.0",
     "outline": "link:@heroicons/react/outline",
+    "querystring": "^0.2.1",
     "react": "18.1.0",
     "react-dom": "18.1.0",
     "react-hook-form": "^7.38.0",

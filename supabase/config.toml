@@ -74,4 +74,4 @@ enabled=true
 # secret="3bd2710a83e4e5373f2ec985fec1ec08fc3f1c84"
 client_id="env(GITHUB_CLIENT_ID)"
 secret="env(GITHUB_CLIENT_SECRET)"
-redirect_uri="https://reviewcorral.ngrok.io/auth/v1/callback"
+redirect_uri="https://reviewcorral.ngrok.io/api/gh/local-auth"
