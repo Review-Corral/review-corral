@@ -6,7 +6,9 @@ export default withApiSupabase(async function GithubEvents(
   res: NextApiResponse,
   supabaseClient,
 ) {
-  const { data, error } = await supabaseClient.from("users").select("*");
+  console.info("Got event: ", req.body);
 
-  return res.status(200).send({ data });
+  // const { data, error } = await supabaseClient.from("users").select("*");
+
+  return res.status(200).end();
 });

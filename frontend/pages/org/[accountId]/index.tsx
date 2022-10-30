@@ -30,7 +30,6 @@ export const OrgView: NextPage<{ organization: Organization }> = ({
               <InstalledRepos installationId={organization.installation_id} />
             </div>
           </div>
-          π
         </div>
         <div className="grow basis-6/12 flex flex-col space-y-6 min-w-[20rem]">
           <div className="rounded-md border border-gray-200">

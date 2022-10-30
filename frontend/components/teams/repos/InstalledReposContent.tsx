@@ -1,6 +1,9 @@
 import { FC } from "react";
 import { Toggle } from "../../common/Toggle";
-import { useGetInstallationRepos } from "./useGetInstallationRepos";
+import {
+  useGetInstallationRepos,
+  useMutateInstallationRepo,
+} from "./useGetInstallationRepos";
 
 interface InstalledReposContentProps {
   installationId: number;
@@ -10,6 +13,7 @@ export const InstalledReposContent: FC<InstalledReposContentProps> = ({
   installationId,
 }) => {
   const getInstalledRepos = useGetInstallationRepos(installationId);
+  const mutateRepo = useMutateInstallationRepo({ installationId });
   // const getSyncedRepos = useGetSyncedRepos(installationId);
   // const syncRepo = useSyncRepo(installationId);
   // const deleteSyncedRepo = useDeleteSyncedRepo(installationId);
@@ -64,20 +68,10 @@ export const InstalledReposContent: FC<InstalledReposContentProps> = ({
                 isEnabled={repository.is_active}
                 // isEnabled={!!syncedRepo}
                 onToggle={(isEnabled) => {
-                  // if (isEnabled) {
-                  //   syncRepo
-                  //     .mutateAsync({
-                  //       teamId,
-                  //       repositoryName: repo.name,
-                  //       repositoryId: repo.id,
-                  //       installationId: installation.installationId,
-                  //     })
-                  //     .catch(() => toast.error("Error turning on repo"));
-                  // } else {
-                  //   deleteSyncedRepo
-                  //     .mutateAsync({ repoId: repo.id.toString() })
-                  //     .catch(() => toast.error("Error turning off repo"));
-                  // }
+                  mutateRepo.mutate({
+                    repositoryId: repository.repository_id,
+                    isActive: isEnabled,
+                  });
                 }}
               />
             </div>

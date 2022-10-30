@@ -9,7 +9,7 @@ import { flattenParam } from "../../../../components/utils/flattenParam";
 import { Database } from "../../../../database-types";
 import { InstallationRepositories } from "../../../../github-types";
 
-type GetRepositoriesRequest = {
+export type PutRepositoryArgs = {
   repositoryId: number;
   isActive: boolean;
 };
@@ -34,7 +34,7 @@ export default withApiAuth<Database>(async function ProtectedRoute(
   }
 
   if (req.method === "PUT") {
-    return _handlePostRequest(req, res, supabaseServerClient, installationId);
+    return _handlePutRequest(req, res, supabaseServerClient, installationId);
   }
 
   return res.status(404).end();
@@ -118,7 +118,7 @@ const _handleGetRequest = async (
   return res.status(200).send({ data: [] });
 };
 
-const _handlePostRequest = async (
+const _handlePutRequest = async (
   req: NextApiRequest,
   res: NextApiResponse<ApiResponseType>,
   supabaseServerClient: SupabaseClient<Database>,
@@ -129,9 +129,7 @@ const _handlePostRequest = async (
     installationId,
   );
 
-  if (
-    !isValidBody<GetRepositoriesRequest>(req.body, ["repositoryId", "isActive"])
-  ) {
+  if (!isValidBody<PutRepositoryArgs>(req.body, ["repositoryId", "isActive"])) {
     return res.status(402).send({ error: "Invalid body" });
   }
 
@@ -143,6 +141,8 @@ const _handlePostRequest = async (
   if (error) {
     return res.status(400).send({ error });
   }
+
+  return res.status(200).send({ data: null });
 };
 
 const _getReposForInstallation = async (
