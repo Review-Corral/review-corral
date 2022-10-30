@@ -11,13 +11,17 @@ export type SlackIntegration = {
   updated_at: Date | null;
 };
 
-export const useSlackIntegrations = (teamId: string) => {
+export const useSlackIntegrations = ({
+  organizationId,
+}: {
+  organizationId: string;
+}) => {
   return useQuery<SlackIntegration[] | undefined, AxiosError>(
-    ["getSlackIntegrations", teamId],
+    ["getSlackIntegrations", organizationId],
     async () => {
       return (
         await axios.get<SlackIntegration[] | undefined>(
-          `/api/proxy/slack/integrations?teamId=${teamId}`,
+          `/api/slack/${organizationId}/integrations`,
         )
       ).data;
     },

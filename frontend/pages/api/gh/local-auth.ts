@@ -7,5 +7,6 @@ export default withApiAuth<Database>(async function ProtectedRoute(
   res,
   _,
 ) {
+  console.log("Got request to GET /api/gh/local-auth");
   res.redirect(307, "http://localhost:54321/auth/v1/callback");
 });

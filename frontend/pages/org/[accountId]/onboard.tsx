@@ -1,27 +1,27 @@
 import { CheckCircleIcon } from "@heroicons/react/outline";
-import { User, withPageAuth } from "@supabase/auth-helpers-nextjs";
+import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import { NextPage } from "next";
+import { Organization } from ".";
 import { Github } from "../../../components/assets/icons/Github";
 import { Slack } from "../../../components/assets/icons/Slack";
 import Button from "../../../components/buttons/Button";
 import GithubButton from "../../../components/GithubButton";
+import { useInstallations } from "../../../components/hooks/useInstallations";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import SlackButton from "../../../components/SlackButton";
-import { useGithubIntegration } from "../../../components/teams/github/useGetGithubIntegration";
 import { useSlackIntegrations } from "../../../components/teams/slack/useSlackIntegrations";
 import { useTeams } from "../../../components/teams/useTeams";
 import { flattenParam } from "../../../components/utils/flattenParam";
 
-interface indexProps {
-  user: User;
-  teamId: string;
-}
-
-const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
+const TeamPage: NextPage<{ organization: Organization }> = ({
+  organization,
+}) => {
   const teams = useTeams();
 
-  const githubIntegration = useGithubIntegration(teamId);
-  const slackIntegration = useSlackIntegrations(teamId);
+  const githubIntegration = useInstallations();
+  const slackIntegration = useSlackIntegrations({
+    organizationId: organization.id,
+  });
 
   console.log(githubIntegration.error?.response?.status);
 
@@ -29,13 +29,9 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
     return <div>Loading team...</div>;
   }
 
-  const team = teams?.data?.find((team) => team.id === teamId);
+  const connectedToGithub =
+    githubIntegration.data && githubIntegration.data.total_count > 0;
 
-  if (!team) {
-    throw Error("Couldn't find team");
-  }
-
-  const connectedToGithub = githubIntegration.data && githubIntegration.data.id;
   const connectedToSlack =
     slackIntegration.data &&
     slackIntegration.data.length > 0 &&
@@ -44,7 +40,7 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
   console.log(githubIntegration.data);
 
   return (
-    <DashboardLayout title="Onboard" orgName={team.name ?? undefined}>
+    <DashboardLayout title="Onboard">
       <h4>let's get your integrations setup</h4>
       <div className="flex flex-col gap-y-6 mt-6">
         <div className="flex grow basis-6/12 flex-col space-y-6">
@@ -63,7 +59,7 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
                 </div>
               </Button>
             ) : (
-              <GithubButton state={teamId} />
+              <GithubButton state={organization.id} />
             )}
           </div>
         </div>
@@ -83,7 +79,7 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
                 </div>
               </Button>
             ) : (
-              <SlackButton teamId={teamId} />
+              <SlackButton teamId={organization.id} />
             )}
           </div>
         </div>
@@ -97,15 +93,30 @@ export default TeamPage;
 
 export const getServerSideProps = withPageAuth({
   redirectTo: "/login",
-  async getServerSideProps({ params }) {
-    const teamId = flattenParam(params?.teamId);
+  async getServerSideProps(ctx, supabaseClient) {
+    const accountId = flattenParam(ctx.params?.accountId);
 
-    console.log("Got teamId", teamId);
+    if (!accountId) {
+      return {
+        notFound: true,
+      };
+    }
 
-    return {
-      props: {
-        teamId,
-      },
-    };
+    const { data, error } = await supabaseClient
+      .from("organizations")
+      .select("*")
+      .eq("account_id", accountId);
+
+    if (error) {
+      throw Error(error.message);
+    }
+
+    if (!data || data.length === 0) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return { props: { organization: data[0] } };
   },
 });

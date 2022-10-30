@@ -1,34 +1,23 @@
-import { User, withPageAuth } from "@supabase/auth-helpers-nextjs";
-import { NextPage } from "next";
+import { withPageAuth } from "@supabase/auth-helpers-nextjs";
+import type { NextPage } from "next";
 import { Github } from "../../../components/assets/icons/Github";
 import { Slack } from "../../../components/assets/icons/Slack";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { InstalledRepos } from "../../../components/teams/repos/InstalledRepos";
 import { SlackIntegrations } from "../../../components/teams/slack/SlackIntegrations";
-import { UsernameMappings } from "../../../components/teams/slack/username-mappings/UsernameMappings";
-import { useTeams } from "../../../components/teams/useTeams";
 import { flattenParam } from "../../../components/utils/flattenParam";
+import { Database } from "../../../database-types";
 
-interface indexProps {
-  user: User;
-  teamId: string;
-}
+export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 
-const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
-  const teams = useTeams();
-
-  if (teams.isLoading) {
-    return <div>Loading team...</div>;
-  }
-
-  const team = teams?.data?.find((team) => team.id === teamId);
-
-  if (!team) {
-    throw Error("Couldn't find team");
-  }
-
+export const OrgView: NextPage<{ organization: Organization }> = ({
+  organization,
+}) => {
   return (
-    <DashboardLayout title="Dashboard" orgName={team.name ?? undefined}>
+    <DashboardLayout
+      title={organization.account_name}
+      activeOrganizationAccountId={organization.account_id}
+    >
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-x-64 mt-6">
         <div className="flex grow basis-6/12 flex-col space-y-6">
           <div className="rounded-md border border-gray-200">
@@ -37,9 +26,11 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
               <span className="font-semibold text-lg">Github Integration</span>
             </div>
             <div className="px-4 py-6">
-              <InstalledRepos teamId={teamId} />
+              {/* TODO: should we be using this installation ID actually? */}
+              <InstalledRepos installationId={organization.installation_id} />
             </div>
           </div>
+          π
         </div>
         <div className="grow basis-6/12 flex flex-col space-y-6 min-w-[20rem]">
           <div className="rounded-md border border-gray-200">
@@ -48,31 +39,46 @@ const TeamPage: NextPage<indexProps> = ({ user, teamId }) => {
               <span className="font-semibold text-lg">Slack Integration</span>
             </div>
             <div className="px-4 py-6">
-              <SlackIntegrations teamId={teamId} />
+              <SlackIntegrations organizationId={organization.id} />
             </div>
           </div>
         </div>
       </div>
-      <div className="mt-6">
+      {/* <div className="mt-6">
         <UsernameMappings teamId={teamId} />
-      </div>
+      </div> */}
     </DashboardLayout>
   );
 };
 
-export default TeamPage;
+export default OrgView;
 
-export const getServerSideProps = withPageAuth({
+export const getServerSideProps = withPageAuth<Database, "public">({
   redirectTo: "/login",
-  async getServerSideProps({ params }) {
-    const teamId = flattenParam(params?.teamId);
+  async getServerSideProps(ctx, supabaseClient) {
+    const accountId = flattenParam(ctx.params?.["accountId"]);
 
-    console.log("Got teamId", teamId);
+    if (!accountId) {
+      return {
+        notFound: true,
+      };
+    }
 
-    return {
-      props: {
-        teamId,
-      },
-    };
+    const { data, error } = await supabaseClient
+      .from("organizations")
+      .select("*")
+      .eq("account_id", accountId);
+
+    if (error) {
+      throw Error(error.message);
+    }
+
+    if (!data || data.length === 0) {
+      return {
+        notFound: true,
+      };
+    }
+
+    return { props: { organization: data[0] } };
   },
 });

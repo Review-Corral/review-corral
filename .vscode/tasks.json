@@ -74,7 +74,7 @@
       }
     },
     {
-      "label": "ngrok github events",
+      "label": "ngrok ",
       "type": "shell",
       "command": [
         "ngrok http 8080 --subdomain reviewcorral"
@@ -85,18 +85,5 @@
         "color": "terminal.ansiRed"
       }
     },
-    {
-      "label": "ngrok github auth",
-      "type": "shell",
-      "command": [
-        "ngrok http 54321 --subdomain reviewcorralauth"
-      ],
-      "isBackground": true,
-      "icon": {
-        "id": "globe",
-        "color": "terminal.ansiRed"
-      },
-      "problemMatcher": []
-    }
   ]
 }

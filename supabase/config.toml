@@ -42,7 +42,7 @@ file_size_limit = "50MiB"
 # in emails.
 site_url = "http://localhost:3000"
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://localhost:3000", "http://localhost:54321/auth/v1/callback", "https://reviewcorralauth.ngrok.io"]
+additional_redirect_urls = ["https://reviewcorral.ngrok.io"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 seconds (one
 # week).
 jwt_expiry = 3600
@@ -74,4 +74,4 @@ enabled=true
 # secret="3bd2710a83e4e5373f2ec985fec1ec08fc3f1c84"
 client_id="env(GITHUB_CLIENT_ID)"
 secret="env(GITHUB_CLIENT_SECRET)"
-redirect_uri="https://reviewcorralauth.ngrok.io/auth/v1/callback"
+redirect_uri="https://reviewcorral.ngrok.io/auth/v1/callback"
