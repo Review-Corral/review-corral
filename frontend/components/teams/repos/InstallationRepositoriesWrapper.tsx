@@ -1,5 +1,5 @@
 import { FC } from "react";
-import { InstalledReposContent } from "./InstalledReposContent";
+import { InstalledReposContent } from "./InstallationRepositories";
 
 interface InstalledReposProps {
   installationId: number;

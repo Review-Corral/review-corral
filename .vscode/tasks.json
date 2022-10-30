@@ -77,7 +77,7 @@
       "label": "ngrok ",
       "type": "shell",
       "command": [
-        "ngrok http 8080 --subdomain reviewcorral"
+        "ngrok http 3000 --subdomain reviewcorral"
       ],
       "isBackground": true,
       "icon": {

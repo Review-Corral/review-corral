@@ -3,7 +3,7 @@ import type { NextPage } from "next";
 import { Github } from "../../../components/assets/icons/Github";
 import { Slack } from "../../../components/assets/icons/Slack";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
-import { InstalledRepos } from "../../../components/teams/repos/InstalledRepos";
+import { InstalledRepos } from "../../../components/teams/repos/InstallationRepositoriesWrapper";
 import { SlackIntegrations } from "../../../components/teams/slack/SlackIntegrations";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { Database } from "../../../database-types";

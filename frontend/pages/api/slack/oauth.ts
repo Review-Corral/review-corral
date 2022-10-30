@@ -1,6 +1,7 @@
 import axios from "axios";
 import { isValidBody } from "../../../components/api/utils/apiUtils";
 import withApiSupabase from "../../../components/api/utils/withApiSupabase";
+import { flattenParam } from "../../../components/utils/flattenParam";
 import { Database } from "../../../database-types";
 
 export type SlackAuthQueryParams = {
@@ -35,10 +36,10 @@ export default withApiSupabase<Database>(async function ProtectedRoute(
   supabaseServerClient,
 ) {
   if (
-    req.method === "GET" ||
-    !isValidBody<SlackAuthQueryParams>(req.body, ["code", "state"])
+    req.method === "GET" &&
+    isValidBody<SlackAuthQueryParams>(req.query, ["code", "state"])
   ) {
-    console.info("Got request to GET /api/slack");
+    console.info("Got request to GET /api/slack: ", req.query);
     axios
       .postForm<
         {
@@ -49,19 +50,20 @@ export default withApiSupabase<Database>(async function ProtectedRoute(
         },
         { data: SlackAuthEvent }
       >("https://slack.com/api/oauth.v2.access", {
-        client_id: process.env.SLACK_BOT_ID,
-        code: req.body.code,
+        client_id: process.env.NEXT_PUBLIC_SLACK_BOT_ID,
+        code: req.query.code,
         client_secret: process.env.SLACK_CLIENT_SECRET,
         redirect_uri: process.env.SLACK_REDIRECT_URL,
       })
       .then(async ({ data }) => {
+        console.log("got data back: ", data);
         const { error } = await supabaseServerClient
           .from("slack_integration")
           .insert({
             access_token: data.access_token,
             channel_id: data.incoming_webhook.channel_id,
             channel_name: data.incoming_webhook.channel,
-            organization_id: req.body.state,
+            organization_id: flattenParam(req.query.state),
             slack_team_name: data.team.name,
             slack_team_id: data.team.id,
           });
@@ -81,6 +83,9 @@ export default withApiSupabase<Database>(async function ProtectedRoute(
         );
         return res.status(500).end();
       });
+    return res
+      .redirect(`${process.env.NEXT_PUBLIC_BASE_URL!}/org/${req.query.state}`)
+      .end();
   } else {
     return res.status(404);
   }

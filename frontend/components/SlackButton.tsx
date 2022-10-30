@@ -1,29 +1,36 @@
-import { useRouter } from "next/router";
+import Link from "next/link";
 import React from "react";
 import Button from "./buttons/Button";
-import { Team } from "./teams/useTeams";
 
 interface SlackButtonProps {
-  teamId: Team["id"];
+  organizationId: string;
 }
 
-const SlackButton: React.FC<SlackButtonProps> = ({ teamId }) => {
-  const router = useRouter();
+const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
+  if (!process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL) {
+    throw Error("NEXT_PUBLIC_SLACK_REDIRECT_URL not set");
+  }
 
-  const redirectURI = process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL;
-  console.log("Slack button redirect URI", redirectURI);
+  if (!process.env.NEXT_PUBLIC_SLACK_BOT_ID) {
+    throw Error("NEXT_PUBLIC_SLACK_BOT_ID not set");
+  }
+
+  const searchParams = new URLSearchParams({
+    state: organizationId,
+    redirect_uri: process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL,
+    client_id: process.env.NEXT_PUBLIC_SLACK_BOT_ID,
+    scope:
+      "channels:history,chat:write,commands,groups:history,incoming-webhook,users:read",
+    user_scope: "",
+  });
 
   return (
     <div>
-      <Button
-        onClick={() =>
-          window.open(
-            `https://slack.com/oauth/v2/authorize?scope=channels%3Ahistory%2Cchat%3Awrite%2Ccommands%2Cgroups%3Ahistory%2Cincoming-webhook%2Cusers%3Aread&user_scope=&redirect_uri=${redirectURI}&state=${teamId}&client_id=3571046828385.3558423656162`,
-          )
-        }
+      <Link
+        href={`https://slack.com/oauth/v2/authorize?${searchParams.toString()}`}
       >
-        Connect to Slack
-      </Button>
+        <Button>Connect to Slack</Button>
+      </Link>
     </div>
   );
 };

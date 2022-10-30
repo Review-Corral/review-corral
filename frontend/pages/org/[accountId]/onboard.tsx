@@ -10,24 +10,17 @@ import { useInstallations } from "../../../components/hooks/useInstallations";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import SlackButton from "../../../components/SlackButton";
 import { useSlackIntegrations } from "../../../components/teams/slack/useSlackIntegrations";
-import { useTeams } from "../../../components/teams/useTeams";
 import { flattenParam } from "../../../components/utils/flattenParam";
 
 const TeamPage: NextPage<{ organization: Organization }> = ({
   organization,
 }) => {
-  const teams = useTeams();
-
   const githubIntegration = useInstallations();
   const slackIntegration = useSlackIntegrations({
     organizationId: organization.id,
   });
 
   console.log(githubIntegration.error?.response?.status);
-
-  if (teams.isLoading) {
-    return <div>Loading team...</div>;
-  }
 
   const connectedToGithub =
     githubIntegration.data && githubIntegration.data.total_count > 0;
@@ -79,7 +72,7 @@ const TeamPage: NextPage<{ organization: Organization }> = ({
                 </div>
               </Button>
             ) : (
-              <SlackButton teamId={organization.id} />
+              <SlackButton organizationId={organization.id} />
             )}
           </div>
         </div>
