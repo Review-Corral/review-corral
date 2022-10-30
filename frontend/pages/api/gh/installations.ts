@@ -2,7 +2,7 @@ import { withApiAuth } from "@supabase/auth-helpers-nextjs";
 import { PostgrestResponse } from "@supabase/supabase-js";
 import axios from "axios";
 import { Database } from "../../../database-types";
-import { InstallationsResponse } from "../../../github-types";
+import { InstallationsResponse } from "../../../github-api-types";
 
 export default withApiAuth<Database>(async function ProtectedRoute(
   req,
@@ -12,23 +12,31 @@ export default withApiAuth<Database>(async function ProtectedRoute(
   const { data } = await supabaseServerClient.auth.getSession();
 
   if (!data?.session?.user?.id) {
-    return res.status(401).json({ error: "Unauthorized" });
+    return res.status(401).send({ error: "Unauthorized" });
   }
 
   console.log("Getting installations for user", data.session.user.id);
 
-  const result = await supabaseServerClient
+  const { data: user, error } = await supabaseServerClient
     .from("users")
     .select("*")
-    .eq("id", data.session.user.id);
+    .eq("id", data.session.user.id)
+    .single();
+
+  if (!user) {
+    return res.status(404).send({
+      error: `No user in user found for id: ${data.session.user.id} ${
+        error && ". Error: " + error.message
+      }`,
+    });
+  }
 
   // Run queries with RLS on the server
-
   const reponse = await axios.get<InstallationsResponse>(
     "https://api.github.com/user/installations",
     {
       headers: {
-        Authorization: `token ${result?.data?.[0].gh_access_token}`,
+        Authorization: `token ${user.gh_access_token}`,
       },
     },
   );
@@ -37,7 +45,7 @@ export default withApiAuth<Database>(async function ProtectedRoute(
   const organizations = await supabaseServerClient
     .from("users_and_organizations")
     .select("user_id, organizations(account_id, id, installation_id)")
-    .eq("user_id", data?.session?.user?.id);
+    .eq("user_id", user.id);
 
   if (organizations.data !== null) {
     for (const installation of reponse.data.installations) {
@@ -58,7 +66,7 @@ export default withApiAuth<Database>(async function ProtectedRoute(
           .eq("id", foundInstallation.orgId);
 
         if (error) {
-          res.status(500).json({
+          res.status(500).send({
             error: `Error updating org installation id: ${error.message}`,
           });
         }
@@ -78,17 +86,17 @@ export default withApiAuth<Database>(async function ProtectedRoute(
         if (error) {
           res
             .status(500)
-            .json({ error: `Error creating org: ${error.message}` });
+            .send({ error: `Error creating org: ${error.message}` });
         }
 
         if (newOrg) {
           await supabaseServerClient
             .from("users_and_organizations")
             .insert({
-              user_id: data.session.user.id,
+              user_id: user.id,
               org_id: newOrg[0].id,
             })
-            .eq("user_id", data?.session?.user?.id);
+            .eq("user_id", user.id);
         }
       }
     }

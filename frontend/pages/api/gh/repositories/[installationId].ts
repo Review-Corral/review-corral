@@ -7,7 +7,7 @@ import {
 } from "../../../../components/api/utils/apiUtils";
 import { flattenParam } from "../../../../components/utils/flattenParam";
 import { Database } from "../../../../database-types";
-import { InstallationRepositories } from "../../../../github-types";
+import { InstallationRepositories } from "../../../../github-api-types";
 
 export type PutRepositoryArgs = {
   repositoryId: number;

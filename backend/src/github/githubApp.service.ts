@@ -9,7 +9,7 @@ import { InstalledRepository } from "types/githubAppTypes";
 import {
   InstallationsResponse,
   OrgMember,
-} from "../../../frontend/github-types";
+} from "../../../frontend/github-api-types";
 import { getInstallationAccessToken } from "./utils";
 
 export interface CreateTeamRepoBody {

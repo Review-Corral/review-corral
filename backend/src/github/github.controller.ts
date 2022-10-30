@@ -12,7 +12,7 @@ import {
 import { github_integration } from "@prisma/client";
 import { LocalAuthGuard } from "src/auth/local-auth.guard";
 import { GithubEvent } from "types/githubEventTypes";
-import { OrgMember } from "../../../frontend/github-types";
+import { OrgMember } from "../../../frontend/github-api-types";
 import { GithubService } from "./github.service";
 import {
   CreateTeamRepoBody,

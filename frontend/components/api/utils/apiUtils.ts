@@ -1,6 +1,6 @@
 import axios from "axios";
 import * as nJwt from "njwt";
-import { InstallationAccessResponse } from "../../../github-types";
+import { InstallationAccessResponse } from "../../../github-api-types";
 
 export function isValidBody<T extends Record<string, unknown>>(
   body: any,

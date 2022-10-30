@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { InstallationsResponse } from "../../github-types";
+import { InstallationsResponse } from "../../github-api-types";
 
 export const USE_INSTALLATIONS_QUERY = "getInstallations";
 
