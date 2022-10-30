@@ -13,12 +13,18 @@ export default withApiAuth<Database>(async function ProtectedRoute(
     return res.status(400).send({ error: "Missing organization Id" });
   }
 
+  console.info(
+    "Got request for Slack integrations for organization ID: ",
+    orgId,
+  );
+
   const { data, error } = await supabaseServerClient
-    .from("slack_integrations")
+    .from("slack_integration")
     .select("*")
-    .eq("orgId", orgId);
+    .eq("organization_id", orgId);
 
   if (error) {
+    console.error("Error getting Slack integrations: ", error);
     return res.status(500).send({ error: error.message });
   }
 

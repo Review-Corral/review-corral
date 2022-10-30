@@ -8,7 +8,7 @@ interface SlackIntegrationsProps {
 export const SlackIntegrations: FC<SlackIntegrationsProps> = ({
   organizationId,
 }) => {
-  const slackIntegrations = useSlackIntegrations(organizationId);
+  const slackIntegrations = useSlackIntegrations({ organizationId });
   // const usernameMapping = useGetUsernameMappings(teamId);
 
   if (slackIntegrations.isLoading) {
