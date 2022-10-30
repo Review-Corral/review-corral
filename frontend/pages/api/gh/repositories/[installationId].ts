@@ -56,6 +56,22 @@ const _handleGetRequest = async (
     installationId,
   );
 
+  const { data: organizationData, error: organizationError } =
+    await supabaseServerClient
+      .from("organizations")
+      .select("id")
+      .eq("installation_id", installationId)
+      .limit(1)
+      .single();
+
+  if (organizationError) {
+    return res.status(500).send({ error: organizationError });
+  }
+
+  if (!organizationData?.id) {
+    return res.status(404).send({ error: "Organization not found" });
+  }
+
   const installationAccessToken = await getInstallationAccessToken(
     installationId,
   );
@@ -96,6 +112,7 @@ const _handleGetRequest = async (
                   repository_id: repo.id,
                   repository_name: repo.name,
                   installation_id: installationId,
+                  organization_id: organizationData.id,
                 };
               }
 
