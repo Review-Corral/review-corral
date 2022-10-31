@@ -118,40 +118,40 @@ export interface Database {
       }
       slack_integration: {
         Row: {
-          access_token: string | null
-          channel_id: string | null
           id: string
-          created_at: string | null
           channel_name: string
           team_id: string | null
-          slack_team_name: string | null
-          slack_team_id: string | null
-          organization_id: string | null
-          updated_at: string | null
+          channel_id: string
+          slack_team_name: string
+          slack_team_id: string
+          organization_id: string
+          created_at: string
+          updated_at: string
+          access_token: string
         }
         Insert: {
-          access_token?: string | null
-          channel_id?: string | null
           id?: string
-          created_at?: string | null
           channel_name: string
           team_id?: string | null
-          slack_team_name?: string | null
-          slack_team_id?: string | null
-          organization_id?: string | null
-          updated_at?: string | null
+          channel_id: string
+          slack_team_name: string
+          slack_team_id: string
+          organization_id: string
+          created_at?: string
+          updated_at?: string
+          access_token: string
         }
         Update: {
-          access_token?: string | null
-          channel_id?: string | null
           id?: string
-          created_at?: string | null
           channel_name?: string
           team_id?: string | null
-          slack_team_name?: string | null
-          slack_team_id?: string | null
-          organization_id?: string | null
-          updated_at?: string | null
+          channel_id?: string
+          slack_team_name?: string
+          slack_team_id?: string
+          organization_id?: string
+          created_at?: string
+          updated_at?: string
+          access_token?: string
         }
       }
       team: {

@@ -57,3 +57,13 @@ export async function getInstallationAccessToken(
       throw Error("Issue getting installation access token");
     });
 }
+
+export const flattenType = <T>(
+  result: T | T[] | null | undefined,
+): T | null => {
+  if (Array.isArray(result)) {
+    return result[0];
+  }
+
+  return result ?? null;
+};

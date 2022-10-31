@@ -1,6 +1,9 @@
 import { WebClient } from "@slack/web-api";
 import { NextApiRequest, NextApiResponse } from "next";
+import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
+import { flattenType } from "../../../../components/api/utils/apiUtils";
 import withApiSupabase from "../../../../components/api/utils/withApiSupabase";
+import { Organization } from "../../../org/[accountId]";
 
 export default withApiSupabase(async function GithubEvents(
   req: NextApiRequest,
@@ -16,29 +19,63 @@ export default withApiSupabase(async function GithubEvents(
   ) {
     const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
-    const { data, error } = await supabaseClient
+    const { data: githubRepository, error } = await supabaseClient
       .from("github_repositories")
       .select(
         `
         id,
-        organizations (*),
+        organization:organizations (*)
       `,
       )
       .eq("repository_id", req.body.repository.id)
       .limit(1)
       .single();
 
+    const organization = flattenType<Organization>(
+      githubRepository?.organization,
+    );
+
+    if (error) {
+      console.warn("Error finding Github Repository: ", error);
+      return res.status(500).end();
+    }
+
+    if (!organization) {
+      console.warn(
+        "No organization found for repository_id: ",
+        req.body.repository_id,
+      );
+      return res.status(404).end();
+    }
+
     const { data: slackIntegration, error: slackIntegrationError } =
       await supabaseClient
         .from("slack_integration")
         .select("*")
-        .eq("team_id", req.body.repository.owner.id);
+        .eq("organization_id", req.body.repository.owner.id)
+        .limit(1)
+        .single();
 
-    // new GithubEventHandler(supabaseClient, slackClient);
+    if (slackIntegrationError) {
+      console.warn("Error finding Slack Integration: ", slackIntegrationError);
+      return res.status(500).end();
+    }
 
-    // const { data, error } = await supabaseClient.from("users").select("*");
+    if (!slackIntegration) {
+      console.warn(
+        "No Slack Integration found for organization_id: ",
+        req.body.repository.owner.id,
+      );
+      return res.status(404).end();
+    }
 
-    return res.status(200).end();
+    new GithubEventHandler(
+      supabaseClient,
+      slackClient,
+      slackIntegration.channel_id,
+      slackIntegration.access_token,
+      organization.installation_id,
+    ).handleEvent(req.body);
   }
 
   return res.status(200).end();
