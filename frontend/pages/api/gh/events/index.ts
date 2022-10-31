@@ -27,7 +27,7 @@ export default withApiSupabase(async function GithubEvents(
         organization:organizations (*)
       `,
       )
-      .eq("repository_id", req.body.repository.id)
+      .eq("repository_id", Number(req.body.repository.id))
       .limit(1)
       .single();
 
@@ -36,12 +36,12 @@ export default withApiSupabase(async function GithubEvents(
     );
 
     if (error) {
-      console.warn("Error finding Github Repository: ", error);
+      console.info("Error finding Github Repository: ", error);
       return res.status(500).end();
     }
 
     if (!organization) {
-      console.warn(
+      console.info(
         "No organization found for repository_id: ",
         req.body.repository_id,
       );
@@ -52,20 +52,12 @@ export default withApiSupabase(async function GithubEvents(
       await supabaseClient
         .from("slack_integration")
         .select("*")
-        .eq("organization_id", req.body.repository.owner.id)
+        .eq("organization_id", organization.id)
         .limit(1)
         .single();
 
     if (slackIntegrationError) {
-      console.warn("Error finding Slack Integration: ", slackIntegrationError);
-      return res.status(500).end();
-    }
-
-    if (!slackIntegration) {
-      console.warn(
-        "No Slack Integration found for organization_id: ",
-        req.body.repository.owner.id,
-      );
+      console.info("Error finding Slack Integration: ", slackIntegrationError);
       return res.status(404).end();
     }
 

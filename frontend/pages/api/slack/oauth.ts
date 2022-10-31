@@ -1,4 +1,5 @@
 import axios from "axios";
+import { ApiError } from "next/dist/server/api-utils";
 import { isValidBody } from "../../../components/api/utils/apiUtils";
 import withApiSupabase from "../../../components/api/utils/withApiSupabase";
 import { flattenParam } from "../../../components/utils/flattenParam";
@@ -35,11 +36,25 @@ export default withApiSupabase<Database>(async function ProtectedRoute(
   res,
   supabaseServerClient,
 ) {
+  if (!process.env.NEXT_PUBLIC_BASE_URL) {
+    throw new ApiError(500, "Missing NEXT_PUBLIC_BASE_URL");
+  }
+
   if (
     req.method === "GET" &&
     isValidBody<SlackAuthQueryParams>(req.query, ["code", "state"])
   ) {
     console.info("Got request to GET /api/slack: ", req.query);
+
+    const state = flattenParam(req.query.state);
+
+    if (!state) {
+      throw new ApiError(
+        500,
+        "No state (organization_id) provided in Slack integration OAuth",
+      );
+    }
+
     axios
       .postForm<
         {
@@ -56,14 +71,13 @@ export default withApiSupabase<Database>(async function ProtectedRoute(
         redirect_uri: process.env.SLACK_REDIRECT_URL,
       })
       .then(async ({ data }) => {
-        console.log("got data back: ", data);
         const { error } = await supabaseServerClient
           .from("slack_integration")
           .insert({
             access_token: data.access_token,
             channel_id: data.incoming_webhook.channel_id,
             channel_name: data.incoming_webhook.channel,
-            organization_id: flattenParam(req.query.state),
+            organization_id: state,
             slack_team_name: data.team.name,
             slack_team_id: data.team.id,
           });
@@ -83,9 +97,20 @@ export default withApiSupabase<Database>(async function ProtectedRoute(
         );
         return res.status(500).end();
       });
-    return res
-      .redirect(`${process.env.NEXT_PUBLIC_BASE_URL!}/org/${req.query.state}`)
-      .end();
+
+    const { data, error } = await supabaseServerClient
+      .from("organizations")
+      .select("*")
+      .eq("id", state)
+      .single();
+
+    if (data) {
+      return res
+        .redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/org/${data.account_id}`)
+        .end();
+    } else {
+      return res.redirect(process.env.NEXT_PUBLIC_BASE_URL).end();
+    }
   } else {
     return res.status(404);
   }

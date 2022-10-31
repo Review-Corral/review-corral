@@ -55,6 +55,7 @@ export default OrgView;
 export const getServerSideProps = withPageAuth<Database, "public">({
   redirectTo: "/login",
   async getServerSideProps(ctx, supabaseClient) {
+    console.log("In get server side props");
     const accountId = flattenParam(ctx.params?.["accountId"]);
 
     if (!accountId) {
@@ -66,18 +67,22 @@ export const getServerSideProps = withPageAuth<Database, "public">({
     const { data, error } = await supabaseClient
       .from("organizations")
       .select("*")
-      .eq("account_id", accountId);
+      .eq("account_id", accountId)
+      .limit(1)
+      .single();
 
     if (error) {
-      throw Error(error.message);
-    }
-
-    if (!data || data.length === 0) {
+      console.info(
+        "Got error getting organization by account ID ",
+        accountId,
+        ": ",
+        error,
+      );
       return {
         notFound: true,
       };
     }
 
-    return { props: { organization: data[0] } };
+    return { props: { organization: data } };
   },
 });

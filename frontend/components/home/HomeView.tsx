@@ -11,10 +11,10 @@ const HomeView = () => {
   console.log("Got data: ", data);
   return (
     <DashboardLayout title="Home">
-      <div className="flex flex-col gap-2">
+      <div className="inline-flex flex-col gap-2">
         {data?.installations.map((installation) => (
           <Link key={installation.id} href={`/org/${installation.account.id}`}>
-            <div className="flex items-center space-x-2">
+            <div className="inline-flex items-center space-x-2 cursor-pointer">
               <div className="rounded-md overflow-hidden">
                 <img
                   src={installation.account.avatar_url}

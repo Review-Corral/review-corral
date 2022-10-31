@@ -17,6 +17,7 @@ export const useInstallations = (isEnabled: boolean = true) => {
       cacheTime: 1000 * 60 * 60, // 60 minutes
       refetchOnMount: false,
       enabled: isEnabled,
+      retry: 0,
     },
   );
 };
