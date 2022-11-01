@@ -215,7 +215,7 @@ export class GithubEventHandler {
     }
 
     if (slackUserId) {
-      return `<@${slackUserId}>`;
+      return `<@${slackUserId.slack_user_id}>`;
     }
 
     return githubLogin;
