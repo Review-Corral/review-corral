@@ -1,26 +1,29 @@
+import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useQuery } from "@tanstack/react-query";
-import axios, { AxiosError } from "axios";
+import { AxiosError } from "axios";
+import { Database } from "../../../../database-types";
 
-export type UsernameMapping = {
-  id: string;
-  created_at: Date | null;
-  github_username: string;
-  slack_user_id: string;
-  team_id: string | null;
-  updated_at: Date | null;
-};
+export type UsernameMapping =
+  Database["public"]["Tables"]["username_mappings"]["Row"];
 
 export const USE_GET_USERNAME_MAPPINGS_KEY = "useGetUsernameMappings";
 
-export const useGetUsernameMappings = (teamId: string) => {
+export const useGetUsernameMappings = (organizationId: string) => {
+  const supabaseClient = useSupabaseClient<Database>();
   return useQuery<UsernameMapping[] | undefined, AxiosError>(
-    [USE_GET_USERNAME_MAPPINGS_KEY, teamId],
+    [USE_GET_USERNAME_MAPPINGS_KEY, organizationId],
     async () => {
-      return (
-        await axios.get<UsernameMapping[] | undefined>(
-          `/api/proxy/teams/username-mappings/${teamId}`,
-        )
-      ).data;
+      const { data, error } = await supabaseClient
+        .from("username_mappings")
+        .select("*")
+        .eq("organization_id", organizationId);
+
+      if (error) {
+        console.error("Error getting username mappings", error);
+        throw new Error("Error getting username mappings");
+      }
+
+      return data;
     },
   );
 };
