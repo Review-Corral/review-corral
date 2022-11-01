@@ -184,16 +184,11 @@ export class GithubEventHandler {
       token: this.slackToken,
       mrkdwn: true,
     };
-    console.debug("Posting message: ", payload);
     try {
       return this.slackClient.chat.postMessage(payload).then((response) => {
         if (!threadTs) {
           this.saveThreadTs(response, prId);
         }
-        console.debug(
-          "Posted message response payload: ",
-          JSON.stringify(response, null, 2),
-        );
         return response;
       });
     } catch (error) {

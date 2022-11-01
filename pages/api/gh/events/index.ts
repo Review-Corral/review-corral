@@ -10,8 +10,6 @@ export default withApiSupabase(async function GithubEvents(
   res: NextApiResponse,
   supabaseClient,
 ) {
-  console.info("Got event: ", req.body);
-
   if (
     req.body.pull_request &&
     req.body.pull_request.id &&
