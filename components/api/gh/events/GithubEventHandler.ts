@@ -210,7 +210,9 @@ export class GithubEventHandler {
     }
 
     if (slackUserId) {
-      return `<@${slackUserId.slack_user_id}>`;
+      const userId = `<@${slackUserId.slack_user_id}>`;
+      console.info("User id is: ", userId);
+      return userId;
     }
 
     return githubLogin;
