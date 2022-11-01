@@ -61,13 +61,17 @@ export default withApiSupabase(async function GithubEvents(
       return res.status(404).end();
     }
 
-    new GithubEventHandler(
-      supabaseClient,
-      slackClient,
-      slackIntegration.channel_id,
-      slackIntegration.access_token,
-      organization.installation_id,
-    ).handleEvent(req.body);
+    try {
+      await new GithubEventHandler(
+        supabaseClient,
+        slackClient,
+        slackIntegration.channel_id,
+        slackIntegration.access_token,
+        organization.installation_id,
+      ).handleEvent(req.body);
+    } catch (error) {
+      console.error(`Got error handling event: ${error}`);
+    }
   }
 
   return res.status(200).end();
