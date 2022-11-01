@@ -32,8 +32,10 @@ export class GithubEventHandler {
         body.action === "ready_for_review") &&
       body.pull_request
     ) {
+      console.log("Handling new PR");
       await this.handleNewPr(prId, body);
     } else {
+      console.log("Handling different event");
       await this.handleOtherEvent(body, prId);
     }
   }
