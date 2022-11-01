@@ -34,10 +34,12 @@ export default withApiAuth<Database>(async function ProtectedRoute(
     });
   }
 
-  if (organization.organization_type === "User") {
+  if (organization.organization_type !== "Organization") {
     return res
       .status(400)
-      .send({ error: "Can't get members for User organization type" });
+      .send({
+        error: "Can't get members for non-organization Organization type",
+      });
   }
 
   const installationAccessToken = await getInstallationAccessToken(

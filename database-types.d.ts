@@ -73,7 +73,9 @@ export interface Database {
           id: string;
           updated_at: string | null;
           created_at: string | null;
-          organization_type: Database["public"]["Enums"]["organization_type"];
+          organization_type:
+            | Database["public"]["Enums"]["organization_type"]
+            | null;
         };
         Insert: {
           account_name: string;
@@ -83,7 +85,9 @@ export interface Database {
           id?: string;
           updated_at?: string | null;
           created_at?: string | null;
-          organization_type?: Database["public"]["Enums"]["organization_type"];
+          organization_type?:
+            | Database["public"]["Enums"]["organization_type"]
+            | null;
         };
         Update: {
           account_name?: string;
@@ -93,7 +97,9 @@ export interface Database {
           id?: string;
           updated_at?: string | null;
           created_at?: string | null;
-          organization_type?: Database["public"]["Enums"]["organization_type"];
+          organization_type?:
+            | Database["public"]["Enums"]["organization_type"]
+            | null;
         };
       };
       pull_requests: {
