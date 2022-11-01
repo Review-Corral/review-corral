@@ -69,6 +69,7 @@ export default withApiSupabase(async function GithubEvents(
       ).handleEvent(req.body);
     } catch (error) {
       console.error(`Got error handling event: ${error}`);
+      return res.status(400).end();
     }
   }
 
