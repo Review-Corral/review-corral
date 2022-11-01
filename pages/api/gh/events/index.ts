@@ -62,7 +62,7 @@ export default withApiSupabase(async function GithubEvents(
     }
 
     try {
-      new GithubEventHandler(
+      await new GithubEventHandler(
         supabaseClient,
         slackClient,
         slackIntegration.channel_id,
