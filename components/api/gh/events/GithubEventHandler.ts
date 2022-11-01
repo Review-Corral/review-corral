@@ -13,6 +13,7 @@ import {
 } from "../../../../github-event-types";
 import { getInstallationAccessToken } from "../../utils/apiUtils";
 
+// TODO: remove this comment
 export class GithubEventHandler {
   constructor(
     private readonly supabaseClient: SupabaseClient<Database>,
