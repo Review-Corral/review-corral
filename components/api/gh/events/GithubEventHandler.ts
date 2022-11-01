@@ -48,27 +48,25 @@ export class GithubEventHandler {
       // Get all comments and post
       console.info("Installation ID: ", this.installationId);
       const accessToken = await getInstallationAccessToken(this.installationId);
-      axios
-        .get<PullRequestComment[]>(body.pull_request.comments_url, {
-          headers: {
-            Authorization: `bearer ${accessToken.token}`,
+
+      try {
+        const response = await axios.get<PullRequestComment[]>(
+          body.pull_request.comments_url,
+          {
+            headers: {
+              Authorization: `bearer ${accessToken.token}`,
+            },
           },
-        })
-        .then((response) => {
-          response.data.forEach((comment) => {
-            if (comment.user.type === "User") {
-              this.postComment(
-                prId,
-                comment.body,
-                comment.user.login,
-                threadTs,
-              );
-            }
-          });
-        })
-        .catch((error) => {
-          console.error("Error getting comments: ", error);
+        );
+
+        response.data.forEach((comment) => {
+          if (comment.user.type === "User") {
+            this.postComment(prId, comment.body, comment.user.login, threadTs);
+          }
         });
+      } catch (error) {
+        console.error("Error getting comments: ", error);
+      }
 
       // Get all requested Reviews and post
       if (body.pull_request.requested_reviewers) {
@@ -117,7 +115,7 @@ export class GithubEventHandler {
         // This means they left a comment on the PR, not an actual review comment
         return;
       }
-      this.postReview(
+      await this.postReview(
         body.pull_request.id,
         body.review,
         body.sender.login,
@@ -132,15 +130,20 @@ export class GithubEventHandler {
       body.comment &&
       body.comment.user.type === "User"
     ) {
-      this.postComment(prId, body.comment.body, body.sender.login, threadTs);
+      await this.postComment(
+        prId,
+        body.comment.body,
+        body.sender.login,
+        threadTs,
+      );
       return;
     }
 
     if (body.action === "closed") {
       if (body.pull_request.merged) {
-        this.postPrMerged(prId, body, threadTs);
+        await this.postPrMerged(prId, body, threadTs);
       } else {
-        this.postPrClosed(prId, body, threadTs);
+        await this.postPrClosed(prId, body, threadTs);
       }
     } else {
       // TODO: Improve this block
@@ -150,7 +153,7 @@ export class GithubEventHandler {
       }
 
       if (body.action === "review_requested" && body.requested_reviewer) {
-        this.postMessage({
+        await this.postMessage({
           message: {
             text: `Review request for ${await this.getSlackUserName(
               body.requested_reviewer.login,
@@ -185,12 +188,12 @@ export class GithubEventHandler {
       mrkdwn: true,
     };
     try {
-      return this.slackClient.chat.postMessage(payload).then((response) => {
-        if (!threadTs) {
-          this.saveThreadTs(response, prId);
-        }
-        return response;
-      });
+      const response = await this.slackClient.chat.postMessage(payload);
+
+      if (!threadTs) {
+        await this.saveThreadTs(response, prId);
+      }
+      return response;
     } catch (error) {
       console.log("Error posting message: ", error);
       return undefined;
@@ -338,7 +341,7 @@ export class GithubEventHandler {
     body: GithubEvent,
     threadTs: string,
   ) {
-    this.postMessage({
+    await this.postMessage({
       message: {
         text: `Pull request marked ready for review by ${await this.getSlackUserName(
           body.sender.login,
@@ -354,7 +357,7 @@ export class GithubEventHandler {
     body: GithubEvent,
     threadTs: string,
   ) {
-    this.postMessage({
+    await this.postMessage({
       message: {
         text: `Pull request closed by ${await this.getSlackUserName(
           body.sender.login,
@@ -377,7 +380,7 @@ export class GithubEventHandler {
     login: string,
     threadTs: string,
   ) {
-    this.postMessage({
+    await this.postMessage({
       message: {
         text: `${await this.getSlackUserName(login)} left a comment`,
         attachments: [
@@ -411,7 +414,7 @@ export class GithubEventHandler {
       }
     };
 
-    this.postMessage({
+    await this.postMessage({
       message: {
         text: `${await this.getSlackUserName(login)} ${getReviewText(review)}`,
         attachments: [
