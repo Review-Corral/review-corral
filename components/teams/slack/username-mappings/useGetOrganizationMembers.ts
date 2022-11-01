@@ -3,7 +3,7 @@ import axios, { AxiosError } from "axios";
 import { OrgMember } from "../../../../github-api-types";
 import { ApiResponse } from "../../../api/utils/apiBaseTypes";
 
-export const USE_GET_MEMBERS_KEY = "useGetUsernameMappings";
+export const USE_GET_MEMBERS_KEY = "useGetOrganizationMembers";
 
 export const useGetMembers = (orgId: string) => {
   return useQuery<OrgMember[] | undefined, AxiosError>(

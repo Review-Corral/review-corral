@@ -19,34 +19,30 @@ export const OrgView: NextPage<{ organization: Organization }> = ({
       title={organization.account_name}
       activeOrganizationAccountId={organization.account_id}
     >
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-x-64 mt-6">
-        <div className="flex grow basis-6/12 flex-col space-y-6">
-          <div className="rounded-md border border-gray-200">
-            <div className="flex p-4 bg-gray-100 rounded-t-md justify-between">
-              <Github className="h-8 w-8 fill-black" />
-              <span className="font-semibold text-lg">Github Integration</span>
-            </div>
-            <div className="px-4 py-6">
-              <InstalledRepos installationId={organization.installation_id} />
-            </div>
+      <div className="space-y-12">
+        <div className="rounded-md border border-gray-200">
+          <div className="flex p-4 bg-gray-100 rounded-t-md justify-between">
+            <Github className="h-8 w-8 fill-black" />
+            <span className="font-semibold text-lg">Github Integration</span>
+          </div>
+          <div className="px-4 py-6">
+            <InstalledRepos installationId={organization.installation_id} />
           </div>
         </div>
-        <div className="grow basis-6/12 flex flex-col space-y-6 min-w-[20rem]">
-          <div className="rounded-md border border-gray-200">
-            <div className="flex p-4 bg-gray-100 rounded-md justify-between">
-              <Slack className="h-8 w-8 fill-black" />
-              <span className="font-semibold text-lg">Slack Integration</span>
-            </div>
-            <div className="px-4 py-6">
-              <SlackIntegrations organizationId={organization.id} />
-            </div>
+        <div className="rounded-md border border-gray-200">
+          <div className="flex p-4 bg-gray-100 rounded-md justify-between">
+            <Slack className="h-8 w-8 fill-black" />
+            <span className="font-semibold text-lg">Slack Integration</span>
+          </div>
+          <div className="px-4 py-6">
+            <SlackIntegrations organizationId={organization.id} />
           </div>
         </div>
-      </div>
-      <div className="mt-6">
-        {organization.organization_type === "Organization" && (
-          <UsernameMappings organizationId={organization.id} />
-        )}
+        <div className="">
+          {organization.organization_type === "Organization" && (
+            <UsernameMappings organizationId={organization.id} />
+          )}
+        </div>
       </div>
     </DashboardLayout>
   );

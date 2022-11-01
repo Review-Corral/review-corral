@@ -1,12 +1,9 @@
 import { FC } from "react";
 import { OrgMember } from "../../../../github-api-types";
 import { ErrorAlert } from "../../../common/alerts/Error";
-import { useGetMembers } from "./useGetMembers";
-import {
-  useGetUsernameMappings,
-  UsernameMapping,
-} from "./useGetUsernameMappings";
+import { useGetMembers } from "./useGetOrganizationMembers";
 import { UsernameMappingsTable } from "./UsernameMappingsTable";
+import { useGetUsernameMappings, UsernameMapping } from "./useUsernameMappings";
 
 export interface MemberWithMapping extends OrgMember {
   mapping?: UsernameMapping;
@@ -55,7 +52,10 @@ export const UsernameMappings: FC<UsernameMappingsProps> = ({
 
   return (
     <div>
-      <UsernameMappingsTable members={membersWithMappings} />
+      <UsernameMappingsTable
+        members={membersWithMappings}
+        organizationId={organizationId}
+      />
     </div>
   );
 };

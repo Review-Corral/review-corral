@@ -3,31 +3,33 @@ import { FC, useState } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import Button from "../../../buttons/Button";
 import { MemberWithMapping } from "./UsernameMappings";
+import {
+  useCreateUsernameMapping,
+  useDeleteUsernameMapping,
+  useUpdateUsernameMapping,
+} from "./useUsernameMappings";
 
 interface UsernameMappingsTableProps {
+  organizationId: string;
   members: MemberWithMapping[];
 }
 
 export const UsernameMappingsTable: FC<UsernameMappingsTableProps> = ({
+  organizationId,
   members,
 }) => {
   return (
     <div className="">
       <div className="sm:flex sm:items-center">
         <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">Users</h1>
+          <h1 className="text-xl font-semibold text-gray-900">
+            Username Mappings
+          </h1>
           <p className="mt-2 text-sm text-gray-700">
-            A list of all the users in your account including their name, title,
-            email and role.
+            Add the Slack "member Id"s for the users in your Github
+            organization. This will allow the bot to reference the Slack
+            username from the Github events.
           </p>
-        </div>
-        <div className="mt-4 sm:mt-0 sm:ml-16 sm:flex-none">
-          <button
-            type="button"
-            className="inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto"
-          >
-            Add user
-          </button>
         </div>
       </div>
       <div className="mt-8 flex flex-col">
@@ -61,6 +63,7 @@ export const UsernameMappingsTable: FC<UsernameMappingsTableProps> = ({
                   {members.map((member) => (
                     <UsernameMappingsTableItem
                       key={member.id}
+                      organizationId={organizationId}
                       member={member}
                     />
                   ))}
@@ -75,6 +78,7 @@ export const UsernameMappingsTable: FC<UsernameMappingsTableProps> = ({
 };
 
 interface UsernameMappingsTableItemProps {
+  organizationId: string;
   member: MemberWithMapping;
 }
 
@@ -109,21 +113,46 @@ const resolver: Resolver<FormValues> = async (values) => {
 };
 
 export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
+  organizationId,
   member,
 }) => {
   const memberHasMapping = !!member.mapping;
 
   const [isEditable, setIsEditable] = useState<boolean>(!memberHasMapping);
 
+  const createUsernameMapping = useCreateUsernameMapping(organizationId);
+  const updateUsernameMapping = useUpdateUsernameMapping(organizationId);
+  // TODO: not sure we need this
+  const deleteUsernameMapping = useDeleteUsernameMapping(organizationId);
+
   const {
     register,
     handleSubmit,
     formState: { errors },
     watch,
-  } = useForm<FormValues>({ resolver });
+  } = useForm<FormValues>({
+    resolver,
+    defaultValues: {
+      slackId: member.mapping?.slack_user_id || "",
+    },
+  });
 
   const onSubmit = handleSubmit(async (data) => {
-    console.log("Data");
+    if (memberHasMapping) {
+      updateUsernameMapping
+        .mutateAsync({
+          slack_user_id: data.slackId,
+          id: member.mapping!.id,
+        })
+        .then(() => setIsEditable(false));
+    } else {
+      createUsernameMapping
+        .mutateAsync({
+          github_username: member.login,
+          slack_user_id: data.slackId,
+        })
+        .then(() => setIsEditable(false));
+    }
   });
 
   console.log("Form errors: ", errors);
@@ -148,7 +177,16 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
       </td>
       <td className="px-3 py-4 text-sm text-gray-500">
         {!isEditable ? (
-          <>{member.mapping?.slack_user_id}</>
+          <div
+            className={`
+                block 
+                w-full 
+                max-w-[13rem] 
+                py-2 
+            `}
+          >
+            {member.mapping?.slack_user_id}
+          </div>
         ) : (
           <div className="">
             <input
@@ -190,15 +228,29 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
       </td>
 
       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-        <Button
-          variant="outline"
-          // disabled={
-          //   currentSlackIdValue == undefined || currentSlackIdValue.trim() == ""
-          // }
-          onClick={onSubmit}
-        >
-          <>Save</>
-        </Button>
+        {isEditable ? (
+          <Button
+            color="indigo"
+            variant="outline"
+            disabled={
+              currentSlackIdValue == undefined ||
+              currentSlackIdValue.trim() == ""
+            }
+            onClick={onSubmit}
+          >
+            <>Save</>
+          </Button>
+        ) : (
+          <Button
+            color="indigo"
+            variant="outline"
+            onClick={() => {
+              setIsEditable(true);
+            }}
+          >
+            <>Edit</>
+          </Button>
+        )}
       </td>
     </tr>
   );
