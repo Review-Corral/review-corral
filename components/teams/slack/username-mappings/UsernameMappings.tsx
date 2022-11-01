@@ -1,23 +1,23 @@
 import { FC } from "react";
+import { OrgMember } from "../../../../github-api-types";
 import { ErrorAlert } from "../../../common/alerts/Error";
-import { OrgMember, useGetMembers } from "./useGetMembers";
-import {
-  useGetUsernameMappings,
-  UsernameMapping,
-} from "./useGetUsernameMappings";
+import { useGetMembers } from "./useGetOrganizationMembers";
 import { UsernameMappingsTable } from "./UsernameMappingsTable";
+import { useGetUsernameMappings, UsernameMapping } from "./useUsernameMappings";
 
 export interface MemberWithMapping extends OrgMember {
   mapping?: UsernameMapping;
 }
 
 interface UsernameMappingsProps {
-  teamId: string;
+  organizationId: string;
 }
 
-export const UsernameMappings: FC<UsernameMappingsProps> = ({ teamId }) => {
-  const usernameMappings = useGetUsernameMappings(teamId);
-  const members = useGetMembers();
+export const UsernameMappings: FC<UsernameMappingsProps> = ({
+  organizationId,
+}) => {
+  const usernameMappings = useGetUsernameMappings(organizationId);
+  const members = useGetMembers(organizationId);
 
   if (members.isLoading || usernameMappings.isLoading) {
     return <span>Loading members...</span>;
@@ -52,7 +52,10 @@ export const UsernameMappings: FC<UsernameMappingsProps> = ({ teamId }) => {
 
   return (
     <div>
-      <UsernameMappingsTable members={membersWithMappings} />
+      <UsernameMappingsTable
+        members={membersWithMappings}
+        organizationId={organizationId}
+      />
     </div>
   );
 };

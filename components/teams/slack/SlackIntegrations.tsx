@@ -1,4 +1,5 @@
 import { FC } from "react";
+import SlackButton from "../../SlackButton";
 import { useSlackIntegrations } from "./useSlackIntegrations";
 
 interface SlackIntegrationsProps {
@@ -16,7 +17,11 @@ export const SlackIntegrations: FC<SlackIntegrationsProps> = ({
   }
 
   if (!slackIntegrations.data || slackIntegrations.data.length < 1) {
-    return <div>No data... </div>;
+    return (
+      <div>
+        <SlackButton organizationId={organizationId} />
+      </div>
+    );
   }
 
   return <div>{slackIntegrations.data[0].channel_name}</div>;

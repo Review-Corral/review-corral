@@ -1,10 +1,6 @@
 import { createBrowserSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { SessionContextProvider } from "@supabase/auth-helpers-react";
-import {
-  Hydrate,
-  QueryClient,
-  QueryClientProvider,
-} from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { AppProps } from "next/app";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
@@ -33,9 +29,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       initialSession={pageProps.initialSession}
     >
       <QueryClientProvider client={queryClient}>
-        <Hydrate state={pageProps.dehydratedState}>
-          <Component {...pageProps} />
-        </Hydrate>
+        <Component {...pageProps} />
         <Toaster position="top-right" />
       </QueryClientProvider>
     </SessionContextProvider>

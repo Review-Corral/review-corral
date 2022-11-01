@@ -107,7 +107,9 @@ export default withApiSupabase<Database>(async function ProtectedRoute(
 
     if (data) {
       return res
-        .redirect(`${process.env.NEXT_PUBLIC_BASE_URL}/org/${data.account_id}`)
+        .redirect(
+          `${process.env.NEXT_PUBLIC_BASE_URL}/org/${data.account_id}/post-slack-auth`,
+        )
         .end();
     } else {
       return res.redirect(process.env.NEXT_PUBLIC_BASE_URL).end();

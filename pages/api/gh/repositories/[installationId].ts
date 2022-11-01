@@ -127,7 +127,6 @@ const _handleGetRequest = async (
       return res.status(400).end({ error: InsertReposError });
     }
     const payload = [...currentRepos, ...insertedRepositories];
-    console.info("Going to return payload: ", payload);
     return res.status(200).send({ data: payload });
   }
 

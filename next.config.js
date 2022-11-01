@@ -1,7 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  redirects: [
+  redirects: () => [
     {
       source: "/logout",
       destination: "/signout",

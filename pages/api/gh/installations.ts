@@ -4,6 +4,9 @@ import axios from "axios";
 import { Database } from "../../../database-types";
 import { InstallationsResponse } from "../../../github-api-types";
 
+type OrganizationType =
+  Database["public"]["Tables"]["organizations"]["Row"]["organization_type"];
+
 export default withApiAuth<Database>(async function ProtectedRoute(
   req,
   res,
@@ -80,6 +83,7 @@ export default withApiAuth<Database>(async function ProtectedRoute(
             installation_id: installation.id,
             account_name: installation.account.login,
             avatar_url: installation.account.avatar_url,
+            organization_type: _getOrganizationType(installation.account.type),
           })
           .select();
 
@@ -104,6 +108,17 @@ export default withApiAuth<Database>(async function ProtectedRoute(
 
   res.json(reponse.data);
 });
+
+const _getOrganizationType = (type?: string) => {
+  switch (type) {
+    case "User":
+      return "User";
+    case "Organization":
+      return "Organization";
+    default:
+      null;
+  }
+};
 
 const foundOrganization = (
   accountId: number,

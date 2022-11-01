@@ -1,6 +1,8 @@
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
 import Button from "./buttons/Button";
+import { GET_SLACK_INTEGRATIONS_KEY } from "./teams/slack/useSlackIntegrations";
 
 interface SlackButtonProps {
   organizationId: string;
@@ -8,6 +10,7 @@ interface SlackButtonProps {
 
 const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
   const slackRedirectUrl = getSlackRedirectUrl();
+  const queryClient = useQueryClient();
 
   if (!process.env.NEXT_PUBLIC_SLACK_BOT_ID) {
     throw Error("NEXT_PUBLIC_SLACK_BOT_ID not set");
@@ -26,6 +29,9 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
     <div>
       <Link
         href={`https://slack.com/oauth/v2/authorize?${searchParams.toString()}`}
+        onClick={() => {
+          queryClient.invalidateQueries([GET_SLACK_INTEGRATIONS_KEY]);
+        }}
       >
         <Button>Connect to Slack</Button>
       </Link>
