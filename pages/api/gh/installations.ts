@@ -80,6 +80,8 @@ export default withApiAuth<Database>(async function ProtectedRoute(
             installation_id: installation.id,
             account_name: installation.account.login,
             avatar_url: installation.account.avatar_url,
+            organization_type:
+              installation.account.type === "User" ? "User" : "Organization",
           })
           .select();
 
