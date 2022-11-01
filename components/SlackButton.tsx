@@ -7,9 +7,7 @@ interface SlackButtonProps {
 }
 
 const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
-  if (!process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL) {
-    throw Error("NEXT_PUBLIC_SLACK_REDIRECT_URL not set");
-  }
+  const slackRedirectUrl = getSlackRedirectUrl();
 
   if (!process.env.NEXT_PUBLIC_SLACK_BOT_ID) {
     throw Error("NEXT_PUBLIC_SLACK_BOT_ID not set");
@@ -17,7 +15,7 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
 
   const searchParams = new URLSearchParams({
     state: organizationId,
-    redirect_uri: process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL,
+    redirect_uri: slackRedirectUrl,
     client_id: process.env.NEXT_PUBLIC_SLACK_BOT_ID,
     scope:
       "channels:history,chat:write,commands,groups:history,incoming-webhook,users:read",
@@ -36,3 +34,16 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
 };
 
 export default SlackButton;
+
+export const getSlackRedirectUrl = (): string => {
+  // TODO: this is much more complicated than it should be
+  if (process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL) {
+    return process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL;
+  }
+
+  if (!process.env.NEXT_PUBLIC_BASE_URL) {
+    throw Error("NEXT_PUBLIC_SLACK_REDIRECT_URL not set");
+  }
+
+  return `${process.env.NEXT_PUBLIC_BASE_URL}/api/slack/oauth`;
+};

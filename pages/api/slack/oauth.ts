@@ -2,6 +2,7 @@ import axios from "axios";
 import { ApiError } from "next/dist/server/api-utils";
 import { isValidBody } from "../../../components/api/utils/apiUtils";
 import withApiSupabase from "../../../components/api/utils/withApiSupabase";
+import { getSlackRedirectUrl } from "../../../components/SlackButton";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { Database } from "../../../database-types";
 
@@ -68,7 +69,7 @@ export default withApiSupabase<Database>(async function ProtectedRoute(
         client_id: process.env.NEXT_PUBLIC_SLACK_BOT_ID,
         code: req.query.code,
         client_secret: process.env.SLACK_CLIENT_SECRET,
-        redirect_uri: process.env.SLACK_REDIRECT_URL,
+        redirect_uri: getSlackRedirectUrl(),
       })
       .then(async ({ data }) => {
         const { error } = await supabaseServerClient
