@@ -35,7 +35,10 @@ export const InstalledReposContent: FC<InstalledReposContentProps> = ({
       <div className="space-y-2 max-w-lg">
         {installedRepos.map((repository) => {
           return (
-            <div key={repository.id} className="grid grid-cols-2">
+            <div
+              key={repository.id}
+              className="flex flex-row items-center justify-between"
+            >
               <div>{repository.repository_name}</div>
               <Toggle
                 isEnabled={repository.is_active}

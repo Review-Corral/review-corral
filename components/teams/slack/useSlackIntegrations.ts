@@ -2,6 +2,8 @@ import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { ApiResponse } from "../../api/utils/apiBaseTypes";
 
+export const GET_SLACK_INTEGRATIONS_KEY = "getSlackIntegrations";
+
 export type SlackIntegration = {
   id: string;
   created_at: Date | null;
@@ -18,7 +20,7 @@ export const useSlackIntegrations = ({
   organizationId: string;
 }) => {
   return useQuery<SlackIntegration[] | null, AxiosError>(
-    ["getSlackIntegrations", organizationId],
+    [GET_SLACK_INTEGRATIONS_KEY, organizationId],
     async () => {
       return (
         await axios.get<ApiResponse<SlackIntegration[] | null>>(
