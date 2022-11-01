@@ -447,6 +447,8 @@ export class GithubEventHandler {
       console.info("Error getting threadTs: ", error);
     }
 
+    console.log("Found threadTS: ", data?.thread_ts);
+
     return data?.thread_ts;
   }
 
