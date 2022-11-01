@@ -1,6 +1,7 @@
 import cntl from "cntl";
 import { FC, useState } from "react";
 import { Resolver, useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import Button from "../../../buttons/Button";
 import { MemberWithMapping } from "./UsernameMappings";
 import {
@@ -144,14 +145,16 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
           slack_user_id: data.slackId,
           id: member.mapping!.id,
         })
-        .then(() => setIsEditable(false));
+        .then(() => setIsEditable(false))
+        .catch((err) => toast.error("Oops... something went wrong"));
     } else {
       createUsernameMapping
         .mutateAsync({
           github_username: member.login,
           slack_user_id: data.slackId,
         })
-        .then(() => setIsEditable(false));
+        .then(() => setIsEditable(false))
+        .catch((err) => toast.error("Oops... something went wrong"));
     }
   });
 
@@ -228,10 +231,11 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
       </td>
 
       <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-        {isEditable ? (
+        {isEditable || createUsernameMapping.isLoading ? (
           <Button
             color="indigo"
             variant="outline"
+            isLoading={createUsernameMapping.isLoading}
             disabled={
               currentSlackIdValue == undefined ||
               currentSlackIdValue.trim() == ""
