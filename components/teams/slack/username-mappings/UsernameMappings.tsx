@@ -1,58 +1,57 @@
 import { FC } from "react";
-import { ErrorAlert } from "../../../common/alerts/Error";
-import { OrgMember, useGetMembers } from "./useGetMembers";
-import {
-  useGetUsernameMappings,
-  UsernameMapping,
-} from "./useGetUsernameMappings";
-import { UsernameMappingsTable } from "./UsernameMappingsTable";
+import { OrgMember } from "../../../../github-api-types";
+import { UsernameMapping } from "./useGetUsernameMappings";
 
 export interface MemberWithMapping extends OrgMember {
   mapping?: UsernameMapping;
 }
 
 interface UsernameMappingsProps {
-  teamId: string;
+  organizationId: string;
 }
 
-export const UsernameMappings: FC<UsernameMappingsProps> = ({ teamId }) => {
-  const usernameMappings = useGetUsernameMappings(teamId);
-  const members = useGetMembers();
+export const UsernameMappings: FC<UsernameMappingsProps> = ({
+  organizationId,
+}) => {
+  // const usernameMappings = useGetUsernameMappings(teamId);
+  // const members = useGetMembers(organizationId);
 
-  if (members.isLoading || usernameMappings.isLoading) {
-    return <span>Loading members...</span>;
-  }
+  return <div>Hello</div>;
 
-  if (members.error) {
-    return <ErrorAlert message="Error getting members" />;
-  }
+  // if (members.isLoading || usernameMappings.isLoading) {
+  //   return <span>Loading members...</span>;
+  // }
 
-  if (usernameMappings.error) {
-    return <ErrorAlert message="Error getting user mappings" />;
-  }
+  // if (members.error) {
+  //   return <ErrorAlert message="Error getting members" />;
+  // }
 
-  if (!members.data) {
-    throw Error("Failed to fetch members");
-  }
+  // if (usernameMappings.error) {
+  //   return <ErrorAlert message="Error getting user mappings" />;
+  // }
 
-  if (!usernameMappings.data) {
-    throw Error("Failed to fetch username mappings");
-  }
+  // if (!members.data) {
+  //   throw Error("Failed to fetch members");
+  // }
 
-  const membersWithMappings = members.data.map<MemberWithMapping>((member) => {
-    const mapping = usernameMappings.data!.find(
-      (mapping) => mapping.github_username === member.login,
-    );
+  // if (!usernameMappings.data) {
+  //   throw Error("Failed to fetch username mappings");
+  // }
 
-    return {
-      ...member,
-      mapping,
-    };
-  });
+  // const membersWithMappings = members.data.map<MemberWithMapping>((member) => {
+  //   const mapping = usernameMappings.data!.find(
+  //     (mapping) => mapping.github_username === member.login,
+  //   );
 
-  return (
-    <div>
-      <UsernameMappingsTable members={membersWithMappings} />
-    </div>
-  );
+  //   return {
+  //     ...member,
+  //     mapping,
+  //   };
+  // });
+
+  // return (
+  //   <div>
+  //     <UsernameMappingsTable members={membersWithMappings} />
+  //   </div>
+  // );
 };

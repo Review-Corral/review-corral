@@ -43,9 +43,9 @@ export const OrgView: NextPage<{ organization: Organization }> = ({
           </div>
         </div>
       </div>
-      {/* <div className="mt-6">
-        <UsernameMappings teamId={teamId} />
-      </div> */}
+      <div className="mt-6">
+        {/* <UsernameMappings organizationId={organization.id} /> */}
+      </div>
     </DashboardLayout>
   );
 };
