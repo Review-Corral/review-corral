@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { OrgMember } from "../../../../github-api-types";
+import { useGetMembers } from "./useGetMembers";
 import { UsernameMapping } from "./useGetUsernameMappings";
 
 export interface MemberWithMapping extends OrgMember {
@@ -14,7 +15,7 @@ export const UsernameMappings: FC<UsernameMappingsProps> = ({
   organizationId,
 }) => {
   // const usernameMappings = useGetUsernameMappings(teamId);
-  // const members = useGetMembers(organizationId);
+  const members = useGetMembers(organizationId);
 
   return <div>Hello</div>;
 

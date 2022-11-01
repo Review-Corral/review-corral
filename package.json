@@ -16,7 +16,6 @@
     "@supabase/auth-helpers-react": "^0.3.0",
     "@supabase/auth-helpers-shared": "^0.2.1",
     "@supabase/supabase-js": "^2.0.4",
-    "@supabase/ui": "^0.36.5",
     "@tanstack/react-query": "^4.13.0",
     "axios": "^0.27.2",
     "cntl": "^1.0.0",

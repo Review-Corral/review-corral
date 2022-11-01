@@ -5,6 +5,7 @@ import { Slack } from "../../../components/assets/icons/Slack";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { InstalledRepos } from "../../../components/teams/repos/InstallationRepositoriesWrapper";
 import { SlackIntegrations } from "../../../components/teams/slack/SlackIntegrations";
+import { UsernameMappings } from "../../../components/teams/slack/username-mappings/UsernameMappings";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { Database } from "../../../database-types";
 
@@ -26,7 +27,6 @@ export const OrgView: NextPage<{ organization: Organization }> = ({
               <span className="font-semibold text-lg">Github Integration</span>
             </div>
             <div className="px-4 py-6">
-              {/* TODO: should we be using this installation ID actually? */}
               <InstalledRepos installationId={organization.installation_id} />
             </div>
           </div>
@@ -44,7 +44,7 @@ export const OrgView: NextPage<{ organization: Organization }> = ({
         </div>
       </div>
       <div className="mt-6">
-        {/* <UsernameMappings organizationId={organization.id} /> */}
+        <UsernameMappings organizationId={organization.id} />
       </div>
     </DashboardLayout>
   );

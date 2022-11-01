@@ -85,5 +85,18 @@
         "color": "terminal.ansiRed"
       }
     },
+    {
+      "label": "Generate Supabase Types ",
+      "type": "shell",
+      "command": [
+        "source ./supabase/.env && supabase gen types typescript --local > ./database-types.d.ts",
+      ],
+      "isBackground": true,
+      "icon": {
+        "id": "symbol-type-parameter",
+        "color": "terminal.ansiBlue"
+      },
+      "problemMatcher": []
+    }
   ]
 }
