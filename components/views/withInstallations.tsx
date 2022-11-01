@@ -10,6 +10,10 @@ export const withInstallations = (WrappedComponent: ComponentType): FC => {
       return <LoadingView loadingText="Loading your GitHub workspaces" />;
     }
 
+    if (installations.error) {
+      throw new Error("Error loading GitHub installations");
+    }
+
     return <WrappedComponent />;
   };
 
