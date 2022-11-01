@@ -326,8 +326,7 @@ export class GithubEventHandler {
           console.error(
             "Got error updating thread with merged status: ",
             error,
-          ),
-            console.error("Error payload: ", JSON.stringify(payload, null, 2));
+          );
         });
     }
   }
