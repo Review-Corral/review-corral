@@ -45,5 +45,5 @@ export const getSlackRedirectUrl = (): string => {
     throw Error("NEXT_PUBLIC_SLACK_REDIRECT_URL not set");
   }
 
-  return `${process.env.NEXT_PUBLIC_BASE_URL}/api/slack/oauth`;
+  return `${process.env.NEXT_PUBLIC_BASE_URL}api/slack/oauth`;
 };
