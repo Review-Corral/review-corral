@@ -163,7 +163,7 @@ export class GithubEventHandler {
           threadTs: threadTs,
         });
       } else if (body.action === "ready_for_review") {
-        this.postReadyForReview(prId, body, threadTs);
+        await this.postReadyForReview(prId, body, threadTs);
       } else {
         // Event we're not handling currently
         console.info("Got unspuported event: ", body.action);
@@ -322,17 +322,13 @@ export class GithubEventHandler {
           },
         ],
       };
-      this.slackClient.chat
-        .update(payload)
-        .then(() =>
-          console.log("Succesfully updated message with merged status"),
-        )
-        .catch((error) => {
-          console.error(
-            "Got error updating thread with merged status: ",
-            error,
-          );
-        });
+
+      try {
+        await this.slackClient.chat.update(payload);
+        console.log("Succesfully updated message with merged status");
+      } catch (error) {
+        console.error("Got error updating thread with merged status: ", error);
+      }
     }
   }
 
