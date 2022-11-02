@@ -289,12 +289,10 @@ export class GithubEventHandler {
             blocks: [
               {
                 type: "section",
-                text: {
-                  type: "mrkdwn",
-                  // TODO: not type safe
-                  text: `Merged at:\n <!date^${date.valueOf()}|${await this.getLocalTimeString(
-                    date,
-                  )}>`,
+                accessory: {
+                  type: "image",
+                  image_url: "https://reviewcorral.nrgok.io/merged-icon.png",
+                  alt_text: "cute cat",
                 },
               },
             ],
