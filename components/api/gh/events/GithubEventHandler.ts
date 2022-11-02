@@ -490,20 +490,6 @@ export class GithubEventHandler {
             },
           ],
         },
-        // {
-        //   type: "section",
-        //   fields: [
-        //     {
-        //       type: "mrkdwn",
-        //       text: `*Target branch*\n ${body.pull_request.base.ref}`,
-        //     },
-        //     {
-        //       type: "mrkdwn",
-        //       text: `*Changes*\n+${body.pull_request.additions}, -${body.pull_request.deletions}`,
-        //     },
-        //   ],
-        // },
-
         ...(!!body.pull_request?.body
           ? [
               {
