@@ -21,6 +21,7 @@
     "cntl": "^1.0.0",
     "eslint-plugin-react": "^7.31.10",
     "next": "12.2.6",
+    "next-axiom": "^0.15.0",
     "next-http-proxy-middleware": "^1.2.4",
     "njwt": "^1.2.0",
     "outline": "link:@heroicons/react/outline",
