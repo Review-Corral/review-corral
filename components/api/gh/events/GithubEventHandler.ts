@@ -281,7 +281,6 @@ export class GithubEventHandler {
     body: GithubEvent,
     threadTs: string,
   ) {
-    const date = this.getDateFromTimestamp(body.pull_request!.merged_at!);
     await this.postMessage({
       message: {
         text: `Pull request merged by ${await this.getSlackUserName(
