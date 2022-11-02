@@ -460,6 +460,7 @@ export class GithubEventHandler {
             text: `#${body.pull_request.number} ${body.pull_request.title}`,
           },
         },
+
         {
           type: "actions",
           elements: [
@@ -473,6 +474,19 @@ export class GithubEventHandler {
             },
           ],
         },
+        // {
+        //   type: "section",
+        //   fields: [
+        //     {
+        //       type: "mrkdwn",
+        //       text: `*Target branch*\n ${body.pull_request.base.ref}`,
+        //     },
+        //     {
+        //       type: "mrkdwn",
+        //       text: `*Changes*\n+${body.pull_request.additions}, -${body.pull_request.deletions}`,
+        //     },
+        //   ],
+        // },
 
         ...(!!body.pull_request?.body
           ? [
@@ -508,6 +522,20 @@ export class GithubEventHandler {
             {
               type: "mrkdwn",
               text: `${await this.getSlackUserName(body.sender.login)}`,
+            },
+            {
+              type: "image",
+              image_url:
+                "https://reviewcorral.ngrok.io/plus-minus-diff-icon-alt.png",
+              alt_text: "plus-minus-icon",
+            },
+            {
+              type: "mrkdwn",
+              text: `+${body.pull_request.additions}, -${body.pull_request.deletions}`,
+            },
+            {
+              type: "mrkdwn",
+              text: `:dart: ${body.pull_request.base.ref}`,
             },
           ],
         },
