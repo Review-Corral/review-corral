@@ -359,13 +359,20 @@ export class GithubEventHandler {
   ) {
     await this.postMessage({
       message: {
-        text: `Pull request closed by ${await this.getSlackUserName(
-          body.sender.login,
-        )}`,
         attachments: [
           {
-            author_name: `<${body.pull_request.html_url}|#${body.pull_request.number} ${body.pull_request.title}>`,
             color: "#FB0909",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `Pull request closed by ${await this.getSlackUserName(
+                    body.sender.login,
+                  )}`,
+                },
+              },
+            ],
           },
         ],
       },
