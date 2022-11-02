@@ -535,8 +535,7 @@ export class GithubEventHandler {
             },
             {
               type: "image",
-              image_url:
-                "https://reviewcorral.ngrok.io/plus-minus-diff-icon-alt.png",
+              image_url: `${process.env.NEXT_PUBLIC_BASE_URL}/plus-minus-diff-icon-alt.png`,
               alt_text: "plus-minus-icon",
             },
             {
