@@ -61,7 +61,13 @@ export class GithubEventHandler {
 
         response.data.forEach((comment) => {
           if (comment.user.type === "User") {
-            this.postComment(prId, comment.body, comment.user.login, threadTs);
+            this.postComment({
+              prId,
+              commentBody: comment.body,
+              commentUrl: comment.url,
+              login: comment.user.login,
+              threadTs: threadTs,
+            });
           }
         });
       } catch (error) {
@@ -130,12 +136,13 @@ export class GithubEventHandler {
       body.comment &&
       body.comment.user.type === "User"
     ) {
-      await this.postComment(
+      await this.postComment({
         prId,
-        body.comment.body,
-        body.sender.login,
-        threadTs,
-      );
+        commentBody: body.comment.body,
+        commentUrl: body.comment.html_url,
+        login: body.sender.login,
+        threadTs: threadTs,
+      });
       return;
     }
 
@@ -366,18 +373,27 @@ export class GithubEventHandler {
     });
   }
 
-  private async postComment(
-    prId: number,
-    comment: string,
-    login: string,
-    threadTs: string,
-  ) {
+  private async postComment({
+    prId,
+    commentBody,
+    commentUrl,
+    login,
+    threadTs,
+  }: {
+    prId: number;
+    commentBody: string;
+    commentUrl: string;
+    login: string;
+    threadTs: string;
+  }) {
     await this.postMessage({
       message: {
-        text: `${await this.getSlackUserName(login)} left a comment`,
+        text: `${await this.getSlackUserName(
+          login,
+        )} left <${commentUrl}|a comment>`,
         attachments: [
           {
-            text: comment,
+            text: commentBody,
           },
         ],
       },
