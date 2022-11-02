@@ -213,9 +213,7 @@ export class GithubEventHandler {
     }
 
     if (slackUserId) {
-      const userId = `<@${slackUserId.slack_user_id}>`;
-      console.info("User id is: ", userId);
-      return userId;
+      return `<@${slackUserId.slack_user_id}>`;
     }
 
     return githubLogin;
@@ -229,12 +227,10 @@ export class GithubEventHandler {
       return;
     }
 
-    const { data, error } = await this.supabaseClient
-      .from("pull_requests")
-      .insert({
-        pr_id: prId.toString(),
-        thread_ts: message.message.ts,
-      });
+    const { error } = await this.supabaseClient.from("pull_requests").insert({
+      pr_id: prId.toString(),
+      thread_ts: message.message.ts,
+    });
 
     if (error) {
       console.error("Error saving thread ts: ", error);
@@ -474,29 +470,6 @@ export class GithubEventHandler {
                 text: "View",
               },
               url: body.pull_request.html_url,
-              action_id: "button-action",
-            },
-          ],
-        },
-        {
-          type: "section",
-          fields: [
-            {
-              type: "mrkdwn",
-              text: `*Additions*\n +${body.pull_request.additions}`,
-            },
-            {
-              type: "mrkdwn",
-              text: `*Deletions*\n -${body.pull_request.deletions}`,
-            },
-
-            {
-              type: "mrkdwn",
-              text: `*Target branch*\n ${body.pull_request.base.ref}`,
-            },
-            {
-              type: "mrkdwn",
-              text: `*Source Branch*\n ${body.pull_request.head.ref}`,
             },
           ],
         },
