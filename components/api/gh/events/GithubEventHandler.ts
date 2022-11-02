@@ -292,7 +292,7 @@ export class GithubEventHandler {
                 accessory: {
                   type: "image",
                   image_url: "https://reviewcorral.nrgok.io/merged-icon.png",
-                  alt_text: "cute cat",
+                  alt_text: "Merged",
                 },
               },
             ],
