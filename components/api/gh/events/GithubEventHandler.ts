@@ -286,7 +286,7 @@ export class GithubEventHandler {
         text: `Pull request merged by ${await this.getSlackUserName(
           body.sender.login,
         )}`,
-        attachments: [MergedAttachment],
+        attachments: [this.getMergedAttachment(false)],
       },
       prId,
       threadTs,
@@ -303,7 +303,7 @@ export class GithubEventHandler {
         text: await this.getPrOpenedMessage(body),
         attachments: [
           await this.getPrOpenedBaseAttachment(body),
-          MergedAttachment,
+          this.getMergedAttachment(true),
         ],
       };
 
@@ -534,17 +534,19 @@ export class GithubEventHandler {
       ],
     };
   }
-}
 
-const MergedAttachment: MessageAttachment = {
-  color: "#8839FB",
-  blocks: [
-    {
-      type: "section",
-      text: {
-        type: "mrkdwn",
-        text: `:large_purple_circle:`,
-      },
-    },
-  ],
-};
+  private getMergedAttachment(showMergedText: boolean): MessageAttachment {
+    return {
+      color: "#8839FB",
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `:large_purple_circle: Pull request merged`,
+          },
+        },
+      ],
+    };
+  }
+}
