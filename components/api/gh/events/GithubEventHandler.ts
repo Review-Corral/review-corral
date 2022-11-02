@@ -1,6 +1,8 @@
 import {
   ChatPostMessageArguments,
   ChatPostMessageResponse,
+  ChatUpdateArguments,
+  MessageAttachment,
   WebClient,
 } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
@@ -282,22 +284,10 @@ export class GithubEventHandler {
     const date = this.getDateFromTimestamp(body.pull_request!.merged_at!);
     await this.postMessage({
       message: {
-        attachments: [
-          {
-            color: "#8839FB",
-            blocks: [
-              {
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text: `Pull request merged by ${await this.getSlackUserName(
-                    body.sender.login,
-                  )}`,
-                },
-              },
-            ],
-          },
-        ],
+        text: `Pull request merged by ${await this.getSlackUserName(
+          body.sender.login,
+        )}`,
+        attachments: [MergedAttachment],
       },
       prId,
       threadTs,
@@ -307,25 +297,14 @@ export class GithubEventHandler {
       this.logger.debug(
         `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
       );
-      const payload = {
+      const payload: ChatUpdateArguments = {
         channel: this.channelId,
         ts: threadTs,
         token: this.slackToken,
         text: await this.getPrOpenedMessage(body),
         attachments: [
           await this.getPrOpenedBaseAttachment(body),
-          {
-            color: "#8839FB",
-            blocks: [
-              {
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text: "Pull Request merged",
-                },
-              },
-            ],
-          },
+          MergedAttachment,
         ],
       };
 
@@ -557,3 +536,16 @@ export class GithubEventHandler {
     };
   }
 }
+
+const MergedAttachment: MessageAttachment = {
+  color: "#8839FB",
+  blocks: [
+    {
+      type: "section",
+      text: {
+        type: "mrkdwn",
+        text: `:large_purple_circle:`,
+      },
+    },
+  ],
+};
