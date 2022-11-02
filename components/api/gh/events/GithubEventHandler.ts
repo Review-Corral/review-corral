@@ -291,7 +291,7 @@ export class GithubEventHandler {
                 type: "section",
                 text: {
                   type: "mrkdwn",
-                  text: "",
+                  text: " ",
                 },
                 accessory: {
                   type: "image",
