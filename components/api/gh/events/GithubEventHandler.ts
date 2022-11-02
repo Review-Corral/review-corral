@@ -61,7 +61,13 @@ export class GithubEventHandler {
 
         response.data.forEach((comment) => {
           if (comment.user.type === "User") {
-            this.postComment(prId, comment.body, comment.user.login, threadTs);
+            this.postComment({
+              prId,
+              commentBody: comment.body,
+              commentUrl: comment.url,
+              login: comment.user.login,
+              threadTs: threadTs,
+            });
           }
         });
       } catch (error) {
@@ -130,12 +136,13 @@ export class GithubEventHandler {
       body.comment &&
       body.comment.user.type === "User"
     ) {
-      await this.postComment(
+      await this.postComment({
         prId,
-        body.comment.body,
-        body.sender.login,
-        threadTs,
-      );
+        commentBody: body.comment.body,
+        commentUrl: body.comment.html_url,
+        login: body.sender.login,
+        threadTs: threadTs,
+      });
       return;
     }
 
@@ -255,8 +262,12 @@ export class GithubEventHandler {
     }
   }
 
-  private async getLocalTimeString(date: string): Promise<string> {
-    return `${new Date(Date.parse(date)).toLocaleString("en-US", {
+  private getDateFromTimestamp(timestamp: string): Date {
+    return new Date(Date.parse(timestamp));
+  }
+
+  private async getLocalTimeString(date: Date): Promise<string> {
+    return `${date.toLocaleString("en-US", {
       timeZone: "America/New_York",
     })} Eastern`;
   }
@@ -266,6 +277,7 @@ export class GithubEventHandler {
     body: GithubEvent,
     threadTs: string,
   ) {
+    const date = this.getDateFromTimestamp(body.pull_request!.merged_at!);
     await this.postMessage({
       message: {
         text: `Pull request merged by ${await this.getSlackUserName(
@@ -280,9 +292,9 @@ export class GithubEventHandler {
                 text: {
                   type: "mrkdwn",
                   // TODO: not type safe
-                  text: `Merged at:\n ${await this.getLocalTimeString(
-                    body.pull_request!.merged_at!,
-                  )}`,
+                  text: `Merged at:\n <!date^${date.valueOf()}|${await this.getLocalTimeString(
+                    date,
+                  )}>`,
                 },
               },
             ],
@@ -366,18 +378,27 @@ export class GithubEventHandler {
     });
   }
 
-  private async postComment(
-    prId: number,
-    comment: string,
-    login: string,
-    threadTs: string,
-  ) {
+  private async postComment({
+    prId,
+    commentBody,
+    commentUrl,
+    login,
+    threadTs,
+  }: {
+    prId: number;
+    commentBody: string;
+    commentUrl: string;
+    login: string;
+    threadTs: string;
+  }) {
     await this.postMessage({
       message: {
-        text: `${await this.getSlackUserName(login)} left a comment`,
+        text: `${await this.getSlackUserName(
+          login,
+        )} left <${commentUrl}|a comment>`,
         attachments: [
           {
-            text: comment,
+            text: commentBody,
           },
         ],
       },
@@ -460,6 +481,7 @@ export class GithubEventHandler {
             text: `#${body.pull_request.number} ${body.pull_request.title}`,
           },
         },
+
         {
           type: "actions",
           elements: [
@@ -473,7 +495,6 @@ export class GithubEventHandler {
             },
           ],
         },
-
         ...(!!body.pull_request?.body
           ? [
               {
@@ -508,6 +529,20 @@ export class GithubEventHandler {
             {
               type: "mrkdwn",
               text: `${await this.getSlackUserName(body.sender.login)}`,
+            },
+            {
+              type: "image",
+              image_url:
+                "https://reviewcorral.ngrok.io/plus-minus-diff-icon-alt.png",
+              alt_text: "plus-minus-icon",
+            },
+            {
+              type: "mrkdwn",
+              text: `+${body.pull_request.additions}, -${body.pull_request.deletions}`,
+            },
+            {
+              type: "mrkdwn",
+              text: `:dart: ${body.pull_request.base.ref}`,
             },
           ],
         },
