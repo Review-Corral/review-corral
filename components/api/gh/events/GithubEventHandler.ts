@@ -262,8 +262,12 @@ export class GithubEventHandler {
     }
   }
 
-  private async getLocalTimeString(date: string): Promise<string> {
-    return `${new Date(Date.parse(date)).toLocaleString("en-US", {
+  private getDateFromTimestamp(timestamp: string): Date {
+    return new Date(Date.parse(timestamp));
+  }
+
+  private async getLocalTimeString(date: Date): Promise<string> {
+    return `${date.toLocaleString("en-US", {
       timeZone: "America/New_York",
     })} Eastern`;
   }
@@ -273,6 +277,7 @@ export class GithubEventHandler {
     body: GithubEvent,
     threadTs: string,
   ) {
+    const date = this.getDateFromTimestamp(body.pull_request!.merged_at!);
     await this.postMessage({
       message: {
         text: `Pull request merged by ${await this.getSlackUserName(
@@ -287,9 +292,9 @@ export class GithubEventHandler {
                 text: {
                   type: "mrkdwn",
                   // TODO: not type safe
-                  text: `Merged at:\n ${await this.getLocalTimeString(
-                    body.pull_request!.merged_at!,
-                  )}`,
+                  text: `Merged at:\n <!date^${date.valueOf()}|${await this.getLocalTimeString(
+                    date,
+                  )}>`,
                 },
               },
             ],
