@@ -1,4 +1,6 @@
 import { WebClient } from "@slack/web-api";
+import Analytics from "analytics-node";
+import { randomUUID } from "crypto";
 import { NextApiRequest, NextApiResponse } from "next";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
@@ -10,6 +12,16 @@ export default withApiSupabase(async function GithubEvents(
   res: NextApiResponse,
   supabaseClient,
 ) {
+  const analytics = new Analytics(process.env.NEXT_PUBLIC_SEGMENT_KEY!);
+  analytics.track({
+    event: "Github Event",
+    anonymousId: randomUUID().toString(),
+    properties: {
+      environment: process.env.NODE_ENV,
+      ...req.body,
+    },
+  });
+
   if (
     req.body.pull_request &&
     req.body.pull_request.id &&
