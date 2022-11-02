@@ -106,9 +106,10 @@ export class GithubEventHandler {
 
     if (!threadTs) {
       // No thread found, so log and return
-      this.logger.error(
-        `Got non-created event (${body.action}) for PR id of ${prId}`,
-      );
+      this.logger.debug(`Got non-created event and didn't find a threadTS`, {
+        action: body.action,
+        prId: prId,
+      });
       return;
     }
 
