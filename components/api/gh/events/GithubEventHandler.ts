@@ -280,9 +280,6 @@ export class GithubEventHandler {
     const date = this.getDateFromTimestamp(body.pull_request!.merged_at!);
     await this.postMessage({
       message: {
-        text: `Pull request merged by ${await this.getSlackUserName(
-          body.sender.login,
-        )}`,
         attachments: [
           {
             color: "#8839FB",
@@ -291,12 +288,9 @@ export class GithubEventHandler {
                 type: "section",
                 text: {
                   type: "mrkdwn",
-                  text: " ",
-                },
-                accessory: {
-                  type: "image",
-                  image_url: "https://reviewcorral.ngrok.io/merged-icon.png",
-                  alt_text: "Merged",
+                  text: `Pull request merged by ${await this.getSlackUserName(
+                    body.sender.login,
+                  )}`,
                 },
               },
             ],
