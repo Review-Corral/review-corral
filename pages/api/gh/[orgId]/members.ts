@@ -1,5 +1,8 @@
 import { withApiAuth } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
+import { NextApiRequest } from "next";
+import { Logger, withAxiom } from "next-axiom";
+import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { getInstallationAccessToken } from "../../../../components/api/utils/apiUtils";
 import { flattenParam } from "../../../../components/utils/flattenParam";
 import { Database } from "../../../../database-types";
@@ -8,11 +11,23 @@ import {
   OrgMember,
 } from "../../../../github-api-types";
 
-export default withApiAuth<Database>(async function ProtectedRoute(
-  req,
+interface AxiomNextApiRequest extends NextApiRequest {
+  log: AxiomLogger;
+}
+
+interface AxiomLogger {
+  info: (message: string, args?: any) => void;
+  debug: (message: string, args?: any) => void;
+  error: (message: string, args?: any) => void;
+  log: (message: string, args?: any) => void;
+}
+
+const handler = withApiAuth<Database>(async function ProtectedRoute(
+  _req,
   res,
   supabaseServerClient,
 ) {
+  const req = _req as AxiomAPIRequest;
   const orgId = flattenParam(req.query.orgId);
 
   if (!orgId) {
@@ -35,11 +50,9 @@ export default withApiAuth<Database>(async function ProtectedRoute(
   }
 
   if (organization.organization_type !== "Organization") {
-    return res
-      .status(400)
-      .send({
-        error: "Can't get members for non-organization Organization type",
-      });
+    return res.status(400).send({
+      error: "Can't get members for non-organization Organization type",
+    });
   }
 
   const installationAccessToken = await getInstallationAccessToken(
@@ -54,11 +67,12 @@ export default withApiAuth<Database>(async function ProtectedRoute(
   });
 
   if (installationAccessToken) {
-    console.log("Got installation access token for members query");
+    req.log.info("Got installation access token for members query");
 
     const members = await getOrganizationMembers(
       organization.account_name,
       installationAccessToken,
+      req.log,
     );
 
     if (members) {
@@ -76,6 +90,7 @@ export default withApiAuth<Database>(async function ProtectedRoute(
 const getOrganizationMembers = async (
   orgName: string,
   installationAccessToken: InstallationAccessResponse,
+  logger: Logger,
 ): Promise<OrgMember[] | undefined> => {
   return await axios
     .get<OrgMember[]>(
@@ -88,7 +103,9 @@ const getOrganizationMembers = async (
     )
     .then((response) => response.data)
     .catch((error) => {
-      console.log("Got error getting members: ", error);
+      logger.info("Got error getting members: ", error);
       return undefined;
     });
 };
+
+export default withAxiom(handler);
