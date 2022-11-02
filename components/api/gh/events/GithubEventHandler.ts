@@ -289,6 +289,10 @@ export class GithubEventHandler {
             blocks: [
               {
                 type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: "",
+                },
                 accessory: {
                   type: "image",
                   image_url: "https://reviewcorral.nrgok.io/merged-icon.png",
