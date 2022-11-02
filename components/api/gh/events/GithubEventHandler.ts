@@ -26,7 +26,9 @@ export class GithubEventHandler {
   ) {}
 
   async handleEvent(body: GithubEvent) {
-    this.logger.debug("Got event with action: ", body.action);
+    this.logger.debug(`Got event '${body.action}'`, {
+      payload: body,
+    });
     const prId = body.pull_request.id;
 
     // New PR, should be the only two threads that create a new thread
@@ -48,7 +50,6 @@ export class GithubEventHandler {
 
     if (threadTs) {
       // Get all comments and post
-      this.logger.debug("Installation ID: ", this.installationId);
       const accessToken = await getInstallationAccessToken(this.installationId);
 
       try {
@@ -95,7 +96,7 @@ export class GithubEventHandler {
     } else {
       this.logger.error(
         "Error posting new thread for PR opened message to Slack: Didn't get message response back to thread messages PR ID: ",
-        prId,
+        { prId: prId },
       );
     }
   }
@@ -173,7 +174,7 @@ export class GithubEventHandler {
         await this.postReadyForReview(prId, body, threadTs);
       } else {
         // Event we're not handling currently
-        this.logger.info("Got unspuported event: ", body.action);
+        this.logger.info("Got unspuported event: ", { action: body.action });
       }
     }
   }
@@ -465,7 +466,7 @@ export class GithubEventHandler {
       this.logger.debug("Error getting threadTs: ", error);
     }
 
-    this.logger.debug("Found threadTS: ", data?.thread_ts);
+    this.logger.debug("Found threadTS: ", { threadTs: data?.thread_ts });
 
     return data?.thread_ts;
   }
