@@ -266,16 +266,6 @@ export class GithubEventHandler {
     }
   }
 
-  private getDateFromTimestamp(timestamp: string): Date {
-    return new Date(Date.parse(timestamp));
-  }
-
-  private async getLocalTimeString(date: Date): Promise<string> {
-    return `${date.toLocaleString("en-US", {
-      timeZone: "America/New_York",
-    })} Eastern`;
-  }
-
   private async postPrMerged(
     prId: number,
     body: GithubEvent,
