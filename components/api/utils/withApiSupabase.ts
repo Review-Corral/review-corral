@@ -2,8 +2,8 @@ import {
   createServerSupabaseClient,
   SupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
-import { CookieOptions } from "@supabase/auth-helpers-shared";
-import { NextApiHandler, NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
+import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { Database } from "../../../database-types";
 
 export type AddParameters<
@@ -14,13 +14,13 @@ export type AddParameters<
 ) => ReturnType<TFunction>;
 
 export default function withApiSupabase<ResponseType = any>(
-  handler: AddParameters<
-    NextApiHandler<ResponseType>,
-    [SupabaseClient<Database, "public">]
-  >,
-  options: { cookieOptions?: CookieOptions } = {},
+  handler: (
+    req: AxiomAPIRequest,
+    res: NextApiResponse,
+    supabaseClient: SupabaseClient<Database>,
+  ) => Promise<void>,
 ) {
-  return async (req: NextApiRequest, res: NextApiResponse): Promise<void> => {
+  return async (req: AxiomAPIRequest, res: NextApiResponse): Promise<void> => {
     if (
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||
       !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY

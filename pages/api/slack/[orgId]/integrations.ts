@@ -1,16 +1,13 @@
-import { withApiAuth } from "@supabase/auth-helpers-nextjs";
 import { withAxiom } from "next-axiom";
-import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
+import { withProtectedApi } from "../../../../components/api/utils/withProtectedApi";
 import { flattenParam } from "../../../../components/utils/flattenParam";
-import { Database } from "../../../../database-types";
 
 export default withAxiom(
-  withApiAuth<Database>(async function ProtectedRoute(
-    _req,
+  withProtectedApi(async function ProtectedRoute(
+    req,
     res,
     supabaseServerClient,
   ) {
-    const req = _req as AxiomAPIRequest;
     const orgId = flattenParam(req.query?.["orgId"]);
 
     if (orgId === null) {

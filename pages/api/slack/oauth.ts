@@ -1,9 +1,8 @@
 import axios from "axios";
 import { withAxiom } from "next-axiom";
-import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { ApiError } from "next/dist/server/api-utils";
 import { isValidBody } from "../../../components/api/utils/apiUtils";
-import withApiSupabase from "../../../components/api/utils/withApiSupabase";
+import { withProtectedApi } from "../../../components/api/utils/withProtectedApi";
 import { getSlackRedirectUrl } from "../../../components/SlackButton";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { Database } from "../../../database-types";
@@ -35,12 +34,11 @@ export interface IncomingWebhook {
 }
 
 export default withAxiom(
-  withApiSupabase<Database>(async function ProtectedRoute(
-    _req,
+  withProtectedApi<Database>(async function ProtectedRoute(
+    req,
     res,
     supabaseServerClient,
   ) {
-    const req = _req as AxiomAPIRequest;
     if (!process.env.NEXT_PUBLIC_BASE_URL) {
       throw new ApiError(500, "Missing NEXT_PUBLIC_BASE_URL");
     }

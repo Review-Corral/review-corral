@@ -1,10 +1,11 @@
-import { SupabaseClient, withApiAuth } from "@supabase/auth-helpers-nextjs";
+import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
 import { NextApiRequest, NextApiResponse } from "next";
 import {
   getInstallationAccessToken,
   isValidBody,
 } from "../../../../components/api/utils/apiUtils";
+import { withProtectedApi } from "../../../../components/api/utils/withProtectedApi";
 import { flattenParam } from "../../../../components/utils/flattenParam";
 import { Database } from "../../../../database-types";
 import { InstallationRepositories } from "../../../../github-api-types";
@@ -14,7 +15,7 @@ export type PutRepositoryArgs = {
   isActive: boolean;
 };
 
-export default withApiAuth<Database>(async function ProtectedRoute(
+export default withProtectedApi(async function ProtectedRoute(
   req,
   res,
   supabaseServerClient,

@@ -1,33 +1,18 @@
-import { withApiAuth } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
-import { NextApiRequest } from "next";
-import { Logger, withAxiom } from "next-axiom";
-import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
+import { Logger } from "next-axiom";
 import { getInstallationAccessToken } from "../../../../components/api/utils/apiUtils";
+import { withProtectedApi } from "../../../../components/api/utils/withProtectedApi";
 import { flattenParam } from "../../../../components/utils/flattenParam";
-import { Database } from "../../../../database-types";
 import {
   InstallationAccessResponse,
   OrgMember,
 } from "../../../../github-api-types";
 
-interface AxiomNextApiRequest extends NextApiRequest {
-  log: AxiomLogger;
-}
-
-interface AxiomLogger {
-  info: (message: string, args?: any) => void;
-  debug: (message: string, args?: any) => void;
-  error: (message: string, args?: any) => void;
-  log: (message: string, args?: any) => void;
-}
-
-const handler = withApiAuth<Database>(async function ProtectedRoute(
-  _req,
+export default withProtectedApi(async function GetMembers(
+  req,
   res,
   supabaseServerClient,
 ) {
-  const req = _req as AxiomAPIRequest;
   const orgId = flattenParam(req.query.orgId);
 
   if (!orgId) {
@@ -107,5 +92,3 @@ const getOrganizationMembers = async (
       return undefined;
     });
 };
-
-export default withAxiom(handler);
