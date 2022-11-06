@@ -7,7 +7,7 @@ import { NextApiResponse } from "next";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { Database } from "../../../database-types";
 
-export async function withProtectedApi<T = any>(
+export function withProtectedApi<T = any>(
   handler: (
     req: AxiomAPIRequest,
     res: NextApiResponse,
