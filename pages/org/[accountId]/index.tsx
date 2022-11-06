@@ -1,4 +1,3 @@
-import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import type { NextPage } from "next";
 import { Github } from "../../../components/assets/icons/Github";
 import { Slack } from "../../../components/assets/icons/Slack";
@@ -7,6 +6,7 @@ import { InstalledRepos } from "../../../components/teams/repos/InstallationRepo
 import { SlackIntegrations } from "../../../components/teams/slack/SlackIntegrations";
 import { UsernameMappings } from "../../../components/teams/slack/username-mappings/UsernameMappings";
 import { flattenParam } from "../../../components/utils/flattenParam";
+import { withPageAuth } from "../../../components/utils/withPageAuth";
 import { Database } from "../../../database-types";
 
 export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
@@ -50,8 +50,7 @@ export const OrgView: NextPage<{ organization: Organization }> = ({
 
 export default OrgView;
 
-export const getServerSideProps = withPageAuth<Database, "public">({
-  redirectTo: "/login",
+export const getServerSideProps = withPageAuth<"public">({
   async getServerSideProps(ctx, supabaseClient) {
     console.log("In get server side props");
     const accountId = flattenParam(ctx.params?.["accountId"]);

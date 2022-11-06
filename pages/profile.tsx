@@ -1,6 +1,7 @@
-import { User, withPageAuth } from "@supabase/auth-helpers-nextjs";
+import { User } from "@supabase/auth-helpers-nextjs";
 import type { NextPage } from "next";
 import { DashboardLayout } from "../components/layout/DashboardLayout";
+import { withPageAuth } from "../components/utils/withPageAuth";
 
 export const Profile: NextPage<{ user: User }> = ({ user }) => {
   return (
@@ -12,10 +13,7 @@ export const Profile: NextPage<{ user: User }> = ({ user }) => {
 
 export default Profile;
 
-export const getServerSideProps = withPageAuth({
-  authRequired: true,
-  redirectTo: "/login",
-});
+export const getServerSideProps = withPageAuth();
 
 export const UserProfileInfo: React.FC<{ user: User }> = ({ user }) => {
   return (
