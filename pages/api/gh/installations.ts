@@ -1,18 +1,15 @@
-import { withApiAuth } from "@supabase/auth-helpers-nextjs";
 import { PostgrestResponse } from "@supabase/supabase-js";
 import axios from "axios";
 import { withAxiom } from "next-axiom";
-import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
-import { Database } from "../../../database-types";
+import { withProtectedApi } from "../../../components/api/utils/withProtectedApi";
 import { InstallationsResponse } from "../../../github-api-types";
 
 export default withAxiom(
-  withApiAuth<Database>(async function ProtectedRoute(
-    _req,
+  withProtectedApi(async function ProtectedRoute(
+    req,
     res,
     supabaseServerClient,
   ) {
-    const req = _req as AxiomAPIRequest;
     const { data } = await supabaseServerClient.auth.getSession();
 
     if (!data?.session?.user?.id) {

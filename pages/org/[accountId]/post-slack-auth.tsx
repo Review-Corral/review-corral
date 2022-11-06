@@ -1,4 +1,3 @@
-import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import { useQueryClient } from "@tanstack/react-query";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
@@ -9,8 +8,8 @@ import {
   useSlackIntegrations,
 } from "../../../components/teams/slack/useSlackIntegrations";
 import { flattenParam } from "../../../components/utils/flattenParam";
+import { withPageAuth } from "../../../components/utils/withPageAuth";
 import LoadingView from "../../../components/views/LoadingView";
-import { Database } from "../../../database-types";
 
 export const PostSlackAuth: NextPage<{ organization: Organization }> = ({
   organization,
@@ -39,8 +38,7 @@ export const PostSlackAuth: NextPage<{ organization: Organization }> = ({
 
 export default PostSlackAuth;
 
-export const getServerSideProps = withPageAuth<Database, "public">({
-  redirectTo: "/login",
+export const getServerSideProps = withPageAuth<"public">({
   async getServerSideProps(ctx, supabaseClient) {
     console.log("In get server side props");
     const accountId = flattenParam(ctx.params?.["accountId"]);

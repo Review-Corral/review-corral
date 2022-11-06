@@ -1,17 +1,12 @@
 {
   "root": true,
   "extends": [
-    "next/babel",
+    "next",
     "next/core-web-vitals",
-    "plugin:security/recommended",
     "prettier"
   ],
-  "plugins": ["jest", "security", "storybook"],
+  "plugins": ["jest"],
   "overrides": [
-    {
-      "files": ["components/**/*.stories.ts?(x)"],
-      "extends": ["plugin:storybook/recommended"]
-    },
     {
       "files": ["**/__tests__/**/*.ts?(x)", "**/?(*.)+(spec|test).ts?(x)"],
       "env": { "jest/globals": true },

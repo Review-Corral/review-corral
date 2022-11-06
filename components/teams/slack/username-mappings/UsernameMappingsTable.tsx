@@ -27,7 +27,7 @@ export const UsernameMappingsTable: FC<UsernameMappingsTableProps> = ({
             Username Mappings
           </h1>
           <p className="mt-2 text-sm text-gray-700">
-            Add the Slack "member Id"s for the users in your Github
+            Add the Slack &quot;member Id&quot;s for the users in your Github
             organization. This will allow the bot to reference the Slack
             username from the Github events.
           </p>
