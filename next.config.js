@@ -4,6 +4,9 @@ const { withAxiom } = require("next-axiom");
 
 const nextConfig = {
   reactStrictMode: true,
+  images: {
+    domains: ["avatars.githubusercontent.com"],
+  },
   redirects: () => [
     {
       source: "/logout",
