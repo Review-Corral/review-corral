@@ -53,6 +53,7 @@ export function withPageAuth<
       props: {
         initialSession: session,
         user: session.user,
+        ...ret.props,
       },
     };
   };

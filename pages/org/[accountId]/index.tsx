@@ -14,6 +14,8 @@ export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 export const OrgView: NextPage<{ organization: Organization }> = ({
   organization,
 }) => {
+  console.log("In org view");
+  console.log("Got organization: ", organization);
   return (
     <DashboardLayout
       title={organization.account_name}
@@ -61,7 +63,7 @@ export const getServerSideProps = withPageAuth<"public">({
       };
     }
 
-    const { data, error } = await supabaseClient
+    const { data: organization, error } = await supabaseClient
       .from("organizations")
       .select("*")
       .eq("account_id", accountId)
@@ -80,6 +82,6 @@ export const getServerSideProps = withPageAuth<"public">({
       };
     }
 
-    return { props: { organization: data } };
+    return { props: { organization } };
   },
 });
