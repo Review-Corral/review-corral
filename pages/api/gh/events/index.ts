@@ -70,6 +70,7 @@ export default withAxiom(
         slackIntegration.access_token,
         organization.installation_id,
         req.log,
+        organization.id,
       );
 
       try {

@@ -25,6 +25,7 @@ export class GithubEventHandler {
     private readonly slackToken: string,
     private readonly installationId: number,
     private readonly logger: Logger,
+    private readonly organizationId: string,
   ) {}
 
   async handleEvent(body: GithubEvent) {
@@ -216,6 +217,7 @@ export class GithubEventHandler {
       .from("username_mappings")
       .select("slack_user_id")
       .eq("github_username", githubLogin)
+      .eq("organization_id", this.organizationId)
       .single();
 
     if (error) {
