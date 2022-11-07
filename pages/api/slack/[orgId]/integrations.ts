@@ -14,10 +14,9 @@ export default withAxiom(
       return res.status(400).send({ error: "Missing organization Id" });
     }
 
-    req.log.info(
-      "Got request for Slack integrations for organization ID: ",
+    req.log.info("Got request for Slack integrations for organization ID: ", {
       orgId,
-    );
+    });
 
     const { data, error } = await supabaseServerClient
       .from("slack_integration")

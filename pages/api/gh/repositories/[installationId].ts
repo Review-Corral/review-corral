@@ -1,6 +1,8 @@
 import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
+import { withAxiom } from "next-axiom";
+import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import {
   getInstallationAccessToken,
   isValidBody,
@@ -15,31 +17,35 @@ export type PutRepositoryArgs = {
   isActive: boolean;
 };
 
-export default withProtectedApi(async function ProtectedRoute(
-  req,
-  res,
-  supabaseServerClient,
-) {
-  const installationId: number = Number(flattenParam(req.query.installationId));
+export default withAxiom(
+  withProtectedApi(async function ProtectedRoute(
+    req,
+    res,
+    supabaseServerClient,
+  ) {
+    const installationId: number = Number(
+      flattenParam(req.query.installationId),
+    );
 
-  if (!installationId) {
-    return res.status(404);
-  }
-  console.info(
-    "Got request for repositories for installation: ",
-    installationId,
-  );
+    if (!installationId) {
+      return res.status(404);
+    }
+    req.log.info(
+      "Got request for repositories for installation: ",
+      installationId,
+    );
 
-  if (req.method === "GET") {
-    return _handleGetRequest(req, res, supabaseServerClient, installationId);
-  }
+    if (req.method === "GET") {
+      return _handleGetRequest(req, res, supabaseServerClient, installationId);
+    }
 
-  if (req.method === "PUT") {
-    return _handlePutRequest(req, res, supabaseServerClient, installationId);
-  }
+    if (req.method === "PUT") {
+      return _handlePutRequest(req, res, supabaseServerClient, installationId);
+    }
 
-  return res.status(404).end();
-});
+    return res.status(404).end();
+  }),
+);
 
 type ApiResponseType = {
   error?: any;
@@ -47,15 +53,14 @@ type ApiResponseType = {
 };
 
 const _handleGetRequest = async (
-  req: NextApiRequest,
+  req: AxiomAPIRequest,
   res: NextApiResponse<ApiResponseType>,
   supabaseServerClient: SupabaseClient<Database>,
   installationId: number,
 ) => {
-  console.info(
-    "Got GET request for repositories for installation: ",
+  req.log.info("Got GET request for repositories for installation: ", {
     installationId,
-  );
+  });
 
   const { data: organizationData, error: organizationError } =
     await supabaseServerClient
@@ -77,8 +82,6 @@ const _handleGetRequest = async (
     installationId,
   );
 
-  console.info("Got installation access token");
-
   const installationRepos = await _getReposForInstallation(
     installationAccessToken.token,
   );
@@ -91,10 +94,9 @@ const _handleGetRequest = async (
         .eq("installation_id", installationId);
 
     if (currentReposError) {
-      console.error(
+      req.log.error(
         "Got error getting current repositories for installation: ",
-        installationId,
-        currentReposError,
+        { installationId, error: currentReposError },
       );
       return res.status(400).send({ error: currentReposError });
     }
@@ -124,27 +126,28 @@ const _handleGetRequest = async (
         .select();
 
     if (InsertReposError) {
-      console.error("Got error adding new repositories: ", InsertReposError);
+      req.log.error("Got error adding new repositories: ", {
+        InsertReposError,
+      });
       return res.status(400).end({ error: InsertReposError });
     }
     const payload = [...currentRepos, ...insertedRepositories];
     return res.status(200).send({ data: payload });
   }
 
-  console.warn("No repositories found for installation");
+  req.log.warn("No repositories found for installation", { installationId });
   return res.status(200).send({ data: [] });
 };
 
 const _handlePutRequest = async (
-  req: NextApiRequest,
+  req: AxiomAPIRequest,
   res: NextApiResponse<ApiResponseType>,
   supabaseServerClient: SupabaseClient<Database>,
   installationId: number,
 ) => {
-  console.info(
-    "Got POST request for repositories for installation: ",
+  req.log.info("Got POST request for repositories for installation: ", {
     installationId,
-  );
+  });
 
   if (!isValidBody<PutRepositoryArgs>(req.body, ["repositoryId", "isActive"])) {
     return res.status(402).send({ error: "Invalid body" });

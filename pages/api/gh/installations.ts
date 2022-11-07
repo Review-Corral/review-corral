@@ -16,7 +16,9 @@ export default withAxiom(
       return res.status(401).send({ error: "Unauthorized" });
     }
 
-    req.log.info("Getting installations for user", data.session.user.id);
+    req.log.info("Getting installations for user", {
+      userId: data.session.user.id,
+    });
 
     const { data: user, error } = await supabaseServerClient
       .from("users")
