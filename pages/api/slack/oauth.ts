@@ -2,7 +2,7 @@ import axios from "axios";
 import { withAxiom } from "next-axiom";
 import { ApiError } from "next/dist/server/api-utils";
 import { isValidBody } from "../../../components/api/utils/apiUtils";
-import { withProtectedApi } from "../../../components/api/utils/withProtectedApi";
+import withApiSupabase from "../../../components/api/utils/withApiSupabase";
 import { getSlackRedirectUrl } from "../../../components/SlackButton";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { Database } from "../../../database-types";
@@ -34,7 +34,7 @@ export interface IncomingWebhook {
 }
 
 export default withAxiom(
-  withProtectedApi<Database>(async function ProtectedRoute(
+  withApiSupabase<Database>(async function ProtectedRoute(
     req,
     res,
     supabaseServerClient,

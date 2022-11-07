@@ -2,11 +2,11 @@ import { WebClient } from "@slack/web-api";
 import { withAxiom } from "next-axiom";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
-import { withProtectedApi } from "../../../../components/api/utils/withProtectedApi";
+import withApiSupabase from "../../../../components/api/utils/withApiSupabase";
 import { Organization } from "../../../org/[accountId]";
 
 export default withAxiom(
-  withProtectedApi(async function GithubEvents(req, res, supabaseClient) {
+  withApiSupabase(async function GithubEvents(req, res, supabaseClient) {
     req.log.info("Got Github Event: ", req.body);
 
     if (
