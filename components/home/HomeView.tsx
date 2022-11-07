@@ -6,9 +6,6 @@ import { withInstallations } from "../views/withInstallations";
 const HomeView = () => {
   const { data, isLoading } = useInstallations();
 
-  // TODO: should load organizations here instead
-
-  console.log("Got data: ", data);
   return (
     <DashboardLayout title="Home">
       <div className="inline-flex flex-col gap-2">
