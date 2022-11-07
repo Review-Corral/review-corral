@@ -18,7 +18,7 @@ export default function withApiSupabase<ResponseType = any>(
     req: AxiomAPIRequest,
     res: NextApiResponse,
     supabaseClient: SupabaseClient<Database>,
-  ) => Promise<void>,
+  ) => Promise<void | NextApiResponse>,
 ) {
   return async (req: AxiomAPIRequest, res: NextApiResponse): Promise<void> => {
     if (

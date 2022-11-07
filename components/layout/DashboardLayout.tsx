@@ -8,20 +8,6 @@ interface NavigationType {
   current: boolean;
 }
 
-const navigation: NavigationType[] = [
-  // { name: "Dashboard", href: "#", current: true },
-  // { name: "Team", href: "#", current: false },
-  // { name: "Projects", href: "#", current: false },
-  // { name: "Calendar", href: "#", current: false },
-  // { name: "Reports", href: "#", current: false },
-];
-
-const userNavigation = [
-  { name: "Your Profile", href: "#" },
-  { name: "Settings", href: "#" },
-  { name: "Sign out", href: "/signout" },
-];
-
 interface DashboardLayoutProps extends NavbarProps {
   title: string;
   children: ReactNode;

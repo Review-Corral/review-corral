@@ -14,8 +14,6 @@ export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 export const OrgView: NextPage<{ organization: Organization }> = ({
   organization,
 }) => {
-  console.log("In org view");
-  console.log("Got organization: ", organization);
   return (
     <DashboardLayout
       title={organization.account_name}

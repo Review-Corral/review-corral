@@ -1,7 +1,7 @@
-import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { SelectorIcon } from "@heroicons/react/outline";
+import { Disclosure, Listbox, Menu, Transition } from "@headlessui/react";
 import Link from "next/link";
-import { FC, Fragment } from "react";
+import { useRouter } from "next/router";
+import { FC, Fragment, useState } from "react";
 import { useInstallations } from "../hooks/useInstallations";
 
 export interface NavbarProps {
@@ -14,6 +14,8 @@ const userNavigation = [
 ];
 
 export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
+  const router = useRouter();
+
   const installations = useInstallations(
     activeOrganizationAccountId !== undefined,
   );
@@ -24,6 +26,9 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
     installations.data.installations.find(
       (installation) => installation.account.id === activeOrganizationAccountId,
     );
+
+  const [currentInstallation, setCurrentInstallation] =
+    useState(activeInstallation);
 
   return (
     <Disclosure as="nav" className="bg-[#f4f4f4]">
@@ -48,7 +53,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                       /
                     </div>
                     <div className="rounded-md px-2 py-2 hover:bg-gray-200 flex gap-2 items-center cursor-pointer">
-                      <div className="flex items-center space-x-2">
+                      {/* <div className="flex items-center space-x-2">
                         <div className="rounded-md overflow-hidden">
                           <img
                             src={activeInstallation.account.avatar_url}
@@ -57,8 +62,37 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                           />
                         </div>
                         <div>{activeInstallation.account.login}</div>
-                      </div>
-                      <SelectorIcon className="h-5 w-5" />
+                      </div> */}
+                      {/* <SelectorIcon className="h-5 w-5" /> */}
+                      <Listbox
+                        value={activeInstallation}
+                        onChange={(installation) => {}}
+                      >
+                        <Listbox.Button>
+                          {activeInstallation.account.login}
+                        </Listbox.Button>
+                        <Listbox.Options>
+                          {installations.data.installations.map(
+                            (installation) => (
+                              <Listbox.Option
+                                key={installation.id}
+                                value={installation}
+                              >
+                                <div className="flex items-center space-x-2">
+                                  <div className="rounded-md overflow-hidden">
+                                    <img
+                                      src={installation.account.avatar_url}
+                                      width={32}
+                                      height={32}
+                                    />
+                                  </div>
+                                  <div>{installation.account.login}</div>
+                                </div>
+                              </Listbox.Option>
+                            ),
+                          )}
+                        </Listbox.Options>
+                      </Listbox>
                     </div>
                   </>
                 )}
