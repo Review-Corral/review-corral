@@ -1,18 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
+import { Database } from "../../../database-types";
 import { ApiResponse } from "../../api/utils/apiBaseTypes";
 
 export const GET_SLACK_INTEGRATIONS_KEY = "getSlackIntegrations";
 
-export type SlackIntegration = {
-  id: string;
-  created_at: Date | null;
-  access_token: string | null;
-  channel_id: string | null;
-  team: string | null;
-  channel_name: string;
-  updated_at: Date | null;
-};
+export type SlackIntegration =
+  Database["public"]["Tables"]["slack_integration"]["Row"];
 
 export const useSlackIntegrations = ({
   organizationId,

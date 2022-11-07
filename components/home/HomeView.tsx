@@ -1,4 +1,3 @@
-import Image from "next/image";
 import Link from "next/link";
 import { useInstallations } from "../hooks/useInstallations";
 import { DashboardLayout } from "../layout/DashboardLayout";
@@ -17,7 +16,7 @@ const HomeView = () => {
           <Link key={installation.id} href={`/org/${installation.account.id}`}>
             <div className="inline-flex items-center space-x-2 cursor-pointer">
               <div className="rounded-md overflow-hidden">
-                <Image
+                <img
                   alt={"Avatar url"}
                   src={installation.account.avatar_url}
                   width={32}

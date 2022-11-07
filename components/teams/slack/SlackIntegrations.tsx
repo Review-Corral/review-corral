@@ -9,14 +9,13 @@ interface SlackIntegrationsProps {
 export const SlackIntegrations: FC<SlackIntegrationsProps> = ({
   organizationId,
 }) => {
-  const slackIntegrations = useSlackIntegrations({ organizationId });
-  // const usernameMapping = useGetUsernameMappings(teamId);
+  const { isLoading, data, error } = useSlackIntegrations({ organizationId });
 
-  if (slackIntegrations.isLoading) {
+  if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  if (!slackIntegrations.data || slackIntegrations.data.length < 1) {
+  if (!data || data.length < 1) {
     return (
       <div>
         <SlackButton organizationId={organizationId} />
@@ -24,5 +23,13 @@ export const SlackIntegrations: FC<SlackIntegrationsProps> = ({
     );
   }
 
-  return <div>{slackIntegrations.data[0].channel_name}</div>;
+  return (
+    <div className="">
+      {data.map((integration) => (
+        <div key={integration.id} className="flex flex-row">
+          <div>{integration.channel_name}</div>
+        </div>
+      ))}
+    </div>
+  );
 };
