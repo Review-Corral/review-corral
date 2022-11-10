@@ -21,16 +21,20 @@ export default function withApiSupabase<ResponseType = any>(
   ) => Promise<void | NextApiResponse>,
 ) {
   return async (req: AxiomAPIRequest, res: NextApiResponse): Promise<void> => {
+    req.log.info("In withApiSupabase");
+
     if (
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||
       !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     ) {
-      req.log.error(
-        "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables are required!",
-      );
-      throw new Error(
-        "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables are required!",
-      );
+      const errorMessage =
+        "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables are required!";
+      req.log.error(errorMessage);
+      res.status(500).send({
+        error: {
+          message: errorMessage,
+        },
+      });
     }
 
     const supabase = createServerSupabaseClient<Database, "public">({
