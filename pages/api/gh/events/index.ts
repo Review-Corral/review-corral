@@ -7,6 +7,10 @@ import { Organization } from "../../../org/[accountId]";
 
 export default withAxiom(
   withApiSupabase(async function GithubEvents(req, res, supabaseClient) {
+    if (req.log === undefined) {
+      console.warn("No logger found");
+    }
+
     req.log.info("Got Github Event: ", req.body);
 
     await req.log.sendLogs();
@@ -78,7 +82,7 @@ export default withAxiom(
       try {
         await eventHandler.handleEvent(req.body);
       } catch (error) {
-        req.log.error(`Got error handling event: ${error}`);
+        req.log.error(`Got error handling event`, error);
         return res.status(400).send({ error: "Error handling event" });
       }
     }
