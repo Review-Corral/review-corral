@@ -9,6 +9,8 @@ export default withAxiom(
   withApiSupabase(async function GithubEvents(req, res, supabaseClient) {
     req.log.info("Got Github Event: ", req.body);
 
+    await req.log.sendLogs();
+
     if (
       req.body.pull_request &&
       req.body.pull_request.id &&
