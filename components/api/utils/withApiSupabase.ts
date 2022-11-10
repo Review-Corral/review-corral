@@ -25,6 +25,9 @@ export default function withApiSupabase<ResponseType = any>(
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||
       !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
     ) {
+      req.log.error(
+        "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables are required!",
+      );
       throw new Error(
         "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables are required!",
       );
@@ -38,7 +41,8 @@ export default function withApiSupabase<ResponseType = any>(
     try {
       await handler(req, res, supabase);
     } catch (error) {
-      res.status(500).json({
+      req.log.error("Got error handling Github Event: ", error);
+      res.status(500).send({
         error: String(error),
       });
       return;
