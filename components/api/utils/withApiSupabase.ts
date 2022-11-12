@@ -21,6 +21,11 @@ export default function withApiSupabase<ResponseType = any>(
   ) => Promise<void | NextApiResponse>,
 ) {
   return async (req: AxiomAPIRequest, res: NextApiResponse): Promise<void> => {
+    if (req.log === undefined) {
+      console.warn("No logger found");
+      return res.status(501).send({ error: "API logger isn't properly set" });
+    }
+
     req.log.info("In withApiSupabase");
 
     if (
