@@ -15,6 +15,7 @@ const handler = async (
 ): Promise<void> => {
   if (req.log === undefined) {
     console.warn("No logger found");
+    return res.status(501).send({ error: "API logger isn't properly set" });
   }
 
   req.log.info("Got Github Event: ", req.body);
