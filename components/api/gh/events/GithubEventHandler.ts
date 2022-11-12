@@ -46,6 +46,8 @@ export class GithubEventHandler {
       this.logger.debug("Handling different event");
       await this.handleOtherEvent(body, prId);
     }
+
+    this.logger.sendLogs();
   }
 
   private async handleNewPr(prId: number, body: GithubEvent) {
