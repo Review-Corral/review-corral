@@ -16,6 +16,8 @@ const handler = async (
 
   req.log.info("Got Github Event: ", req.body);
 
+  return res.status(200).send({ data: "success" });
+
   // if (
   //   req.body.pull_request &&
   //   req.body.pull_request.id &&
