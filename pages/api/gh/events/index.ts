@@ -33,6 +33,7 @@ const handler = async (
   req.log.info("Got Github Event", {
     action: body?.action,
     number: body?.number,
+    pullRequestId: body.pull_request?.id,
   });
 
   if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
