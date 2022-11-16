@@ -180,7 +180,7 @@ export class GithubEventHandler {
         await this.postReadyForReview(prId, body, threadTs);
       } else {
         // Event we're not handling currently
-        this.logger.info("Got unspuported event: ", { action: body.action });
+        this.logger.info("Got unsupported event: ", { action: body.action });
       }
     }
   }

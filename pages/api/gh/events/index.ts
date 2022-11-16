@@ -6,23 +6,65 @@ import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
 import withApiSupabase from "../../../../components/api/utils/withApiSupabase";
+import { GithubEvent } from "../../../../github-event-types";
 import { Organization } from "../../../org/[accountId]";
+
+const getBaseLogPayload = (
+  body: GithubEvent,
+): {
+  number: GithubEvent["number"];
+  action: GithubEvent["action"];
+  pullRequestId?: GithubEvent["pull_request"]["id"];
+} => {
+  return {
+    number: body?.number,
+    action: body?.action,
+    pullRequestId: body.pull_request?.id,
+  };
+};
 
 const handler = async (
   req: AxiomAPIRequest,
   res: NextApiResponse,
   supabaseClient: SupabaseClient,
 ): Promise<void> => {
-  req.log.info("Got Github Event with Action", { action: req.body.action });
+  const body = req.body as GithubEvent;
 
-  if (
-    req.body.pull_request &&
-    req.body.pull_request.id &&
-    req.body.repository.id
-  ) {
-    req.log.info("Got Github Event with Pull Request", {
-      action: req.body.pull_request,
-    });
+  req.log.info("Got Github Event", {
+    action: body?.action,
+    number: body?.number,
+  });
+
+  req.log.debug("GH Event comment", {
+    ...getBaseLogPayload(body),
+    payload: body?.comment,
+  });
+  req.log.debug("GH Event review", {
+    ...getBaseLogPayload(body),
+    payload: body?.review,
+  });
+  req.log.debug("GH Event pull request", {
+    ...getBaseLogPayload(body),
+    payload: body?.pull_request,
+  });
+  req.log.debug("GH Event repository", {
+    ...getBaseLogPayload(body),
+    payload: body?.repository,
+  });
+  req.log.debug("GH Event sender", {
+    ...getBaseLogPayload(body),
+    payload: body?.sender,
+  });
+  req.log.debug("GH Event installation", {
+    ...getBaseLogPayload(body),
+    payload: body?.installation,
+  });
+  req.log.debug("GH Event installation", {
+    ...getBaseLogPayload(body),
+    payload: body?.requested_reviewer,
+  });
+
+  if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
     const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
     const { data: githubRepository, error } = await supabaseClient
@@ -33,7 +75,7 @@ const handler = async (
         organization:organizations (*)
       `,
       )
-      .eq("repository_id", Number(req.body.repository.id))
+      .eq("repository_id", Number(body?.repository.id))
       .limit(1)
       .single();
 
@@ -49,7 +91,7 @@ const handler = async (
     if (!organization) {
       req.log.warn(
         "No organization found for repository_id: ",
-        req.body.repository_id,
+        body.repository.id,
       );
       return res.status(404).send({ error: "No organization found" });
     }
@@ -78,7 +120,7 @@ const handler = async (
     );
 
     try {
-      await eventHandler.handleEvent(req.body);
+      await eventHandler.handleEvent(body);
     } catch (error) {
       req.log.error(`Got error handling event`, error);
       return res.status(400).send({ error: "Error handling event" });
