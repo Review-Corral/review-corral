@@ -59,7 +59,7 @@ const handler = async (
   //   // ...getBaseLogPayload(body),
   //   payload: body?.installation,
   // });
-  // req.log.debug("GH Event installation", {
+  // req.log.debug("GH Event Reviewer", {
   //   // ...getBaseLogPayload(body),
   //   payload: body?.requested_reviewer,
   // });
