@@ -14,7 +14,7 @@ const handler = async (
     return res.status(501).send({ error: "API logger isn't properly set" });
   }
 
-  req.log.info("Got Github Event: ", req.body);
+  req.log.info("Got Github Event: ");
 
   return res.status(200).send({ data: "success" });
 
