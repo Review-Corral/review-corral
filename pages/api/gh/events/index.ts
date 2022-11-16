@@ -5,23 +5,10 @@ import { withAxiom } from "next-axiom";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
+import { analytics } from "../../../../components/api/utils/segment";
 import withApiSupabase from "../../../../components/api/utils/withApiSupabase";
 import { GithubEvent } from "../../../../github-event-types";
 import { Organization } from "../../../org/[accountId]";
-
-const getBaseLogPayload = (
-  body: GithubEvent,
-): {
-  number: GithubEvent["number"];
-  action: GithubEvent["action"];
-  pullRequestId?: GithubEvent["pull_request"]["id"];
-} => {
-  return {
-    number: body?.number,
-    action: body?.action,
-    pullRequestId: body.pull_request?.id,
-  };
-};
 
 const handler = async (
   req: AxiomAPIRequest,
@@ -34,6 +21,15 @@ const handler = async (
     action: body?.action,
     number: body?.number,
     pullRequestId: body.pull_request?.id,
+  });
+
+  analytics.track({
+    event: "Got GH Event",
+    userId: body?.sender?.login ?? "unknown",
+    properties: {
+      body: body,
+      env: process.env.NODE_ENV ?? "development",
+    },
   });
 
   if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
