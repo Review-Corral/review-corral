@@ -5,7 +5,9 @@ import { withAxiom } from "next-axiom";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
+import { analytics } from "../../../../components/api/utils/segment";
 import withApiSupabase from "../../../../components/api/utils/withApiSupabase";
+import { GithubEvent } from "../../../../github-event-types";
 import { Organization } from "../../../org/[accountId]";
 
 const handler = async (
@@ -13,20 +15,24 @@ const handler = async (
   res: NextApiResponse,
   supabaseClient: SupabaseClient,
 ): Promise<void> => {
-  if (req.log === undefined) {
-    console.warn("No logger found");
-    return res.status(501).send({ error: "API logger isn't properly set" });
-  }
+  const body = req.body as GithubEvent;
 
-  req.log.info("Got Github Event: ", req.body);
+  req.log.info("Got Github Event", {
+    action: body?.action,
+    number: body?.number,
+    pullRequestId: body.pull_request?.id,
+  });
 
-  return;
+  analytics.track({
+    event: "Got GH Event",
+    userId: body?.sender?.login ?? "unknown",
+    properties: {
+      body: body,
+      env: process.env.NODE_ENV ?? "development",
+    },
+  });
 
-  if (
-    req.body.pull_request &&
-    req.body.pull_request.id &&
-    req.body.repository.id
-  ) {
+  if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
     const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
     const { data: githubRepository, error } = await supabaseClient
@@ -37,7 +43,7 @@ const handler = async (
         organization:organizations (*)
       `,
       )
-      .eq("repository_id", Number(req.body.repository.id))
+      .eq("repository_id", Number(body?.repository.id))
       .limit(1)
       .single();
 
@@ -51,10 +57,9 @@ const handler = async (
     }
 
     if (!organization) {
-      req.log.warn(
-        "No organization found for repository_id: ",
-        req.body.repository_id,
-      );
+      req.log.warn("No organization found for repository_id: ", {
+        orgId: body.repository.id,
+      });
       return res.status(404).send({ error: "No organization found" });
     }
 
@@ -82,7 +87,7 @@ const handler = async (
     );
 
     try {
-      await eventHandler.handleEvent(req.body);
+      await eventHandler.handleEvent(body);
     } catch (error) {
       req.log.error(`Got error handling event`, error);
       return res.status(400).send({ error: "Error handling event" });

@@ -29,9 +29,6 @@ export class GithubEventHandler {
   ) {}
 
   async handleEvent(body: GithubEvent) {
-    this.logger.debug(`Got event '${body.action}'`, {
-      payload: body,
-    });
     const prId = body.pull_request.id;
 
     // New PR, should be the only two threads that create a new thread
@@ -46,8 +43,6 @@ export class GithubEventHandler {
       this.logger.debug("Handling different event");
       await this.handleOtherEvent(body, prId);
     }
-
-    this.logger.sendLogs();
   }
 
   private async handleNewPr(prId: number, body: GithubEvent) {
@@ -180,7 +175,7 @@ export class GithubEventHandler {
         await this.postReadyForReview(prId, body, threadTs);
       } else {
         // Event we're not handling currently
-        this.logger.info("Got unspuported event: ", { action: body.action });
+        this.logger.info("Got unsupported event: ", { action: body.action });
       }
     }
   }
@@ -223,7 +218,7 @@ export class GithubEventHandler {
       .single();
 
     if (error) {
-      this.logger.error("Error getting slack user name: ", error);
+      this.logger.warn("Error getting slack user name: ", error);
       return githubLogin;
     }
 
