@@ -36,10 +36,6 @@ const handler = async (
   });
 
   if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
-    req.log.debug("GH Event with pull_request info", {
-      ...body.pull_request,
-    });
-
     const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
     const { data: githubRepository, error } = await supabaseClient
