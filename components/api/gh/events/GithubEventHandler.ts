@@ -29,9 +29,6 @@ export class GithubEventHandler {
   ) {}
 
   async handleEvent(body: GithubEvent) {
-    this.logger.debug(`Got event '${body.action}'`, {
-      payload: body,
-    });
     const prId = body.pull_request.id;
 
     // New PR, should be the only two threads that create a new thread
@@ -223,7 +220,7 @@ export class GithubEventHandler {
       .single();
 
     if (error) {
-      this.logger.error("Error getting slack user name: ", error);
+      this.logger.warn("Error getting slack user name: ", error);
       return githubLogin;
     }
 

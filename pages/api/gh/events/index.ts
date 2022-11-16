@@ -35,34 +35,34 @@ const handler = async (
     number: body?.number,
   });
 
-  req.log.debug("GH Event comment", {
-    ...getBaseLogPayload(body),
-    payload: body?.comment,
-  });
-  req.log.debug("GH Event review", {
-    ...getBaseLogPayload(body),
-    payload: body?.review,
-  });
-  req.log.debug("GH Event pull request", {
-    ...getBaseLogPayload(body),
-    payload: body?.pull_request,
-  });
-  req.log.debug("GH Event repository", {
-    ...getBaseLogPayload(body),
-    payload: body?.repository,
-  });
-  req.log.debug("GH Event sender", {
-    ...getBaseLogPayload(body),
-    payload: body?.sender,
-  });
-  req.log.debug("GH Event installation", {
-    ...getBaseLogPayload(body),
-    payload: body?.installation,
-  });
-  req.log.debug("GH Event installation", {
-    ...getBaseLogPayload(body),
-    payload: body?.requested_reviewer,
-  });
+  // req.log.debug("GH Event comment", {
+  //   // ...getBaseLogPayload(body),
+  //   payload: body?.comment,
+  // });
+  // req.log.debug("GH Event review", {
+  //   // ...getBaseLogPayload(body),
+  //   payload: body?.review,
+  // });
+  // req.log.debug("GH Event pull request", {
+  //   // ...getBaseLogPayload(body),
+  //   payload: body?.pull_request,
+  // });
+  // req.log.debug("GH Event repository", {
+  //   // ...getBaseLogPayload(body),
+  //   payload: body?.repository,
+  // });
+  // req.log.debug("GH Event sender", {
+  //   // ...getBaseLogPayload(body),
+  //   payload: body?.sender,
+  // });
+  // req.log.debug("GH Event installation", {
+  //   // ...getBaseLogPayload(body),
+  //   payload: body?.installation,
+  // });
+  // req.log.debug("GH Event installation", {
+  //   // ...getBaseLogPayload(body),
+  //   payload: body?.requested_reviewer,
+  // });
 
   if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
     const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
