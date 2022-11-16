@@ -21,13 +21,6 @@ export default function withApiSupabase<ResponseType = any>(
   ) => Promise<void | NextApiResponse>,
 ) {
   return async (req: AxiomAPIRequest, res: NextApiResponse): Promise<void> => {
-    if (req.log === undefined) {
-      console.warn("No logger found");
-      return res.status(501).send({ error: "API logger isn't properly set" });
-    }
-
-    req.log.info("In withApiSupabase");
-
     if (
       !process.env.NEXT_PUBLIC_SUPABASE_URL ||
       !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
@@ -50,7 +43,7 @@ export default function withApiSupabase<ResponseType = any>(
     try {
       await handler(req, res, supabase);
     } catch (error) {
-      req.log.error("Got error handling Github Event: ", error);
+      req.log.error("Error in handling child of withApiSupabase", error);
       res.status(500).send({
         error: String(error),
       });

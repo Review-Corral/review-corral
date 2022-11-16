@@ -35,36 +35,11 @@ const handler = async (
     number: body?.number,
   });
 
-  // req.log.debug("GH Event comment", {
-  //   // ...getBaseLogPayload(body),
-  //   payload: body?.comment,
-  // });
-  // req.log.debug("GH Event review", {
-  //   // ...getBaseLogPayload(body),
-  //   payload: body?.review,
-  // });
-  // req.log.debug("GH Event pull request", {
-  //   // ...getBaseLogPayload(body),
-  //   payload: body?.pull_request,
-  // });
-  // req.log.debug("GH Event repository", {
-  //   // ...getBaseLogPayload(body),
-  //   payload: body?.repository,
-  // });
-  // req.log.debug("GH Event sender", {
-  //   // ...getBaseLogPayload(body),
-  //   payload: body?.sender,
-  // });
-  // req.log.debug("GH Event installation", {
-  //   // ...getBaseLogPayload(body),
-  //   payload: body?.installation,
-  // });
-  // req.log.debug("GH Event Reviewer", {
-  //   // ...getBaseLogPayload(body),
-  //   payload: body?.requested_reviewer,
-  // });
-
   if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
+    req.log.debug("GH Event with pull_request info", {
+      ...body.pull_request,
+    });
+
     const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
     const { data: githubRepository, error } = await supabaseClient
@@ -89,10 +64,9 @@ const handler = async (
     }
 
     if (!organization) {
-      req.log.warn(
-        "No organization found for repository_id: ",
-        body.repository.id,
-      );
+      req.log.warn("No organization found for repository_id: ", {
+        orgId: body.repository.id,
+      });
       return res.status(404).send({ error: "No organization found" });
     }
 
