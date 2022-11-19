@@ -17,6 +17,30 @@ export type pages = "github" | "slack" | "usernames";
 
 export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 
+type SubNav = {
+  text: string;
+  page: pages | undefined;
+};
+
+const routes: SubNav[] = [
+  {
+    text: "Overview",
+    page: undefined,
+  },
+  {
+    text: "Github",
+    page: "github",
+  },
+  {
+    text: "Slack",
+    page: "slack",
+  },
+  {
+    text: "Usernames",
+    page: "usernames",
+  },
+];
+
 export const OrgView: NextPage<{
   organization: Organization;
   page: pages | undefined;
@@ -41,35 +65,32 @@ export const OrgView: NextPage<{
       activeOrganizationAccountId={organization.account_id}
       subnav={
         <>
-          <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <h1 className="font-semibold text-gray-900">
-              <ul>
+          <div className="max-w-7xl mx-auto px-4 pt-4 pb-3 sm:px-6 lg:px-8 font-medium ">
+            <ul>
+              {routes.map((route) => (
                 <li
-                  className="inline px-2 py-2"
-                  onClick={() => setPageWrapper(undefined)}
+                  key={route.text}
+                  className={`
+                    inline px-1 py-1 cursor-pointer text-base hover:bg-gray-100 rounded-md
+                    `}
+                  onClick={() => setPageWrapper(route.page)}
                 >
-                  Overview
+                  <span
+                    className={`
+                      pb-[0.9rem]
+                      px-1
+                      ${
+                        _page == route.page
+                          ? "border-b-2 border-indigo-500"
+                          : ""
+                      }
+                    `}
+                  >
+                    {route.text}
+                  </span>
                 </li>
-                <li
-                  className="inline px-2 py-2"
-                  onClick={() => setPageWrapper("github")}
-                >
-                  Github
-                </li>
-                <li
-                  className="inline px-2 py-2"
-                  onClick={() => setPageWrapper("slack")}
-                >
-                  Slack
-                </li>
-                <li
-                  className="inline px-2 py-2"
-                  onClick={() => setPageWrapper("usernames")}
-                >
-                  Usernames
-                </li>
-              </ul>
-            </h1>
+              ))}
+            </ul>
           </div>
         </>
       }
