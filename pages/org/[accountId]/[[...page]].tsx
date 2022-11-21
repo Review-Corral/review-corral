@@ -176,6 +176,7 @@ export const OrgView: NextPage<{
 
 import { FC } from "react";
 import { ErrorAlert } from "../../../components/common/alerts/Error";
+import { InfoAlert } from "../../../components/common/alerts/Info";
 import { useGetInstallationRepos } from "../../../components/teams/repos/useGetInstallationRepos";
 
 interface GithubCardProps {
@@ -190,7 +191,7 @@ export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
         <div className="flex p-4 bg-gray-100 rounded-t-md justify-between items-center w-96">
           <div className="flex gap-4 items-center">
             <Github className="h-8 w-8 fill-black" />
-            <span className="font-semibold text-lg">Github Integration</span>
+            <span className="font-semibold text-lg">Enabled Repositories</span>
           </div>
           <div
             className="cursor-pointer underline text-indigo-500 underline-offset-2"
@@ -200,7 +201,7 @@ export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
           </div>
         </div>
         <div className="px-4 py-6">
-          <GithubCardData organization={organization} />
+          <GithubCardData organization={organization} onEdit={onEdit} />
         </div>
       </div>
     </div>
@@ -209,9 +210,13 @@ export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
 
 interface GithubCardDataProps {
   organization: Organization;
+  onEdit: () => void;
 }
 
-export const GithubCardData: FC<GithubCardDataProps> = ({ organization }) => {
+export const GithubCardData: FC<GithubCardDataProps> = ({
+  organization,
+  onEdit,
+}) => {
   const getInstalledRepos = useGetInstallationRepos(
     organization.installation_id,
   );
@@ -239,10 +244,31 @@ export const GithubCardData: FC<GithubCardDataProps> = ({ organization }) => {
     return <ErrorAlert message="You need to setup your integration!" />;
   }
 
+  const activeRepos = getInstalledRepos.data.filter((item) => item.is_active);
+
+  if (activeRepos.length < 1) {
+    return (
+      <InfoAlert
+        message="No repositories enabled yet"
+        subMessage={
+          <>
+            Configure your repositories{" "}
+            <span
+              className="underline cursor-pointer underline-offset-2"
+              onClick={onEdit}
+            >
+              here
+            </span>
+          </>
+        }
+      />
+    );
+  }
+
   return (
     <div>
       <ul className="space-y-2">
-        {getInstalledRepos.data.map((repo) => (
+        {activeRepos.map((repo) => (
           <li key={repo.id}>{repo.repository_name}</li>
         ))}
       </ul>
