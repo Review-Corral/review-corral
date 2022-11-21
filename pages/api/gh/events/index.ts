@@ -76,6 +76,10 @@ const handler = async (
       return res.status(404).send({ error: "No organization found" });
     }
 
+    // Flush the events now so we're guranteed to get at least something in the logs
+    // in the event that the logs are too big to fully send later one
+    await req.log.flush();
+
     const eventHandler = new GithubEventHandler(
       supabaseClient,
       slackClient,
