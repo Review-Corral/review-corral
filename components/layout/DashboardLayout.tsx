@@ -40,7 +40,7 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({
         <Navbar {...props} />
         <header className="bg-white border-b border-gray-200">{subnav}</header>
         <main>
-          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-7 lg:px-10">
             {children}
           </div>
         </main>

@@ -48,7 +48,7 @@ export const OrgView: NextPage<{
   const router = useRouter();
   const [_page, setPage] = useState<pages | undefined>(page);
 
-  const setPageWrapper = (page: pages | undefined) => {
+  const setPageWrapper = (page: pages | undefined): void => {
     setPage(page);
     let route = "";
     if (page) {
@@ -142,10 +142,111 @@ export const OrgView: NextPage<{
               </div>
             );
           default:
-            return <div>Overview</div>;
+            return (
+              <div className="space-y-12">
+                <h1 className="text-2xl font-bold pt-8">Overview</h1>
+                <div className="flex justify-between items-start">
+                  <div className="flex flex-wrap">
+                    <GithubCard
+                      organization={organization}
+                      onEdit={() => {
+                        setPageWrapper("github");
+                      }}
+                    />
+                  </div>
+                  <div className="rounded-md border border-gray-200 w-96">
+                    <div className="flex p-4 bg-gray-100 rounded-md justify-between">
+                      <Slack className="h-8 w-8 fill-black" />
+                      <span className="font-semibold text-lg">
+                        Slack Integration
+                      </span>
+                    </div>
+                    <div className="px-4 py-6">
+                      <SlackIntegrations organizationId={organization.id} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            );
         }
       })()}
     </DashboardLayout>
+  );
+};
+
+import { FC } from "react";
+import { ErrorAlert } from "../../../components/common/alerts/Error";
+import { useGetInstallationRepos } from "../../../components/teams/repos/useGetInstallationRepos";
+
+interface GithubCardProps {
+  organization: Organization;
+  onEdit: () => void;
+}
+
+export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
+  return (
+    <div id="github">
+      <div className="rounded-md border border-gray-200">
+        <div className="flex p-4 bg-gray-100 rounded-t-md justify-between items-center w-96">
+          <div className="flex gap-4 items-center">
+            <Github className="h-8 w-8 fill-black" />
+            <span className="font-semibold text-lg">Github Integration</span>
+          </div>
+          <div
+            className="cursor-pointer underline text-indigo-500 underline-offset-2"
+            onClick={() => onEdit()}
+          >
+            Edit
+          </div>
+        </div>
+        <div className="px-4 py-6">
+          <GithubCardData organization={organization} />
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface GithubCardDataProps {
+  organization: Organization;
+}
+
+export const GithubCardData: FC<GithubCardDataProps> = ({ organization }) => {
+  const getInstalledRepos = useGetInstallationRepos(
+    organization.installation_id,
+  );
+
+  if (getInstalledRepos.isLoading) {
+    return (
+      <div>
+        <ul className="space-y-4">
+          {Array.from(Array(3).keys()).map((num) => (
+            <li
+              key={num}
+              className="h-6 w-[80%] rounded-lg bg-gray-200 animate-pulse"
+            />
+          ))}
+        </ul>
+      </div>
+    );
+  }
+
+  if (getInstalledRepos.isError) {
+    return <ErrorAlert message="Error loading your Github integration" />;
+  }
+
+  if (!getInstalledRepos.data || getInstalledRepos.data.length === 0) {
+    return <ErrorAlert message="You need to setup your integration!" />;
+  }
+
+  return (
+    <div>
+      <ul className="space-y-2">
+        {getInstalledRepos.data.map((repo) => (
+          <li key={repo.id}>{repo.repository_name}</li>
+        ))}
+      </ul>
+    </div>
   );
 };
 
