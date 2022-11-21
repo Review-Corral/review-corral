@@ -11,7 +11,6 @@ export const useGetInstallationRepos = (installationId: number) => {
   return useQuery<GithubRepositories[], AxiosError>(
     ["getInstalledRepos", installationId],
     async () => {
-      console.log("going to request with installation id", installationId);
       return (
         await axios.get<ApiResponse<GithubRepositories[]>>(
           `/api/gh/repositories/${installationId}`,

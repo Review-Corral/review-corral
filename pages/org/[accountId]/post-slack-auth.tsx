@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import {
   GET_SLACK_INTEGRATIONS_KEY,
   useSlackIntegrations,
-} from "../../../components/teams/slack/useSlackIntegrations";
+} from "../../../components/organization/slack/useSlackIntegrations";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { withPageAuth } from "../../../components/utils/withPageAuth";
 import LoadingView from "../../../components/views/LoadingView";

@@ -6,20 +6,19 @@ import { ReactNode, useState } from "react";
 import { Github } from "../../../components/assets/icons/Github";
 import { Slack } from "../../../components/assets/icons/Slack";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
-import { InstalledRepos } from "../../../components/teams/repos/InstallationRepositoriesWrapper";
-import { SlackIntegrations } from "../../../components/teams/slack/SlackIntegrations";
-import { UsernameMappings } from "../../../components/teams/slack/username-mappings/UsernameMappings";
+import { SlackIntegrations } from "../../../components/organization/slack/SlackIntegrations";
+import { UsernameMappings } from "../../../components/organization/slack/username-mappings/UsernameMappings";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { withPageAuth } from "../../../components/utils/withPageAuth";
 import { Database } from "../../../database-types";
 
-export type pages = "github" | "slack" | "usernames";
+export type Pages = "github" | "slack" | "usernames";
 
 export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 
 type SubNav = {
   text: string;
-  page: pages | undefined;
+  page: Pages | undefined;
 };
 
 const routes: SubNav[] = [
@@ -43,12 +42,12 @@ const routes: SubNav[] = [
 
 export const OrgView: NextPage<{
   organization: Organization;
-  page: pages | undefined;
+  page: Pages | undefined;
 }> = ({ organization, page }) => {
   const router = useRouter();
-  const [_page, setPage] = useState<pages | undefined>(page);
+  const [_page, setPage] = useState<Pages | undefined>(page);
 
-  const setPageWrapper = (page: pages | undefined): void => {
+  const setPageWrapper = (page: Pages | undefined): void => {
     setPage(page);
     let route = "";
     if (page) {
@@ -96,26 +95,11 @@ export const OrgView: NextPage<{
       }
     >
       {((): ReactNode => {
+        const tabProps = { organization, setPage: setPageWrapper };
+
         switch (_page) {
           case "github":
-            return (
-              <div id="github">
-                <h1 className="text-xl font-semibold">Github</h1>
-                <div className="rounded-md border border-gray-200">
-                  <div className="flex p-4 bg-gray-100 rounded-t-md justify-between">
-                    <Github className="h-8 w-8 fill-black" />
-                    <span className="font-semibold text-lg">
-                      Github Integration
-                    </span>
-                  </div>
-                  <div className="px-4 py-6">
-                    <InstalledRepos
-                      installationId={organization.installation_id}
-                    />
-                  </div>
-                </div>
-              </div>
-            );
+            return <GithubTab {...tabProps} />;
           case "slack":
             return (
               <div id="slack">
@@ -142,32 +126,7 @@ export const OrgView: NextPage<{
               </div>
             );
           default:
-            return (
-              <div className="space-y-12">
-                <h1 className="text-2xl font-bold pt-8">Overview</h1>
-                <div className="flex justify-between items-start">
-                  <div className="flex flex-wrap">
-                    <GithubCard
-                      organization={organization}
-                      onEdit={() => {
-                        setPageWrapper("github");
-                      }}
-                    />
-                  </div>
-                  <div className="rounded-md border border-gray-200 w-96">
-                    <div className="flex p-4 bg-gray-100 rounded-md justify-between">
-                      <Slack className="h-8 w-8 fill-black" />
-                      <span className="font-semibold text-lg">
-                        Slack Integration
-                      </span>
-                    </div>
-                    <div className="px-4 py-6">
-                      <SlackIntegrations organizationId={organization.id} />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
+            return <OverviewTab {...tabProps} />;
         }
       })()}
     </DashboardLayout>
@@ -177,7 +136,9 @@ export const OrgView: NextPage<{
 import { FC } from "react";
 import { ErrorAlert } from "../../../components/common/alerts/Error";
 import { InfoAlert } from "../../../components/common/alerts/Info";
-import { useGetInstallationRepos } from "../../../components/teams/repos/useGetInstallationRepos";
+import { GithubTab } from "../../../components/organization/github/GithubTab";
+import { useGetInstallationRepos } from "../../../components/organization/github/useGetInstallationRepos";
+import { OverviewTab } from "../../../components/organization/Overview";
 
 interface GithubCardProps {
   organization: Organization;
