@@ -13,8 +13,8 @@ interface GithubCardProps {
 
 export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
   return (
-    <div id="github">
-      <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center w-96">
+    <div id="github" className="w-96">
+      <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center">
         <div className="flex gap-4 items-center">
           <Github className="h-8 w-8 fill-black" />
           <span className="font-semibold text-lg">Enabled Repositories</span>
@@ -91,16 +91,24 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
     <div>
       <div className="space-y-2">
         {activeRepos.map((repo) => (
-          <>
+          <div key={repo.id}>
             <div
-              className="border border-gray-200 rounded-md p-4"
-              key={repo.id}
+              className="flex flex-row gap-4 items-center border border-gray-200 rounded-md p-4 bg-white"
               id={repo.id}
             >
-              {repo.repository_name}
+              <div className="rounded-full h-2 w-2 bg-green-500 flex-shrink-0"></div>
+              <div className="truncate">{repo.repository_name}</div>
             </div>
-            <Xarrow start={repo.id} end="slack-channel" showHead={false} />
-          </>
+
+            {/* TODO: in the future the target should be found from a m2m table of Github <-> slack */}
+            <Xarrow
+              start={repo.id}
+              end="slack-channel"
+              showHead={false}
+              color={"#6366f1"}
+              strokeWidth={3}
+            />
+          </div>
         ))}
       </div>
     </div>

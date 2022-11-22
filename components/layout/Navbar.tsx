@@ -1,5 +1,4 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { SelectorIcon } from "@heroicons/react/outline";
 import Link from "next/link";
 import { FC, Fragment } from "react";
 import { useInstallations } from "../hooks/useInstallations";
@@ -47,7 +46,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                     <div className="-mt-0.5 text-3xl text-gray-400 font-extralight">
                       /
                     </div>
-                    <div className="rounded-md px-2 py-2 hover:bg-gray-200 flex gap-2 items-center cursor-pointer">
+                    <div className="rounded-md px-2 py- flex gap-2 items-center">
                       <div className="flex items-center space-x-2">
                         <div className="rounded-md overflow-hidden">
                           <img
@@ -58,7 +57,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                         </div>
                         <div>{activeInstallation.account.login}</div>
                       </div>
-                      <SelectorIcon className="h-5 w-5" />
+                      {/* <SelectorIcon className="h-5 w-5" /> */}
                     </div>
                   </>
                 )}

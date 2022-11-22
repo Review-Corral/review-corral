@@ -10,22 +10,18 @@ export const OverviewTab: FC<OverviewProps> = ({ organization, setPage }) => {
     <div className="space-y-12">
       <Header>Overview</Header>
       <div className="flex justify-between items-start">
-        <div className="flex flex-wrap">
-          <GithubOverviewCard
-            organization={organization}
-            onEdit={() => {
-              setPage("github");
-            }}
-          />
-        </div>
-        <div className="flex flex-wrap">
-          <SlackOverviewCard
-            organization={organization}
-            onEdit={() => {
-              setPage("slack");
-            }}
-          />
-        </div>
+        <GithubOverviewCard
+          organization={organization}
+          onEdit={() => {
+            setPage("github");
+          }}
+        />
+        <SlackOverviewCard
+          organization={organization}
+          onEdit={() => {
+            setPage("slack");
+          }}
+        />
       </div>
     </div>
   );

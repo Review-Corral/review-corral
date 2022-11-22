@@ -14,8 +14,8 @@ export const SlackOverviewCard: FC<SlackOverviewCardProps> = ({
   onEdit,
 }) => {
   return (
-    <div id="github">
-      <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center w-96">
+    <div id="github" className="w-96">
+      <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center">
         <div className="flex gap-4 items-center">
           <Slack className="h-8 w-8 fill-black" />
           <span className="font-semibold text-lg">Channels</span>
@@ -70,7 +70,7 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({
       <div className="space-y-2">
         {slackChannels.data.map((channel) => (
           <div
-            className="border border-gray-200 rounded-md p-4"
+            className="border border-gray-200 rounded-md p-4 truncate"
             id="slack-channel"
             key={channel.id}
           >
