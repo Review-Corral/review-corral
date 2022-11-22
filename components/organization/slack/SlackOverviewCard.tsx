@@ -71,6 +71,7 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({
         {slackChannels.data.map((channel) => (
           <div
             className="border border-gray-200 rounded-md p-4"
+            id="slack-channel"
             key={channel.id}
           >
             <span className="text-gray-400 mr-2">

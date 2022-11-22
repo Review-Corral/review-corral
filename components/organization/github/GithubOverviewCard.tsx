@@ -1,4 +1,5 @@
 import { FC } from "react";
+import Xarrow from "react-xarrows";
 import { ErrorAlert } from "../../../components/common/alerts/Error";
 import { InfoAlert } from "../../../components/common/alerts/Info";
 import { useGetInstallationRepos } from "../../../components/organization/github/useGetInstallationRepos";
@@ -90,9 +91,16 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
     <div>
       <div className="space-y-2">
         {activeRepos.map((repo) => (
-          <div className="border border-gray-200 rounded-md p-4" key={repo.id}>
-            {repo.repository_name}
-          </div>
+          <>
+            <div
+              className="border border-gray-200 rounded-md p-4"
+              key={repo.id}
+              id={repo.id}
+            >
+              {repo.repository_name}
+            </div>
+            <Xarrow start={repo.id} end="slack-channel" showHead={false} />
+          </>
         ))}
       </div>
     </div>
