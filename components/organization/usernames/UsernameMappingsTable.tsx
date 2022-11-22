@@ -2,37 +2,32 @@ import cntl from "cntl";
 import { FC, useState } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import Button from "../../../buttons/Button";
-import { MemberWithMapping } from "./UsernameMappings";
+import { OrgMember } from "../../../github-api-types";
+import Button from "../../buttons/Button";
 import {
   useCreateUsernameMapping,
   useDeleteUsernameMapping,
+  UsernameMapping,
   useUpdateUsernameMapping,
 } from "./useUsernameMappings";
 
+export interface MemberWithMapping extends OrgMember {
+  mapping?: UsernameMapping;
+}
+
 interface UsernameMappingsTableProps {
+  isLoading: boolean;
   organizationId: string;
   members: MemberWithMapping[];
 }
 
 export const UsernameMappingsTable: FC<UsernameMappingsTableProps> = ({
+  isLoading,
   organizationId,
   members,
 }) => {
   return (
     <div className="">
-      <div className="sm:flex sm:items-center">
-        <div className="sm:flex-auto">
-          <h1 className="text-xl font-semibold text-gray-900">
-            Username Mappings
-          </h1>
-          <p className="mt-2 text-sm text-gray-700">
-            Add the Slack &quot;member Id&quot;s for the users in your Github
-            organization. This will allow the bot to reference the Slack
-            username from the Github events.
-          </p>
-        </div>
-      </div>
       <div className="mt-8 flex flex-col">
         <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
@@ -61,13 +56,33 @@ export const UsernameMappingsTable: FC<UsernameMappingsTableProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
-                  {members.map((member) => (
-                    <UsernameMappingsTableItem
-                      key={member.id}
-                      organizationId={organizationId}
-                      member={member}
-                    />
-                  ))}
+                  {isLoading ? (
+                    <>
+                      {Array.from(Array(3).keys()).map((num) => (
+                        <tr key={num}>
+                          <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                            <div className="h-6 w-[80%] rounded-lg bg-gray-200 animate-pulse" />
+                          </td>
+                          <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                            <div className="h-6 w-[80%] rounded-lg bg-gray-200 animate-pulse" />
+                          </td>
+                          <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                            <div className="h-6 w-[80%] rounded-lg bg-gray-200 animate-pulse" />
+                          </td>
+                        </tr>
+                      ))}
+                    </>
+                  ) : (
+                    <>
+                      {members.map((member) => (
+                        <UsernameMappingsTableItem
+                          key={member.id}
+                          organizationId={organizationId}
+                          member={member}
+                        />
+                      ))}
+                    </>
+                  )}
                 </tbody>
               </table>
             </div>

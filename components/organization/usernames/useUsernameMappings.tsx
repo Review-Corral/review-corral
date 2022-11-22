@@ -1,7 +1,7 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Database } from "../../../../database-types";
+import { Database } from "../../../database-types";
 
 export type UsernameMapping =
   Database["public"]["Tables"]["username_mappings"]["Row"];

@@ -7,7 +7,6 @@ import { Github } from "../../../components/assets/icons/Github";
 import { Slack } from "../../../components/assets/icons/Slack";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { SlackIntegrations } from "../../../components/organization/slack/SlackIntegrations";
-import { UsernameMappings } from "../../../components/organization/slack/username-mappings/UsernameMappings";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { withPageAuth } from "../../../components/utils/withPageAuth";
 import { Database } from "../../../database-types";
@@ -118,13 +117,7 @@ export const OrgView: NextPage<{
               </div>
             );
           case "usernames":
-            return (
-              <div id="usernames">
-                {organization.organization_type === "Organization" && (
-                  <UsernameMappings organizationId={organization.id} />
-                )}
-              </div>
-            );
+            return <UsernamesTab {...tabProps} />;
           default:
             return <OverviewTab {...tabProps} />;
         }
@@ -139,6 +132,7 @@ import { InfoAlert } from "../../../components/common/alerts/Info";
 import { GithubTab } from "../../../components/organization/github/GithubTab";
 import { useGetInstallationRepos } from "../../../components/organization/github/useGetInstallationRepos";
 import { OverviewTab } from "../../../components/organization/Overview";
+import { UsernamesTab } from "../../../components/organization/usernames/UsernamesTab";
 
 interface GithubCardProps {
   organization: Organization;
