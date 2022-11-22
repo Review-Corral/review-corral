@@ -8,6 +8,7 @@ import {
 import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
 import { Logger } from "next-axiom";
+import slackifyMarkdown from "slackify-markdown";
 import { Database } from "../../../../database-types";
 import {
   GithubEvent,
@@ -373,7 +374,7 @@ export class GithubEventHandler {
         )} left <${commentUrl}|a comment>`,
         attachments: [
           {
-            text: commentBody,
+            text: slackifyMarkdown(commentBody),
           },
         ],
       },
@@ -407,7 +408,7 @@ export class GithubEventHandler {
         text: `${await this.getSlackUserName(login)} ${getReviewText(review)}`,
         attachments: [
           {
-            text: review.body,
+            text: slackifyMarkdown(review.body),
             color: "#fff",
           },
           ...[
@@ -479,7 +480,7 @@ export class GithubEventHandler {
                 type: "section",
                 text: {
                   type: "mrkdwn",
-                  text: `${body.pull_request.body}`,
+                  text: `${slackifyMarkdown(body.pull_request.body)}`,
                 },
               },
             ]
