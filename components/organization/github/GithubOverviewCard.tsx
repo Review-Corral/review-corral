@@ -106,7 +106,7 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
               end="slack-channel"
               showHead={false}
               color={"#6366f1"}
-              strokeWidth={3}
+              strokeWidth={2}
             />
           </div>
         ))}
