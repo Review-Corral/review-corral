@@ -1,7 +1,7 @@
 import { withPageAuth } from "@supabase/auth-helpers-nextjs";
 import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { ReactNode, useState } from "react";
+import { ReactNode, useEffect, useState } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
 import { GithubTab } from "../../../components/organization/github/GithubTab";
 import { OverviewTab } from "../../../components/organization/Overview";
@@ -42,15 +42,35 @@ const OrgOverviewPage: NextPage<{
   const [_page, setPage] = useState<Pages | undefined>(page);
 
   const setPageWrapper = (page: Pages | undefined): void => {
-    setPage(page);
-    let route = "";
-    if (page) {
-      route = `/org/${organization.account_id}/${page}`;
-    } else {
-      route = `/org/${organization.account_id}`;
+    if (page !== _page) {
+      setPage(page);
+      let route = "";
+      if (page) {
+        route = `/org/${organization.account_id}/${page}`;
+      } else {
+        route = `/org/${organization.account_id}`;
+      }
+      router.push(route, undefined, { shallow: true });
     }
-    router.push(route, undefined, { shallow: true });
   };
+
+  const stringIsPage = (str: string): str is Pages => {
+    return routes.map((route) => route.page).includes(str as Pages);
+  };
+
+  // Handles pressing back when moving tabs
+  useEffect(() => {
+    const splitPath = router.asPath.split("/");
+    if (splitPath.length > 3) {
+      const page = splitPath[3];
+      if (stringIsPage(page)) {
+        setPageWrapper(page);
+      }
+    } else {
+      setPageWrapper(undefined);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [router.asPath]);
 
   return (
     <DashboardLayout
