@@ -11,7 +11,7 @@ import { withPageAuth } from "../../../components/utils/withPageAuth";
 import LoadingView from "../../../components/views/LoadingView";
 import { Organization } from "./[[...page]]";
 
-export const PostSlackAuth: NextPage<{ organization: Organization }> = ({
+const PostSlackAuth: NextPage<{ organization: Organization }> = ({
   organization,
 }) => {
   const queryClient = useQueryClient();

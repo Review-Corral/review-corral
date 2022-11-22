@@ -1,6 +1,6 @@
 import { FC } from "react";
-import { GithubCard } from "../../pages/org/[accountId]/[[...page]]";
 import { Slack } from "../assets/icons/Slack";
+import { GithubCard as GithubOverviewCard } from "./github/GithubOverviewCard";
 import { Header, OrgViewProps } from "./shared";
 import { SlackIntegrations } from "./slack/SlackIntegrations";
 
@@ -12,7 +12,7 @@ export const OverviewTab: FC<OverviewProps> = ({ organization, setPage }) => {
       <Header>Overview</Header>
       <div className="flex justify-between items-start">
         <div className="flex flex-wrap">
-          <GithubCard
+          <GithubOverviewCard
             organization={organization}
             onEdit={() => {
               setPage("github");

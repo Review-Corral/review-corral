@@ -1,5 +1,9 @@
 import { FC, PropsWithChildren } from "react";
-import { Organization, Pages } from "../../pages/org/[accountId]/[[...page]]";
+import { Database } from "../../database-types";
+
+export type Pages = "github" | "slack" | "usernames";
+
+export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 
 export interface OrgViewProps {
   organization: Organization;

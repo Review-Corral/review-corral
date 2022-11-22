@@ -1,4 +1,5 @@
 import { FC } from "react";
+import { ErrorAlert } from "../../common/alerts/Error";
 import { Toggle } from "../../common/Toggle";
 import { Header, OrgViewProps } from "../shared";
 import {
@@ -16,7 +17,9 @@ export const GithubTab: FC<OrgViewProps> = ({ organization }) => {
       <Header>Github</Header>
 
       {repos.error ? (
-        <>Error</>
+        <ErrorAlert
+          message={"There was an unexpected error fetching your Github data"}
+        />
       ) : (
         <div className="mt-8 flex flex-col">
           <div className="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">

@@ -1,19 +1,14 @@
-import { SupabaseClient } from "@supabase/supabase-js";
-import type { GetServerSidePropsContext, NextPage, PreviewData } from "next";
+import { withPageAuth } from "@supabase/auth-helpers-nextjs";
+import { NextPage } from "next";
 import { useRouter } from "next/router";
-import { ParsedUrlQuery } from "querystring";
 import { ReactNode, useState } from "react";
-import { Github } from "../../../components/assets/icons/Github";
-import { Slack } from "../../../components/assets/icons/Slack";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
-import { SlackIntegrations } from "../../../components/organization/slack/SlackIntegrations";
+import { GithubTab } from "../../../components/organization/github/GithubTab";
+import { OverviewTab } from "../../../components/organization/Overview";
+import { Organization, Pages } from "../../../components/organization/shared";
+import { SlackTab } from "../../../components/organization/slack/SlackTab";
+import { UsernamesTab } from "../../../components/organization/usernames/UsernamesTab";
 import { flattenParam } from "../../../components/utils/flattenParam";
-import { withPageAuth } from "../../../components/utils/withPageAuth";
-import { Database } from "../../../database-types";
-
-export type Pages = "github" | "slack" | "usernames";
-
-export type Organization = Database["public"]["Tables"]["organizations"]["Row"];
 
 type SubNav = {
   text: string;
@@ -39,7 +34,7 @@ const routes: SubNav[] = [
   },
 ];
 
-export const OrgView: NextPage<{
+const OrgOverviewPage: NextPage<{
   organization: Organization;
   page: Pages | undefined;
 }> = ({ organization, page }) => {
@@ -69,7 +64,7 @@ export const OrgView: NextPage<{
                 <li
                   key={route.text}
                   className={`
-                    inline px-1 py-1 cursor-pointer text-base hover:bg-gray-100 rounded-md
+                    inline px-2 py-1 cursor-pointer text-base hover:bg-gray-100 rounded-md
                     `}
                   onClick={() => setPageWrapper(route.page)}
                 >
@@ -100,22 +95,7 @@ export const OrgView: NextPage<{
           case "github":
             return <GithubTab {...tabProps} />;
           case "slack":
-            return (
-              <div id="slack">
-                <h1 className="text-xl font-semibold">Slack</h1>
-                <div className="rounded-md border border-gray-200">
-                  <div className="flex p-4 bg-gray-100 rounded-md justify-between">
-                    <Slack className="h-8 w-8 fill-black" />
-                    <span className="font-semibold text-lg">
-                      Slack Integration
-                    </span>
-                  </div>
-                  <div className="px-4 py-6">
-                    <SlackIntegrations organizationId={organization.id} />
-                  </div>
-                </div>
-              </div>
-            );
+            return <SlackTab {...tabProps} />;
           case "usernames":
             return <UsernamesTab {...tabProps} />;
           default:
@@ -126,150 +106,40 @@ export const OrgView: NextPage<{
   );
 };
 
-import { FC } from "react";
-import { ErrorAlert } from "../../../components/common/alerts/Error";
-import { InfoAlert } from "../../../components/common/alerts/Info";
-import { GithubTab } from "../../../components/organization/github/GithubTab";
-import { useGetInstallationRepos } from "../../../components/organization/github/useGetInstallationRepos";
-import { OverviewTab } from "../../../components/organization/Overview";
-import { UsernamesTab } from "../../../components/organization/usernames/UsernamesTab";
-
-interface GithubCardProps {
-  organization: Organization;
-  onEdit: () => void;
-}
-
-export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
-  return (
-    <div id="github">
-      <div className="rounded-md border border-gray-200">
-        <div className="flex p-4 bg-gray-100 rounded-t-md justify-between items-center w-96">
-          <div className="flex gap-4 items-center">
-            <Github className="h-8 w-8 fill-black" />
-            <span className="font-semibold text-lg">Enabled Repositories</span>
-          </div>
-          <div
-            className="cursor-pointer underline text-indigo-500 underline-offset-2"
-            onClick={() => onEdit()}
-          >
-            Edit
-          </div>
-        </div>
-        <div className="px-4 py-6">
-          <GithubCardData organization={organization} onEdit={onEdit} />
-        </div>
-      </div>
-    </div>
-  );
-};
-
-interface GithubCardDataProps {
-  organization: Organization;
-  onEdit: () => void;
-}
-
-export const GithubCardData: FC<GithubCardDataProps> = ({
-  organization,
-  onEdit,
-}) => {
-  const getInstalledRepos = useGetInstallationRepos(
-    organization.installation_id,
-  );
-
-  if (getInstalledRepos.isLoading) {
-    return (
-      <div>
-        <ul className="space-y-4">
-          {Array.from(Array(3).keys()).map((num) => (
-            <li
-              key={num}
-              className="h-6 w-[80%] rounded-lg bg-gray-200 animate-pulse"
-            />
-          ))}
-        </ul>
-      </div>
-    );
-  }
-
-  if (getInstalledRepos.isError) {
-    return <ErrorAlert message="Error loading your Github integration" />;
-  }
-
-  if (!getInstalledRepos.data || getInstalledRepos.data.length === 0) {
-    return <ErrorAlert message="You need to setup your integration!" />;
-  }
-
-  const activeRepos = getInstalledRepos.data.filter((item) => item.is_active);
-
-  if (activeRepos.length < 1) {
-    return (
-      <InfoAlert
-        message="No repositories enabled yet"
-        subMessage={
-          <>
-            Configure your repositories{" "}
-            <span
-              className="underline cursor-pointer underline-offset-2"
-              onClick={onEdit}
-            >
-              here
-            </span>
-          </>
-        }
-      />
-    );
-  }
-
-  return (
-    <div>
-      <ul className="space-y-2">
-        {activeRepos.map((repo) => (
-          <li key={repo.id}>{repo.repository_name}</li>
-        ))}
-      </ul>
-    </div>
-  );
-};
-
-export default OrgView;
+export default OrgOverviewPage;
 
 export const getServerSideProps = withPageAuth<"public">({
-  getServerSideProps: baseGetServerSideProps,
+  getServerSideProps: async function getServerSideProps(ctx, supabaseClient) {
+    const accountId = flattenParam(ctx.params?.["accountId"]);
+    const page = flattenParam(ctx.params?.["page"]);
+
+    if (!accountId) {
+      return {
+        notFound: true,
+        props: {},
+      };
+    }
+
+    const { data: organization, error } = await supabaseClient
+      .from("organizations")
+      .select("*")
+      .eq("account_id", accountId)
+      .limit(1)
+      .single();
+
+    if (error) {
+      console.error(
+        "Got error getting organization by account ID ",
+        accountId,
+        ": ",
+        error,
+      );
+      return {
+        notFound: true,
+        props: {},
+      };
+    }
+
+    return { props: { organization, page } };
+  },
 });
-
-export async function baseGetServerSideProps(
-  ctx: GetServerSidePropsContext<ParsedUrlQuery, PreviewData>,
-  supabaseClient: SupabaseClient,
-) {
-  const accountId = flattenParam(ctx.params?.["accountId"]);
-  const page = flattenParam(ctx.params?.["page"]);
-
-  if (!accountId) {
-    return {
-      notFound: true,
-      props: {},
-    };
-  }
-
-  const { data: organization, error } = await supabaseClient
-    .from("organizations")
-    .select("*")
-    .eq("account_id", accountId)
-    .limit(1)
-    .single();
-
-  if (error) {
-    console.error(
-      "Got error getting organization by account ID ",
-      accountId,
-      ": ",
-      error,
-    );
-    return {
-      notFound: true,
-      props: {},
-    };
-  }
-
-  return { props: { organization, page } };
-}
