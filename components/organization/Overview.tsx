@@ -1,8 +1,7 @@
 import { FC } from "react";
-import { Slack } from "../assets/icons/Slack";
 import { GithubCard as GithubOverviewCard } from "./github/GithubOverviewCard";
 import { Header, OrgViewProps } from "./shared";
-import { SlackIntegrations } from "./slack/SlackIntegrations";
+import { SlackOverviewCard } from "./slack/SlackOverviewCard";
 
 interface OverviewProps extends OrgViewProps {}
 
@@ -19,14 +18,13 @@ export const OverviewTab: FC<OverviewProps> = ({ organization, setPage }) => {
             }}
           />
         </div>
-        <div className="rounded-md border border-gray-200 w-96">
-          <div className="flex p-4 bg-gray-100 rounded-md justify-between">
-            <Slack className="h-8 w-8 fill-black" />
-            <span className="font-semibold text-lg">Slack Integration</span>
-          </div>
-          <div className="px-4 py-6">
-            <SlackIntegrations organizationId={organization.id} />
-          </div>
+        <div className="flex flex-wrap">
+          <SlackOverviewCard
+            organization={organization}
+            onEdit={() => {
+              setPage("slack");
+            }}
+          />
         </div>
       </div>
     </div>

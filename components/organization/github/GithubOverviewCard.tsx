@@ -13,22 +13,20 @@ interface GithubCardProps {
 export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
   return (
     <div id="github">
-      <div className="rounded-md border border-gray-200">
-        <div className="flex p-4 bg-gray-100 rounded-t-md justify-between items-center w-96">
-          <div className="flex gap-4 items-center">
-            <Github className="h-8 w-8 fill-black" />
-            <span className="font-semibold text-lg">Enabled Repositories</span>
-          </div>
-          <div
-            className="cursor-pointer underline text-indigo-500 underline-offset-2"
-            onClick={() => onEdit()}
-          >
-            Edit
-          </div>
+      <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center w-96">
+        <div className="flex gap-4 items-center">
+          <Github className="h-8 w-8 fill-black" />
+          <span className="font-semibold text-lg">Enabled Repositories</span>
         </div>
-        <div className="px-4 py-6">
-          <GithubCardData organization={organization} onEdit={onEdit} />
+        <div
+          className="cursor-pointer underline text-indigo-500 underline-offset-2"
+          onClick={() => onEdit()}
+        >
+          Edit
         </div>
+      </div>
+      <div className="py-6">
+        <GithubCardData organization={organization} onEdit={onEdit} />
       </div>
     </div>
   );
@@ -47,14 +45,14 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
   if (getInstalledRepos.isLoading) {
     return (
       <div>
-        <ul className="space-y-4">
+        <div className="space-y-4">
           {Array.from(Array(3).keys()).map((num) => (
-            <li
+            <div
               key={num}
-              className="h-6 w-[80%] rounded-lg bg-gray-200 animate-pulse"
+              className="h-6 w-full rounded-lg bg-gray-200 animate-pulse"
             />
           ))}
-        </ul>
+        </div>
       </div>
     );
   }
@@ -90,11 +88,13 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
 
   return (
     <div>
-      <ul className="space-y-2">
+      <div className="space-y-2">
         {activeRepos.map((repo) => (
-          <li key={repo.id}>{repo.repository_name}</li>
+          <div className="border border-gray-200 rounded-md p-4" key={repo.id}>
+            {repo.repository_name}
+          </div>
         ))}
-      </ul>
+      </div>
     </div>
   );
 };
