@@ -480,7 +480,7 @@ export class GithubEventHandler {
                 type: "section",
                 text: {
                   type: "mrkdwn",
-                  text: `${slackifyMarkdown(body.pull_request.body)}`,
+                  text: slackifyMarkdown(body.pull_request.body),
                 },
               },
             ]
