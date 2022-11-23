@@ -17,6 +17,9 @@ export type PutRepositoryArgs = {
   isActive: boolean;
 };
 
+type RepositoryInsertArgs =
+  Database["public"]["Tables"]["github_repositories"]["Insert"];
+
 export default withAxiom(
   withProtectedApi(async function ProtectedRoute(
     req,
@@ -82,16 +85,16 @@ const _handleGetRequest = async (
     installationId,
   );
 
-  const installationRepos = await _getReposForInstallation(
+  const installation = await _getReposForInstallation(
     installationAccessToken.token,
   );
 
-  if (installationRepos.repositories.length > 0) {
-    const { data: currentRepos, error: currentReposError } =
+  if (installation.repositories.length > 0) {
+    const { data: orgsRepos, error: currentReposError } =
       await supabaseServerClient
         .from("github_repositories")
         .select("*")
-        .eq("installation_id", installationId);
+        .eq("organization_id", organizationData.id);
 
     if (currentReposError) {
       req.log.error(
@@ -101,16 +104,36 @@ const _handleGetRequest = async (
       return res.status(400).send({ error: currentReposError });
     }
 
-    type RepositoryInsertArgs =
-      Database["public"]["Tables"]["github_repositories"]["Insert"];
+    // If the repository ID is found again, but it has a new installation id,
+    // update it instead.
+    // This can happen if the user uninstalls the Github app, and then installs
+    // it again for the same repositoires
+    if (installation.repositories && orgsRepos) {
+      for (let installationRepo of installation.repositories) {
+        const mistmatchedInstalltionIds = orgsRepos?.filter(
+          (orgRepo) =>
+            installationRepo.id === orgRepo.repository_id &&
+            installationId !== orgRepo.installation_id,
+        );
+
+        for (let mismatchedRepo of mistmatchedInstalltionIds) {
+          await supabaseServerClient
+            .from("github_repositories")
+            .update({
+              installation_id: installationId,
+            })
+            .eq("id", mismatchedRepo.id);
+        }
+      }
+    }
 
     const { data: insertedRepositories, error: InsertReposError } =
       await supabaseServerClient
         .from("github_repositories")
         .insert(
-          installationRepos.repositories
+          installation.repositories
             .map((repo) => {
-              if (!currentRepos?.find((r) => r.repository_id === repo.id)) {
+              if (!orgsRepos?.find((r) => r.repository_id === repo.id)) {
                 return {
                   repository_id: repo.id,
                   repository_name: repo.name,
@@ -131,7 +154,7 @@ const _handleGetRequest = async (
       });
       return res.status(400).end({ error: InsertReposError });
     }
-    const payload = [...currentRepos, ...insertedRepositories];
+    const payload = [...(orgsRepos ?? []), ...(insertedRepositories ?? [])];
     return res.status(200).send({ data: payload });
   }
 

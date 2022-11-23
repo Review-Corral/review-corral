@@ -1,5 +1,6 @@
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { SelectorIcon } from "@heroicons/react/outline";
+import { UserCircleIcon } from "@heroicons/react/outline";
+import { useSession } from "@supabase/auth-helpers-react";
 import Link from "next/link";
 import { FC, Fragment } from "react";
 import { useInstallations } from "../hooks/useInstallations";
@@ -25,11 +26,16 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
       (installation) => installation.account.id === activeOrganizationAccountId,
     );
 
+  const session = useSession();
+
+  const avatarUrl: string | undefined =
+    session?.user.user_metadata["avatar_url"];
+
   return (
     <Disclosure as="nav" className="bg-[#f4f4f4]">
       {({ open }) => (
         <>
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-4">
                 <Link href="/" className="">
@@ -37,7 +43,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                     <img
                       className="h-12 w-12"
                       src="https://avatars.githubusercontent.com/in/203068?s=120&u=4f27b80d54a1405e10756a1dc0175d1ef3866422&v=4"
-                      alt="Workflow"
+                      alt="Review Corral logo"
                     />
                   </div>
                 </Link>
@@ -47,7 +53,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                     <div className="-mt-0.5 text-3xl text-gray-400 font-extralight">
                       /
                     </div>
-                    <div className="rounded-md px-2 py-2 hover:bg-gray-200 flex gap-2 items-center cursor-pointer">
+                    <div className="rounded-md px-2 py- flex gap-2 items-center">
                       <div className="flex items-center space-x-2">
                         <div className="rounded-md overflow-hidden">
                           <img
@@ -58,7 +64,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                         </div>
                         <div>{activeInstallation.account.login}</div>
                       </div>
-                      <SelectorIcon className="h-5 w-5" />
+                      {/* <SelectorIcon className="h-5 w-5" /> */}
                     </div>
                   </>
                 )}
@@ -69,20 +75,13 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                     <div>
                       <Menu.Button className="max-w-xs bg-slate-200 rounded-full flex items-center text-sm text-black">
                         <span className="sr-only">Open user menu</span>
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                          strokeWidth={1.5}
-                          stroke="currentColor"
-                          className="w-6 h-6"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975m11.963 0a9 9 0 10-11.963 0m11.963 0A8.966 8.966 0 0112 21a8.966 8.966 0 01-5.982-2.275M15 9.75a3 3 0 11-6 0 3 3 0 016 0z"
-                          />
-                        </svg>
+                        {avatarUrl ? (
+                          <div className="rounded-full overflow-hidden">
+                            <img src={avatarUrl} width={32} height={32} />
+                          </div>
+                        ) : (
+                          <UserCircleIcon className="h-8 w-8" />
+                        )}
                       </Menu.Button>
                     </div>
                     <Transition

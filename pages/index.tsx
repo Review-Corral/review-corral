@@ -1,23 +1,29 @@
+import { User } from "@supabase/supabase-js";
 import type { NextPage } from "next";
 import HomeView from "../components/home/HomeView";
+import { flattenParam } from "../components/utils/flattenParam";
 import { withPageAuth } from "../components/utils/withPageAuth";
 
-const Home: NextPage = () => {
+const Home: NextPage<{ user: User; syncGithub?: boolean }> = () => {
   return <HomeView />;
 };
 
 export default Home;
 
-// export async function getServerSideProps(context) {
-//   const func = await withPageAuth({
-//     getServerSideProps: async (context, supabase) => {
-//       return {
-//         props: {},
-//       };
-//     },
-//   });
+export const getServerSideProps = withPageAuth({
+  authRequired: true,
+  getServerSideProps: async (_context, supabase) => {
+    const user = await supabase.auth.getUser();
+    const syncGithub = flattenParam(_context.query?.["sync_github"]);
 
-//   return await func(context);
-// }
+    if (user.data.user) {
+      return {
+        props: { user: user.data.user, syncGithub },
+      };
+    }
 
-export const getServerSideProps = withPageAuth({});
+    return {
+      notFound: true,
+    };
+  },
+});

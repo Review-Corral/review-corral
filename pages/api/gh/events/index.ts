@@ -7,8 +7,8 @@ import { GithubEventHandler } from "../../../../components/api/gh/events/GithubE
 import { flattenType } from "../../../../components/api/utils/apiUtils";
 import { analytics } from "../../../../components/api/utils/segment";
 import withApiSupabase from "../../../../components/api/utils/withApiSupabase";
+import { Organization } from "../../../../components/organization/shared";
 import { GithubEvent } from "../../../../github-event-types";
-import { Organization } from "../../../org/[accountId]";
 
 const handler = async (
   req: AxiomAPIRequest,

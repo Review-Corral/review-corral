@@ -24,29 +24,23 @@ const userNavigation = [
 
 interface DashboardLayoutProps extends NavbarProps {
   title: string;
+  subnav?: ReactNode;
   children: ReactNode;
 }
 
 export const DashboardLayout: FC<DashboardLayoutProps> = ({
   title,
   children,
+  subnav,
   ...props
 }) => {
   return (
     <>
-      <div className="min-h-full">
+      <div className="min-h-full min-w-[900px] overflow-x-auto">
         <Navbar {...props} />
-        <header className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto py-4 px-4 sm:px-6 lg:px-8">
-            <h1 className="text-lg leading-6 font-semibold text-gray-900">
-              {title}
-            </h1>
-          </div>
-        </header>
-        <main>
-          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-            {children}
-          </div>
+        <header className="bg-white border-b border-gray-200">{subnav}</header>
+        <main className="">
+          <div className="max-w-7xl mx-auto py-6 px-7">{children}</div>
         </main>
       </div>
     </>

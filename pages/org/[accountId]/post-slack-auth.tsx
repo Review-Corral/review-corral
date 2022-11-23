@@ -2,16 +2,16 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
-import { Organization } from ".";
+import { Organization } from "../../../components/organization/shared";
 import {
   GET_SLACK_INTEGRATIONS_KEY,
   useSlackIntegrations,
-} from "../../../components/teams/slack/useSlackIntegrations";
+} from "../../../components/organization/slack/useSlackIntegrations";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { withPageAuth } from "../../../components/utils/withPageAuth";
 import LoadingView from "../../../components/views/LoadingView";
 
-export const PostSlackAuth: NextPage<{ organization: Organization }> = ({
+const PostSlackAuth: NextPage<{ organization: Organization }> = ({
   organization,
 }) => {
   const queryClient = useQueryClient();

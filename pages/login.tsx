@@ -39,9 +39,10 @@ const Auth: NextPage = () => {
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <img
           className="mx-auto h-12 w-auto"
-          src="https://tailwindui.com/img/logos/workflow-mark-indigo-600.svg"
-          alt="Workflow"
+          src="https://avatars.githubusercontent.com/in/203068?s=120&u=4f27b80d54a1405e10756a1dc0175d1ef3866422&v=4"
+          alt="Review Corral logo"
         />
+        <div className="text-center text-2xl mt-4">Review Corral</div>
         <div className="flex justify-center mt-8">
           <Button
             isLoading={isLoading}

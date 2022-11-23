@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
 import { Database } from "../../../database-types";
 import { PutRepositoryArgs } from "../../../pages/api/gh/repositories/[installationId]";
@@ -11,7 +11,6 @@ export const useGetInstallationRepos = (installationId: number) => {
   return useQuery<GithubRepositories[], AxiosError>(
     ["getInstalledRepos", installationId],
     async () => {
-      console.log("going to request with installation id", installationId);
       return (
         await axios.get<ApiResponse<GithubRepositories[]>>(
           `/api/gh/repositories/${installationId}`,
@@ -26,6 +25,8 @@ export const useMutateInstallationRepo = ({
 }: {
   installationId: number;
 }) => {
+  const queryClient = useQueryClient();
+
   return useMutation<void, AxiosError, PutRepositoryArgs, GithubRepositories[]>(
     ["getInstalledRepos", installationId],
     async (args) => {
@@ -33,6 +34,11 @@ export const useMutateInstallationRepo = ({
         `/api/gh/repositories/${installationId}`,
         args,
       );
+    },
+    {
+      onSuccess(_data, _variables, _context) {
+        queryClient.refetchQueries(["getInstalledRepos", installationId]);
+      },
     },
   );
 };

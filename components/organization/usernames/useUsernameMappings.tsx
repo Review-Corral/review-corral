@@ -1,7 +1,7 @@
 import { useSupabaseClient } from "@supabase/auth-helpers-react";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { AxiosError } from "axios";
-import { Database } from "../../../../database-types";
+import { Database } from "../../../database-types";
 
 export type UsernameMapping =
   Database["public"]["Tables"]["username_mappings"]["Row"];
@@ -17,7 +17,10 @@ export const USE_CREATE_USERNAME_MAPPING_KEY = "postUsernameMapping";
 export const USE_UPDATE_USERNAME_MAPPING_KEY = "updateUsernameMapping";
 export const USE_DELETE_USERNAME_MAPPING_KEY = "deleteUsernameMapping";
 
-export const useGetUsernameMappings = (organizationId: string) => {
+export const useGetUsernameMappings = (
+  organizationId: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) => {
   const supabaseClient = useSupabaseClient<Database>();
   return useQuery<UsernameMapping[] | undefined, AxiosError>(
     [USE_GET_USERNAME_MAPPINGS_KEY, organizationId],
@@ -34,38 +37,54 @@ export const useGetUsernameMappings = (organizationId: string) => {
 
       return data;
     },
+    {
+      enabled,
+    },
   );
 };
 
 export const useCreateUsernameMapping = (organizationId: string) => {
   const supabaseClient = useSupabaseClient<Database>();
+  const queryClient = useQueryClient();
 
   return useMutation<
     UsernameMapping,
     unknown,
     CreateUsernameMappingArgs,
     UsernameMapping
-  >([USE_CREATE_USERNAME_MAPPING_KEY, organizationId], async (args) => {
-    const { data, error } = await supabaseClient
-      .from("username_mappings")
-      .insert({
-        ...args,
-        organization_id: organizationId,
-      })
-      .select()
-      .single();
+  >(
+    [USE_CREATE_USERNAME_MAPPING_KEY, organizationId],
+    async (args) => {
+      const { data, error } = await supabaseClient
+        .from("username_mappings")
+        .insert({
+          ...args,
+          organization_id: organizationId,
+        })
+        .select()
+        .single();
 
-    if (error) {
-      console.error("Error creating username mapping", error);
-      throw new Error("Error creating username mapping");
-    }
+      if (error) {
+        console.error("Error creating username mapping", error);
+        throw new Error("Error creating username mapping");
+      }
 
-    return data;
-  });
+      return data;
+    },
+    {
+      onSuccess(_data, _variables, _context) {
+        queryClient.refetchQueries([
+          USE_GET_USERNAME_MAPPINGS_KEY,
+          organizationId,
+        ]);
+      },
+    },
+  );
 };
 
 export const useUpdateUsernameMapping = (organizationId: string) => {
   const supabaseClient = useSupabaseClient<Database>();
+  const queryClient = useQueryClient();
 
   return useMutation<
     UsernameMapping,
@@ -91,25 +110,13 @@ export const useUpdateUsernameMapping = (organizationId: string) => {
 
       return data;
     },
+    {
+      onSuccess(data, _variables, _context) {
+        queryClient.refetchQueries([
+          USE_GET_USERNAME_MAPPINGS_KEY,
+          organizationId,
+        ]);
+      },
+    },
   );
-};
-
-export const useDeleteUsernameMapping = (organizationId: string) => {
-  const supabaseClient = useSupabaseClient<Database>();
-
-  return useMutation<
-    void,
-    AxiosError,
-    { id: UsernameMapping["id"] },
-    UsernameMapping
-  >([USE_DELETE_USERNAME_MAPPING_KEY, organizationId], async ({ id }) => {
-    const { error } = await supabaseClient
-      .from("username_mappings")
-      .delete()
-      .eq("id", id);
-
-    if (error) {
-      throw new Error("Error deleting username mapping");
-    }
-  });
 };

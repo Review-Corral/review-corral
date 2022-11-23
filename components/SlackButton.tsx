@@ -2,7 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
 import Button from "./buttons/Button";
-import { GET_SLACK_INTEGRATIONS_KEY } from "./teams/slack/useSlackIntegrations";
+import { GET_SLACK_INTEGRATIONS_KEY } from "./organization/slack/useSlackIntegrations";
 
 interface SlackButtonProps {
   organizationId: string;

@@ -13,14 +13,12 @@
       "dependsOn": [
         "Supabase",
         "zsh",
-        "Frontend"
+        "Frontend",
+        "ngrok"
       ],
       "group": {
         "kind": "build",
         "isDefault": true
-      },
-      "runOptions": {
-        "runOn": "folderOpen"
       },
       "icon": {
         "id": "paintcan",
@@ -74,7 +72,7 @@
       }
     },
     {
-      "label": "ngrok ",
+      "label": "ngrok",
       "type": "shell",
       "command": [
         "ngrok http 3000 --subdomain reviewcorral"
