@@ -11,7 +11,7 @@ const LoadingView: React.FC<LoadingViewProps> = ({
   return (
     <div
       data-testid="loading-page"
-      className="flex h-screen w-screen items-center justify-cente"
+      className="flex h-screen w-screen items-center justify-center"
     >
       <div className="flex flex-col items-center space-y-8 ">
         <div className="flex items-center">
