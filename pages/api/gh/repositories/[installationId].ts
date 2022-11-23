@@ -108,20 +108,22 @@ const _handleGetRequest = async (
     // update it instead.
     // This can happen if the user uninstalls the Github app, and then installs
     // it again for the same repositoires
-    for (let installationRepo of installation.repositories) {
-      const mistmatchedInstalltionIds = orgsRepos.filter(
-        (orgRepo) =>
-          installationRepo.id === orgRepo.repository_id &&
-          installationId !== orgRepo.installation_id,
-      );
+    if (installation.repositories && orgsRepos) {
+      for (let installationRepo of installation.repositories) {
+        const mistmatchedInstalltionIds = orgsRepos?.filter(
+          (orgRepo) =>
+            installationRepo.id === orgRepo.repository_id &&
+            installationId !== orgRepo.installation_id,
+        );
 
-      for (let mismatchedRepo of mistmatchedInstalltionIds) {
-        await supabaseServerClient
-          .from("github_repositories")
-          .update({
-            installation_id: installationId,
-          })
-          .eq("id", mismatchedRepo.id);
+        for (let mismatchedRepo of mistmatchedInstalltionIds) {
+          await supabaseServerClient
+            .from("github_repositories")
+            .update({
+              installation_id: installationId,
+            })
+            .eq("id", mismatchedRepo.id);
+        }
       }
     }
 
@@ -152,7 +154,7 @@ const _handleGetRequest = async (
       });
       return res.status(400).end({ error: InsertReposError });
     }
-    const payload = [...orgsRepos, ...insertedRepositories];
+    const payload = [...(orgsRepos ?? []), ...(insertedRepositories ?? [])];
     return res.status(200).send({ data: payload });
   }
 

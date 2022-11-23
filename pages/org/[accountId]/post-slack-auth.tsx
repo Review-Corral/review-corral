@@ -2,6 +2,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import type { NextPage } from "next";
 import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
+import { Organization } from "../../../components/organization/shared";
 import {
   GET_SLACK_INTEGRATIONS_KEY,
   useSlackIntegrations,
@@ -9,7 +10,6 @@ import {
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { withPageAuth } from "../../../components/utils/withPageAuth";
 import LoadingView from "../../../components/views/LoadingView";
-import { Organization } from "./[[...page]]";
 
 const PostSlackAuth: NextPage<{ organization: Organization }> = ({
   organization,
