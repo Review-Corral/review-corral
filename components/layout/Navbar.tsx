@@ -43,7 +43,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                     <img
                       className="h-12 w-12"
                       src="https://avatars.githubusercontent.com/in/203068?s=120&u=4f27b80d54a1405e10756a1dc0175d1ef3866422&v=4"
-                      alt="Workflow"
+                      alt="Review Corral logo"
                     />
                   </div>
                 </Link>

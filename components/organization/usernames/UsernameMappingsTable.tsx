@@ -6,7 +6,6 @@ import { OrgMember } from "../../../github-api-types";
 import Button from "../../buttons/Button";
 import {
   useCreateUsernameMapping,
-  useDeleteUsernameMapping,
   UsernameMapping,
   useUpdateUsernameMapping,
 } from "./useUsernameMappings";
@@ -133,8 +132,6 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
 
   const createUsernameMapping = useCreateUsernameMapping(organizationId);
   const updateUsernameMapping = useUpdateUsernameMapping(organizationId);
-  // TODO: not sure we need this
-  const deleteUsernameMapping = useDeleteUsernameMapping(organizationId);
 
   const {
     register,

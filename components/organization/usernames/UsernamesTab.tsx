@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { ErrorAlert } from "../../common/alerts/Error";
+import { InfoAlert } from "../../common/alerts/Info";
 import { Header, OrgViewProps } from "../shared";
 import { useGetMembers } from "./useGetOrganizationMembers";
 import {
@@ -8,11 +9,13 @@ import {
 } from "./UsernameMappingsTable";
 import { useGetUsernameMappings } from "./useUsernameMappings";
 
-export const UsernamesTab: FC<OrgViewProps> = ({
-  organization: { id: organizationId },
-}) => {
-  const usernameMappings = useGetUsernameMappings(organizationId);
-  const members = useGetMembers(organizationId);
+export const UsernamesTab: FC<OrgViewProps> = ({ organization }) => {
+  const usernameMappings = useGetUsernameMappings(organization.id, {
+    enabled: organization.organization_type === "Organization",
+  });
+  const members = useGetMembers(organization.id, {
+    enabled: organization.organization_type === "Organization",
+  });
 
   if (members.error) {
     return <ErrorAlert message="Error getting members" />;
@@ -42,11 +45,27 @@ export const UsernamesTab: FC<OrgViewProps> = ({
         organization. This will allow the bot to reference the Slack username
         from the Github events.
       </p>
-      <UsernameMappingsTable
-        isLoading={usernameMappings.isLoading || members.isLoading}
-        members={membersWithMappings}
-        organizationId={organizationId}
-      />
+      {organization.organization_type === "User" ? (
+        <div className="mt-8">
+          <InfoAlert
+            message="No users to map"
+            subMessage={
+              <>
+                This repository belongs to a &apos;User&apos; type in Github.
+                Review Corral does not support repositories that{" "}
+                <b className="font-bold">do not</b> belong to an organization in
+                Github.
+              </>
+            }
+          />
+        </div>
+      ) : (
+        <UsernameMappingsTable
+          isLoading={usernameMappings.isLoading || members.isLoading}
+          members={membersWithMappings}
+          organizationId={organization.id}
+        />
+      )}
     </div>
   );
 };

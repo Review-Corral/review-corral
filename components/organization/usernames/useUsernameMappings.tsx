@@ -17,7 +17,10 @@ export const USE_CREATE_USERNAME_MAPPING_KEY = "postUsernameMapping";
 export const USE_UPDATE_USERNAME_MAPPING_KEY = "updateUsernameMapping";
 export const USE_DELETE_USERNAME_MAPPING_KEY = "deleteUsernameMapping";
 
-export const useGetUsernameMappings = (organizationId: string) => {
+export const useGetUsernameMappings = (
+  organizationId: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) => {
   const supabaseClient = useSupabaseClient<Database>();
   return useQuery<UsernameMapping[] | undefined, AxiosError>(
     [USE_GET_USERNAME_MAPPINGS_KEY, organizationId],
@@ -33,6 +36,9 @@ export const useGetUsernameMappings = (organizationId: string) => {
       }
 
       return data;
+    },
+    {
+      enabled,
     },
   );
 };

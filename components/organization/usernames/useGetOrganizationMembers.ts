@@ -5,7 +5,10 @@ import { ApiResponse } from "../../api/utils/apiBaseTypes";
 
 export const USE_GET_MEMBERS_KEY = "useGetOrganizationMembers";
 
-export const useGetMembers = (orgId: string) => {
+export const useGetMembers = (
+  orgId: string,
+  { enabled = true }: { enabled?: boolean } = {},
+) => {
   return useQuery<OrgMember[] | undefined, AxiosError>(
     [USE_GET_MEMBERS_KEY],
     async () => {
@@ -14,6 +17,9 @@ export const useGetMembers = (orgId: string) => {
           `/api/gh/${orgId}/members`,
         )
       ).data.data;
+    },
+    {
+      enabled,
     },
   );
 };
