@@ -78,7 +78,7 @@ const OrgOverviewPage: NextPage<{
       activeOrganizationAccountId={organization.account_id}
       subnav={
         <>
-          <div className="max-w-7xl mx-auto px-4 pt-4 pb-3 sm:px-6 lg:px-8 font-medium ">
+          <div className="max-w-7xl mx-auto px-6 pt-4 pb-3 font-medium ">
             <ul>
               {routes.map((route) => (
                 <li

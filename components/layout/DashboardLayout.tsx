@@ -36,13 +36,11 @@ export const DashboardLayout: FC<DashboardLayoutProps> = ({
 }) => {
   return (
     <>
-      <div className="min-h-full">
+      <div className="min-h-full min-w-[900px] overflow-x-auto">
         <Navbar {...props} />
         <header className="bg-white border-b border-gray-200">{subnav}</header>
-        <main>
-          <div className="max-w-7xl mx-auto py-6 px-4 sm:px-7 lg:px-10">
-            {children}
-          </div>
+        <main className="">
+          <div className="max-w-7xl mx-auto py-6 px-7">{children}</div>
         </main>
       </div>
     </>
