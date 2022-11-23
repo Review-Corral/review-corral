@@ -6,6 +6,7 @@ import { useGetInstallationRepos } from "../../../components/organization/github
 import { Github } from "../../assets/icons/Github";
 import { ActiveLight } from "../../common/misc/activeLight";
 import { Organization } from "../shared";
+import { useSlackIntegrations } from "../slack/useSlackIntegrations";
 
 interface GithubCardProps {
   organization: Organization;
@@ -43,6 +44,10 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
   const getInstalledRepos = useGetInstallationRepos(
     organization.installation_id,
   );
+
+  const { data: slackData } = useSlackIntegrations({
+    organizationId: organization.id,
+  });
 
   if (getInstalledRepos.isLoading) {
     return (
@@ -104,13 +109,16 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
             </div>
 
             {/* TODO: in the future the target should be found from a m2m table of Github <-> slack */}
-            <Xarrow
-              start={repo.id}
-              end="slack-channel"
-              showHead={false}
-              color={"#6366f1"}
-              strokeWidth={2}
-            />
+            {/* Only show the Arrows if the slack data has loaded and there's at least one entry */}
+            {slackData != undefined && slackData.length > 0 && (
+              <Xarrow
+                start={repo.id}
+                end="slack-channel"
+                showHead={false}
+                color={"#6366f1"}
+                strokeWidth={2}
+              />
+            )}
           </div>
         ))}
       </div>
