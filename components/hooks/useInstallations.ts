@@ -6,7 +6,7 @@ export const USE_INSTALLATIONS_QUERY = "getInstallations";
 
 export const useInstallations = (isEnabled: boolean = true) => {
   return useQuery<InstallationsResponse, AxiosError>(
-    ["getInstallations"],
+    [USE_INSTALLATIONS_QUERY],
     async () => {
       return (await axios.get<InstallationsResponse>("/api/gh/installations"))
         .data;

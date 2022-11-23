@@ -72,7 +72,7 @@ export const useCreateUsernameMapping = (organizationId: string) => {
       return data;
     },
     {
-      onSuccess(data, _variables, _context) {
+      onSuccess(_data, _variables, _context) {
         queryClient.refetchQueries([
           USE_GET_USERNAME_MAPPINGS_KEY,
           organizationId,

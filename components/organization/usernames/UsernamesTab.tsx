@@ -27,7 +27,7 @@ export const UsernamesTab: FC<OrgViewProps> = ({ organization }) => {
 
   const membersWithMappings =
     members.data?.map<MemberWithMapping>((member) => {
-      const mapping = usernameMappings.data!.find(
+      const mapping = usernameMappings.data?.find(
         (mapping) => mapping.github_username === member.login,
       );
 

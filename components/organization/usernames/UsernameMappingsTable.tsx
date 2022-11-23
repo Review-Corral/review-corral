@@ -168,8 +168,6 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
     }
   });
 
-  console.log("Form errors: ", errors);
-
   const currentSlackIdValue = watch("slackId");
 
   return (
