@@ -41,11 +41,14 @@ export const UsernameMappingsTable: FC<UsernameMappingsTableProps> = ({
                   </th>
                   <th
                     scope="col"
-                    className="px-3 py-3.5 text-left text-sm font-semibold text-gray-900"
+                    className="px-3 py-3.5 text-left w-[30%] text-sm font-semibold text-gray-900"
                   >
                     Slack ID
                   </th>
-                  <th scope="col" className="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                  <th
+                    scope="col"
+                    className="relative py-3.5 pl-3 pr-4 sm:pr-6 w-[30%]"
+                  >
                     <span className="sr-only">Edit</span>
                   </th>
                 </tr>
@@ -177,7 +180,7 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
             <img
               className="h-10 w-10 rounded-full"
               src={member.avatar_url}
-              alt=""
+              alt={`${member.login} avatar`}
             />
           </div>
           <div className="ml-4">
@@ -190,15 +193,16 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
           <div
             className={`
                 block 
-                w-full 
+                w-full
                 max-w-[13rem] 
+                rounded-md
                 py-2 
             `}
           >
             {member.mapping?.slack_user_id}
           </div>
         ) : (
-          <div className="">
+          <>
             <input
               type="text"
               className={cntl`
@@ -222,6 +226,7 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
                   `
                 }
                 px-2
+                -ml-2
                 
                 sm:text-sm 
                 `}
@@ -233,7 +238,7 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
                 {errors.slackId.message}
               </div>
             )}
-          </div>
+          </>
         )}
       </td>
 

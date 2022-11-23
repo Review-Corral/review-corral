@@ -4,6 +4,7 @@ import { ErrorAlert } from "../../../components/common/alerts/Error";
 import { InfoAlert } from "../../../components/common/alerts/Info";
 import { useGetInstallationRepos } from "../../../components/organization/github/useGetInstallationRepos";
 import { Github } from "../../assets/icons/Github";
+import { ActiveLight } from "../../common/misc/activeLight";
 import { Organization } from "../shared";
 
 interface GithubCardProps {
@@ -98,7 +99,7 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
               className="flex flex-row gap-4 items-center border border-gray-200 rounded-md p-4 bg-white"
               id={repo.id}
             >
-              <div className="rounded-full h-2 w-2 bg-green-500 flex-shrink-0"></div>
+              <ActiveLight />
               <div className="truncate">{repo.repository_name}</div>
             </div>
 

@@ -1,5 +1,6 @@
 import { FC } from "react";
 import { ErrorAlert } from "../../common/alerts/Error";
+import { ActiveLight } from "../../common/misc/activeLight";
 import { Header, OrgViewProps } from "../shared";
 import { useSlackIntegrations } from "./useSlackIntegrations";
 
@@ -84,7 +85,7 @@ export const SlackTab: FC<OrgViewProps> = ({ organization }) => {
                             </td>
                             <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-6">
                               <div className="flex items-center justify-end gap-4">
-                                <div className="rounded-full h-2 w-2 bg-green-500 flex-shrink-0"></div>
+                                <ActiveLight />
                                 <span>Active</span>
                               </div>
                             </td>
