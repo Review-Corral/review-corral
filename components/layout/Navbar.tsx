@@ -76,8 +76,13 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                       <Menu.Button className="max-w-xs bg-slate-200 rounded-full flex items-center text-sm text-black">
                         <span className="sr-only">Open user menu</span>
                         {avatarUrl ? (
-                          <div className="rounded-full overflow-hidden">
-                            <img src={avatarUrl} width={32} height={32} />
+                          <div className="rounded-full overflow-hidden border border-gray-200 bg-white">
+                            <img
+                              src={avatarUrl}
+                              width={32}
+                              height={32}
+                              alt={"User github log"}
+                            />
                           </div>
                         ) : (
                           <UserCircleIcon className="h-8 w-8" />
