@@ -33,7 +33,6 @@ export default withAxiom(
       });
     }
 
-    // Run queries with RLS on the server
     const reponse = await axios.get<InstallationsResponse>(
       "https://api.github.com/user/installations",
       {
@@ -51,7 +50,7 @@ export default withAxiom(
 
     if (organizations.data !== null) {
       for (const installation of reponse.data.installations) {
-        const foundInstallation = foundOrganization(
+        const foundInstallation = findOrganization(
           installation.account.id,
           organizations,
         );
@@ -71,45 +70,105 @@ export default withAxiom(
             req.log.error(
               `Error updating org installation id: ${error.message}`,
             );
-            res.status(500).send({
+            return res.status(500).send({
               error: `There was an unexpected error`,
             });
           }
         }
 
         if (!foundInstallation) {
-          const { data: newOrg, error } = await supabaseServerClient
+          // Check that the organization was created by another user
+          // if so, then just create the mapping
+          const {
+            data: orgIdWithInstallationId,
+            error: foundOrgWithInstallationIdError,
+          } = await supabaseServerClient
             .from("organizations")
-            .insert({
-              account_id: installation.account.id,
-              installation_id: installation.id,
-              account_name: installation.account.login,
-              avatar_url: installation.account.avatar_url,
-              organization_type: _getOrganizationType(
-                installation.account.type,
-              ),
-            })
-            .select();
+            .select("id")
+            .eq("account_id", installation.account.id);
 
-          if (error) {
-            req.log.error(`Error creating org: ${error.message}`);
-            res.status(500).send({ error: `There was an unexpected error` });
+          if (foundOrgWithInstallationIdError) {
+            req.log.error(
+              `Error finding org with installation id: ${foundOrgWithInstallationIdError.message}`,
+            );
+            return res.status(500).send({
+              error: `There was an unexpected error`,
+            });
           }
 
-          if (newOrg) {
-            const { error } = await supabaseServerClient
+          req.log.debug("Result for searching for org with installation id", {
+            result: orgIdWithInstallationId,
+            installationId: installation.account.id,
+          });
+
+          // If the organization already exists, just link to the user through
+          // the m2m table
+          if (orgIdWithInstallationId && orgIdWithInstallationId.length > 0) {
+            const foundOrgId = orgIdWithInstallationId[0].id;
+            req.log.debug(
+              "Found organization for the installation id for non-linked user/organization",
+              {
+                orgId: foundOrgId,
+                installationId: installation.id,
+                user: user.id,
+              },
+            );
+
+            const { error: insertError } = await supabaseServerClient
               .from("users_and_organizations")
+              .insert([
+                {
+                  org_id: foundOrgId,
+                  user_id: user.id,
+                },
+              ]);
+
+            if (insertError) {
+              req.log.error(
+                `Error inserting user and organization: ${insertError.message}`,
+              );
+              return res.status(500).send({
+                error: `There was an unexpected error`,
+              });
+            }
+          } else {
+            const { data: newOrg, error } = await supabaseServerClient
+              .from("organizations")
               .insert({
-                user_id: user.id,
-                org_id: newOrg[0].id,
+                account_id: installation.account.id,
+                installation_id: installation.id,
+                account_name: installation.account.login,
+                avatar_url: installation.account.avatar_url,
+                organization_type: _getOrganizationType(
+                  installation.account.type,
+                ),
               })
-              .eq("user_id", user.id);
+              .select();
 
             if (error) {
-              req.log.error(
-                `Error creating user_and_organizations row: ${error.message}`,
-              );
-              res.status(500).send({ error: `There was an unexpected error` });
+              req.log.error(`Error creating org: ${error.message}`);
+              return res
+                .status(500)
+                .send({ error: `There was an unexpected error` });
+            }
+
+            if (newOrg) {
+              const { error } = await supabaseServerClient
+                .from("users_and_organizations")
+                .insert({
+                  user_id: user.id,
+                  org_id: newOrg[0].id,
+                })
+                .eq("user_id", user.id);
+
+              if (error) {
+                req.log.error(
+                  `Error creating user_and_organizations row: ${error.message}`,
+                );
+                return res
+                  .status(500)
+                  .send({ error: `There was an unexpected error` });
+              }
             }
           }
         }
@@ -131,7 +190,7 @@ const _getOrganizationType = (type?: string) => {
   }
 };
 
-const foundOrganization = (
+const findOrganization = (
   accountId: number,
   organization: PostgrestResponse<
     {
