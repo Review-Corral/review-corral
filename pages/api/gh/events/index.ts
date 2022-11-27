@@ -3,7 +3,6 @@ import { WebClient } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { NextApiRequest, NextApiResponse } from "next";
-import { withAxiom } from "next-axiom";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
@@ -13,7 +12,7 @@ import { Organization } from "../../../../components/organization/shared";
 import { GithubEvent } from "../../../../github-event-types";
 
 const handler = async (
-  req: AxiomAPIRequest,
+  req: NextApiRequest,
   res: NextApiResponse,
   supabaseClient: SupabaseClient,
 ): Promise<void> => {
@@ -156,4 +155,4 @@ const verifyGithubWebhookSecret = async ({
   return calculated === signature;
 };
 
-export default withAxiom(withApiSupabase(handler));
+export default withApiSupabase(handler);

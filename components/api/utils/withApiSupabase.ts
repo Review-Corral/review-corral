@@ -2,7 +2,7 @@ import {
   createServerSupabaseClient,
   SupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
-import { NextApiResponse } from "next";
+import { NextApiRequest, NextApiResponse } from "next";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { Database } from "../../../database-types";
 
@@ -15,7 +15,7 @@ export type AddParameters<
 
 export default function withApiSupabase<ResponseType = any>(
   handler: (
-    req: AxiomAPIRequest,
+    req: NextApiRequest,
     res: NextApiResponse,
     supabaseClient: SupabaseClient<Database>,
   ) => Promise<void | NextApiResponse>,
@@ -27,7 +27,7 @@ export default function withApiSupabase<ResponseType = any>(
     ) {
       const errorMessage =
         "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables are required!";
-      req.log.error(errorMessage);
+      console.error(errorMessage);
       res.status(500).send({
         error: {
           message: errorMessage,
@@ -43,7 +43,7 @@ export default function withApiSupabase<ResponseType = any>(
     try {
       await handler(req, res, supabase);
     } catch (error) {
-      req.log.error("Error in handling child of withApiSupabase", error);
+      console.error("Error in handling child of withApiSupabase", error);
       res.status(500).send({
         error: String(error),
       });
