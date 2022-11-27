@@ -2,7 +2,7 @@ import axios from "axios";
 import { withAxiom } from "next-axiom";
 import { ApiError } from "next/dist/server/api-utils";
 import { isValidBody } from "../../../components/api/utils/apiUtils";
-import withApiSupabase from "../../../components/api/utils/withApiSupabase";
+import { withProtectedApi } from "../../../components/api/utils/withProtectedApi";
 import { getSlackRedirectUrl } from "../../../components/SlackButton";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { Database } from "../../../database-types";
@@ -34,7 +34,7 @@ export interface IncomingWebhook {
 }
 
 export default withAxiom(
-  withApiSupabase<Database>(async function ProtectedRoute(
+  withProtectedApi<Database>(async function ProtectedRoute(
     req,
     res,
     supabaseServerClient,
@@ -87,7 +87,8 @@ export default withAxiom(
 
           if (error) {
             req.log.error(
-              `Error inserting slack_integration for ${req.body.state}: ${error}`,
+              `Error inserting slack_integration for ${state}`,
+              error,
             );
             return res.status(500).end();
           }
@@ -96,7 +97,8 @@ export default withAxiom(
         })
         .catch((error) => {
           req.log.error(
-            `Error for oAuth with Slack for ${req.body.state}: ${error}`,
+            `Error for oAuth with Slack for ${req.body.state}`,
+            error,
           );
           return res.status(500).end();
         });
@@ -109,7 +111,9 @@ export default withAxiom(
 
       if (data) {
         const url = `${process.env.NEXT_PUBLIC_BASE_URL}/org/${data.account_id}/post-slack-auth`;
-        req.log.debug("Redirecting to url:", url);
+        req.log.debug("Redirecting to url:", {
+          url,
+        });
       } else {
         const url = process.env.NEXT_PUBLIC_BASE_UR;
         req.log.warn("No organization found, redirecting to backup url:", url);
