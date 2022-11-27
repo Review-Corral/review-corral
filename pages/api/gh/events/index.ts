@@ -17,11 +17,13 @@ const handler = async (
   supabaseClient: SupabaseClient,
 ): Promise<void> => {
   req.log.debug("Got request to POST /api/gh/events");
+  console.log("Got request to POST /api/gh/events");
 
   const validEvent = await checkEventWrapper(req);
 
   if (!validEvent) {
     req.log.error("Got event with invalid signature");
+    console.error("Got event with invalid signature");
     req.log.flush();
     return res.status(403).send({ error: "Invalid signature" });
   }
@@ -134,6 +136,7 @@ const checkEventWrapper = async (req: AxiomAPIRequest) => {
 
     // TODO: REMOVE
     req.log.debug("Signature: ", { signature });
+    console.log("Signature: ", { signature });
 
     return await verifyGithubWebhookSecret({
       signature,
