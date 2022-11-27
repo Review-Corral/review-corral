@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import { WebClient } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
@@ -16,24 +17,21 @@ const handler = async (
   res: NextApiResponse,
   supabaseClient: SupabaseClient,
 ): Promise<void> => {
-  req.log.debug("Got request to POST /api/gh/events");
   console.log("Got request to POST /api/gh/events");
 
   const validEvent = await checkEventWrapper(req);
 
   if (!validEvent) {
-    req.log.error("Got event with invalid signature");
     console.error("Got event with invalid signature");
-    req.log.flush();
     return res.status(403).send({ error: "Invalid signature" });
   }
 
-  req.log.debug("Event has valid signature");
+  console.debug("Event has valid signature");
   console.log("Event has valid signature");
 
   const body = req.body as GithubEvent;
 
-  req.log.info("Got Github Event", {
+  console.info("Got Github Event", {
     action: body?.action,
     number: body?.number,
     pullRequestId: body.pull_request?.id,
@@ -68,12 +66,12 @@ const handler = async (
     );
 
     if (error) {
-      req.log.info("Error finding Github Repository: ", error);
+      console.info("Error finding Github Repository: ", error);
       return res.status(500).send({ error: "Error finding Github Repository" });
     }
 
     if (!organization) {
-      req.log.warn("No organization found for repository_id: ", {
+      console.warn("No organization found for repository_id: ", {
         orgId: body.repository.id,
       });
       return res.status(404).send({ error: "No organization found" });
@@ -88,13 +86,9 @@ const handler = async (
         .single();
 
     if (slackIntegrationError) {
-      req.log.warn("Error finding Slack Integration: ", slackIntegrationError);
+      console.warn("Error finding Slack Integration: ", slackIntegrationError);
       return res.status(404).send({ error: "No organization found" });
     }
-
-    // Flush the events now so we're guranteed to get at least something in the logs
-    // in the event that the logs are too big to fully send later one
-    await req.log.flush();
 
     const eventHandler = new GithubEventHandler(
       supabaseClient,
@@ -109,7 +103,7 @@ const handler = async (
     try {
       await eventHandler.handleEvent(body);
     } catch (error) {
-      req.log.error(`Got error handling event`, error);
+      console.error(`Got error handling event`, error);
       return res.status(400).send({ error: "Error handling event" });
     }
   }
@@ -119,25 +113,21 @@ const handler = async (
 
 const checkEventWrapper = async (req: AxiomAPIRequest) => {
   if (!process.env.GITHUB_WEBHOOK_SECRET) {
-    req.log.error("No GITHUB_WEBHOOK_SECRET set");
+    console.error("No GITHUB_WEBHOOK_SECRET set");
     return false;
   }
   try {
     const signature = req.headers["x-hub-signature-256"];
 
     if (!signature) {
-      req.log.debug("No signature found");
+      console.debug("No signature found");
       return false;
     }
 
     if (Array.isArray(signature)) {
-      req.log.debug("Signature is invalid type");
+      console.debug("Signature is invalid type");
       return false;
     }
-
-    // TODO: REMOVE
-    req.log.debug("Signature: ", { signature });
-    console.log("Signature: ", { signature });
 
     return await verifyGithubWebhookSecret({
       req,
