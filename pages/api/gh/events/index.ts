@@ -122,7 +122,7 @@ const checkEventWrapper = async (req: AxiomAPIRequest) => {
     return false;
   }
   try {
-    const signature = req.headers["x-hub-signature"];
+    const signature = req.headers["x-hub-signature-256"];
 
     if (!signature) {
       req.log.debug("No signature found");
@@ -155,8 +155,8 @@ const verifyGithubWebhookSecret = async ({
   signature: string;
   secret: string;
 }) => {
-  const hmac = createHmac("sha1", secret);
-  const calculated = `sha1=${hmac.digest("hex")}`;
+  const hmac = createHmac("sha256", secret);
+  const calculated = `sha256=${hmac.digest("hex")}`;
 
   return calculated === signature;
 };
