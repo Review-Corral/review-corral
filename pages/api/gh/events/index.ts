@@ -1,7 +1,7 @@
 import { WebClient } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
-import { NextApiResponse } from "next";
+import { NextApiRequest, NextApiResponse } from "next";
 import { withAxiom } from "next-axiom";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
@@ -139,6 +139,7 @@ const checkEventWrapper = async (req: AxiomAPIRequest) => {
     console.log("Signature: ", { signature });
 
     return await verifyGithubWebhookSecret({
+      req,
       signature,
       secret: process.env.GITHUB_WEBHOOK_SECRET,
     });
@@ -149,13 +150,16 @@ const checkEventWrapper = async (req: AxiomAPIRequest) => {
 };
 
 const verifyGithubWebhookSecret = async ({
+  req,
   signature,
   secret,
 }: {
+  req: NextApiRequest;
   signature: string;
   secret: string;
 }) => {
   const hmac = createHmac("sha256", secret);
+  hmac.update(req.body);
   const calculated = `sha256=${hmac.digest("hex")}`;
 
   return calculated === signature;
