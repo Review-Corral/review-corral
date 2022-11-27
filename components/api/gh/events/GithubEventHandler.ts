@@ -241,6 +241,7 @@ export class GithubEventHandler {
     const { error } = await this.supabaseClient.from("pull_requests").insert({
       pr_id: prId.toString(),
       thread_ts: message.message.ts,
+      organization_id: this.organizationId,
     });
 
     if (error) {
