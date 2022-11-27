@@ -22,6 +22,7 @@ const handler = async (
 
   if (!validEvent) {
     req.log.error("Got event with invalid signature");
+    req.log.flush();
     return res.status(403).send({ error: "Invalid signature" });
   }
 
