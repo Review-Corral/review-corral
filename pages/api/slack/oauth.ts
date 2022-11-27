@@ -111,7 +111,9 @@ export default withAxiom(
 
       if (data) {
         const url = `${process.env.NEXT_PUBLIC_BASE_URL}/org/${data.account_id}/post-slack-auth`;
-        req.log.debug("Redirecting to url:", url);
+        req.log.debug("Redirecting to url:", {
+          url,
+        });
       } else {
         const url = process.env.NEXT_PUBLIC_BASE_UR;
         req.log.warn("No organization found, redirecting to backup url:", url);

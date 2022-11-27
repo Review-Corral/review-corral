@@ -1,9 +1,9 @@
 import { WebClient } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
+import { createHmac } from "crypto";
 import { NextApiResponse } from "next";
 import { withAxiom } from "next-axiom";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
-import { verifySecret } from "verify-github-webhook-secret";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
 import { analytics } from "../../../../components/api/utils/segment";
@@ -16,17 +16,18 @@ const handler = async (
   res: NextApiResponse,
   supabaseClient: SupabaseClient,
 ): Promise<void> => {
-  const body = req.body as GithubEvent;
+  req.log.debug("Got request to POST /api/gh/events");
 
-  const validEvent = await verifySecret(
-    req,
-    process.env.GITHUB_WEBHOOK_SECRET!,
-  );
+  const validEvent = await checkEventWrapper(req);
 
   if (!validEvent) {
     req.log.error("Got event with invalid signature");
     return res.status(403).send({ error: "Invalid signature" });
   }
+
+  req.log.debug("Event has valid signature");
+
+  const body = req.body as GithubEvent;
 
   req.log.info("Got Github Event", {
     action: body?.action,
@@ -110,6 +111,47 @@ const handler = async (
   }
 
   return res.status(200).send({ data: "OK" });
+};
+
+const checkEventWrapper = async (req: AxiomAPIRequest) => {
+  if (!process.env.GITHUB_WEBHOOK_SECRET) {
+    req.log.error("No GITHUB_WEBHOOK_SECRET set");
+    return false;
+  }
+  try {
+    const signature = req.headers["x-hub-signature"];
+
+    if (!signature) {
+      req.log.debug("No signature found");
+      return false;
+    }
+
+    if (Array.isArray(signature)) {
+      req.log.debug("Signature is invalid type");
+      return false;
+    }
+
+    return await verifyGithubWebhookSecret({
+      signature,
+      secret: process.env.GITHUB_WEBHOOK_SECRET,
+    });
+  } catch (error) {
+    console.error("Error checking event", error);
+    return false;
+  }
+};
+
+const verifyGithubWebhookSecret = async ({
+  signature,
+  secret,
+}: {
+  signature: string;
+  secret: string;
+}) => {
+  const hmac = createHmac("sha1", secret);
+  const calculated = `sha1=${hmac.digest("hex")}`;
+
+  return calculated === signature;
 };
 
 export default withAxiom(withApiSupabase(handler));
