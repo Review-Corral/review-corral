@@ -132,7 +132,7 @@ const checkEventWrapper = async (req: AxiomAPIRequest) => {
     }
 
     // TODO: REMOVE
-    req.log.debug("Signature: ", signature);
+    req.log.debug("Signature: ", { signature });
 
     return await verifyGithubWebhookSecret({
       signature,
