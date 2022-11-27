@@ -129,7 +129,6 @@ export interface Database {
         Row: {
           id: string
           channel_name: string
-          team_id: string | null
           channel_id: string
           slack_team_name: string
           slack_team_id: string
@@ -141,7 +140,6 @@ export interface Database {
         Insert: {
           id?: string
           channel_name: string
-          team_id?: string | null
           channel_id: string
           slack_team_name: string
           slack_team_id: string
@@ -153,7 +151,6 @@ export interface Database {
         Update: {
           id?: string
           channel_name?: string
-          team_id?: string | null
           channel_id?: string
           slack_team_name?: string
           slack_team_id?: string
@@ -161,32 +158,6 @@ export interface Database {
           created_at?: string
           updated_at?: string
           access_token?: string
-        }
-      }
-      team: {
-        Row: {
-          created_at: string | null
-          id: string
-          name: string
-          updated_at: string | null
-          installation_id: string | null
-          installation_image_url: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string
-          name: string
-          updated_at?: string | null
-          installation_id?: string | null
-          installation_image_url?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string
-          name?: string
-          updated_at?: string | null
-          installation_id?: string | null
-          installation_image_url?: string | null
         }
       }
       username_mappings: {
@@ -262,20 +233,6 @@ export interface Database {
           id?: string
           updated_at?: string | null
           created_at?: string | null
-        }
-      }
-      users_and_teams: {
-        Row: {
-          user: string
-          team: string
-        }
-        Insert: {
-          user: string
-          team: string
-        }
-        Update: {
-          user?: string
-          team?: string
         }
       }
     }
