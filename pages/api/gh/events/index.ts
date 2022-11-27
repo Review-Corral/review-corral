@@ -3,6 +3,7 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import { NextApiResponse } from "next";
 import { withAxiom } from "next-axiom";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
+import { verifySecret } from "verify-github-webhook-secret";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
 import { analytics } from "../../../../components/api/utils/segment";
@@ -16,6 +17,16 @@ const handler = async (
   supabaseClient: SupabaseClient,
 ): Promise<void> => {
   const body = req.body as GithubEvent;
+
+  const validEvent = await verifySecret(
+    req,
+    process.env.GITHUB_WEBHOOK_SECRET!,
+  );
+
+  if (!validEvent) {
+    req.log.error("Got event with invalid signature");
+    return res.status(403).send({ error: "Invalid signature" });
+  }
 
   req.log.info("Got Github Event", {
     action: body?.action,
