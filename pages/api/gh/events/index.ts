@@ -3,7 +3,7 @@ import { WebClient } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { NextApiRequest, NextApiResponse } from "next";
-import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
+import { AxiomAPIRequest, withAxiom } from "next-axiom/dist/withAxiom";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
 import { analytics } from "../../../../components/api/utils/segment";
@@ -12,7 +12,7 @@ import { Organization } from "../../../../components/organization/shared";
 import { GithubEvent } from "../../../../github-event-types";
 
 const handler = async (
-  req: NextApiRequest,
+  req: AxiomAPIRequest,
   res: NextApiResponse,
   supabaseClient: SupabaseClient,
 ): Promise<void> => {
@@ -95,7 +95,6 @@ const handler = async (
       slackIntegration.channel_id,
       slackIntegration.access_token,
       organization.installation_id,
-      req.log,
       organization.id,
     );
 
@@ -110,7 +109,7 @@ const handler = async (
   return res.status(200).send({ data: "OK" });
 };
 
-const checkEventWrapper = async (req: AxiomAPIRequest) => {
+const checkEventWrapper = async (req: NextApiRequest) => {
   if (!process.env.GITHUB_WEBHOOK_SECRET) {
     console.error("No GITHUB_WEBHOOK_SECRET set");
     return false;
@@ -155,4 +154,5 @@ const verifyGithubWebhookSecret = async ({
   return calculated === signature;
 };
 
-export default withApiSupabase(handler);
+// TOOD: remove when transition away from Axiom complete
+export default withAxiom(withApiSupabase(handler));

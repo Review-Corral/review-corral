@@ -2,7 +2,7 @@ import {
   createServerSupabaseClient,
   SupabaseClient,
 } from "@supabase/auth-helpers-nextjs";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiResponse } from "next";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
 import { Database } from "../../../database-types";
 
@@ -15,7 +15,7 @@ export type AddParameters<
 
 export default function withApiSupabase<ResponseType = any>(
   handler: (
-    req: NextApiRequest,
+    req: AxiomAPIRequest,
     res: NextApiResponse,
     supabaseClient: SupabaseClient<Database>,
   ) => Promise<void | NextApiResponse>,
