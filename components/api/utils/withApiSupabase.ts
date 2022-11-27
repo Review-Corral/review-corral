@@ -27,7 +27,7 @@ export default function withApiSupabase<ResponseType = any>(
     ) {
       const errorMessage =
         "NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY env variables are required!";
-      req.log.error(errorMessage);
+      console.error(errorMessage);
       res.status(500).send({
         error: {
           message: errorMessage,
@@ -43,7 +43,7 @@ export default function withApiSupabase<ResponseType = any>(
     try {
       await handler(req, res, supabase);
     } catch (error) {
-      req.log.error("Error in handling child of withApiSupabase", error);
+      console.error("Error in handling child of withApiSupabase", error);
       res.status(500).send({
         error: String(error),
       });

@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import {
   ChatPostMessageArguments,
   ChatPostMessageResponse,
@@ -7,7 +8,6 @@ import {
 } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
-import { Logger } from "next-axiom";
 import slackifyMarkdown from "slackify-markdown";
 import { Database } from "../../../../database-types";
 import {
@@ -25,7 +25,6 @@ export class GithubEventHandler {
     private readonly channelId: string,
     private readonly slackToken: string,
     private readonly installationId: number,
-    private readonly logger: Logger,
     private readonly organizationId: string,
   ) {}
 
@@ -38,10 +37,10 @@ export class GithubEventHandler {
         body.action === "ready_for_review") &&
       body.pull_request
     ) {
-      this.logger.debug("Handling new PR");
+      console.debug("Handling new PR");
       await this.handleNewPr(prId, body);
     } else {
-      this.logger.debug("Handling different event");
+      console.debug("Handling different event");
       await this.handleOtherEvent(body, prId);
     }
   }
@@ -75,7 +74,7 @@ export class GithubEventHandler {
           }
         });
       } catch (error) {
-        this.logger.error("Error getting comments: ", error);
+        console.error("Error getting comments: ", error);
       }
 
       // Get all requested Reviews and post
@@ -95,7 +94,7 @@ export class GithubEventHandler {
         );
       }
     } else {
-      this.logger.error(
+      console.error(
         "Error posting new thread for PR opened message to Slack: Didn't get message response back to thread messages PR ID: ",
         { prId: prId },
       );
@@ -107,7 +106,7 @@ export class GithubEventHandler {
 
     if (!threadTs) {
       // No thread found, so log and return
-      this.logger.debug(`Got non-created event and didn't find a threadTS`, {
+      console.debug(`Got non-created event and didn't find a threadTS`, {
         action: body.action,
         prId: prId,
       });
@@ -176,7 +175,7 @@ export class GithubEventHandler {
         await this.postReadyForReview(prId, body, threadTs);
       } else {
         // Event we're not handling currently
-        this.logger.info("Got unsupported event: ", { action: body.action });
+        console.info("Got unsupported event: ", { action: body.action });
       }
     }
   }
@@ -205,7 +204,7 @@ export class GithubEventHandler {
       }
       return response;
     } catch (error) {
-      this.logger.error("Error posting message: ", error);
+      console.error("Error posting message: ", error);
       return undefined;
     }
   }
@@ -219,7 +218,7 @@ export class GithubEventHandler {
       .single();
 
     if (error) {
-      this.logger.warn("Error getting slack user name: ", error);
+      console.warn("Error getting slack user name: ", error);
       return githubLogin;
     }
 
@@ -232,7 +231,7 @@ export class GithubEventHandler {
 
   private async saveThreadTs(message: ChatPostMessageResponse, prId: number) {
     if (!message.message?.ts) {
-      this.logger.error(
+      console.error(
         "Error saving thread ts: No message.message.ts is undefined",
       );
       return;
@@ -245,7 +244,7 @@ export class GithubEventHandler {
     });
 
     if (error) {
-      this.logger.error("Error saving thread ts: ", error);
+      console.error("Error saving thread ts: ", error);
     }
   }
 
@@ -263,7 +262,7 @@ export class GithubEventHandler {
         threadTs: undefined,
       });
     } catch (error) {
-      this.logger.error("Got error posting to channel: ", error);
+      console.error("Got error posting to channel: ", error);
     }
   }
 
@@ -284,7 +283,7 @@ export class GithubEventHandler {
     });
 
     if (threadTs) {
-      this.logger.debug(
+      console.debug(
         `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
       );
       const payload: ChatUpdateArguments = {
@@ -300,12 +299,9 @@ export class GithubEventHandler {
 
       try {
         await this.slackClient.chat.update(payload);
-        this.logger.debug("Succesfully updated message with merged status");
+        console.debug("Succesfully updated message with merged status");
       } catch (error) {
-        this.logger.error(
-          "Got error updating thread with merged status: ",
-          error,
-        );
+        console.error("Got error updating thread with merged status: ", error);
       }
     }
   }
@@ -433,10 +429,10 @@ export class GithubEventHandler {
       .single();
 
     if (error) {
-      this.logger.debug("Error getting threadTs: ", error);
+      console.debug("Error getting threadTs: ", error);
     }
 
-    this.logger.debug("Found threadTS: ", { threadTs: data?.thread_ts });
+    console.debug("Found threadTS: ", { threadTs: data?.thread_ts });
 
     return data?.thread_ts;
   }
