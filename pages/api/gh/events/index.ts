@@ -48,6 +48,8 @@ const handler = async (
   if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
     const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
+    const repositoryId: Number = Number(body.repository.id);
+
     const { data: githubRepository, error } = await supabaseClient
       .from("github_repositories")
       .select(
@@ -56,22 +58,21 @@ const handler = async (
         organization:organizations (*)
       `,
       )
-      .eq("repository_id", Number(body.repository.id))
-      .limit(1)
+      .eq("repository_id", repositoryId)
       .single();
-
-    const organization = flattenType<Organization>(
-      githubRepository?.organization,
-    );
 
     if (error) {
       console.error(`Error finding Github Repository with id: `, {
         pull_request_id: body.pull_request.id,
-        repositoryId: body.repository.id,
+        repositoryId,
         error,
       });
       return res.status(500).send({ error: "Error finding Github Repository" });
     }
+
+    const organization = flattenType<Organization>(
+      githubRepository?.organization,
+    );
 
     if (!organization) {
       console.warn("No organization found for repository_id: ", {
