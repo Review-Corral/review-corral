@@ -134,15 +134,17 @@ export default withAxiom(
           } else {
             const { data: newOrg, error } = await supabaseServerClient
               .from("organizations")
-              .insert({
-                account_id: installation.account.id,
-                installation_id: installation.id,
-                account_name: installation.account.login,
-                avatar_url: installation.account.avatar_url,
-                organization_type: _getOrganizationType(
-                  installation.account.type,
-                ),
-              })
+              .insert([
+                {
+                  account_id: installation.account.id,
+                  installation_id: installation.id,
+                  account_name: installation.account.login,
+                  avatar_url: installation.account.avatar_url,
+                  organization_type: _getOrganizationType(
+                    installation.account.type,
+                  ),
+                },
+              ])
               .select();
 
             if (error) {
