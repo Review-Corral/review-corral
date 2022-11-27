@@ -20,3 +20,15 @@ create policy "ALL Username mappings belongs to user's organization"
       where org_id = organization_id
     )
   );
+
+
+alter table public.slack_integration enable row level security;
+create policy "ALL slack integration belongs to user's organization"
+  on public.slack_integration
+  for ALL
+  using (
+    auth.uid() in (
+      select user_id from users_and_organizations
+      where org_id = organization_id
+    )
+  );
