@@ -159,7 +159,7 @@ const verifyGithubWebhookSecret = async ({
   secret: string;
 }) => {
   const hmac = createHmac("sha256", secret);
-  hmac.update(req.body);
+  hmac.update(JSON.stringify(req.body));
   const calculated = `sha256=${hmac.digest("hex")}`;
 
   return calculated === signature;
