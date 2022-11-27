@@ -1,4 +1,5 @@
 import cntl from "cntl";
+import Link from "next/dist/client/link";
 import { FC, useState } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
@@ -182,7 +183,17 @@ export const UsernameMappingsTableItem: FC<UsernameMappingsTableItemProps> = ({
             />
           </div>
           <div className="ml-4">
-            <div className="font-semibold text-gray-900">{member.login}</div>
+            <Link href={member.html_url} passHref>
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                className="cursor-pointer hover:underline "
+              >
+                <div className="font-semibold text-gray-900">
+                  {member.login}
+                </div>
+              </a>
+            </Link>
           </div>
         </div>
       </td>
