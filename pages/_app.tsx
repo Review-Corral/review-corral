@@ -8,6 +8,7 @@ import { Database } from "../database-types";
 import "../styles/globals.css";
 
 function MyApp({ Component, pageProps }: AppProps) {
+  const isProduction = process.env.NODE_ENV === "production";
   const [supabaseClient] = useState(() =>
     createBrowserSupabaseClient<Database>(),
   );
