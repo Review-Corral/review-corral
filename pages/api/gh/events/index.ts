@@ -29,6 +29,7 @@ const handler = async (
   }
 
   req.log.debug("Event has valid signature");
+  console.log("Event has valid signature");
 
   const body = req.body as GithubEvent;
 
