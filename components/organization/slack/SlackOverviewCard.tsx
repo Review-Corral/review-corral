@@ -2,6 +2,7 @@ import { FC } from "react";
 import { Slack } from "../../assets/icons/Slack";
 import { ErrorAlert } from "../../common/alerts/Error";
 import { Organization } from "../shared";
+import { SetupSlackCard } from "./SetupSlackCard";
 import { useSlackIntegrations } from "./useSlackIntegrations";
 
 interface SlackOverviewCardProps {
@@ -20,12 +21,6 @@ export const SlackOverviewCard: FC<SlackOverviewCardProps> = ({
           <Slack className="h-8 w-8 fill-black" />
           <span className="font-semibold text-lg">Channels</span>
         </div>
-        {/* <div
-          className="cursor-pointer underline text-indigo-500 underline-offset-2"
-          onClick={() => onEdit()}
-        >
-          Edit
-        </div> */}
       </div>
       <div className="py-6">
         <SlackCardData organization={organization} onEdit={onEdit} />
@@ -64,7 +59,7 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({
   }
 
   if (!slackChannels.data || slackChannels.data.length === 0) {
-    return <ErrorAlert message="You need to setup your integration!" />;
+    return <SetupSlackCard organization={organization} />;
   }
 
   return (

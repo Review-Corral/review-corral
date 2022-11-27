@@ -29,7 +29,7 @@ const HomeView: FC<HomeViewProps> = ({ syncGithub }) => {
 
   return (
     <DashboardLayout title="Home">
-      {data && data.total_count < 0 ? (
+      {data && data.total_count <= 0 ? (
         <>
           <Header>Onboarding</Header>
           <div className="mt-8 space-y-6">
@@ -50,7 +50,7 @@ const HomeView: FC<HomeViewProps> = ({ syncGithub }) => {
                 <Button
                   color="indigo"
                   onClick={() =>
-                    router.push("https://github.com/apps/review-corral")
+                    router.push(process.env.NEXT_PUBLIC_GITHUB_APP_URL!)
                   }
                 >
                   Install Integration

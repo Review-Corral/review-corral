@@ -33,7 +33,7 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
           queryClient.invalidateQueries([GET_SLACK_INTEGRATIONS_KEY]);
         }}
       >
-        <Button>Connect to Slack</Button>
+        <Button color="indigo">Connect to Slack</Button>
       </Link>
     </div>
   );

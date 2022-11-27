@@ -1,9 +1,9 @@
 import { FC } from "react";
 import Xarrow from "react-xarrows";
 import { ErrorAlert } from "../../../components/common/alerts/Error";
-import { InfoAlert } from "../../../components/common/alerts/Info";
 import { useGetInstallationRepos } from "../../../components/organization/github/useGetInstallationRepos";
 import { Github } from "../../assets/icons/Github";
+import Button from "../../buttons/Button";
 import { ActiveLight } from "../../common/misc/activeLight";
 import { Organization } from "../shared";
 import { useSlackIntegrations } from "../slack/useSlackIntegrations";
@@ -78,20 +78,15 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
 
   if (activeRepos.length < 1) {
     return (
-      <InfoAlert
-        message="No repositories enabled yet"
-        subMessage={
-          <>
-            Configure your repositories&nbsp;
-            <span
-              className="underline cursor-pointer underline-offset-2"
-              onClick={onEdit}
-            >
-              here
-            </span>
-          </>
-        }
-      />
+      <div className="p-4 border border-grey-200 rounded-md space-y-6 max-w-xl">
+        <span>
+          Configure your repositories below to tell Review Corral which
+          repositories to post events for and which ones to ignore.
+        </span>
+        <Button color="indigo" onClick={onEdit}>
+          Setup Github Repositories
+        </Button>
+      </div>
     );
   }
 
