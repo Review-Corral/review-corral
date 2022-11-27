@@ -56,7 +56,7 @@ const handler = async (
         organization:organizations (*)
       `,
       )
-      .eq("repository_id", Number(body?.repository.id))
+      .eq("repository_id", Number(body.repository.id))
       .limit(1)
       .single();
 
@@ -65,7 +65,11 @@ const handler = async (
     );
 
     if (error) {
-      console.info("Error finding Github Repository: ", error);
+      console.error(`Error finding Github Repository with id: `, {
+        pull_request_id: body.pull_request.id,
+        repositoryId: body.repository.id,
+        error,
+      });
       return res.status(500).send({ error: "Error finding Github Repository" });
     }
 
