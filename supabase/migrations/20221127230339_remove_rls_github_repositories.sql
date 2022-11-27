@@ -1,0 +1,1 @@
+alter table public.github_repositories disable row level security;
