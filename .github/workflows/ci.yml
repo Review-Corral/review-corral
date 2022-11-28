@@ -1,0 +1,14 @@
+
+name: CI
+
+on:
+  create
+
+jobs:
+  test-and-lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - run: yarn lint
+      - run: yarn tsc
+      - run: yarn test
