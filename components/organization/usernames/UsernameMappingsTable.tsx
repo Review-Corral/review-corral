@@ -8,7 +8,7 @@ import Button from "../../buttons/Button";
 import {
   useCreateUsernameMapping,
   UsernameMapping,
-  useUpdateUsernameMapping,
+  useUpdateUsernameMapping
 } from "./useUsernameMappings";
 
 export interface MemberWithMapping extends OrgMember {
@@ -108,21 +108,7 @@ const resolver: Resolver<FormValues> = async (values) => {
             message: "This is required.",
           },
         }
-      : values.slackId.length > 11
-      ? {
-          slackId: {
-            type: "maxLength",
-            message: "Should be exactly 11 characters",
-          },
-        }
-      : values.slackId.length < 11
-      ? {
-          slackId: {
-            type: "minLength",
-            message: "Should be exactly 11 characters",
-          },
-        }
-      : {},
+      : {}
   };
 };
 
