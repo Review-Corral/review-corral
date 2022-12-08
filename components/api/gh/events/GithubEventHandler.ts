@@ -451,7 +451,7 @@ export class GithubEventHandler {
           type: "header",
           text: {
             type: "plain_text",
-            text: `#${body.pull_request.number} ${body.pull_request.title}`,
+            text: `${body.pull_request.title} #${body.pull_request.number}`,
           },
         },
 
@@ -510,7 +510,7 @@ export class GithubEventHandler {
             },
             {
               type: "mrkdwn",
-              text: `+${body.pull_request.additions}, -${body.pull_request.deletions}`,
+              text: `+${body.pull_request.additions}-${body.pull_request.deletions}`,
             },
             {
               type: "mrkdwn",
