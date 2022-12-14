@@ -1,14 +1,23 @@
+# About
+Review Corral is an opinonated tool to effectively organize pull request events from
+Github in Slack.
+
+## Features:
+1. Events for pull requests are organized into Slack threads to limit event notifications
+to only the participants of the thread.
+2. Username mappings translate the Github event usernames to Slack usernames to automatically
+notify and subscribe the appropriate users in Slack. 
+3. [Coming soon] Scheduling of messages for reviews that are still open and awaiting reviews.
+
 ## Testing locally
 
-Use the "Review Corral - Test" Github app to test things locally
+In order to test Review Corral locally, you'll need to setup a few things.
+1. Create a copy of the Review Corral Github & Slack apps via the provided manifests (coming soon).
+2. Install the [Supabase CLI](https://supabase.com/docs/guides/cli).
+3. Setup your local config (coming soon.)
 
-Run `./ngrok http 8080` to get a public URL to forward Github events to. You may
-have to update the "Webhook URL" property in the Github app settings [here](https://github.com/settings/apps/review-corral-test).
-
-Run the frontend with `cd ./frontend && p dev`
-Run the backend with `cd ./backend && yarn dev`
-
-## Auth
+## Miscellaneous Notes
+### Auth
 
 Auth works by redirecting from Nrgok to `api/gh/local-auth`. The redirect is necessary
 so we can use one Nrgok domain for all of the tunneling. 
@@ -20,10 +29,3 @@ you check the supabase auth logs).
 ### Logs
 - `docker logs -f supabase_auth_backend` to check auth logs
 - `docker logs -f supabase_kong_backend` to check KONG logs
-
-### Pem files
-Github gives PEM files for signing. To get these into environment variables, run
-`base64 ${pem-file-path}` and then save that result to an env variable.
-
-#### DB Diagram
-- https://dbdiagram.io/d/635572f84709410195c2cdc4
