@@ -72,4 +72,4 @@ url = ""
 enabled=true
 client_id="env(GITHUB_CLIENT_ID)"
 secret="env(GITHUB_CLIENT_SECRET)"
-redirect_uri="https://reviewcorral.ngrok.io/api/gh/local-auth"
+redirect_uri="env(GITHUB_REDIRECT_URI)"
