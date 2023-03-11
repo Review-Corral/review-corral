@@ -1,5 +1,5 @@
 import { FC, PropsWithChildren } from "react";
-import { Database } from "../../database-types";
+import { Database } from "../../types/database-types";
 
 export type Pages = "github" | "slack" | "usernames";
 

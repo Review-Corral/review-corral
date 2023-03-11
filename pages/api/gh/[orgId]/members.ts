@@ -6,7 +6,7 @@ import { flattenParam } from "../../../../components/utils/flattenParam";
 import {
   InstallationAccessResponse,
   OrgMember,
-} from "../../../../github-api-types";
+} from "../../../../types/github-api-types";
 
 export default withAxiom(
   withProtectedApi(async function GetMembers(req, res, supabaseServerClient) {

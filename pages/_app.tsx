@@ -4,8 +4,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import type { AppProps } from "next/app";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
-import { Database } from "../database-types";
 import "../styles/globals.css";
+import { Database } from "../types/database-types";
 
 function MyApp({ Component, pageProps }: AppProps) {
   const isProduction = process.env.NODE_ENV === "production";

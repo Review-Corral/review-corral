@@ -5,7 +5,7 @@ import { isValidBody } from "../../../components/api/utils/apiUtils";
 import { withProtectedApi } from "../../../components/api/utils/withProtectedApi";
 import { getSlackRedirectUrl } from "../../../components/SlackButton";
 import { flattenParam } from "../../../components/utils/flattenParam";
-import { Database } from "../../../database-types";
+import { Database } from "../../../types/database-types";
 
 export type SlackAuthQueryParams = {
   code: string;

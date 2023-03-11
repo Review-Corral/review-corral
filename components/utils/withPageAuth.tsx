@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { SupabaseClient } from "@supabase/auth-helpers-react";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
-import { Database } from "../../database-types";
+import { Database } from "../../types/database-types";
 import { AddParameters } from "../api/utils/withApiSupabase";
 
 export function withPageAuth<
