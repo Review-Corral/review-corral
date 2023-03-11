@@ -2,7 +2,7 @@ import { PostgrestResponse } from "@supabase/supabase-js";
 import axios from "axios";
 import { withAxiom } from "next-axiom";
 import { withProtectedApi } from "../../../components/api/utils/withProtectedApi";
-import { InstallationsResponse } from "../../../github-api-types";
+import { InstallationsResponse } from "../../../types/github-api-types";
 
 export default withAxiom(
   withProtectedApi(async function ProtectedRoute(

@@ -5,7 +5,7 @@ import {
 } from "@supabase/auth-helpers-nextjs";
 import { NextApiResponse } from "next";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
-import { Database } from "../../../database-types";
+import { Database } from "../../../types/database-types";
 
 export function withProtectedApi<T = any>(
   handler: (

@@ -9,12 +9,12 @@ import {
 import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
 import slackifyMarkdown from "slackify-markdown";
-import { Database } from "../../../../database-types";
+import { Database } from "../../../../types/database-types";
 import {
   GithubEvent,
   PullRequestComment,
   Review,
-} from "../../../../github-event-types";
+} from "../../../../types/github-event-types";
 import { getInstallationAccessToken } from "../../utils/apiUtils";
 
 // TODO: remove this comment

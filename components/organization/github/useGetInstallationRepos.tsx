@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { Database } from "../../../database-types";
 import { PutRepositoryArgs } from "../../../pages/api/gh/repositories/[installationId]";
+import { Database } from "../../../types/database-types";
 import { ApiResponse } from "../../api/utils/apiBaseTypes";
 
 type GithubRepositories =

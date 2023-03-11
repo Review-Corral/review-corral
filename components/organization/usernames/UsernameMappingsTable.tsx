@@ -3,12 +3,12 @@ import Link from "next/dist/client/link";
 import { FC, useState } from "react";
 import { Resolver, useForm } from "react-hook-form";
 import toast from "react-hot-toast";
-import { OrgMember } from "../../../github-api-types";
+import { OrgMember } from "../../../types/github-api-types";
 import Button from "../../buttons/Button";
 import {
   useCreateUsernameMapping,
   UsernameMapping,
-  useUpdateUsernameMapping
+  useUpdateUsernameMapping,
 } from "./useUsernameMappings";
 
 export interface MemberWithMapping extends OrgMember {
@@ -108,7 +108,7 @@ const resolver: Resolver<FormValues> = async (values) => {
             message: "This is required.",
           },
         }
-      : {}
+      : {},
   };
 };
 

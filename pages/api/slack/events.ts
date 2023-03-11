@@ -1,5 +1,5 @@
 import withApiSupabase from "../../../components/api/utils/withApiSupabase";
-import { Database } from "../../../database-types";
+import { Database } from "../../../types/database-types";
 
 export default withApiSupabase<Database>(async function ProtectedRoute(
   req,

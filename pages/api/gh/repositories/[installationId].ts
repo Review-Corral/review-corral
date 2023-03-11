@@ -9,8 +9,8 @@ import {
 } from "../../../../components/api/utils/apiUtils";
 import { withProtectedApi } from "../../../../components/api/utils/withProtectedApi";
 import { flattenParam } from "../../../../components/utils/flattenParam";
-import { Database } from "../../../../database-types";
-import { InstallationRepositories } from "../../../../github-api-types";
+import { Database } from "../../../../types/database-types";
+import { InstallationRepositories } from "../../../../types/github-api-types";
 
 export type PutRepositoryArgs = {
   repositoryId: number;
