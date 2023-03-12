@@ -1,5 +1,13 @@
 /* eslint-disable no-console */
 import {
+  PullRequestClosedEvent,
+  PullRequestEvent,
+  PullRequestOpenedEvent,
+  PullRequestReadyForReviewEvent,
+  PullRequestReview,
+  WebhookEvent,
+} from "@octokit/webhooks-types";
+import {
   ChatPostMessageArguments,
   ChatPostMessageResponse,
   ChatUpdateArguments,
@@ -10,12 +18,12 @@ import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
 import slackifyMarkdown from "slackify-markdown";
 import { Database } from "../../types/database-types";
-import {
-  GithubEvent,
-  PullRequestComment,
-  Review,
-} from "../../types/github-types";
+
 import { getInstallationAccessToken } from "../utils/apiUtils";
+
+type PullRequestReadyEvent =
+  | PullRequestOpenedEvent
+  | PullRequestReadyForReviewEvent;
 
 // TODO: remove this comment
 export class GithubEventHandler {
@@ -28,41 +36,42 @@ export class GithubEventHandler {
     private readonly organizationId: string,
   ) {}
 
-  async handleEvent(body: GithubEvent) {
-    const prId = body.pull_request.id;
+  async handleEvent(body: WebhookEvent) {
+    if ("pull_request" in body) {
+      const prId = body.pull_request.id;
 
-    // New PR, should be the only two threads that create a new thread
-    if (
-      ((body.action === "opened" && body.pull_request?.draft === false) ||
-        body.action === "ready_for_review") &&
-      body.pull_request
-    ) {
-      console.debug("Handling new PR");
-      await this.handleNewPr(prId, body);
-    } else {
-      console.debug("Handling different event");
-      await this.handleOtherEvent(body, prId);
+      // New PR, should be the only two threads that create a new thread
+      if (
+        ((body.action === "opened" && body.pull_request?.draft === false) ||
+          body.action === "ready_for_review") &&
+        body.pull_request
+      ) {
+        console.debug("Handling new PR");
+        await this.handleNewPr(prId, body);
+      } else {
+        console.debug("Handling different event");
+        await this.handleOtherEvent(body, prId);
+      }
     }
   }
 
-  public async handleNewPr(prId: number, body: GithubEvent) {
-    const threadTs = (await this.postPrOpened(prId, body))?.ts;
+  public async handleNewPr(prId: number, body: PullRequestReadyEvent) {
+    const threadTs = (await this.postPrReady(prId, body))?.ts;
 
     if (threadTs) {
       // Get all comments and post
       const accessToken = await getInstallationAccessToken(this.installationId);
 
       try {
-        const response = await axios.get<PullRequestComment[]>(
-          body.pull_request.comments_url,
-          {
-            headers: {
-              Authorization: `bearer ${accessToken.token}`,
-            },
+        // TODO: get appropriate type here:
+        const response = await axios.get(body.pull_request.comments_url, {
+          headers: {
+            Authorization: `bearer ${accessToken.token}`,
           },
-        );
+        });
 
-        response.data.forEach((comment) => {
+        // TODO: see above todo for better type
+        response.data.forEach((comment: any) => {
           if (comment.user.type === "User") {
             this.postComment({
               prId,
@@ -81,15 +90,18 @@ export class GithubEventHandler {
       if (body.pull_request.requested_reviewers) {
         body.pull_request.requested_reviewers.map(
           async (requested_reviewer) => {
-            await this.postMessage({
-              message: {
-                text: `Review request for ${await this.getSlackUserName(
-                  requested_reviewer.login,
-                )}`,
-              },
-              prId,
-              threadTs: threadTs,
-            });
+            // The requested reviewer could be a 'Team' and not a 'User'
+            if ("login" in requested_reviewer) {
+              await this.postMessage({
+                message: {
+                  text: `Review request for ${await this.getSlackUserName(
+                    requested_reviewer.login,
+                  )}`,
+                },
+                prId,
+                threadTs: threadTs,
+              });
+            }
           },
         );
       }
@@ -101,80 +113,87 @@ export class GithubEventHandler {
     }
   }
 
-  private async handleOtherEvent(body: GithubEvent, prId: number) {
-    const threadTs = await this.getThreadTs(prId);
+  private async handleOtherEvent(body: WebhookEvent, prId: number) {
+    if ("action" in body) {
+      const threadTs = await this.getThreadTs(prId);
 
-    if (!threadTs) {
-      // No thread found, so log and return
-      console.debug(`Got non-created event and didn't find a threadTS`, {
-        action: body.action,
-        prId: prId,
-      });
-      return;
-    }
-
-    if (body.action === "deleted") {
-      // Ingore, this is probably a comment or review that was deleted
-      return;
-    }
-
-    if (body.action === "submitted" && body.review) {
-      if (body.review.state === "commented" && body.review.body === null) {
-        // This means they left a comment on the PR, not an actual review comment
-        return;
-      }
-      await this.postReview(
-        body.pull_request.id,
-        body.review,
-        body.sender.login,
-        threadTs,
-      );
-      return;
-    }
-
-    if (
-      (body.action === "opened" || body.action === "created") &&
-      body.comment &&
-      body.comment.user.type === "User"
-    ) {
-      await this.postComment({
-        prId,
-        commentBody: body.comment.body,
-        commentUrl: body.comment.html_url,
-        login: body.sender.login,
-        threadTs: threadTs,
-      });
-      return;
-    }
-
-    if (body.action === "closed") {
-      if (body.pull_request.merged) {
-        await this.postPrMerged(prId, body, threadTs);
-      } else {
-        await this.postPrClosed(prId, body, threadTs);
-      }
-    } else {
-      // TODO: Improve this block
-
-      if (body.action === "synchronize") {
+      if (!threadTs) {
+        // No thread found, so log and return
+        console.debug(`Got non-created event and didn't find a threadTS`, {
+          action: body.action,
+          prId: prId,
+        });
         return;
       }
 
-      if (body.action === "review_requested" && body.requested_reviewer) {
-        await this.postMessage({
-          message: {
-            text: `Review request for ${await this.getSlackUserName(
-              body.requested_reviewer.login,
-            )}`,
-          },
+      if (body.action === "deleted") {
+        // Ingore, this is probably a comment or review that was deleted
+        return;
+      }
+
+      if (body.action === "submitted" && "review" in body) {
+        if (body.review.state === "commented" && body.review.body === null) {
+          // This means they left a comment on the PR, not an actual review comment
+          return;
+        }
+        await this.postReview(
+          body.pull_request.id,
+          body.review,
+          body.sender.login,
+          threadTs,
+        );
+        return;
+      }
+
+      if (
+        (body.action === "opened" || body.action === "created") &&
+        "comment" in body &&
+        body.comment.user.type === "User"
+      ) {
+        await this.postComment({
           prId,
+          commentBody: body.comment.body,
+          commentUrl: body.comment.html_url,
+          login: body.sender.login,
           threadTs: threadTs,
         });
-      } else if (body.action === "ready_for_review") {
-        await this.postReadyForReview(prId, body, threadTs);
-      } else {
-        // Event we're not handling currently
-        console.info("Got unsupported event: ", { action: body.action });
+        return;
+      }
+
+      if ("pull_request" in body) {
+        if (body.action === "closed") {
+          if (body.pull_request.merged) {
+            await this.postPrMerged(prId, body, threadTs);
+          } else {
+            await this.postPrClosed(prId, body, threadTs);
+          }
+        } else {
+          // TODO: Improve this block
+
+          if (body.action === "synchronize") {
+            return;
+          }
+
+          if (
+            body.action === "review_requested" &&
+            "requested_reviewer" in body
+          ) {
+            await this.postMessage({
+              message: {
+                text: `Review request for ${await this.getSlackUserName(
+                  body.requested_reviewer.login,
+                )}`,
+              },
+              prId,
+              threadTs: threadTs,
+            });
+          } else if (body.action === "ready_for_review") {
+            await this.postReadyForReview(prId, body, threadTs);
+          } else {
+            // Event we're not handling currently
+            console.info("Got unsupported event: ", { action: body.action });
+          }
+        }
       }
     }
   }
@@ -247,9 +266,9 @@ export class GithubEventHandler {
     }
   }
 
-  private async postPrOpened(
+  private async postPrReady(
     prId: number,
-    body: GithubEvent,
+    body: PullRequestReadyEvent,
   ): Promise<ChatPostMessageResponse | undefined> {
     try {
       return this.postMessage({
@@ -267,7 +286,7 @@ export class GithubEventHandler {
 
   private async postPrMerged(
     prId: number,
-    body: GithubEvent,
+    body: PullRequestClosedEvent,
     threadTs: string,
   ) {
     await this.postMessage({
@@ -307,7 +326,7 @@ export class GithubEventHandler {
 
   private async postReadyForReview(
     prId: number,
-    body: GithubEvent,
+    body: PullRequestEvent,
     threadTs: string,
   ) {
     await this.postMessage({
@@ -323,7 +342,7 @@ export class GithubEventHandler {
 
   private async postPrClosed(
     prId: number,
-    body: GithubEvent,
+    body: PullRequestClosedEvent,
     threadTs: string,
   ) {
     await this.postMessage({
@@ -381,11 +400,11 @@ export class GithubEventHandler {
 
   private async postReview(
     prId: number,
-    review: Review,
+    review: PullRequestReview,
     login: string,
     threadTs: string,
   ) {
-    const getReviewText = (review: Review) => {
+    const getReviewText = (review: PullRequestReview) => {
       switch (review.state) {
         case "approved": {
           return "approved the pull request";
@@ -404,7 +423,7 @@ export class GithubEventHandler {
         text: `${await this.getSlackUserName(login)} ${getReviewText(review)}`,
         attachments: [
           {
-            text: slackifyMarkdown(review.body),
+            text: slackifyMarkdown(review.body ?? ""),
             color: "#fff",
           },
           ...[
@@ -436,13 +455,13 @@ export class GithubEventHandler {
     return data?.thread_ts;
   }
 
-  private async getPrOpenedMessage(body: GithubEvent): Promise<string> {
+  private async getPrOpenedMessage(body: PullRequestEvent): Promise<string> {
     return `Pull request opened by ${await this.getSlackUserName(
       body.sender.login,
     )}`;
   }
 
-  private async getPrOpenedBaseAttachment(body: GithubEvent) {
+  private async getPrOpenedBaseAttachment(body: PullRequestEvent) {
     return {
       // color: "#106D04",
       blocks: [
