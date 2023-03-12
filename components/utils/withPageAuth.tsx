@@ -1,8 +1,8 @@
 import { createServerSupabaseClient } from "@supabase/auth-helpers-nextjs";
 import { SupabaseClient } from "@supabase/auth-helpers-react";
 import { GetServerSideProps, GetServerSidePropsContext } from "next";
+import { AddParameters } from "../../services/utils/withApiSupabase";
 import { Database } from "../../types/database-types";
-import { AddParameters } from "../api/utils/withApiSupabase";
 
 export function withPageAuth<
   SchemaName extends string & keyof Database = "public" extends keyof Database

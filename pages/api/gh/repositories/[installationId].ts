@@ -3,12 +3,12 @@ import axios from "axios";
 import { NextApiResponse } from "next";
 import { withAxiom } from "next-axiom";
 import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
+import { flattenParam } from "../../../../components/utils/flattenParam";
 import {
   getInstallationAccessToken,
   isValidBody,
-} from "../../../../components/api/utils/apiUtils";
-import { withProtectedApi } from "../../../../components/api/utils/withProtectedApi";
-import { flattenParam } from "../../../../components/utils/flattenParam";
+} from "../../../../services/utils/apiUtils";
+import { withProtectedApi } from "../../../../services/utils/withProtectedApi";
 import { Database } from "../../../../types/database-types";
 import { InstallationRepositories } from "../../../../types/github-api-types";
 

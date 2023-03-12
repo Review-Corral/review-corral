@@ -1,4 +1,4 @@
-import withApiSupabase from "../../../components/api/utils/withApiSupabase";
+import withApiSupabase from "../../../services/utils/withApiSupabase";
 import { Database } from "../../../types/database-types";
 
 export default withApiSupabase<Database>(async function ProtectedRoute(
