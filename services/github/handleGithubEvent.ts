@@ -5,7 +5,7 @@ import { GithubEventHandler } from "services/github/GithubEventHandler";
 import { getSlackClient } from "services/slack/SlackClient";
 import { flattenType } from "services/utils/apiUtils";
 import { analytics } from "services/utils/segment";
-import { GithubEvent } from "types/github-event-types";
+import { GithubEvent } from "types/github-types";
 
 export const handleGithubEvent = async ({
   supabaseClient,

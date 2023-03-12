@@ -1,6 +1,7 @@
+import { PullRequestOpenedEvent } from "@octokit/webhooks-types";
 import { WebClient } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { OwnerOrUserOrSender, Repository } from "types/github-event-types";
+
 import { describe, expect, it, vi } from "vitest";
 import { GithubEventHandler } from "./GithubEventHandler";
 
@@ -41,7 +42,7 @@ describe("Github Event Handler tests", () => {
 
     const spy = vi.spyOn(handler, "handleNewPr");
 
-    const user: OwnerOrUserOrSender = {
+    const user: PullRequestOpenedEvent["sender"] = {
       login: "test-pr-user",
       id: 123,
       node_id: "node-id",
@@ -58,18 +59,18 @@ describe("Github Event Handler tests", () => {
       repos_url: "repos_url",
       events_url: "events_url",
       received_events_url: "received_events_url",
-      type: "type",
       site_admin: false,
+      type: "User",
     };
 
-    const repo: Repository = {
-      // finish all the properties
+    const repository: PullRequestOpenedEvent["repository"] = {
       id: 123,
       node_id: "node-id",
-      name: "name",
-      full_name: "full_name",
-      private: false,
+      name: "test-repo",
       owner: user,
+      web_commit_signoff_required: false,
+      full_name: "test-repo",
+      private: false,
       html_url: "html_url",
       description: "description",
       fork: false,
@@ -92,6 +93,7 @@ describe("Github Event Handler tests", () => {
       git_refs_url: "git_refs_url",
       git_tags_url: "git_tags_url",
       git_url: "git_url",
+      hooks_url: "hooks_url",
       issue_comment_url: "issue_comment_url",
       issue_events_url: "issue_events_url",
       issues_url: "issues_url",
@@ -113,18 +115,17 @@ describe("Github Event Handler tests", () => {
       trees_url: "trees_url",
       clone_url: "clone_url",
       mirror_url: "mirror_url",
-      hooks_url: "hooks_url",
       svn_url: "svn_url",
       homepage: "homepage",
       language: "language",
-      forks_count: 123,
-      stargazers_count: 123,
-      watchers_count: 123,
-      size: 123,
+      forks_count: 0,
+      stargazers_count: 0,
+      watchers_count: 0,
+      size: 0,
       default_branch: "default_branch",
-      open_issues_count: 123,
+      open_issues_count: 0,
       is_template: false,
-      topics: ["topic1", "topic2"],
+      topics: [],
       has_issues: false,
       has_projects: false,
       has_wiki: false,
@@ -132,41 +133,114 @@ describe("Github Event Handler tests", () => {
       has_downloads: false,
       archived: false,
       disabled: false,
-      visibility: "visibility",
+      visibility: "public",
       pushed_at: "pushed_at",
       created_at: "created_at",
+      updated_at: "updated_at",
+      license: null,
+      forks: 0,
+      open_issues: 0,
+      watchers: 0,
+      allow_forking: true,
     };
 
-    handler.handleEvent({
-      action: "opened",
-      number: 123,
-      pull_request: {
-        url: "test-pr-url",
-        id: 123,
-        node_id: "node-id",
-        html_url: "html_url",
-        diff_url: "diff_url",
-        patch_url: "patch_url",
-        issue_url: "issue_url",
-        number: 1,
-        state: "state",
-        locked: false,
-        title: "test-pr-title",
+    const pullRequest: PullRequestOpenedEvent["pull_request"] = {
+      url: "test-pr-url",
+      id: 123,
+      node_id: "node-id",
+      html_url: "html_url",
+      diff_url: "diff_url",
+      patch_url: "patch_url",
+      issue_url: "issue_url",
+      closed_at: null,
+      merged_at: null,
+      mergeable: null,
+      mergeable_state: "mergeable_state",
+      merged: false,
+      author_association: "COLLABORATOR",
+      comments: 0,
+      commits: 0,
+      deletions: 0,
+      additions: 0,
+      changed_files: 0,
+      merged_by: null,
+      rebaseable: null,
+      maintainer_can_modify: false,
+      review_comments: 0,
+      auto_merge: null,
+      number: 1,
+      locked: false,
+      title: "test-pr-title",
+      user: user,
+      created_at: "created_at",
+      updated_at: "updated_at",
+      merge_commit_sha: "merge_commit_sha",
+      draft: false,
+      commits_url: "commits_url",
+      review_comments_url: "review_comments_url",
+      review_comment_url: "review_comment_url",
+      comments_url: "comments_url",
+      statuses_url: "statuses_url",
+      state: "open",
+      body: "This is the body of the PR",
+      labels: [],
+      milestone: null,
+      active_lock_reason: null,
+      assignee: null,
+      assignees: [],
+      requested_reviewers: [],
+      requested_teams: [],
+      head: {
+        label: "head-label",
+        ref: "head-ref",
+        sha: "head-sha",
         user: user,
-        created_at: "created_at",
-        updated_at: "updated_at",
-        closed_at: "closed_at",
-        merged_at: undefined,
-        merge_commit_sha: "merge_commit_sha",
-        draft: false,
-        commits_url: "commits_url",
-        review_comments_url: "review_comments_url",
-        review_comment_url: "review_comment_url",
-        comments_url: "comments_url",
-        statuses_url: "statuses_url",
+        repo: repository,
       },
-      repository: repo,
-    });
+      base: {
+        label: "base-label",
+        ref: "base-ref",
+        sha: "base-sha",
+        user: user,
+        repo: repository,
+      },
+      _links: {
+        self: {
+          href: "self-href",
+        },
+        html: {
+          href: "html-href",
+        },
+        issue: {
+          href: "issue-href",
+        },
+        comments: {
+          href: "comments-href",
+        },
+        review_comments: {
+          href: "review_comments-href",
+        },
+        review_comment: {
+          href: "review_comment-href",
+        },
+        commits: {
+          href: "commits-href",
+        },
+        statuses: {
+          href: "statuses-href",
+        },
+      },
+    };
+
+    const event: PullRequestOpenedEvent = {
+      action: "opened",
+      number: 1,
+      sender: user,
+      pull_request: pullRequest,
+      repository,
+    };
+
+    handler.handleEvent(event);
 
     expect(spy).toHaveBeenCalledTimes(1);
   });

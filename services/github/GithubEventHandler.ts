@@ -14,7 +14,7 @@ import {
   GithubEvent,
   PullRequestComment,
   Review,
-} from "../../types/github-event-types";
+} from "../../types/github-types";
 import { getInstallationAccessToken } from "../utils/apiUtils";
 
 // TODO: remove this comment
@@ -45,7 +45,7 @@ export class GithubEventHandler {
     }
   }
 
-  private async handleNewPr(prId: number, body: GithubEvent) {
+  public async handleNewPr(prId: number, body: GithubEvent) {
     const threadTs = (await this.postPrOpened(prId, body))?.ts;
 
     if (threadTs) {
