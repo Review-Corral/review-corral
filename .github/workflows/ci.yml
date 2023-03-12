@@ -9,6 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+      - run: yarn install --frozen-lockfile
       - run: yarn lint
       - run: yarn tsc
       - run: yarn test
