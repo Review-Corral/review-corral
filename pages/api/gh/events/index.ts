@@ -5,7 +5,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 import { AxiomAPIRequest, withAxiom } from "next-axiom/dist/withAxiom";
 import { handleGithubEvent } from "services/github/handleGithubEvent";
 import withApiSupabase from "../../../../services/utils/withApiSupabase";
-import { GithubEvent } from "../../../../types/github-event-types";
+import { GithubEvent } from "../../../../types/github-types";
 
 const handler = async (
   req: AxiomAPIRequest,
