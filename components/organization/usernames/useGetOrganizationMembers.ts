@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
+import { ApiResponse } from "../../../services/utils/apiBaseTypes";
 import { OrgMember } from "../../../types/github-api-types";
-import { ApiResponse } from "../../api/utils/apiBaseTypes";
 
 export const USE_GET_MEMBERS_KEY = "useGetOrganizationMembers";
 

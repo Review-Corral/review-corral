@@ -1,8 +1,8 @@
 import axios from "axios";
 import { Logger, withAxiom } from "next-axiom";
-import { getInstallationAccessToken } from "../../../../components/api/utils/apiUtils";
-import { withProtectedApi } from "../../../../components/api/utils/withProtectedApi";
 import { flattenParam } from "../../../../components/utils/flattenParam";
+import { getInstallationAccessToken } from "../../../../services/utils/apiUtils";
+import { withProtectedApi } from "../../../../services/utils/withProtectedApi";
 import {
   InstallationAccessResponse,
   OrgMember,

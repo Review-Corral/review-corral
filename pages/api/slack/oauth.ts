@@ -1,10 +1,10 @@
 import axios from "axios";
 import { withAxiom } from "next-axiom";
 import { ApiError } from "next/dist/server/api-utils";
-import { isValidBody } from "../../../components/api/utils/apiUtils";
-import { withProtectedApi } from "../../../components/api/utils/withProtectedApi";
 import { getSlackRedirectUrl } from "../../../components/SlackButton";
 import { flattenParam } from "../../../components/utils/flattenParam";
+import { isValidBody } from "../../../services/utils/apiUtils";
+import { withProtectedApi } from "../../../services/utils/withProtectedApi";
 import { Database } from "../../../types/database-types";
 
 export type SlackAuthQueryParams = {

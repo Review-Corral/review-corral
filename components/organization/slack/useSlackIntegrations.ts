@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
+import { ApiResponse } from "../../../services/utils/apiBaseTypes";
 import { Database } from "../../../types/database-types";
-import { ApiResponse } from "../../api/utils/apiBaseTypes";
 
 export const GET_SLACK_INTEGRATIONS_KEY = "getSlackIntegrations";
 

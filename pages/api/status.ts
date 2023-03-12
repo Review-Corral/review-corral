@@ -1,7 +1,7 @@
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextApiResponse } from "next";
 import { AxiomAPIRequest, withAxiom } from "next-axiom/dist/withAxiom";
-import withApiSupabase from "../../components/api/utils/withApiSupabase";
+import withApiSupabase from "../../services/utils/withApiSupabase";
 
 const handler = async (
   req: AxiomAPIRequest,

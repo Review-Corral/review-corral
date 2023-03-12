@@ -1,6 +1,6 @@
 import { withAxiom } from "next-axiom";
-import { withProtectedApi } from "../../../../components/api/utils/withProtectedApi";
 import { flattenParam } from "../../../../components/utils/flattenParam";
+import { withProtectedApi } from "../../../../services/utils/withProtectedApi";
 
 export default withAxiom(
   withProtectedApi(async function ProtectedRoute(
