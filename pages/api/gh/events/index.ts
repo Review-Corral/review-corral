@@ -1,9 +1,9 @@
 /* eslint-disable no-console */
-import { WebClient } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { NextApiRequest, NextApiResponse } from "next";
 import { AxiomAPIRequest, withAxiom } from "next-axiom/dist/withAxiom";
+import { getSlackClient } from "slack/SlackClient";
 import { GithubEventHandler } from "../../../../components/api/gh/events/GithubEventHandler";
 import { flattenType } from "../../../../components/api/utils/apiUtils";
 import { analytics } from "../../../../components/api/utils/segment";
@@ -46,7 +46,7 @@ const handler = async (
   });
 
   if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
-    const slackClient = new WebClient(process.env.SLACK_BOT_TOKEN);
+    const slackClient = getSlackClient();
 
     const repositoryId: Number = Number(body.repository.id);
 
