@@ -2,7 +2,7 @@
 name: CI
 
 on:
-  create
+  push
 
 jobs:
   test-and-lint:
