@@ -130,7 +130,6 @@ export class GithubEventHandler {
         threadTs,
       );
       return;
-      // Comments
     }
 
     if (
