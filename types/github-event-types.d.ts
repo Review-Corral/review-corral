@@ -53,7 +53,7 @@ export interface PullRequest {
   created_at: string;
   updated_at: string;
   closed_at: string;
-  merged_at?: null;
+  merged_at?: string;
   merge_commit_sha: string;
   assignee?: null;
   assignees?: null[] | null;
