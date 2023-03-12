@@ -1,11 +1,11 @@
 /* eslint-disable no-console */
+import { WebhookEvent } from "@octokit/webhooks-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { NextApiRequest, NextApiResponse } from "next";
 import { AxiomAPIRequest, withAxiom } from "next-axiom/dist/withAxiom";
 import { handleGithubEvent } from "services/github/handleGithubEvent";
 import withApiSupabase from "../../../../services/utils/withApiSupabase";
-import { GithubEvent } from "../../../../types/github-types";
 
 const handler = async (
   req: AxiomAPIRequest,
@@ -21,10 +21,9 @@ const handler = async (
     return res.status(403).send({ error: "Invalid signature" });
   }
 
-  console.debug("Event has valid signature");
   console.log("Event has valid signature");
 
-  const body = req.body as GithubEvent;
+  const body = req.body as WebhookEvent;
 
   handleGithubEvent({ supabaseClient, githubEvent: body, res });
 };

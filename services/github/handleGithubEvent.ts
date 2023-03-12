@@ -1,11 +1,10 @@
 import { Organization } from "@/components/organization/shared";
+import { WebhookEvent } from "@octokit/webhooks-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextApiResponse } from "next";
-import { GithubEventHandler } from "services/github/GithubEventHandler";
 import { getSlackClient } from "services/slack/SlackClient";
 import { flattenType } from "services/utils/apiUtils";
-import { analytics } from "services/utils/segment";
-import { GithubEvent } from "types/github-types";
+import { GithubEventHandler } from "./GithubEventHandler";
 
 export const handleGithubEvent = async ({
   supabaseClient,
@@ -13,30 +12,18 @@ export const handleGithubEvent = async ({
   res,
 }: {
   supabaseClient: SupabaseClient;
-  githubEvent: GithubEvent;
+  githubEvent: WebhookEvent;
   res: NextApiResponse;
 }): Promise<void> => {
-  const body = githubEvent;
-
   console.log("Got Github Event", {
-    action: body?.action,
-    number: body?.number,
-    pullRequestId: body.pull_request?.id,
+    action: getPropertyFromWebhookIfExists(githubEvent, "action"),
+    number: getPropertyFromWebhookIfExists(githubEvent, "number"),
   });
 
-  analytics.track({
-    event: "Got GH Event",
-    userId: body?.sender?.login ?? "unknown",
-    properties: {
-      body: body,
-      env: process.env.NODE_ENV ?? "development",
-    },
-  });
-
-  if (body?.pull_request && body?.pull_request.id && body?.repository.id) {
+  if ("pull_request" in githubEvent) {
     const slackClient = getSlackClient();
 
-    const repositoryId: Number = Number(body.repository.id);
+    const repositoryId: Number = Number(githubEvent.repository.id);
 
     const { data: githubRepository, error } = await supabaseClient
       .from("github_repositories")
@@ -51,7 +38,7 @@ export const handleGithubEvent = async ({
 
     if (error) {
       console.error(`Error finding Github Repository with id: `, {
-        pull_request_id: body.pull_request.id,
+        pull_request_id: githubEvent.pull_request.id,
         repositoryId,
         error,
       });
@@ -64,7 +51,7 @@ export const handleGithubEvent = async ({
 
     if (!organization) {
       console.warn("No organization found for repository_id: ", {
-        orgId: body.repository.id,
+        orgId: githubEvent.repository.id,
       });
       return res.status(404).send({ error: "No organization found" });
     }
@@ -92,7 +79,7 @@ export const handleGithubEvent = async ({
     );
 
     try {
-      await eventHandler.handleEvent(body);
+      await eventHandler.handleEvent(githubEvent);
     } catch (error) {
       console.error(`Got error handling event`, error);
       return res.status(400).send({ error: "Error handling event" });
@@ -100,4 +87,16 @@ export const handleGithubEvent = async ({
   }
 
   return res.status(200).send({ data: "OK" });
+};
+
+const getPropertyFromWebhookIfExists = (
+  event: WebhookEvent,
+  property: string,
+): unknown | null => {
+  if (property in event) {
+    // @ts-ignore
+    return event[property];
+  }
+
+  return null;
 };
