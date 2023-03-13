@@ -14,10 +14,9 @@ import {
   MessageAttachment,
   WebClient,
 } from "@slack/web-api";
-import { SupabaseClient } from "@supabase/supabase-js";
 import axios from "axios";
+import { Db } from "services/db";
 import slackifyMarkdown from "slackify-markdown";
-import { Database } from "../../types/database-types";
 
 import { getInstallationAccessToken } from "../utils/apiUtils";
 
@@ -28,7 +27,7 @@ type PullRequestReadyEvent =
 // TODO: remove this comment
 export class GithubEventHandler {
   constructor(
-    private readonly supabaseClient: SupabaseClient<Database>,
+    private readonly database: Db,
     private readonly slackClient: WebClient,
     private readonly channelId: string,
     private readonly slackToken: string,
@@ -37,7 +36,9 @@ export class GithubEventHandler {
   ) {}
 
   async handleEvent(body: WebhookEvent) {
+    console.info("hello!");
     if ("pull_request" in body) {
+      console.log("Pull request in body");
       const prId = body.pull_request.id;
 
       // New PR, should be the only two threads that create a new thread
@@ -46,12 +47,15 @@ export class GithubEventHandler {
           body.action === "ready_for_review") &&
         body.pull_request
       ) {
-        console.debug("Handling new PR");
+        // Ignore draft PRs for now
+        console.log("Handling new PR");
         await this.handleNewPr(prId, body);
       } else {
-        console.debug("Handling different event");
+        console.log("Handling different event");
         await this.handleOtherEvent(body, prId);
       }
+    } else {
+      console.log("Pull request not in body");
     }
   }
 
@@ -228,12 +232,11 @@ export class GithubEventHandler {
   }
 
   private async getSlackUserName(githubLogin: string): Promise<string> {
-    const { data: slackUserId, error } = await this.supabaseClient
-      .from("username_mappings")
-      .select("slack_user_id")
-      .eq("github_username", githubLogin)
-      .eq("organization_id", this.organizationId)
-      .single();
+    const { data: slackUserId, error } =
+      await this.database.getSlackUserIdFromGithubLogin({
+        githubLogin,
+        organizationId: this.organizationId,
+      });
 
     if (error) {
       console.warn("Error getting slack user name: ", error);
@@ -255,10 +258,10 @@ export class GithubEventHandler {
       return;
     }
 
-    const { error } = await this.supabaseClient.from("pull_requests").insert({
-      pr_id: prId.toString(),
-      thread_ts: message.message.ts,
-      organization_id: this.organizationId,
+    const { error } = await this.database.insertPullRequest({
+      prId: prId.toString(),
+      threadTs: message.message.ts,
+      organizationId: this.organizationId,
     });
 
     if (error) {
@@ -440,11 +443,9 @@ export class GithubEventHandler {
   }
 
   private async getThreadTs(prId: number): Promise<string | undefined> {
-    const { data, error } = await this.supabaseClient
-      .from("pull_requests")
-      .select("thread_ts")
-      .eq("pr_id", prId.toString())
-      .single();
+    const { data, error } = await this.database.getThreadTs({
+      prId: prId.toString(),
+    });
 
     if (error) {
       console.debug("Error getting threadTs: ", error);
