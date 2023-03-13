@@ -3715,6 +3715,11 @@ trough@^1.0.0:
   resolved "https://registry.yarnpkg.com/trough/-/trough-1.0.5.tgz#b8b639cefad7d0bb2abd37d433ff8293efa5f406"
   integrity sha512-rvuRbTarPXmMb79SmzEp8aqXNKcK+y0XaB298IXueQ8I2PsrATcPBCSPyK/dDNa2iWOhKlfNnOjdAOTBU/nkFA==
 
+ts-essentials@^9.3.0:
+  version "9.3.1"
+  resolved "https://registry.yarnpkg.com/ts-essentials/-/ts-essentials-9.3.1.tgz#f2d1e1584ef53c0251012258338421d7cf78a4d0"
+  integrity sha512-9CChSvQMyVRo29Vb1A2jbs+LKo3d/bAf+ndSaX0T8cEiy/HChVaRN/HY5DqUryZ8hZ6uol9bEgCnGmnDbwBR9Q==
+
 tsconfig-paths@^3.14.1:
   version "3.14.1"
   resolved "https://registry.yarnpkg.com/tsconfig-paths/-/tsconfig-paths-3.14.1.tgz#ba0734599e8ea36c862798e920bcf163277b137a"
@@ -3922,6 +3927,13 @@ vite-node@0.29.2:
     rollup "^3.10.0"
   optionalDependencies:
     fsevents "~2.3.2"
+
+vitest-mock-extended@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/vitest-mock-extended/-/vitest-mock-extended-1.1.0.tgz#d19a547b2ea21ae441e84207edfae838b3f243e7"
+  integrity sha512-4AMVDXmbBd7kImh1Hi2B0EBuDy6hTy+8r4CVEcpEsmlVmxjHB2vszr/6B1W6ONYw76RLhlLDJlmk9fOE5B9H8w==
+  dependencies:
+    ts-essentials "^9.3.0"
 
 vitest@^0.29.2:
   version "0.29.2"

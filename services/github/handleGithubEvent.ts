@@ -2,6 +2,7 @@ import { Organization } from "@/components/organization/shared";
 import { WebhookEvent } from "@octokit/webhooks-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextApiResponse } from "next";
+import { Db } from "services/db";
 import { getSlackClient } from "services/slack/SlackClient";
 import { flattenType } from "services/utils/apiUtils";
 import { GithubEventHandler } from "./GithubEventHandler";
@@ -70,7 +71,7 @@ export const handleGithubEvent = async ({
     }
 
     const eventHandler = new GithubEventHandler(
-      supabaseClient,
+      new Db(supabaseClient),
       slackClient,
       slackIntegration.channel_id,
       slackIntegration.access_token,
