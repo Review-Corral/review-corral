@@ -117,7 +117,7 @@ export class GithubEventHandler {
     }
   }
 
-  private async handleOtherEvent(body: WebhookEvent, prId: number) {
+  public async handleOtherEvent(body: WebhookEvent, prId: number) {
     if ("action" in body) {
       const threadTs = await this.getThreadTs(prId);
 

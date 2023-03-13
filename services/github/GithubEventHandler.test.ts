@@ -12,7 +12,7 @@ describe("Github Event Handler tests", () => {
     expect(true).toBeTruthy();
   });
 
-  it("should handle a pull request event", async () => {
+  it("should handle a new pull request event", async () => {
     // TODO: can remove?
     vi.mock("./handlers", () => {
       return {
@@ -58,7 +58,8 @@ describe("Github Event Handler tests", () => {
       "organizationId",
     );
 
-    const spy = vi.spyOn(handler, "handleNewPr");
+    const handleNewPrSpy = vi.spyOn(handler, "handleNewPr");
+    const handleOtherEventSpy = vi.spyOn(handler, "handleOtherEvent");
 
     const mockPullRequestEvent = mock<PullRequestOpenedEvent>();
     mockPullRequestEvent.action = "opened";
@@ -68,6 +69,7 @@ describe("Github Event Handler tests", () => {
 
     await handler.handleEvent(mockPullRequestEvent);
 
-    expect(spy).toHaveBeenCalledTimes(1);
+    expect(handleNewPrSpy).toHaveBeenCalledTimes(1);
+    expect(handleOtherEventSpy).toHaveBeenCalledTimes(0);
   });
 });
