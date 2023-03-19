@@ -33,11 +33,13 @@ export class Db {
     threadTs,
     ...props
   }: {
-    threadTs: string;
+    threadTs: string | null;
+    isDraft: boolean;
     prId: string;
   } & BaseProps) =>
     await this.client.from("pull_requests").insert({
       pr_id: prId.toString(),
+      is_draft: props.isDraft,
       thread_ts: threadTs,
       organization_id: props.organizationId,
     });
