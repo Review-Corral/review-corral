@@ -109,13 +109,7 @@ export class ReadyHandler {
     // If the PR was opened
     if (body.action === "opened") {
       return {
-        threadTs: (
-          await this.slackClient.postPrReady(
-            prId,
-            body,
-            await this.getSlackUserName(body.sender.login),
-          )
-        )?.ts,
+        threadTs: await this.createNewThread(prId, body),
         wasCreated: true,
       };
     } else {
@@ -129,13 +123,7 @@ export class ReadyHandler {
       // If we still couldn't find a thread, then post a new one.
       if (!existingThreadTs) {
         return {
-          threadTs: (
-            await this.slackClient.postPrReady(
-              prId,
-              body,
-              await this.getSlackUserName(body.sender.login),
-            )
-          )?.ts,
+          threadTs: await this.createNewThread(prId, body),
           wasCreated: true,
         };
       } else {
@@ -144,6 +132,33 @@ export class ReadyHandler {
           wasCreated: false,
         };
       }
+    }
+  }
+
+  async createNewThread(
+    prId: number,
+    body: PullRequestReadyEvent,
+  ): Promise<string> {
+    const response = await this.slackClient.postPrReady(
+      prId,
+      body,
+      await this.getSlackUserName(body.sender.login),
+    );
+
+    if (response && response.ts) {
+      this.database.insertPullRequest({
+        prId: prId.toString(),
+        isDraft: false,
+        threadTs: response.ts,
+        organizationId: this.organizationId,
+      });
+
+      return response.ts;
+    } else {
+      throw new Error(
+        `Tried to create new thread for PR Id ${prId} but didn't get a response ts: ` +
+          `\nReceieved Response: ${JSON.stringify(response)}`,
+      );
     }
   }
 }
