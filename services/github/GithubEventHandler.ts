@@ -4,7 +4,7 @@ import {
   PullRequestReadyForReviewEvent,
   WebhookEvent,
 } from "@octokit/webhooks-types";
-import { ChatPostMessageResponse, WebClient } from "@slack/web-api";
+import { ChatPostMessageResponse } from "@slack/web-api";
 import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
 import { ReadyHandler } from "./ReadyHandler";
@@ -19,7 +19,6 @@ export class GithubEventHandler {
 
   constructor(
     private readonly database: Db,
-    slackWebClient: WebClient,
     channelId: string,
     slackToken: string,
     private readonly installationId: number,
@@ -34,8 +33,6 @@ export class GithubEventHandler {
       console.log("Pull request in body");
       const prId = body.pull_request.id;
 
-      // TODO: handle converted to draft event
-      // New PR, should be the only two threads that create a new thread
       if (body.action === "opened" || body.action === "ready_for_review") {
         console.log(`Handling ${body.action} PR`);
         await new ReadyHandler(
