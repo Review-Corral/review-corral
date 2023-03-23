@@ -15,6 +15,7 @@ export class ReadyHandler {
   ) {}
 
   public async handleNewPr(prId: number, body: PullRequestReadyEvent) {
+    console.log("hello I'm called!");
     // If the PR is opened but in draft, just save the PR and don't post it
     if (body.pull_request?.draft === true) {
       // Handle draft phase
