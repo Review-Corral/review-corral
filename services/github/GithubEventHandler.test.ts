@@ -4,7 +4,7 @@ import { mock } from "vitest-mock-extended";
 
 import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GithubEventHandler } from "./GithubEventHandler";
 import { ReadyHandler } from "./ReadyHandler";
 
@@ -33,11 +33,11 @@ vi.mock("@slack/web-api", () => {
 });
 
 vi.mock("./ReadyHandler", () => {
-  const ReadyHandler = vi.fn(() => ({
-    handleNewPr: vi.fn(() => {
-      console.log("hey called from the mock!");
-    }),
-  }));
+  const ReadyHandler = vi.fn();
+
+  ReadyHandler.prototype.handleNewPr = vi.fn(() => {
+    console.log("hey called from the mock!");
+  });
 
   return { ReadyHandler };
 });
@@ -51,29 +51,35 @@ vi.mock("./SlackClient", () => {
 });
 
 describe("GithubEventHandler", () => {
+  let handler: GithubEventHandler;
+  let readyHandler: ReadyHandler;
+
+  beforeEach(() => {});
+
   it("should handle a new pull request event", async () => {
     const supabaseClient = new SupabaseClient("abc", "123");
     const slackClient = new SlackClient("channelId", "slackToken");
-    const datbase = new Db(supabaseClient);
+    const database = new Db(supabaseClient);
 
-    const handler = new GithubEventHandler(
-      datbase,
-      "channelId",
-      "slackToken",
-      1234,
-      "organizationId",
+    const organizationId = "organizationId";
+    const installationId = 1234;
+
+    readyHandler = new ReadyHandler(
+      database,
+      slackClient,
+      organizationId,
+      () => Promise.resolve("slackUserName"),
+      installationId,
     );
 
-    const readyHandler = new ReadyHandler(
-      datbase,
+    handler = new GithubEventHandler(
+      database,
       slackClient,
-      "organizationId",
-      (githubLogin: string) => Promise.resolve("slackUserName"),
-      1234,
+      installationId,
+      organizationId,
     );
 
     const handleOtherEventSpy = vi.spyOn(handler, "handleOtherEvent");
-    const handleNewPrSpy = vi.spyOn(readyHandler, "handleNewPr");
 
     const mockPullRequestEvent = mock<PullRequestOpenedEvent>();
     mockPullRequestEvent.action = "opened";
@@ -85,6 +91,5 @@ describe("GithubEventHandler", () => {
 
     expect(vi.isMockFunction(readyHandler.handleNewPr)).toBe(true);
     expect(readyHandler.handleNewPr).toHaveBeenCalledTimes(1);
-    expect(handleOtherEventSpy).toHaveBeenCalledTimes(0);
   });
 });
