@@ -15,20 +15,14 @@ export type PullRequestReadyEvent =
 
 // TODO: remove this comment
 export class GithubEventHandler {
-  readonly slackClient: SlackClient;
-
   constructor(
     private readonly database: Db,
-    channelId: string,
-    slackToken: string,
+    private readonly slackClient: SlackClient,
     private readonly installationId: number,
     private readonly organizationId: string,
-  ) {
-    this.slackClient = new SlackClient(channelId, slackToken);
-  }
+  ) {}
 
   async handleEvent(body: WebhookEvent) {
-    console.info("hello!");
     if ("pull_request" in body) {
       console.log("Pull request in body");
       const prId = body.pull_request.id;
