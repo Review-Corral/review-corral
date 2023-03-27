@@ -1,11 +1,9 @@
 import { PullRequestOpenedEvent } from "@octokit/webhooks-types";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { mock } from "vitest-mock-extended";
-
 import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
-import { beforeEach, describe, expect, it, vi } from "vitest";
-import { GithubEventHandler } from "./GithubEventHandler";
+import { afterEach, beforeEach, describe, it, vi } from "vitest";
+import { mock } from "vitest-mock-extended";
 import { ReadyHandler } from "./ReadyHandler";
 
 vi.mock("@supabase/supabase-js", () => {
@@ -50,17 +48,18 @@ vi.mock("./SlackClient", () => {
   return { SlackClient };
 });
 
-describe("GithubEventHandler", () => {
+describe("ReadyHandler", () => {
   const organizationId = "organizationId";
   const installationId = 1234;
 
-  let handler: GithubEventHandler;
   let readyHandler: ReadyHandler;
+  let slackClient: SlackClient;
 
   beforeEach(() => {
     const supabaseClient = new SupabaseClient("abc", "123");
-    const slackClient = new SlackClient("channelId", "slackToken");
     const database = new Db(supabaseClient);
+
+    slackClient = new SlackClient("channelId", "slackToken");
 
     readyHandler = new ReadyHandler(
       database,
@@ -69,28 +68,21 @@ describe("GithubEventHandler", () => {
       () => Promise.resolve("slackUserName"),
       installationId,
     );
+  });
 
-    handler = new GithubEventHandler(
-      database,
-      slackClient,
-      installationId,
-      organizationId,
-    );
+  afterEach(() => {
+    vi.clearAllMocks();
   });
 
   it("should handle a new pull request event", async () => {
-    const handleOtherEventSpy = vi.spyOn(handler, "handleOtherEvent");
-
     const mockPullRequestEvent = mock<PullRequestOpenedEvent>();
     mockPullRequestEvent.action = "opened";
     const mockedPullRequest = mock<PullRequestOpenedEvent["pull_request"]>();
     mockedPullRequest.draft = false;
     mockPullRequestEvent.pull_request = mockedPullRequest;
 
-    await handler.handleEvent(mockPullRequestEvent);
+    await readyHandler.handleNewPr(1, mockPullRequestEvent);
 
-    expect(vi.isMockFunction(readyHandler.handleNewPr)).toBe(true);
-    expect(readyHandler.handleNewPr).toHaveBeenCalledTimes(1);
-    expect(handleOtherEventSpy).toHaveBeenCalledTimes(0);
+    expect(slackClient.postMessage).toHaveBeenCalledTimes(1);
   });
 });
