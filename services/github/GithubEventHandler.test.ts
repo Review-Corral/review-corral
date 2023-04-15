@@ -6,7 +6,7 @@ import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { GithubEventHandler } from "./GithubEventHandler";
-import { ReadyHandler } from "./ReadyHandler";
+import { handlePrReady } from "./handlePrReady";
 
 vi.mock("@supabase/supabase-js", () => {
   const SupabaseClient = vi.fn(() => ({
@@ -32,14 +32,10 @@ vi.mock("@slack/web-api", () => {
   return { WebClient };
 });
 
-vi.mock("./ReadyHandler", () => {
-  const ReadyHandler = vi.fn();
-
-  ReadyHandler.prototype.handleNewPr = vi.fn(() => {
-    console.log("hey called from the mock!");
-  });
-
-  return { ReadyHandler };
+vi.mock("./handlePrReady", () => {
+  return {
+    handlePrReady: vi.fn(),
+  };
 });
 
 vi.mock("./SlackClient", () => {
@@ -55,20 +51,11 @@ describe("GithubEventHandler", () => {
   const installationId = 1234;
 
   let handler: GithubEventHandler;
-  let readyHandler: ReadyHandler;
 
   beforeEach(() => {
     const supabaseClient = new SupabaseClient("abc", "123");
     const slackClient = new SlackClient("channelId", "slackToken");
     const database = new Db(supabaseClient);
-
-    readyHandler = new ReadyHandler(
-      database,
-      slackClient,
-      organizationId,
-      () => Promise.resolve("slackUserName"),
-      installationId,
-    );
 
     handler = new GithubEventHandler(
       database,
@@ -92,8 +79,7 @@ describe("GithubEventHandler", () => {
 
     await handler.handleEvent(mockPullRequestEvent);
 
-    expect(vi.isMockFunction(readyHandler.handleNewPr)).toBe(true);
-    expect(readyHandler.handleNewPr).toHaveBeenCalledTimes(1);
+    expect(handlePrReady).toHaveBeenCalledTimes(1);
     expect(handleOtherEventSpy).toHaveBeenCalledTimes(0);
   });
 });

@@ -4,10 +4,9 @@ import {
   PullRequestReadyForReviewEvent,
   WebhookEvent,
 } from "@octokit/webhooks-types";
-import { ChatPostMessageResponse } from "@slack/web-api";
 import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
-import { ReadyHandler } from "./ReadyHandler";
+import { handlePrReady } from "./handlePrReady";
 
 export type PullRequestReadyEvent =
   | PullRequestOpenedEvent
@@ -29,13 +28,14 @@ export class GithubEventHandler {
 
       if (body.action === "opened" || body.action === "ready_for_review") {
         console.log(`Handling ${body.action} PR`);
-        await new ReadyHandler(
-          this.database,
-          this.slackClient,
-          this.organizationId,
-          this.getSlackUserName,
-          this.installationId,
-        ).handleNewPr(prId, body);
+
+        handlePrReady(prId, body, {
+          database: this.database,
+          slackClient: this.slackClient,
+          organizationId: this.organizationId,
+          getSlackUserName: this.getSlackUserName,
+          installationId: this.installationId,
+        });
       } else {
         console.log(`Handling different event, '${body.action}'`);
         await this.handleOtherEvent(body, prId);
@@ -166,26 +166,6 @@ export class GithubEventHandler {
     }
 
     return githubLogin;
-  }
-
-  private async saveThreadTs(message: ChatPostMessageResponse, prId: number) {
-    if (!message.message?.ts) {
-      console.error(
-        "Error saving thread ts: No message.message.ts is undefined",
-      );
-      return;
-    }
-
-    const { error } = await this.database.insertPullRequest({
-      prId: prId.toString(),
-      isDraft: false,
-      threadTs: message.message.ts,
-      organizationId: this.organizationId,
-    });
-
-    if (error) {
-      console.error("Error saving thread ts: ", error);
-    }
   }
 
   private async getThreadTs(prId: number): Promise<string | undefined> {

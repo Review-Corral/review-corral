@@ -5,7 +5,8 @@ import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
 import { Mock, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
-import { ReadyHandler } from "./ReadyHandler";
+import { handlePrReady } from "./handlePrReady";
+import { BasePrEventHandlerProps } from "./shared";
 
 vi.mock("@supabase/supabase-js", () => {
   const SupabaseClient = vi.fn(() => ({
@@ -52,19 +53,19 @@ describe("ReadyHandler", () => {
 
   let database: Db;
   let slackClient: SlackClient;
-  let readyHandler: ReadyHandler;
+  let baseProps: BasePrEventHandlerProps;
 
   beforeEach(() => {
     database = new Db(new SupabaseClient("abc", "123"));
 
     slackClient = new SlackClient("channelId", "slackToken");
-    readyHandler = new ReadyHandler(
+    baseProps = {
       database,
       slackClient,
       organizationId,
-      () => Promise.resolve("slackUserName"),
+      getSlackUserName: () => Promise.resolve("slackUserName"),
       installationId,
-    );
+    };
   });
 
   afterEach(() => {
@@ -76,21 +77,31 @@ describe("ReadyHandler", () => {
       action: "opened",
     });
 
+    const prId = 1234;
+
     const mockedPullRequest = mock<PullRequestOpenedEvent["pull_request"]>({
+      id: prId,
       draft: false,
       requested_reviewers: [],
     });
     mockPullRequestEvent.pull_request = mockedPullRequest;
 
+    const threadTs = "1234";
     const mockedChatResponse = mock<ChatPostMessageResponse>({
-      ts: "1234",
+      ts: threadTs,
     });
     (slackClient.postPrReady as Mock).mockResolvedValueOnce(mockedChatResponse);
 
-    await readyHandler.handleNewPr(1, mockPullRequestEvent);
+    await handlePrReady(prId, mockPullRequestEvent, baseProps);
 
     expect(slackClient.postPrReady).toHaveBeenCalledTimes(1);
     expect(database.insertPullRequest).toHaveBeenCalledTimes(1);
+    expect(database.insertPullRequest).toHaveBeenCalledWith({
+      organizationId,
+      prId: prId.toString(),
+      isDraft: false,
+      threadTs: threadTs,
+    });
   });
 
   it("should NOT call to post a message but insert in database on new draft PR event", async () => {
@@ -107,7 +118,7 @@ describe("ReadyHandler", () => {
     });
     mockPullRequestEvent.pull_request = mockedPullRequest;
 
-    await readyHandler.handleNewPr(prId, mockPullRequestEvent);
+    await handlePrReady(prId, mockPullRequestEvent, baseProps);
 
     expect(slackClient.postPrReady).toHaveBeenCalledTimes(0);
     expect(database.insertPullRequest).toHaveBeenCalledTimes(1);
