@@ -60,6 +60,10 @@ export async function handlePrReady(
         }
       } else {
         // TODO: post ready for review message
+        baseProps.slackClient.postReadyForReview({
+          prId,
+          threadTs,
+        });
       }
     } else {
       console.error(

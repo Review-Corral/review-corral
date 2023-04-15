@@ -135,11 +135,11 @@ export class GithubEventHandler {
               threadTs: threadTs,
             });
           } else if (body.action === "ready_for_review") {
-            await this.slackClient.postReadyForReview(
+            await this.slackClient.postReadyForReview({
               prId,
               threadTs,
-              await this.getSlackUserName(body.sender.login),
-            );
+              slackUsername: await this.getSlackUserName(body.sender.login),
+            });
           } else {
             // Event we're not handling currently
             console.info("Got unsupported event: ", { action: body.action });
