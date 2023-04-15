@@ -11,6 +11,12 @@
       "files": ["**/__tests__/**/*.ts?(x)", "**/?(*.)+(spec|test).ts?(x)"],
       "env": { "jest/globals": true },
       "extends": ["plugin:jest/recommended"]
+    },
+    {
+      "files": ["services/**/*.ts"],
+      "rules": {
+        "no-console": "off"
+      }
     }
   ],
   "rules": {
