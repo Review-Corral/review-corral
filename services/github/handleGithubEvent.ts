@@ -5,6 +5,7 @@ import { NextApiResponse } from "next";
 import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
 import { flattenType } from "services/utils/apiUtils";
+import { getPropertyIfExists } from "services/utils/getPropertyIfExists";
 import { Database } from "types/database-types";
 import { GithubEventHandler } from "./GithubEventHandler";
 
@@ -18,8 +19,8 @@ export const handleGithubEvent = async ({
   res: NextApiResponse;
 }): Promise<void> => {
   console.log("Got Github Event", {
-    action: getPropertyFromWebhookIfExists(githubEvent, "action"),
-    number: getPropertyFromWebhookIfExists(githubEvent, "number"),
+    action: getPropertyIfExists(githubEvent, "action"),
+    number: getPropertyIfExists(githubEvent, "number"),
   });
 
   if ("pull_request" in githubEvent) {
@@ -85,16 +86,4 @@ export const handleGithubEvent = async ({
   }
 
   return res.status(200).send({ data: "OK" });
-};
-
-const getPropertyFromWebhookIfExists = (
-  event: WebhookEvent,
-  property: string,
-): unknown | null => {
-  if (property in event) {
-    // @ts-ignore
-    return event[property];
-  }
-
-  return null;
 };
