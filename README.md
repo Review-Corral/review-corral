@@ -31,7 +31,9 @@ hand in order to load the Github keys in for auth to work.
 ### Auth
 
 Auth works by redirecting from Nrgok to `api/gh/local-auth`. The redirect is necessary
-so we can use one Nrgok domain for all of the tunneling.
+so we can use one Nrgok domain for all of the tunneling. See the
+`[auth.external.github]`
+section in `./supabase/config.toml` for where this is configured.
 
 Make sure the Github App has the permission to read the user's email
 (Account Permission -> email address). If this isn't on it will silently fail (unless
