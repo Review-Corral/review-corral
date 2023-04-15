@@ -270,14 +270,16 @@ export class SlackClient {
     };
   }
 
-  async postReadyForReview(
-    prId: number,
-    threadTs: string,
-    slackUsername: string,
-  ) {
+  async postReadyForReview({
+    prId,
+    threadTs,
+  }: {
+    prId: number;
+    threadTs: string;
+  }) {
     await this.postMessage({
       message: {
-        text: `Pull request marked ready for review by ${slackUsername}`,
+        text: `Pull request marked ready for review`,
       },
       prId,
       threadTs,
