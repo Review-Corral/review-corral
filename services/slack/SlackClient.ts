@@ -40,14 +40,8 @@ export class SlackClient {
     };
     try {
       return await this.client.chat.postMessage(payload);
-
-      // if (!threadTs) {
-      //   await this.saveThreadTs(response, prId);
-      // }
-      // return response;
     } catch (error) {
       console.error("Error posting message: ", error);
-      return undefined;
     }
   }
 

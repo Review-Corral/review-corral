@@ -3,8 +3,9 @@ import { WebhookEvent } from "@octokit/webhooks-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextApiResponse } from "next";
 import { Db } from "services/db";
-import { SlackClient, getSlackWebClient } from "services/slack/SlackClient";
+import { SlackClient } from "services/slack/SlackClient";
 import { flattenType } from "services/utils/apiUtils";
+import { Database } from "types/database-types";
 import { GithubEventHandler } from "./GithubEventHandler";
 
 export const handleGithubEvent = async ({
@@ -12,7 +13,7 @@ export const handleGithubEvent = async ({
   githubEvent,
   res,
 }: {
-  supabaseClient: SupabaseClient;
+  supabaseClient: SupabaseClient<Database>;
   githubEvent: WebhookEvent;
   res: NextApiResponse;
 }): Promise<void> => {
@@ -22,18 +23,11 @@ export const handleGithubEvent = async ({
   });
 
   if ("pull_request" in githubEvent) {
-    const slackWebClient = getSlackWebClient();
-
     const repositoryId: Number = Number(githubEvent.repository.id);
 
     const { data: githubRepository, error } = await supabaseClient
       .from("github_repositories")
-      .select(
-        `
-        id,
-        organization:organizations (*)
-      `,
-      )
+      .select("id, organization:organizations (*)")
       .eq("repository_id", repositoryId)
       .single();
 
