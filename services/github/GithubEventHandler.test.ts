@@ -81,10 +81,13 @@ describe("GithubEventHandler", () => {
   it("should handle a new pull request event", async () => {
     const handleOtherEventSpy = vi.spyOn(handler, "handleOtherEvent");
 
-    const mockPullRequestEvent = mock<PullRequestOpenedEvent>();
-    mockPullRequestEvent.action = "opened";
-    const mockedPullRequest = mock<PullRequestOpenedEvent["pull_request"]>();
-    mockedPullRequest.draft = false;
+    const mockPullRequestEvent = mock<PullRequestOpenedEvent>({
+      action: "opened",
+    });
+
+    const mockedPullRequest = mock<PullRequestOpenedEvent["pull_request"]>({
+      draft: false,
+    });
     mockPullRequestEvent.pull_request = mockedPullRequest;
 
     await handler.handleEvent(mockPullRequestEvent);

@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "next lint",
     "test": "vitest run",
+    "test:watch": "vitest watch",
     "types": "supabase gen types typescript --local > ./types/database-types.d.ts"
   },
   "dependencies": {
