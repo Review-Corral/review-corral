@@ -13,7 +13,8 @@ import {
 import { PullRequestReadyEvent } from "services/github/GithubEventHandler";
 import slackifyMarkdown from "slackify-markdown";
 
-export const getSlackClient = () => new WebClient(process.env.SLACK_BOT_TOKEN);
+export const getSlackWebClient = () =>
+  new WebClient(process.env.SLACK_BOT_TOKEN);
 
 export class SlackClient {
   readonly client: WebClient;

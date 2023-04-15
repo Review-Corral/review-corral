@@ -3,7 +3,7 @@ import { WebhookEvent } from "@octokit/webhooks-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextApiResponse } from "next";
 import { Db } from "services/db";
-import { getSlackClient } from "services/slack/SlackClient";
+import { SlackClient, getSlackWebClient } from "services/slack/SlackClient";
 import { flattenType } from "services/utils/apiUtils";
 import { GithubEventHandler } from "./GithubEventHandler";
 
@@ -22,7 +22,7 @@ export const handleGithubEvent = async ({
   });
 
   if ("pull_request" in githubEvent) {
-    const slackClient = getSlackClient();
+    const slackWebClient = getSlackWebClient();
 
     const repositoryId: Number = Number(githubEvent.repository.id);
 
@@ -70,11 +70,14 @@ export const handleGithubEvent = async ({
       return res.status(404).send({ error: "No organization found" });
     }
 
+    const slackClient = new SlackClient(
+      slackIntegration.channel_id,
+      slackIntegration.access_token,
+    );
+
     const eventHandler = new GithubEventHandler(
       new Db(supabaseClient),
       slackClient,
-      slackIntegration.channel_id,
-      slackIntegration.access_token,
       organization.installation_id,
       organization.id,
     );
