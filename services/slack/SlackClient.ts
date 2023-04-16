@@ -10,7 +10,7 @@ import {
   MessageAttachment,
   WebClient,
 } from "@slack/web-api";
-import { PullRequestReadyEvent } from "services/github/GithubEventHandler";
+import { PullRequestEventOpenedOrReadyForReview } from "services/github/handlePullRequestEvent";
 import slackifyMarkdown from "slackify-markdown";
 
 export const getSlackWebClient = () =>
@@ -28,7 +28,6 @@ export class SlackClient {
     threadTs,
   }: {
     message: Omit<ChatPostMessageArguments, "token" | "channel">;
-    prId: number;
     threadTs: string | undefined;
   }): Promise<ChatPostMessageResponse | undefined> {
     const payload = {
@@ -54,7 +53,7 @@ export class SlackClient {
     await this.postMessage({
       message: {
         text: `Pull request merged by ${slackUsername}`,
-        attachments: [this.getMergedAttachment(false)],
+        attachments: [this.getMergedAttachment()],
       },
       prId,
       threadTs,
@@ -71,7 +70,7 @@ export class SlackClient {
         text: await this.getPrOpenedMessage(body, slackUsername),
         attachments: [
           await this.getPrOpenedBaseAttachment(body, slackUsername),
-          this.getMergedAttachment(true),
+          this.getMergedAttachment(),
         ],
       };
 
@@ -85,7 +84,6 @@ export class SlackClient {
   }
 
   async postConvertedToDraft(
-    prId: number,
     body: PullRequestEvent,
     threadTs: string,
     slackUsername: string,
@@ -95,7 +93,7 @@ export class SlackClient {
         text: `Pull request converted to draft by ${slackUsername}`,
         attachments: [this.getConvertedToDraftAttachment()],
       },
-      prId,
+      prId: body.pull_request.id,
       threadTs,
     });
 
@@ -151,7 +149,6 @@ export class SlackClient {
   }
 
   async postPrClosed(
-    prId: number,
     body: PullRequestClosedEvent,
     threadTs: string,
     slackUsername: string,
@@ -173,7 +170,7 @@ export class SlackClient {
           },
         ],
       },
-      prId,
+      prId: body.pull_request.id,
       threadTs,
     });
   }
@@ -325,8 +322,7 @@ export class SlackClient {
   }
 
   async postPrReady(
-    prId: number,
-    body: PullRequestReadyEvent,
+    body: PullRequestEventOpenedOrReadyForReview,
     slackUsername: string,
   ): Promise<ChatPostMessageResponse | undefined> {
     try {
@@ -337,7 +333,7 @@ export class SlackClient {
             await this.getPrOpenedBaseAttachment(body, slackUsername),
           ],
         },
-        prId,
+        prId: body.pull_request.id,
         threadTs: undefined,
       });
     } catch (error) {

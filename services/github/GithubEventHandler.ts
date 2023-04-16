@@ -1,17 +1,8 @@
 /* eslint-disable no-console */
-import {
-  PullRequestEvent,
-  PullRequestOpenedEvent,
-  PullRequestReadyForReviewEvent,
-  WebhookEvent,
-} from "@octokit/webhooks-types";
+import { PullRequestEvent, WebhookEvent } from "@octokit/webhooks-types";
 import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
 import { handlePrReady } from "./handlePrReady";
-
-export type PullRequestReadyEvent =
-  | PullRequestOpenedEvent
-  | PullRequestReadyForReviewEvent;
 
 // TODO: remove this comment
 export class GithubEventHandler {
@@ -34,7 +25,6 @@ export class GithubEventHandler {
           database: this.database,
           slackClient: this.slackClient,
           organizationId: this.organizationId,
-          getSlackUserName: this.getSlackUserName,
           installationId: this.installationId,
         });
       } else {

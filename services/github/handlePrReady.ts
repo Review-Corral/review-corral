@@ -2,12 +2,12 @@ import axios from "axios";
 import { getInstallationAccessToken } from "services/utils/apiUtils";
 import { InstallationAccessResponse } from "types/github-api-types";
 import { PullRequestReadyEvent } from "./GithubEventHandler";
-import { BasePrEventHandlerProps } from "./shared";
+import { BaseGithubHanderProps } from "./shared";
 
 export async function handlePrReady(
   prId: number,
   body: PullRequestReadyEvent,
-  baseProps: BasePrEventHandlerProps,
+  baseProps: BaseGithubHanderProps,
 ) {
   // If the PR is opened but in draft, just save the PR and don't post it
   if (body.pull_request?.draft === true) {
@@ -79,7 +79,7 @@ async function postCommentsForNewPR(
   accessToken: InstallationAccessResponse,
   prId: number,
   threadTs: string,
-  baseProps: BasePrEventHandlerProps,
+  baseProps: BaseGithubHanderProps,
 ) {
   try {
     const response = await axios.get(body.pull_request.comments_url, {
@@ -108,7 +108,7 @@ async function postCommentsForNewPR(
 async function getThreadTsForNewPr(
   prId: number,
   body: PullRequestReadyEvent,
-  baseProps: BasePrEventHandlerProps,
+  baseProps: BaseGithubHanderProps,
 ): Promise<{
   threadTs?: string;
   wasCreated: boolean;
@@ -145,7 +145,7 @@ async function getThreadTsForNewPr(
 async function createNewThread(
   prId: number,
   body: PullRequestReadyEvent,
-  baseProps: BasePrEventHandlerProps,
+  baseProps: BaseGithubHanderProps,
 ): Promise<string> {
   const response = await baseProps.slackClient.postPrReady(
     prId,
