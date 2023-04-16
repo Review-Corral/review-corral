@@ -5,6 +5,6 @@ export interface BasePrEventHandlerProps {
   database: Db;
   slackClient: SlackClient;
   organizationId: string;
-  getSlackUserName: (githubLogin: string) => Promise<string>;
   installationId: number;
+  getSlackUserName: (githubLogin: string) => Promise<string>;
 }
