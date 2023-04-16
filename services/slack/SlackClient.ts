@@ -45,7 +45,6 @@ export class SlackClient {
   }
 
   async postPrMerged(
-    prId: number,
     body: PullRequestClosedEvent,
     threadTs: string,
     slackUsername: string,
@@ -55,7 +54,6 @@ export class SlackClient {
         text: `Pull request merged by ${slackUsername}`,
         attachments: [this.getMergedAttachment()],
       },
-      prId,
       threadTs,
     });
 
@@ -93,7 +91,6 @@ export class SlackClient {
         text: `Pull request converted to draft by ${slackUsername}`,
         attachments: [this.getConvertedToDraftAttachment()],
       },
-      prId: body.pull_request.id,
       threadTs,
     });
 
@@ -143,7 +140,6 @@ export class SlackClient {
           },
         ],
       },
-      prId,
       threadTs,
     });
   }
@@ -170,7 +166,6 @@ export class SlackClient {
           },
         ],
       },
-      prId: body.pull_request.id,
       threadTs,
     });
   }
@@ -212,7 +207,6 @@ export class SlackClient {
           ],
         ],
       },
-      prId,
       threadTs,
     });
   }
@@ -316,7 +310,6 @@ export class SlackClient {
       message: {
         text: `Pull request marked ready for review`,
       },
-      prId,
       threadTs,
     });
   }
@@ -333,7 +326,6 @@ export class SlackClient {
             await this.getPrOpenedBaseAttachment(body, slackUsername),
           ],
         },
-        prId: body.pull_request.id,
         threadTs: undefined,
       });
     } catch (error) {

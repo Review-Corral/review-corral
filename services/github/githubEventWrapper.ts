@@ -10,17 +10,17 @@ import { Database } from "types/database-types";
 import { BaseGithubHanderProps } from "./shared";
 
 export const githubEventWrapper = async <
-  T extends EmitterWebhookEvent<"pull_request" | "pull_request_review">,
+  T extends EmitterWebhookEvent<"pull_request" | "pull_request_review_comment">,
 >({
   supabaseClient,
   githubEvent,
   res,
-  hander: handleEvent,
+  handler: handleEvent,
 }: {
   supabaseClient: SupabaseClient<Database>;
   githubEvent: T;
   res: NextApiResponse;
-  hander: (event: T, baseProps: BaseGithubHanderProps) => Promise<void>;
+  handler: (event: T, baseProps: BaseGithubHanderProps) => Promise<void>;
 }): Promise<void> => {
   console.log("Got Github Event", {
     action: getPropertyIfExists(githubEvent, "action"),
