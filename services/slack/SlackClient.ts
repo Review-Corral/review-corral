@@ -84,6 +84,45 @@ export class SlackClient {
     }
   }
 
+  async postConvertedToDraft(
+    prId: number,
+    body: PullRequestEvent,
+    threadTs: string,
+    slackUsername: string,
+  ) {
+    await this.postMessage({
+      message: {
+        text: `Pull request converted to draft by ${slackUsername}`,
+        attachments: [this.getConvertedToDraftAttachment()],
+      },
+      prId,
+      threadTs,
+    });
+
+    if (threadTs) {
+      console.debug(
+        `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
+      );
+      const payload: ChatUpdateArguments = {
+        channel: this.channelId,
+        ts: threadTs,
+        token: this.slackToken,
+        text: await this.getPrOpenedMessage(body, slackUsername),
+        attachments: [
+          await this.getPrOpenedBaseAttachment(body, slackUsername),
+          this.getConvertedToDraftAttachment(),
+        ],
+      };
+
+      try {
+        await this.client.chat.update(payload);
+        console.debug("Succesfully updated message with merged status");
+      } catch (error) {
+        console.error("Got error updating thread with merged status: ", error);
+      }
+    }
+  }
+
   async postComment({
     prId,
     commentBody,
@@ -117,7 +156,7 @@ export class SlackClient {
     threadTs: string,
     slackUsername: string,
   ) {
-    await this.postMessage({
+    return await this.postMessage({
       message: {
         attachments: [
           {
@@ -160,7 +199,7 @@ export class SlackClient {
       }
     };
 
-    await this.postMessage({
+    return await this.postMessage({
       message: {
         text: `${slackUsername} ${getReviewText(review)}`,
         attachments: [
@@ -193,7 +232,6 @@ export class SlackClient {
     slackUsername: string,
   ) {
     return {
-      // color: "#106D04",
       blocks: [
         {
           type: "header",
@@ -277,7 +315,7 @@ export class SlackClient {
     prId: number;
     threadTs: string;
   }) {
-    await this.postMessage({
+    return await this.postMessage({
       message: {
         text: `Pull request marked ready for review`,
       },
@@ -307,7 +345,7 @@ export class SlackClient {
     }
   }
 
-  private getMergedAttachment(showMergedText: boolean): MessageAttachment {
+  private getMergedAttachment(): MessageAttachment {
     return {
       color: "#8839FB",
       blocks: [
@@ -316,6 +354,21 @@ export class SlackClient {
           text: {
             type: "mrkdwn",
             text: `:large_purple_circle: Pull request merged`,
+          },
+        },
+      ],
+    };
+  }
+
+  private getConvertedToDraftAttachment(): MessageAttachment {
+    return {
+      color: "#8839FB",
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `:construction: Pull request converted back to draft`,
           },
         },
       ],

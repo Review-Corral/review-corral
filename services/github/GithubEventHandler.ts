@@ -1,5 +1,6 @@
 /* eslint-disable no-console */
 import {
+  PullRequestEvent,
   PullRequestOpenedEvent,
   PullRequestReadyForReviewEvent,
   WebhookEvent,
@@ -38,7 +39,9 @@ export class GithubEventHandler {
         });
       } else {
         console.log(`Handling different event, '${body.action}'`);
-        await this.handleOtherEvent(body, prId);
+        if ("number" in body) {
+          await this.handlePullRequestEvent(body, prId);
+        }
       }
     } else {
       console.log(
@@ -49,7 +52,7 @@ export class GithubEventHandler {
     }
   }
 
-  public async handleOtherEvent(body: WebhookEvent, prId: number) {
+  public async handlePullRequestEvent(body: PullRequestEvent, prId: number) {
     if ("action" in body) {
       const threadTs = await this.getThreadTs(prId);
 
@@ -62,88 +65,63 @@ export class GithubEventHandler {
         return;
       }
 
-      if (body.action === "deleted") {
-        // Ingore, this is probably a comment or review that was deleted
-        return;
-      }
-
-      if (body.action === "submitted" && "review" in body) {
-        if (body.review.state === "commented" && body.review.body === null) {
-          // This means they left a comment on the PR, not an actual review comment
-          return;
-        }
-        await this.slackClient.postReview(
-          body.pull_request.id,
-          body.review,
-          body.sender.login,
-          threadTs,
-          await this.getSlackUserName(body.sender.login),
-        );
-        return;
-      }
-
-      if (
-        (body.action === "opened" || body.action === "created") &&
-        "comment" in body &&
-        body.comment.user.type === "User"
-      ) {
-        await this.slackClient.postComment({
-          prId,
-          commentBody: body.comment.body,
-          commentUrl: body.comment.html_url,
-          threadTs: threadTs,
-          slackUsername: await this.getSlackUserName(body.sender.login),
-        });
-        return;
-      }
-
       if ("pull_request" in body) {
-        if (body.action === "closed") {
-          if (body.pull_request.merged) {
-            await this.slackClient.postPrMerged(
+        switch (body.action) {
+          case "converted_to_draft":
+            return await this.slackClient.postConvertedToDraft(
               prId,
               body,
               threadTs,
               await this.getSlackUserName(body.sender.login),
             );
-          } else {
-            await this.slackClient.postPrClosed(
-              prId,
-              body,
-              threadTs,
-              await this.getSlackUserName(body.sender.login),
-            );
-          }
-        } else {
-          // TODO: Improve this block
+          case "closed":
+            if (body.pull_request.merged) {
+              return await this.slackClient.postPrMerged(
+                prId,
+                body,
+                threadTs,
+                await this.getSlackUserName(body.sender.login),
+              );
+            } else {
+              return await this.slackClient.postPrClosed(
+                prId,
+                body,
+                threadTs,
+                await this.getSlackUserName(body.sender.login),
+              );
+            }
+          case "review_requested":
+            if ("requested_reviewer" in body) {
+              return await this.slackClient.postMessage({
+                message: {
+                  text: `Review request for ${await this.getSlackUserName(
+                    body.requested_reviewer.login,
+                  )}`,
+                },
+                prId,
+                threadTs: threadTs,
+              });
+            }
 
-          if (body.action === "synchronize") {
-            return;
-          }
+          default:
+          // nothing
+        }
+      }
 
-          if (
-            body.action === "review_requested" &&
-            "requested_reviewer" in body
-          ) {
-            await this.slackClient.postMessage({
-              message: {
-                text: `Review request for ${await this.getSlackUserName(
-                  body.requested_reviewer.login,
-                )}`,
-              },
-              prId,
-              threadTs: threadTs,
-            });
-          } else if (body.action === "ready_for_review") {
-            await this.slackClient.postReadyForReview({
-              prId,
-              threadTs,
-              slackUsername: await this.getSlackUserName(body.sender.login),
-            });
-          } else {
-            // Event we're not handling currently
-            console.info("Got unsupported event: ", { action: body.action });
-          }
+      // Handle comments
+      if ("comment" in body) {
+        if (
+          ["created", "opened"].includes(body.action) &&
+          body.comment.user.type === "User"
+        ) {
+          await this.slackClient.postComment({
+            prId,
+            commentBody: body.comment.body,
+            commentUrl: body.comment.html_url,
+            threadTs: threadTs,
+            slackUsername: await this.getSlackUserName(body.sender.login),
+          });
+          return;
         }
       }
     }

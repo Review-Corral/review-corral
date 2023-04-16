@@ -1,5 +1,5 @@
 import { Organization } from "@/components/organization/shared";
-import { WebhookEvent } from "@octokit/webhooks-types";
+import { PullRequestEvent, WebhookEvent } from "@octokit/webhooks-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { NextApiResponse } from "next";
 import { Db } from "services/db";
@@ -8,6 +8,9 @@ import { flattenType } from "services/utils/apiUtils";
 import { getPropertyIfExists } from "services/utils/getPropertyIfExists";
 import { Database } from "types/database-types";
 import { GithubEventHandler } from "./GithubEventHandler";
+
+const isPullRequestEvent = (event: WebhookEvent): event is PullRequestEvent =>
+  "pull_request" in event && "number" in event;
 
 export const handleGithubEvent = async ({
   supabaseClient,
@@ -23,7 +26,7 @@ export const handleGithubEvent = async ({
     number: getPropertyIfExists(githubEvent, "number"),
   });
 
-  if ("pull_request" in githubEvent) {
+  if (isPullRequestEvent(githubEvent)) {
     const repositoryId: Number = Number(githubEvent.repository.id);
 
     const { data: githubRepository, error } = await supabaseClient
