@@ -10,7 +10,7 @@ import { getInstallationAccessToken } from "services/utils/apiUtils";
 import { Mock, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
 import { handlePrReady } from "./handlePrReady";
-import { BasePrEventHandlerProps } from "./shared";
+import { BaseGithubHanderProps } from "./shared";
 
 vi.mock("@supabase/supabase-js", () => {
   const SupabaseClient = vi.fn(() => ({
@@ -58,7 +58,7 @@ describe("ReadyHandler", () => {
 
   let database: Db;
   let slackClient: SlackClient;
-  let baseProps: BasePrEventHandlerProps;
+  let baseProps: BaseGithubHanderProps;
 
   beforeEach(() => {
     database = new Db(new SupabaseClient("abc", "123"));
