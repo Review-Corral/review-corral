@@ -1,11 +1,12 @@
 /* eslint-disable no-console */
 import { createEventHandler } from "@octokit/webhooks";
-import { WebhookEvent } from "@octokit/webhooks-types";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { NextApiRequest, NextApiResponse } from "next";
 import { AxiomAPIRequest, withAxiom } from "next-axiom/dist/withAxiom";
-import { githubEventWrapper } from "services/github/handleGithubEvent";
+import { githubEventWrapper } from "services/github/githubEventWrapper";
+import { handlePullRequestEvent } from "services/github/handlePrEvent";
+import { handlePullRequestCommentEvent } from "services/github/handlePrReviewCommentEvent";
 import withApiSupabase from "../../../../services/utils/withApiSupabase";
 
 const handler = async (
@@ -22,16 +23,25 @@ const handler = async (
     return res.status(403).send({ error: "Invalid signature" });
   }
 
-  const eventHandler = createEventHandler({});
-  eventHandler.on("pull_request", (event) => {
-    event.payload;
-  });
-
   console.log("Event has valid signature");
 
-  const body = req.body as WebhookEvent;
-
-  githubEventWrapper({ supabaseClient, githubEvent: body, res });
+  const eventHandler = createEventHandler({});
+  eventHandler.on("pull_request", (event) => {
+    githubEventWrapper({
+      supabaseClient,
+      githubEvent: event,
+      res,
+      handler: handlePullRequestEvent,
+    });
+  });
+  eventHandler.on("pull_request_review_comment", (event) => {
+    githubEventWrapper({
+      supabaseClient,
+      githubEvent: event,
+      res,
+      handler: handlePullRequestCommentEvent,
+    });
+  });
 };
 
 const checkEventWrapper = async (req: NextApiRequest) => {

@@ -1,12 +1,13 @@
 import { EmitterWebhookEvent } from "@octokit/webhooks";
 import {
+  PullRequestConvertedToDraftEvent,
   PullRequestOpenedEvent,
   PullRequestReadyForReviewEvent,
 } from "@octokit/webhooks-types";
 import axios from "axios";
 import { getInstallationAccessToken } from "services/utils/apiUtils";
 import { InstallationAccessResponse } from "types/github-api-types";
-import { BaseGithubHanderProps, getSlackUserName } from "./shared";
+import { BaseGithubHanderProps, getSlackUserName, getThreadTs } from "./shared";
 
 type PrEventType = EmitterWebhookEvent<"pull_request">;
 
@@ -17,10 +18,72 @@ export type PullRequestEventOpenedOrReadyForReview =
 export const handlePullRequestEvent = async (
   { payload }: PrEventType,
   props: BaseGithubHanderProps,
-) => {
+): Promise<void> => {
   if (payload.action === "opened" || payload.action === "ready_for_review") {
-    handleNewPr(payload, props);
+    return handleNewPr(payload, props);
+  } else {
+    const threadTs = await getThreadTs(payload.pull_request.id, props.database);
+
+    if (!threadTs) {
+      // No thread found, so log and return
+      console.debug(`Got non-created event and didn't find a threadTS`, {
+        action: payload.action,
+        prId: payload.pull_request.id,
+      });
+      return;
+    }
+
+    switch (payload.action) {
+      case "converted_to_draft":
+        return await handleConvertedToDraft(threadTs, payload, props);
+      case "closed":
+        if (payload.pull_request.merged) {
+          await props.slackClient.postPrMerged(
+            payload,
+            threadTs,
+            await getSlackUserName(payload.sender.login, props),
+          );
+          return;
+        } else {
+          await props.slackClient.postPrClosed(
+            payload,
+            threadTs,
+            await getSlackUserName(payload.sender.login, props),
+          );
+          return;
+        }
+      case "review_requested":
+        if ("requested_reviewer" in payload) {
+          await props.slackClient.postMessage({
+            message: {
+              text: `Review request for ${await getSlackUserName(
+                payload.requested_reviewer.login,
+                props,
+              )}`,
+            },
+            threadTs: threadTs,
+          });
+        }
+        return;
+      default:
+        console.debug(`Got unhandled pull_request event`, {
+          action: payload.action,
+          prId: payload.pull_request.id,
+        });
+    }
   }
+};
+
+const handleConvertedToDraft = async (
+  threadTs: string,
+  event: PullRequestConvertedToDraftEvent,
+  props: BaseGithubHanderProps,
+) => {
+  await props.slackClient.postConvertedToDraft(
+    event,
+    threadTs,
+    await getSlackUserName(event.sender.login, props),
+  );
 };
 
 const handleNewPr = async (
@@ -87,6 +150,11 @@ const handleNewPr = async (
     }
   }
 
+  /**
+   * Only to be used for 'new' PRs where it will try and find the thread_ts
+   * in the database if one exists (this will happen if it started out as a draft), or
+   * create a new one if it doesn't exist.
+   */
   async function getThreadTsForNewPr(
     body: PullRequestEventOpenedOrReadyForReview,
     baseProps: BaseGithubHanderProps,

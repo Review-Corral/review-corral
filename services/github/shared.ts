@@ -29,3 +29,20 @@ export async function getSlackUserName(
 
   return githubLogin;
 }
+
+async function getThreadTs(
+  prId: number,
+  database: Db,
+): Promise<string | undefined> {
+  const { data, error } = await database.getThreadTs({
+    prId: prId.toString(),
+  });
+
+  if (error) {
+    console.debug("Error getting threadTs: ", error);
+  }
+
+  console.debug("Found threadTS: ", { threadTs: data?.thread_ts });
+
+  return data?.thread_ts ?? undefined;
+}
