@@ -30,7 +30,7 @@ export async function getSlackUserName(
   return githubLogin;
 }
 
-async function getThreadTs(
+export async function getThreadTs(
   prId: number,
   database: Db,
 ): Promise<string | undefined> {

@@ -10,7 +10,7 @@ import {
   MessageAttachment,
   WebClient,
 } from "@slack/web-api";
-import { PullRequestEventOpenedOrReadyForReview } from "services/github/handlePullRequestEvent";
+import { PullRequestEventOpenedOrReadyForReview } from "services/github/handlePrEvent";
 import slackifyMarkdown from "slackify-markdown";
 
 export const getSlackWebClient = () =>
@@ -145,6 +145,32 @@ export class SlackClient {
   }
 
   async postPrClosed(
+    body: PullRequestClosedEvent,
+    threadTs: string,
+    slackUsername: string,
+  ) {
+    return await this.postMessage({
+      message: {
+        attachments: [
+          {
+            color: "#FB0909",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `Pull request closed by ${slackUsername}`,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      threadTs,
+    });
+  }
+
+  async postReviewRequested(
     body: PullRequestClosedEvent,
     threadTs: string,
     slackUsername: string,
