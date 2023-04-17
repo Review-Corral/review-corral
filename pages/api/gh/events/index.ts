@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 import { flattenParam } from "@/components/utils/flattenParam";
-import { createEventHandler } from "@octokit/webhooks";
+import { EmitterWebhookEvent } from "@octokit/webhooks";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -26,26 +26,10 @@ const handler = async (
 
   console.log("Event has valid signature");
 
-  const eventHandler = createEventHandler({});
-  eventHandler.on("pull_request", (event) => {
-    githubEventWrapper({
-      supabaseClient,
-      githubEvent: event,
-      res,
-      handler: handlePullRequestEvent,
-    });
-  });
-  eventHandler.on("pull_request_review_comment", (event) => {
-    githubEventWrapper({
-      supabaseClient,
-      githubEvent: event,
-      res,
-      handler: handlePullRequestCommentEvent,
-    });
-  });
-
   const githubDelivery = flattenParam(req.headers["x-github-delivery"]);
-  const githubEventName = flattenParam(req.headers["x-github-event"]);
+  const githubEventName = flattenParam(
+    req.headers["x-github-event"],
+  ) as EmitterWebhookEvent["name"];
 
   if (!githubDelivery || !githubEventName) {
     console.warn(
@@ -59,16 +43,41 @@ const handler = async (
     return res.status(400).send({ error: "Missing headers" });
   }
 
+  const emitterEvent: EmitterWebhookEvent = {
+    id: githubDelivery,
+    // Typing seems broken here?
+    name: githubEventName as any,
+    payload: req.body,
+  };
+
   try {
-    eventHandler.receive({
-      id: githubDelivery,
-      // Typing seems broken here?
-      name: githubEventName as any,
-      payload: req.body,
-    });
+    await receiveEvent(emitterEvent, supabaseClient, res);
+    return res.status(200).send({ success: true });
   } catch (error) {
     console.error("Error handling event", error);
     return res.status(500).send({ error: "Error handling event" });
+  }
+};
+
+const receiveEvent = async (
+  emitterEvent: EmitterWebhookEvent,
+  supabaseClient: SupabaseClient,
+  res: NextApiResponse,
+) => {
+  if (emitterEvent.name === "pull_request") {
+    await githubEventWrapper({
+      supabaseClient,
+      githubEvent: emitterEvent,
+      res,
+      handler: handlePullRequestEvent,
+    });
+  } else if (emitterEvent.name === "pull_request_review_comment") {
+    await githubEventWrapper({
+      supabaseClient,
+      githubEvent: emitterEvent,
+      res,
+      handler: handlePullRequestCommentEvent,
+    });
   }
 };
 
