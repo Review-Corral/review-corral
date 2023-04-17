@@ -113,8 +113,12 @@ const handleNewPr = async (
         // This then means that it was posted before and we just need to post
         // that it's now ready for review
         await props.slackClient.postReadyForReview({
-          prId: payload.pull_request.id,
+          body: payload,
           threadTs,
+          slackUsername: await getSlackUserName(
+            payload.pull_request.user.login,
+            props,
+          ),
         });
       }
     } else {

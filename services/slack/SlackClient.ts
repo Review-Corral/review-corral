@@ -94,29 +94,93 @@ export class SlackClient {
       threadTs,
     });
 
-    if (threadTs) {
-      console.debug(
-        `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
-      );
-      const payload: ChatUpdateArguments = {
-        channel: this.channelId,
-        ts: threadTs,
-        token: this.slackToken,
-        text: await this.getPrOpenedMessage(body, slackUsername),
-        attachments: [
-          await this.getPrOpenedBaseAttachment(body, slackUsername),
-          this.getConvertedToDraftAttachment(),
-        ],
-      };
+    console.debug(
+      `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
+    );
 
-      try {
-        await this.client.chat.update(payload);
-        console.debug("Succesfully updated message with merged status");
-      } catch (error) {
-        console.error("Got error updating thread with merged status: ", error);
-      }
+    const defaultPayload = await this.getBaseChatUpdateArguments({
+      body,
+      threadTs,
+      slackUsername,
+    });
+
+    try {
+      await this.client.chat.update({
+        ...defaultPayload,
+        attachments: [
+          ...(defaultPayload.attachments || []),
+          this.getConvertedToDraftAttachment("Pull request marked as draft"),
+        ],
+      });
+      console.debug("Succesfully updated message with merged status");
+    } catch (error) {
+      console.error("Got error updating thread with merged status: ", error);
     }
   }
+
+  async postReadyForReview({
+    body,
+    threadTs,
+    slackUsername,
+  }: {
+    body: PullRequestEvent;
+    threadTs: string;
+    slackUsername: string;
+  }) {
+    await this.postMessage({
+      message: {
+        text: `Draft status removed`,
+        attachments: [
+          {
+            color: "#D9CD27",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: `:large_green_circle: pull request is now ready for review`,
+                },
+              },
+            ],
+          },
+        ],
+      },
+      threadTs,
+    });
+
+    console.debug(
+      `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
+    );
+
+    const defaultPayload = await this.getBaseChatUpdateArguments({
+      body,
+      threadTs,
+      slackUsername,
+    });
+
+    try {
+      await this.client.chat.update(defaultPayload);
+      console.debug("Succesfully updated message with ready for review status");
+    } catch (error) {
+      console.error("Got error updating thread with merged status: ", error);
+    }
+  }
+
+  getBaseChatUpdateArguments = async ({
+    body,
+    threadTs,
+    slackUsername,
+  }: {
+    body: PullRequestEvent;
+    threadTs: string;
+    slackUsername: string;
+  }): Promise<ChatUpdateArguments> => ({
+    channel: this.channelId,
+    ts: threadTs,
+    token: this.slackToken,
+    text: await this.getPrOpenedMessage(body, slackUsername),
+    attachments: [await this.getPrOpenedBaseAttachment(body, slackUsername)],
+  });
 
   async postComment({
     prId,
@@ -325,21 +389,6 @@ export class SlackClient {
     };
   }
 
-  async postReadyForReview({
-    prId,
-    threadTs,
-  }: {
-    prId: number;
-    threadTs: string;
-  }) {
-    return await this.postMessage({
-      message: {
-        text: `Pull request marked ready for review`,
-      },
-      threadTs,
-    });
-  }
-
   async postPrReady(
     body: PullRequestEventOpenedOrReadyForReview,
     slackUsername: string,
@@ -374,7 +423,9 @@ export class SlackClient {
     };
   }
 
-  private getConvertedToDraftAttachment(): MessageAttachment {
+  private getConvertedToDraftAttachment(
+    text: string = "Pull request converted back to draft",
+  ): MessageAttachment {
     return {
       color: "#D9CD27",
       blocks: [
@@ -382,7 +433,7 @@ export class SlackClient {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `:construction: Pull request converted back to draft`,
+            text: `:construction: ${text}`,
           },
         },
       ],
