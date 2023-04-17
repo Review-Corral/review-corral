@@ -88,7 +88,7 @@ export class SlackClient {
   ) {
     await this.postMessage({
       message: {
-        text: `Pull request converted to draft by ${slackUsername}`,
+        text: `Pull request converted to draft`,
         attachments: [this.getConvertedToDraftAttachment()],
       },
       threadTs,
@@ -132,13 +132,13 @@ export class SlackClient {
         text: `Draft status removed`,
         attachments: [
           {
-            color: "#D9CD27",
+            color: "#02A101",
             blocks: [
               {
                 type: "section",
                 text: {
                   type: "mrkdwn",
-                  text: `:large_green_circle: pull request is now ready for review`,
+                  text: `:large_green_circle: Pull request is now ready for review`,
                 },
               },
             ],
