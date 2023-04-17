@@ -5,7 +5,6 @@ import { NextApiResponse } from "next";
 import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
 import { flattenType } from "services/utils/apiUtils";
-import { getPropertyIfExists } from "services/utils/getPropertyIfExists";
 import { Database } from "types/database-types";
 import { BaseGithubHanderProps } from "./shared";
 
@@ -26,8 +25,8 @@ export const githubEventWrapper = async <
   ) => Promise<void>;
 }): Promise<void> => {
   console.log("Got Github Event", {
-    action: getPropertyIfExists(githubEvent.payload, "action"),
-    number: getPropertyIfExists(githubEvent.payload, "number"),
+    action: githubEvent.payload.action,
+    id: githubEvent.payload.pull_request.id,
   });
 
   const repositoryId: Number = Number(githubEvent.payload.repository.id);
