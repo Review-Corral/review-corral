@@ -42,6 +42,13 @@ const handler = async (
       handler: handlePullRequestCommentEvent,
     });
   });
+
+  try {
+    eventHandler.receive(req.body);
+  } catch (error) {
+    console.error("Error handling event", error);
+    return res.status(500).send({ error: "Error handling event" });
+  }
 };
 
 const checkEventWrapper = async (req: NextApiRequest) => {
