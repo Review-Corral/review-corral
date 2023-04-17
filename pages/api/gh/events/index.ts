@@ -52,7 +52,6 @@ const handler = async (
 
   try {
     await receiveEvent(emitterEvent, supabaseClient, res);
-    return res.status(200).send({ success: true });
   } catch (error) {
     console.error("Error handling event", error);
     return res.status(500).send({ error: "Error handling event" });

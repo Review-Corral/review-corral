@@ -77,8 +77,7 @@ export const githubEventWrapper = async <
   );
 
   try {
-    // await eventHandler.handleEvent(githubEvent);
-    handleEvent(githubEvent["payload"], {
+    await handleEvent(githubEvent["payload"], {
       database: new Db(supabaseClient),
       slackClient,
       organizationId: organization.id,

@@ -17,8 +17,9 @@ export const handlePullRequestEvent = async (
   payload: PullRequestEvent,
   props: BaseGithubHanderProps,
 ): Promise<void> => {
+  console.log("Hanlding PR event with action: ", payload.action);
   if (payload.action === "opened" || payload.action === "ready_for_review") {
-    return handleNewPr(payload, props);
+    return await handleNewPr(payload, props);
   } else {
     const threadTs = await getThreadTs(payload.pull_request.id, props.database);
 
@@ -91,7 +92,7 @@ const handleNewPr = async (
   // If the PR is opened or ready for review but in draft, save the PR in the database
   // but don't post it
   if (payload.pull_request.draft) {
-    props.database.insertPullRequest({
+    await props.database.insertPullRequest({
       prId: payload.pull_request.id.toString(),
       isDraft: true,
       threadTs: null,
@@ -99,13 +100,16 @@ const handleNewPr = async (
     });
   } else {
     const { threadTs, wasCreated } = await getThreadTsForNewPr(payload, props);
+
+    console.log("Got threadTs: ", threadTs, " and wasCreated: ", wasCreated);
+
     if (threadTs) {
       if (wasCreated) {
-        postAllCommentsForNewPrThread(threadTs, payload, props);
+        await postAllCommentsForNewPrThread(threadTs, payload, props);
       } else {
         // This then means that it was posted before and we just need to post
         // that it's now ready for review
-        props.slackClient.postReadyForReview({
+        await props.slackClient.postReadyForReview({
           prId: payload.pull_request.id,
           threadTs,
         });
@@ -199,7 +203,7 @@ const handleNewPr = async (
     );
 
     if (response && response.ts) {
-      baseProps.database.insertPullRequest({
+      await baseProps.database.insertPullRequest({
         prId: body.pull_request.id.toString(),
         isDraft: false,
         threadTs: response.ts,
@@ -230,7 +234,7 @@ const handleNewPr = async (
 
       for (const comment of response.data) {
         if (comment.user.type === "User") {
-          baseProps.slackClient.postComment({
+          await baseProps.slackClient.postComment({
             prId: body.pull_request.id,
             commentBody: comment.body,
             commentUrl: comment.url,
