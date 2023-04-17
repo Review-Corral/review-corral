@@ -1,4 +1,5 @@
 /* eslint-disable no-console */
+import { flattenParam } from "@/components/utils/flattenParam";
 import { createEventHandler } from "@octokit/webhooks";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
@@ -43,8 +44,28 @@ const handler = async (
     });
   });
 
+  const githubDelivery = flattenParam(req.headers["x-github-delivery"]);
+  const githubEventName = flattenParam(req.headers["x-github-event"]);
+
+  if (!githubDelivery || !githubEventName) {
+    console.warn(
+      "Got Github event with valid signature but missing headers: ",
+      {
+        githubDelivery,
+        githubEventName,
+      },
+    );
+
+    return res.status(400).send({ error: "Missing headers" });
+  }
+
   try {
-    eventHandler.receive(req.body);
+    eventHandler.receive({
+      id: githubDelivery,
+      // Typing seems broken here?
+      name: githubEventName as any,
+      payload: req.body,
+    });
   } catch (error) {
     console.error("Error handling event", error);
     return res.status(500).send({ error: "Error handling event" });
