@@ -376,7 +376,7 @@ export class SlackClient {
 
   private getConvertedToDraftAttachment(): MessageAttachment {
     return {
-      color: "#8839FB",
+      color: "#D9CD27",
       blocks: [
         {
           type: "section",
