@@ -89,9 +89,11 @@ const handleNewPr = async (
   payload: PullRequestEventOpenedOrReadyForReview,
   props: BaseGithubHanderProps,
 ) => {
+  console.log("Handling new PR");
   // If the PR is opened or ready for review but in draft, save the PR in the database
   // but don't post it
   if (payload.pull_request.draft) {
+    console.log("Handling draft PR");
     await props.database.insertPullRequest({
       prId: payload.pull_request.id.toString(),
       isDraft: true,
@@ -99,6 +101,7 @@ const handleNewPr = async (
       organizationId: props.organizationId,
     });
   } else {
+    console.log("Pull request is not draft");
     const { threadTs, wasCreated } = await getThreadTsForNewPr(payload, props);
 
     console.log("Got threadTs: ", threadTs, " and wasCreated: ", wasCreated);
@@ -166,11 +169,13 @@ const handleNewPr = async (
   }> {
     // If the PR was opened
     if (body.action === "opened") {
+      console.log("PR was opened, creating new thread...");
       return {
         threadTs: await createNewThread(body, baseProps),
         wasCreated: true,
       };
     } else {
+      console.log("PR was not opened, trying to find existing thread...");
       // This should trigger for 'ready_for_review' events
       const existingThreadTs = (
         await baseProps.database.getThreadTs({
@@ -180,11 +185,13 @@ const handleNewPr = async (
 
       // If we still couldn't find a thread, then post a new one.
       if (!existingThreadTs) {
+        console.log("Couldn't find existing thread, creating new thread...");
         return {
           threadTs: await createNewThread(body, baseProps),
           wasCreated: true,
         };
       } else {
+        console.log("Found existing thread");
         return {
           threadTs: existingThreadTs,
           wasCreated: false,
