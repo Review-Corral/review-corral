@@ -197,25 +197,34 @@ const handleNewPr = async (
     body: PullRequestEventOpenedOrReadyForReview,
     baseProps: BaseGithubHanderProps,
   ): Promise<string> {
-    const response = await baseProps.slackClient.postPrReady(
-      body,
-      await getSlackUserName(body.sender.login, baseProps),
-    );
-
-    if (response && response.ts) {
-      await baseProps.database.insertPullRequest({
-        prId: body.pull_request.id.toString(),
-        isDraft: false,
-        threadTs: response.ts,
-        organizationId: baseProps.organizationId,
-      });
-
-      return response.ts;
-    } else {
-      throw new Error(
-        `Tried to create new thread for PR Id ${body.pull_request.id.toString()} but didn't get a response ts: ` +
-          `\nReceieved Response: ${JSON.stringify(response)}`,
+    try {
+      const response = await baseProps.slackClient.postPrReady(
+        body,
+        await getSlackUserName(body.sender.login, baseProps),
       );
+
+      if (response && response.ts) {
+        console.debug("About to insert PullRequest into database", {
+          prId: body.pull_request.id,
+          organizationId: baseProps.organizationId,
+          threadTs: response.ts,
+        });
+        await baseProps.database.insertPullRequest({
+          prId: body.pull_request.id.toString(),
+          isDraft: false,
+          threadTs: response.ts,
+          organizationId: baseProps.organizationId,
+        });
+
+        return response.ts;
+      } else {
+        throw new Error(
+          `Tried to create new thread for PR Id ${body.pull_request.id.toString()} but didn't get a response ts: ` +
+            `\nReceieved Response: ${JSON.stringify(response)}`,
+        );
+      }
+    } catch (error) {
+      throw new Error("Error creating new thread for PR: " + error);
     }
   }
 
