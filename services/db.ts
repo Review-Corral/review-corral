@@ -40,11 +40,17 @@ export class Db {
     threadTs: string | null;
     isDraft: boolean;
     prId: string;
-  } & BaseProps) =>
-    await this.client.from("pull_requests").insert({
-      pr_id: prId.toString(),
-      is_draft: props.isDraft,
-      thread_ts: threadTs,
-      organization_id: props.organizationId,
-    });
+  } & BaseProps) => {
+    const response = await this.client
+      .from("pull_requests")
+      .insert({
+        pr_id: prId.toString(),
+        is_draft: props.isDraft,
+        thread_ts: threadTs,
+        organization_id: props.organizationId,
+      })
+      .select();
+
+    console.debug("Response from insertPullRequest: ", response);
+  };
 }
