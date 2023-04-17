@@ -1,10 +1,8 @@
-import { EmitterWebhookEvent } from "@octokit/webhooks";
+import { PullRequestReviewCommentEvent } from "@octokit/webhooks-types";
 import { BaseGithubHanderProps, getSlackUserName, getThreadTs } from "./shared";
 
-type PrCommentEventType = EmitterWebhookEvent<"pull_request_review_comment">;
-
 export const handlePullRequestCommentEvent = async (
-  { payload }: PrCommentEventType,
+  payload: PullRequestReviewCommentEvent,
   props: BaseGithubHanderProps,
 ) => {
   if (payload.action === "created" && payload.comment.user.type === "User") {
