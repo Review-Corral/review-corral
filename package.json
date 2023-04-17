@@ -10,6 +10,7 @@
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "test:watch": "vitest watch",
+    "checks": "yarn typecheck && yarn lint && yarn test",
     "types": "supabase gen types typescript --local > ./types/database-types.d.ts"
   },
   "dependencies": {

@@ -20,7 +20,10 @@ export const githubEventWrapper = async <
   supabaseClient: SupabaseClient<Database>;
   githubEvent: T;
   res: NextApiResponse;
-  handler: (event: T, baseProps: BaseGithubHanderProps) => Promise<void>;
+  handler: (
+    event: T["payload"],
+    baseProps: BaseGithubHanderProps,
+  ) => Promise<void>;
 }): Promise<void> => {
   console.log("Got Github Event", {
     action: getPropertyIfExists(githubEvent, "action"),
@@ -75,7 +78,7 @@ export const githubEventWrapper = async <
 
   try {
     // await eventHandler.handleEvent(githubEvent);
-    handleEvent(githubEvent, {
+    handleEvent(githubEvent["payload"], {
       database: new Db(supabaseClient),
       slackClient,
       organizationId: organization.id,
