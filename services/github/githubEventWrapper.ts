@@ -26,8 +26,8 @@ export const githubEventWrapper = async <
   ) => Promise<void>;
 }): Promise<void> => {
   console.log("Got Github Event", {
-    action: getPropertyIfExists(githubEvent, "action"),
-    number: getPropertyIfExists(githubEvent, "number"),
+    action: getPropertyIfExists(githubEvent.payload, "action"),
+    number: getPropertyIfExists(githubEvent.payload, "number"),
   });
 
   const repositoryId: Number = Number(githubEvent.payload.repository.id);
