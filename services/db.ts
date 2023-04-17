@@ -1,4 +1,4 @@
-import { SupabaseClient } from "@supabase/supabase-js";
+import { PostgrestSingleResponse, SupabaseClient } from "@supabase/supabase-js";
 import { Database } from "types/database-types";
 
 interface BaseProps {
@@ -20,7 +20,11 @@ export class Db {
     organizationId,
   }: {
     githubLogin: string;
-  } & BaseProps) =>
+  } & BaseProps): Promise<
+    PostgrestSingleResponse<{
+      slack_user_id: string;
+    }>
+  > =>
     await this.client
       .from("username_mappings")
       .select("slack_user_id")

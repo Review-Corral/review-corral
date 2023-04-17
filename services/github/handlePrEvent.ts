@@ -1,6 +1,6 @@
-import { EmitterWebhookEvent } from "@octokit/webhooks";
 import {
   PullRequestConvertedToDraftEvent,
+  PullRequestEvent,
   PullRequestOpenedEvent,
   PullRequestReadyForReviewEvent,
 } from "@octokit/webhooks-types";
@@ -9,14 +9,12 @@ import { getInstallationAccessToken } from "services/utils/apiUtils";
 import { InstallationAccessResponse } from "types/github-api-types";
 import { BaseGithubHanderProps, getSlackUserName, getThreadTs } from "./shared";
 
-type PrEventType = EmitterWebhookEvent<"pull_request">;
-
 export type PullRequestEventOpenedOrReadyForReview =
   | PullRequestOpenedEvent
   | PullRequestReadyForReviewEvent;
 
 export const handlePullRequestEvent = async (
-  { payload }: PrEventType,
+  payload: PullRequestEvent,
   props: BaseGithubHanderProps,
 ): Promise<void> => {
   if (payload.action === "opened" || payload.action === "ready_for_review") {
