@@ -78,7 +78,7 @@ const receiveEvent = async (
       handler: handlePullRequestCommentEvent,
     });
   } else {
-    console.debug(`Got unhandled event name of ${emitterEvent}`);
+    console.debug(`Got unhandled event name of ${emitterEvent.name}`);
     return res.status(200).send({ ok: true });
   }
 };
