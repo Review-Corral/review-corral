@@ -9,7 +9,9 @@ import { Database } from "types/database-types";
 import { BaseGithubHanderProps } from "./shared";
 
 export const githubEventWrapper = async <
-  T extends EmitterWebhookEvent<"pull_request" | "pull_request_review_comment">,
+  T extends EmitterWebhookEvent<
+    "pull_request" | "pull_request_review_comment" | "pull_request_review"
+  >,
 >({
   supabaseClient,
   githubEvent,

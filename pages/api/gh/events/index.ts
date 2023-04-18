@@ -8,6 +8,7 @@ import { AxiomAPIRequest, withAxiom } from "next-axiom/dist/withAxiom";
 import { githubEventWrapper } from "services/github/githubEventWrapper";
 import { handlePullRequestEvent } from "services/github/handlePrEvent";
 import { handlePullRequestCommentEvent } from "services/github/handlePrReviewCommentEvent";
+import { handlePullRequestReviewEvent } from "services/github/handlePrReviewEvent";
 import withApiSupabase from "../../../../services/utils/withApiSupabase";
 
 const handler = async (
@@ -76,6 +77,13 @@ const receiveEvent = async (
       githubEvent: emitterEvent,
       res,
       handler: handlePullRequestCommentEvent,
+    });
+  } else if (emitterEvent.name === "pull_request_review") {
+    await githubEventWrapper({
+      supabaseClient,
+      githubEvent: emitterEvent,
+      res,
+      handler: handlePullRequestReviewEvent,
     });
   } else {
     console.debug(`Got unhandled event name of ${emitterEvent.name}`);
