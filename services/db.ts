@@ -11,8 +11,8 @@ export class Db {
   getThreadTs = async ({ prId }: { prId: string }) =>
     await this.client
       .from("pull_requests")
-      .select("thread_ts")
-      .eq("pr_id", prId.toString())
+      .select("pr_id, threadTs")
+      .eq("pr_id", prId)
       .single();
 
   getSlackUserIdFromGithubLogin = async ({
