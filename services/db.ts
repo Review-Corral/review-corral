@@ -11,7 +11,7 @@ export class Db {
   getThreadTs = async ({ prId }: { prId: string }) =>
     await this.client
       .from("pull_requests")
-      .select("pr_id, threadTs")
+      .select("pr_id, thread_ts")
       .eq("pr_id", prId)
       .single();
 
