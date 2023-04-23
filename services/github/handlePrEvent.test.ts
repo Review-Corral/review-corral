@@ -212,10 +212,9 @@ describe("handlePrEvent", () => {
     expect(getInstallationAccessToken).toHaveBeenCalledTimes(1);
     expect(slackClient.postPrReady).toHaveBeenCalledTimes(1);
     expect(slackClient.postReadyForReview).toHaveBeenCalledTimes(0);
-    // expect(slackClient.postReadyForReview).toHaveBeenLastCalledWith({
-    //   body: mockPullRequestEvent,
-    //   threadTs,
-    //   slackUsername: "slackUserName",
-    // });
+    expect(slackClient.postPrReady).toHaveBeenLastCalledWith(
+      mockPullRequestEvent,
+      "slackUserName",
+    );
   });
 });
