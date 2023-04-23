@@ -5,15 +5,22 @@ interface BaseProps {
   organizationId: string;
 }
 
+export type PullRequestRow =
+  Database["public"]["Tables"]["pull_requests"]["Row"];
+
 export class Db {
   constructor(public readonly client: SupabaseClient<Database>) {}
 
-  getThreadTs = async ({ prId }: { prId: string }) =>
+  getPullRequest = async ({
+    prId,
+  }: {
+    prId: string;
+  }): Promise<PostgrestSingleResponse<PullRequestRow | null>> =>
     await this.client
       .from("pull_requests")
-      .select("pr_id, thread_ts")
+      .select()
       .eq("pr_id", prId)
-      .single();
+      .maybeSingle();
 
   getSlackUserIdFromGithubLogin = async ({
     githubLogin,
@@ -47,10 +54,30 @@ export class Db {
         pr_id: prId.toString(),
         draft: props.isDraft,
         thread_ts: threadTs,
-        organization_id: props.organizationId,
       })
       .select();
 
     console.debug("Response from insertPullRequest: ", response);
+  };
+
+  updatePullRequest = async ({
+    prId,
+    threadTs,
+    ...props
+  }: {
+    threadTs: string;
+    isDraft: boolean;
+    prId: string;
+  } & BaseProps) => {
+    const response = await this.client
+      .from("pull_requests")
+      .update({
+        draft: props.isDraft,
+        thread_ts: threadTs,
+      })
+      .eq("pr_id", prId)
+      .select();
+
+    console.debug("Response from updatePullRequest: ", response);
   };
 }

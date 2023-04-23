@@ -146,7 +146,7 @@ describe("handlePrEvent", () => {
     const prId = 1234;
     const threadTs = "11111";
 
-    (database.getThreadTs as Mock).mockResolvedValueOnce({
+    (database.getPullRequest as Mock).mockResolvedValueOnce({
       data: { thread_ts: threadTs },
     });
 

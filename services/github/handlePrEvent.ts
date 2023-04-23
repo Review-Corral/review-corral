@@ -5,6 +5,7 @@ import {
   PullRequestReadyForReviewEvent,
 } from "@octokit/webhooks-types";
 import axios from "axios";
+import { PullRequestRow } from "services/db";
 import { getInstallationAccessToken } from "services/utils/apiUtils";
 import { InstallationAccessResponse } from "types/github-api-types";
 import { BaseGithubHanderProps, getSlackUserName, getThreadTs } from "./shared";
@@ -175,39 +176,52 @@ const handleNewPr = async (
     if (body.action === "opened") {
       console.log("PR was opened, creating new thread...");
       return {
-        threadTs: await createNewThread(body, baseProps),
+        threadTs: await createNewThread({
+          existingPullRequest: null,
+          body,
+          baseProps,
+        }),
         wasCreated: true,
       };
     } else {
       console.log("PR was not opened, trying to find existing thread...");
       // This should trigger for 'ready_for_review' events
-      const existingThreadTs = (
-        await baseProps.database.getThreadTs({
+      const existingPullRequest = (
+        await baseProps.database.getPullRequest({
           prId: body.pull_request.id.toString(),
         })
-      ).data?.thread_ts;
+      ).data;
 
       // If we still couldn't find a thread, then post a new one.
-      if (!existingThreadTs) {
+      if (!existingPullRequest?.thread_ts) {
         console.log("Couldn't find existing thread, creating new thread...");
         return {
-          threadTs: await createNewThread(body, baseProps),
+          threadTs: await createNewThread({
+            existingPullRequest,
+            body,
+            baseProps,
+          }),
           wasCreated: true,
         };
       } else {
         console.log("Found existing thread");
         return {
-          threadTs: existingThreadTs,
+          threadTs: existingPullRequest.thread_ts,
           wasCreated: false,
         };
       }
     }
   }
 
-  async function createNewThread(
-    body: PullRequestEventOpenedOrReadyForReview,
-    baseProps: BaseGithubHanderProps,
-  ): Promise<string> {
+  async function createNewThread({
+    existingPullRequest,
+    body,
+    baseProps,
+  }: {
+    existingPullRequest: PullRequestRow | null;
+    body: PullRequestEventOpenedOrReadyForReview;
+    baseProps: BaseGithubHanderProps;
+  }): Promise<string> {
     try {
       const response = await baseProps.slackClient.postPrReady(
         body,
@@ -215,17 +229,34 @@ const handleNewPr = async (
       );
 
       if (response && response.ts) {
-        console.debug("About to insert PullRequest into database", {
-          prId: body.pull_request.id,
-          organizationId: baseProps.organizationId,
-          threadTs: response.ts,
-        });
-        await baseProps.database.insertPullRequest({
-          prId: body.pull_request.id.toString(),
-          isDraft: false,
-          threadTs: response.ts,
-          organizationId: baseProps.organizationId,
-        });
+        console.debug(
+          "Succesfully created new thread_ts. About to update database",
+          {
+            prId: body.pull_request.id,
+            organizationId: baseProps.organizationId,
+            existingPrId: existingPullRequest?.pr_id,
+            threadTs: response.ts,
+          },
+        );
+        if (existingPullRequest) {
+          console.debug(
+            `Updating existing PR record of id ${existingPullRequest.pr_id}}`,
+          );
+          await baseProps.database.updatePullRequest({
+            prId: existingPullRequest?.pr_id,
+            isDraft: body.pull_request.draft,
+            threadTs: response.ts,
+            organizationId: baseProps.organizationId,
+          });
+        } else {
+          console.debug(`Creating new  PR record`);
+          await baseProps.database.insertPullRequest({
+            prId: body.pull_request.id.toString(),
+            isDraft: body.pull_request.draft,
+            threadTs: response.ts,
+            organizationId: baseProps.organizationId,
+          });
+        }
 
         return response.ts;
       } else {
