@@ -112,9 +112,14 @@ export class SlackClient {
           this.getConvertedToDraftAttachment("Pull request marked as draft"),
         ],
       });
-      console.debug("Succesfully updated message with merged status");
+      console.debug(
+        "Succesfully updated message with converted to draft status",
+      );
     } catch (error) {
-      console.error("Got error updating thread with merged status: ", error);
+      console.error(
+        "Got error updating thread with converted to draft status: ",
+        error,
+      );
     }
   }
 
@@ -213,25 +218,31 @@ export class SlackClient {
     threadTs: string,
     slackUsername: string,
   ) {
-    return await this.postMessage({
+    await this.postMessage({
       message: {
-        attachments: [
-          {
-            color: "#FB0909",
-            blocks: [
-              {
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text: `Pull request closed by ${slackUsername}`,
-                },
-              },
-            ],
-          },
-        ],
+        attachments: [this.getPrClosedAttatchment(slackUsername)],
       },
       threadTs,
     });
+
+    const defaultPayload = await this.getBaseChatUpdateArguments({
+      body,
+      threadTs,
+      slackUsername,
+    });
+
+    try {
+      await this.client.chat.update({
+        ...defaultPayload,
+        attachments: [
+          ...(defaultPayload.attachments || []),
+          this.getPrClosedAttatchment(slackUsername),
+        ],
+      });
+      console.debug("Succesfully updated message with closed pr status");
+    } catch (error) {
+      console.error("Got error updating thread with closed pr status: ", error);
+    }
   }
 
   async postReviewRequested(
@@ -434,6 +445,21 @@ export class SlackClient {
           text: {
             type: "mrkdwn",
             text: `:construction: ${text}`,
+          },
+        },
+      ],
+    };
+  }
+
+  private getPrClosedAttatchment(slackUsername: string): MessageAttachment {
+    return {
+      color: "#FB0909",
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `Pull request closed by ${slackUsername}`,
           },
         },
       ],
