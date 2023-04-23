@@ -39,18 +39,10 @@ export class Db {
       .eq("organization_id", organizationId)
       .single();
 
-  insertPullRequest = async ({
-    pr_id,
-    thread_ts,
-    draft,
-  }: PullRequest["Insert"]) => {
+  insertPullRequest = async (props: PullRequest["Insert"]) => {
     const response = await this.client
       .from("pull_requests")
-      .insert({
-        pr_id,
-        draft,
-        thread_ts,
-      })
+      .insert(props)
       .select();
 
     console.debug("Response from insertPullRequest: ", response);
