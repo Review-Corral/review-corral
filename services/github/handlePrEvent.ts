@@ -249,7 +249,7 @@ const handleNewPr = async (
             organizationId: baseProps.organizationId,
           });
         } else {
-          console.debug(`Creating new  PR record`);
+          console.debug(`Creating new PR record`);
           await baseProps.database.insertPullRequest({
             prId: body.pull_request.id.toString(),
             isDraft: body.pull_request.draft,

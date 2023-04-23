@@ -4,7 +4,7 @@ import {
 } from "@octokit/webhooks-types";
 import { ChatPostMessageResponse } from "@slack/web-api";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { Db } from "services/db";
+import { Db, PullRequestRow } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
 import { getInstallationAccessToken } from "services/utils/apiUtils";
 import { Mock, afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -23,11 +23,12 @@ vi.mock("@supabase/supabase-js", () => {
 
 vi.mock("services/db", () => {
   const Db = vi.fn();
-  Db.prototype.getThreadTs = vi.fn((arg: unknown) => ({
+  Db.prototype.getPullRequest = vi.fn((arg: unknown) => ({
     data: null,
     error: null,
   }));
   Db.prototype.insertPullRequest = vi.fn(() => {});
+  Db.prototype.updatePullRequest = vi.fn(() => {});
 
   return { Db };
 });
@@ -147,7 +148,7 @@ describe("handlePrEvent", () => {
     const threadTs = "11111";
 
     (database.getPullRequest as Mock).mockResolvedValueOnce({
-      data: { thread_ts: threadTs },
+      data: mock<PullRequestRow>({ thread_ts: threadTs }),
     });
 
     const mockedPullRequest = mock<
@@ -170,5 +171,51 @@ describe("handlePrEvent", () => {
       threadTs,
       slackUsername: "slackUserName",
     });
+  });
+
+  it("should update record with thread_ts if pull request record exists but not thread_ts", async () => {
+    const mockPullRequestEvent = mock<PullRequestReadyForReviewEvent>({
+      action: "ready_for_review",
+    });
+
+    const prId = 1234;
+
+    const threadTs = "11111";
+
+    // Simulate a record already existing in the database but without a thread_ts
+    (database.getPullRequest as Mock).mockResolvedValueOnce({
+      data: mock<ChatPostMessageResponse>({
+        thread_ts: null,
+      }),
+    });
+
+    (slackClient.postPrReady as Mock).mockResolvedValueOnce(
+      mock<PullRequestRow>({
+        pr_id: prId.toString(),
+        thread_ts: threadTs,
+      }),
+    );
+
+    const mockedPullRequest = mock<
+      PullRequestReadyForReviewEvent["pull_request"]
+    >({
+      id: prId,
+      draft: false,
+      requested_reviewers: [],
+    });
+    mockPullRequestEvent.pull_request = mockedPullRequest;
+
+    await handlePullRequestEvent(mockPullRequestEvent, baseProps);
+
+    expect(database.insertPullRequest).toHaveBeenCalledTimes(0);
+    expect(database.updatePullRequest).toHaveBeenCalledTimes(1);
+    expect(getInstallationAccessToken).toHaveBeenCalledTimes(1);
+    expect(slackClient.postPrReady).toHaveBeenCalledTimes(1);
+    expect(slackClient.postReadyForReview).toHaveBeenCalledTimes(0);
+    // expect(slackClient.postReadyForReview).toHaveBeenLastCalledWith({
+    //   body: mockPullRequestEvent,
+    //   threadTs,
+    //   slackUsername: "slackUserName",
+    // });
   });
 });
