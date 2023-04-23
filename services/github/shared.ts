@@ -34,7 +34,7 @@ export async function getThreadTs(
   prId: number,
   database: Db,
 ): Promise<string | undefined> {
-  const { data, error } = await database.getThreadTs({
+  const { data, error } = await database.getPullRequest({
     prId: prId.toString(),
   });
 
