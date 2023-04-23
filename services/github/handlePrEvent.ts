@@ -96,10 +96,10 @@ const handleNewPr = async (
   if (payload.pull_request.draft) {
     console.log("Handling draft PR");
     await props.database.insertPullRequest({
-      prId: payload.pull_request.id.toString(),
-      isDraft: true,
-      threadTs: null,
-      organizationId: props.organizationId,
+      pr_id: payload.pull_request.id.toString(),
+      draft: true,
+      thread_ts: null,
+      organization_id: props.organizationId,
     });
   } else {
     console.log("Pull request is not draft");
@@ -243,18 +243,17 @@ const handleNewPr = async (
             `Updating existing PR record of id ${existingPullRequest.pr_id}}`,
           );
           await baseProps.database.updatePullRequest({
-            prId: existingPullRequest?.pr_id,
-            isDraft: body.pull_request.draft,
-            threadTs: response.ts,
-            organizationId: baseProps.organizationId,
+            pr_id: existingPullRequest?.pr_id,
+            draft: body.pull_request.draft,
+            thread_ts: response.ts,
           });
         } else {
           console.debug(`Creating new PR record`);
           await baseProps.database.insertPullRequest({
-            prId: body.pull_request.id.toString(),
-            isDraft: body.pull_request.draft,
-            threadTs: response.ts,
-            organizationId: baseProps.organizationId,
+            pr_id: body.pull_request.id.toString(),
+            draft: body.pull_request.draft,
+            thread_ts: response.ts,
+            organization_id: baseProps.organizationId,
           });
         }
 

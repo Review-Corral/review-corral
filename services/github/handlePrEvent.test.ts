@@ -106,10 +106,10 @@ describe("handlePrEvent", () => {
     expect(slackClient.postPrReady).toHaveBeenCalledTimes(1);
     expect(database.insertPullRequest).toHaveBeenCalledTimes(1);
     expect(database.insertPullRequest).toHaveBeenCalledWith({
-      organizationId,
-      prId: prId.toString(),
-      isDraft: false,
-      threadTs: threadTs,
+      organization_id: organizationId,
+      pr_id: prId.toString(),
+      draft: false,
+      thread_ts: threadTs,
     });
   });
 
@@ -132,10 +132,10 @@ describe("handlePrEvent", () => {
     expect(slackClient.postPrReady).toHaveBeenCalledTimes(0);
     expect(database.insertPullRequest).toHaveBeenCalledTimes(1);
     expect(database.insertPullRequest).toHaveBeenCalledWith({
-      organizationId,
-      prId: prId.toString(),
-      isDraft: true,
-      threadTs: null,
+      organization_id: organizationId,
+      pr_id: prId.toString(),
+      draft: true,
+      thread_ts: null,
     });
   });
 
@@ -168,7 +168,7 @@ describe("handlePrEvent", () => {
     expect(slackClient.postReadyForReview).toHaveBeenCalledTimes(1);
     expect(slackClient.postReadyForReview).toHaveBeenLastCalledWith({
       body: mockPullRequestEvent,
-      threadTs,
+      threadTs: threadTs,
       slackUsername: "slackUserName",
     });
   });

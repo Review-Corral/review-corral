@@ -5,8 +5,8 @@ interface BaseProps {
   organizationId: string;
 }
 
-export type PullRequestRow =
-  Database["public"]["Tables"]["pull_requests"]["Row"];
+type PullRequest = Database["public"]["Tables"]["pull_requests"];
+export type PullRequestRow = PullRequest["Row"];
 
 export class Db {
   constructor(public readonly client: SupabaseClient<Database>) {}
@@ -40,20 +40,16 @@ export class Db {
       .single();
 
   insertPullRequest = async ({
-    prId,
-    threadTs,
-    ...props
-  }: {
-    threadTs: string | null;
-    isDraft: boolean;
-    prId: string;
-  } & BaseProps) => {
+    pr_id,
+    thread_ts,
+    draft,
+  }: PullRequest["Insert"]) => {
     const response = await this.client
       .from("pull_requests")
       .insert({
-        pr_id: prId.toString(),
-        draft: props.isDraft,
-        thread_ts: threadTs,
+        pr_id,
+        draft,
+        thread_ts,
       })
       .select();
 
@@ -61,19 +57,15 @@ export class Db {
   };
 
   updatePullRequest = async ({
-    prId,
-    threadTs,
-    ...props
-  }: {
-    threadTs: string;
-    isDraft: boolean;
-    prId: string;
-  } & BaseProps) => {
+    pr_id: prId,
+    thread_ts,
+    draft,
+  }: PullRequest["Update"]) => {
     const response = await this.client
       .from("pull_requests")
       .update({
-        draft: props.isDraft,
-        thread_ts: threadTs,
+        draft,
+        thread_ts,
       })
       .eq("pr_id", prId)
       .select();
