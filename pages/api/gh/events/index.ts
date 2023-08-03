@@ -65,7 +65,7 @@ const receiveEvent = async (
   res: NextApiResponse,
 ) => {
   if (emitterEvent.name === "pull_request") {
-    await githubEventWrapper({
+    await githubEventWrapper<EmitterWebhookEvent<"pull_request">>({
       supabaseClient,
       githubEvent: emitterEvent,
       res,
