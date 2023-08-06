@@ -12,9 +12,6 @@ CREATE TABLE IF NOT EXISTS public.users
 
 TABLESPACE pg_default;
 
-ALTER TABLE IF EXISTS public.users
-    OWNER to supabase_admin;
-
 GRANT ALL ON TABLE public.users TO anon;
 
 GRANT ALL ON TABLE public.users TO postgres;
@@ -44,9 +41,6 @@ CREATE TABLE IF NOT EXISTS public.users_and_teams
 )
 
 TABLESPACE pg_default;
-
-ALTER TABLE IF EXISTS public.users_and_teams
-    OWNER to supabase_admin;
 
 GRANT ALL ON TABLE public.users_and_teams TO anon;
 

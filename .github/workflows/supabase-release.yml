@@ -41,5 +41,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: supabase/setup-cli@v1
-      - run: supabase link --project-ref $PROJECT_ID
+      - run: supabase link --project-ref $PROJECT_ID <<< ""
       - run: supabase db push

@@ -21,7 +21,7 @@ In order to test Review Corral locally, you'll need to setup a few things:
 1. From the Github app you've added, copy the Client ID and Client secret to the
    `GITHUB_CLIENT_ID` and `GITHUB_CLIENT_SECRET` in `./supabase.env` variables respectfully
 1. Install the [Supabase CLI](https://supabase.com/docs/guides/cli).
-1. Setup your local config (coming soon.)
+1. Run `supabase start`
 
 ### Using the Supabase CLI
 
