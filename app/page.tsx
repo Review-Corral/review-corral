@@ -1,11 +1,22 @@
-"use client";
+import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+import { Database } from "types/database-types";
+import HomePage from "./home-page";
 
-import HomeView from "@/components/home/HomeView";
-import { User } from "@supabase/supabase-js";
-import { NextPage } from "next";
+export default async function Home() {
+  const supabase = createServerComponentClient<Database>({
+    cookies,
+  });
 
-const Home: NextPage<{ user: User; syncGithub?: boolean }> = () => {
-  return <HomeView />;
-};
+  const {
+    data: { session },
+  } = await supabase.auth.getSession();
 
-export default Home;
+  if (!session) {
+    // this is a protected route - only users who are signed in can view this route
+    redirect("/login");
+  }
+
+  return <HomePage user={session.user} />;
+}
