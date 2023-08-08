@@ -1,7 +1,6 @@
-import { User } from "@supabase/auth-helpers-nextjs";
-import type { NextPage } from "next";
-import { DashboardLayout } from "../components/layout/DashboardLayout";
-import { withPageAuth } from "../components/utils/withPageAuth";
+import { DashboardLayout } from "@/components/layout/DashboardLayout";
+import { User } from "@supabase/supabase-js";
+import { NextPage } from "next";
 
 export const Profile: NextPage<{ user: User }> = ({ user }) => {
   return (
@@ -12,8 +11,6 @@ export const Profile: NextPage<{ user: User }> = ({ user }) => {
 };
 
 export default Profile;
-
-export const getServerSideProps = withPageAuth();
 
 export const UserProfileInfo: React.FC<{ user: User }> = ({ user }) => {
   return (

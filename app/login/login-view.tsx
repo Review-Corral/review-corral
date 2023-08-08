@@ -1,42 +1,24 @@
-import {
-  useSessionContext,
-  useSupabaseClient,
-} from "@supabase/auth-helpers-react";
+import { Github } from "@/components/assets/icons/Github";
+import Button from "@/components/buttons/Button";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { NextPage } from "next";
-import { useRouter } from "next/router";
-import { useEffect, useState } from "react";
-import { Github } from "../components/assets/icons/Github";
-import Button from "../components/buttons/Button";
-import { Database } from "../types/database-types";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { Database } from "types/database-types";
 
-const Auth: NextPage = () => {
+const LoginView: NextPage = () => {
   const router = useRouter();
 
-  const { isLoading, session } = useSessionContext();
-  const supabaseClient = useSupabaseClient<Database>();
+  const supabase = createClientComponentClient<Database>();
+
+  const [isLoading, setIsLoading] = useState(false);
 
   const [loginError, setLoginError] = useState<string | undefined>(undefined);
-
-  useEffect(() => {
-    if (session?.user) {
-      // Store the provider token and refresh token (if exist) since these
-      // will not persist in the session permanently.
-      supabaseClient
-        .from("users")
-        .update({
-          gh_access_token: session.provider_token,
-          gh_refresh_token: session.refresh_token,
-        })
-        .eq("id", session.user.id)
-        .then(() => {
-          router.push("/");
-        });
-    }
-  }, [session?.user]);
 
   return (
     <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-slate-50">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           className="mx-auto h-12 w-auto"
           src="https://avatars.githubusercontent.com/in/203068?s=120&u=4f27b80d54a1405e10756a1dc0175d1ef3866422&v=4"
@@ -49,7 +31,8 @@ const Auth: NextPage = () => {
             color="indigo"
             leftIcon={<Github className="fill-white h-4" />}
             onClick={async () => {
-              const result = await supabaseClient.auth.signInWithOAuth({
+              setIsLoading(true);
+              const result = await supabase.auth.signInWithOAuth({
                 provider: "github",
                 options: {
                   scopes: "repo",
@@ -58,9 +41,11 @@ const Auth: NextPage = () => {
               });
 
               if (result.error) {
+                setIsLoading(false);
                 console.error(result.error);
                 setLoginError(result.error.message);
               } else {
+                setIsLoading(false);
                 router.push("/");
               }
             }}
@@ -86,4 +71,4 @@ const Auth: NextPage = () => {
   );
 };
 
-export default Auth;
+export default LoginView;

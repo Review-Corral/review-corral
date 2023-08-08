@@ -1,14 +1,14 @@
-import { withPageAuth } from "@supabase/auth-helpers-nextjs";
+"use client";
+
 import { NextPage } from "next";
-import { useRouter } from "next/router";
+import { usePathname, useRouter } from "next/navigation";
 import { ReactNode, useEffect, useState } from "react";
 import { DashboardLayout } from "../../../components/layout/DashboardLayout";
-import { GithubTab } from "../../../components/organization/github/GithubTab";
 import { OverviewTab } from "../../../components/organization/Overview";
+import { GithubTab } from "../../../components/organization/github/GithubTab";
 import { Organization, Pages } from "../../../components/organization/shared";
 import { SlackTab } from "../../../components/organization/slack/SlackTab";
 import { UsernamesTab } from "../../../components/organization/usernames/UsernamesTab";
-import { flattenParam } from "../../../components/utils/flattenParam";
 
 type SubNav = {
   text: string;
@@ -39,6 +39,7 @@ const OrgOverviewPage: NextPage<{
   page: Pages | undefined;
 }> = ({ organization, page }) => {
   const router = useRouter();
+  const path = usePathname();
   const [_page, setPage] = useState<Pages | undefined>(page);
 
   const setPageWrapper = (page: Pages | undefined): void => {
@@ -50,7 +51,7 @@ const OrgOverviewPage: NextPage<{
       } else {
         route = `/org/${organization.account_id}`;
       }
-      router.push(route, undefined, { shallow: true });
+      router.push(route, undefined);
     }
   };
 
@@ -60,17 +61,20 @@ const OrgOverviewPage: NextPage<{
 
   // Handles pressing back when moving tabs
   useEffect(() => {
-    const splitPath = router.asPath.split("/");
-    if (splitPath.length > 3) {
-      const page = splitPath[3];
-      if (stringIsPage(page)) {
-        setPageWrapper(page);
+    if (path) {
+      const splitPath = path.split("/");
+      if (splitPath.length > 3) {
+        const page = splitPath[3];
+        if (stringIsPage(page)) {
+          setPageWrapper(page);
+        }
+      } else {
+        setPageWrapper(undefined);
       }
-    } else {
-      setPageWrapper(undefined);
     }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router.asPath]);
+  }, [path]);
 
   return (
     <DashboardLayout
@@ -127,39 +131,3 @@ const OrgOverviewPage: NextPage<{
 };
 
 export default OrgOverviewPage;
-
-export const getServerSideProps = withPageAuth<"public">({
-  getServerSideProps: async function getServerSideProps(ctx, supabaseClient) {
-    const accountId = flattenParam(ctx.params?.["accountId"]);
-    const page = flattenParam(ctx.params?.["page"]);
-
-    if (!accountId) {
-      return {
-        notFound: true,
-        props: {},
-      };
-    }
-
-    const { data: organization, error } = await supabaseClient
-      .from("organizations")
-      .select("*")
-      .eq("account_id", accountId)
-      .limit(1)
-      .single();
-
-    if (error) {
-      console.error(
-        "Got error getting organization by account ID ",
-        accountId,
-        ": ",
-        error,
-      );
-      return {
-        notFound: true,
-        props: {},
-      };
-    }
-
-    return { props: { organization, page } };
-  },
-});
