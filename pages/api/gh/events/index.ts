@@ -1,28 +1,28 @@
 /* eslint-disable no-console */
 import { flattenParam } from "@/components/utils/flattenParam";
 import { EmitterWebhookEvent } from "@octokit/webhooks";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
-import { NextApiRequest, NextApiResponse } from "next";
+import { NextApiRequest } from "next";
 import { AxiomAPIRequest, withAxiom } from "next-axiom/dist/withAxiom";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 import { githubEventWrapper } from "services/github/githubEventWrapper";
 import { handlePullRequestEvent } from "services/github/handlePrEvent";
 import { handlePullRequestCommentEvent } from "services/github/handlePrReviewCommentEvent";
 import { handlePullRequestReviewEvent } from "services/github/handlePrReviewEvent";
-import withApiSupabase from "../../../../services/utils/withApiSupabase";
+import { Database } from "types/database-types";
 
-const handler = async (
-  req: AxiomAPIRequest,
-  res: NextApiResponse,
-  supabaseClient: SupabaseClient,
-): Promise<void> => {
+export const POST = withAxiom(async (req: AxiomAPIRequest) => {
+  const supabaseClient = createRouteHandlerClient<Database>({ cookies });
   console.log("Got request to POST /api/gh/events");
 
   const validEvent = await checkEventWrapper(req);
 
   if (!validEvent) {
     console.error("Got event with invalid signature");
-    return res.status(403).send({ error: "Invalid signature" });
+    return NextResponse.json({ error: "Invalid signature" }, { status: 403 });
   }
 
   console.log("Event has valid signature");
@@ -41,7 +41,7 @@ const handler = async (
       },
     );
 
-    return res.status(400).send({ error: "Missing headers" });
+    return NextResponse.json({ error: "Missing headers" }, { status: 400 });
   }
 
   const emitterEvent: EmitterWebhookEvent = {
@@ -52,42 +52,41 @@ const handler = async (
   };
 
   try {
-    await receiveEvent(emitterEvent, supabaseClient, res);
+    await receiveEvent(emitterEvent, supabaseClient);
   } catch (error) {
     console.error("Error handling event", error);
-    return res.status(500).send({ error: "Error handling event" });
+    return NextResponse.json(
+      { error: "Error handling event" },
+      { status: 500 },
+    );
   }
-};
+});
 
 const receiveEvent = async (
   emitterEvent: EmitterWebhookEvent,
   supabaseClient: SupabaseClient,
-  res: NextApiResponse,
 ) => {
   if (emitterEvent.name === "pull_request") {
-    await githubEventWrapper<EmitterWebhookEvent<"pull_request">>({
+    return await githubEventWrapper<EmitterWebhookEvent<"pull_request">>({
       supabaseClient,
       githubEvent: emitterEvent,
-      res,
       handler: handlePullRequestEvent,
     });
   } else if (emitterEvent.name === "pull_request_review_comment") {
-    await githubEventWrapper({
+    return await githubEventWrapper({
       supabaseClient,
       githubEvent: emitterEvent,
-      res,
       handler: handlePullRequestCommentEvent,
     });
   } else if (emitterEvent.name === "pull_request_review") {
-    await githubEventWrapper({
+    return await githubEventWrapper({
       supabaseClient,
       githubEvent: emitterEvent,
-      res,
       handler: handlePullRequestReviewEvent,
     });
   } else {
     console.debug(`Got unhandled event name of ${emitterEvent.name}`);
-    return res.status(200).send({ ok: true });
+    return NextResponse.json({ data: "OK" }, { status: 200 });
   }
 };
 
@@ -135,6 +134,3 @@ const verifyGithubWebhookSecret = async ({
 
   return calculated === signature;
 };
-
-// TOOD: remove when transition away from Axiom complete
-export default withAxiom(withApiSupabase(handler));

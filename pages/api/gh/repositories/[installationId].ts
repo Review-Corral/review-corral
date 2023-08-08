@@ -1,14 +1,15 @@
-import { SupabaseClient } from "@supabase/auth-helpers-nextjs";
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
-import { NextApiResponse } from "next";
 import { withAxiom } from "next-axiom";
-import { AxiomAPIRequest } from "next-axiom/dist/withAxiom";
+import { AxiomRequest } from "next-axiom/dist/withAxiom";
+import { cookies } from "next/headers";
+import { useSearchParams } from "next/navigation";
+import { NextResponse } from "next/server";
 import { flattenParam } from "../../../../components/utils/flattenParam";
 import {
   getInstallationAccessToken,
   isValidBody,
 } from "../../../../services/utils/apiUtils";
-import { withProtectedApi } from "../../../../services/utils/withProtectedApi";
 import { Database } from "../../../../types/database-types";
 import { InstallationRepositories } from "../../../../types/github-api-types";
 
@@ -20,47 +21,24 @@ export type PutRepositoryArgs = {
 type RepositoryInsertArgs =
   Database["public"]["Tables"]["github_repositories"]["Insert"];
 
-export default withAxiom(
-  withProtectedApi(async function ProtectedRoute(
-    req,
-    res,
-    supabaseServerClient,
-  ) {
-    const installationId: number = Number(
-      flattenParam(req.query.installationId),
+export const GET = withAxiom(async (req: AxiomRequest) => {
+  const searchParams = useSearchParams();
+
+  const installationId = Number(
+    flattenParam(searchParams?.get("installationId") || undefined),
+  );
+  const supabaseServerClient = createRouteHandlerClient<Database>({ cookies });
+
+  if (!installationId) {
+    return NextResponse.json(
+      { error: "No installation id provided" },
+      { status: 400 },
     );
+  }
+  req.log.info("Got request for repositories for installation: ", {
+    installationId,
+  });
 
-    if (!installationId) {
-      return res.status(404);
-    }
-    req.log.info(
-      "Got request for repositories for installation: ",
-      installationId,
-    );
-
-    if (req.method === "GET") {
-      return _handleGetRequest(req, res, supabaseServerClient, installationId);
-    }
-
-    if (req.method === "PUT") {
-      return _handlePutRequest(req, res, supabaseServerClient, installationId);
-    }
-
-    return res.status(404).end();
-  }),
-);
-
-type ApiResponseType = {
-  error?: any;
-  data?: any;
-};
-
-const _handleGetRequest = async (
-  req: AxiomAPIRequest,
-  res: NextApiResponse<ApiResponseType>,
-  supabaseServerClient: SupabaseClient<Database>,
-  installationId: number,
-) => {
   req.log.info("Got GET request for repositories for installation: ", {
     installationId,
   });
@@ -74,11 +52,14 @@ const _handleGetRequest = async (
       .single();
 
   if (organizationError) {
-    return res.status(500).send({ error: organizationError });
+    return NextResponse.json({ error: organizationError }, { status: 500 });
   }
 
   if (!organizationData?.id) {
-    return res.status(404).send({ error: "Organization not found" });
+    return NextResponse.json(
+      { error: "Organization not found" },
+      { status: 404 },
+    );
   }
 
   const installationAccessToken = await getInstallationAccessToken(
@@ -99,9 +80,12 @@ const _handleGetRequest = async (
     if (currentReposError) {
       req.log.error(
         "Got error getting current repositories for installation: ",
-        { installationId, error: currentReposError },
+        {
+          installationId,
+          error: currentReposError,
+        },
       );
-      return res.status(400).send({ error: currentReposError });
+      return NextResponse.json({ error: currentReposError }, { status: 500 });
     }
 
     // If the repository ID is found again, but it has a new installation id,
@@ -152,28 +136,40 @@ const _handleGetRequest = async (
       req.log.error("Got error adding new repositories: ", {
         InsertReposError,
       });
-      return res.status(400).end({ error: InsertReposError });
+      return NextResponse.json({ error: InsertReposError }, { status: 500 });
     }
     const payload = [...(orgsRepos ?? []), ...(insertedRepositories ?? [])];
-    return res.status(200).send({ data: payload });
+    return NextResponse.json({ data: payload }, { status: 200 });
   }
 
   req.log.warn("No repositories found for installation", { installationId });
-  return res.status(200).send({ data: [] });
-};
+  return NextResponse.json({ data: [] }, { status: 200 });
+});
 
-const _handlePutRequest = async (
-  req: AxiomAPIRequest,
-  res: NextApiResponse<ApiResponseType>,
-  supabaseServerClient: SupabaseClient<Database>,
-  installationId: number,
-) => {
+export const PUT = withAxiom(async (req: AxiomRequest) => {
+  const searchParams = useSearchParams();
+
+  const installationId = Number(
+    flattenParam(searchParams?.get("installationId") || undefined),
+  );
+  const supabaseServerClient = createRouteHandlerClient<Database>({ cookies });
+
+  if (!installationId) {
+    return NextResponse.json(
+      { error: "No installation id provided" },
+      { status: 400 },
+    );
+  }
+  req.log.info("Got request for repositories for installation: ", {
+    installationId,
+  });
+
   req.log.info("Got POST request for repositories for installation: ", {
     installationId,
   });
 
   if (!isValidBody<PutRepositoryArgs>(req.body, ["repositoryId", "isActive"])) {
-    return res.status(402).send({ error: "Invalid body" });
+    return NextResponse.json({ error: "Invalid body" }, { status: 402 });
   }
 
   const { error } = await supabaseServerClient
@@ -182,11 +178,11 @@ const _handlePutRequest = async (
     .eq("repository_id", req.body.repositoryId);
 
   if (error) {
-    return res.status(400).send({ error });
+    return NextResponse.json({ error }, { status: 500 });
   }
 
-  return res.status(200).send({ data: null });
-};
+  return NextResponse.json({ data: null }, { status: 200 });
+});
 
 const _getReposForInstallation = async (
   installationAccessToken: string,

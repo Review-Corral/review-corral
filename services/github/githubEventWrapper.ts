@@ -1,7 +1,7 @@
 import { Organization } from "@/components/organization/shared";
 import { EmitterWebhookEvent } from "@octokit/webhooks";
 import { SupabaseClient } from "@supabase/supabase-js";
-import { NextApiResponse } from "next";
+import { NextResponse } from "next/server";
 import { Db } from "services/db";
 import { SlackClient } from "services/slack/SlackClient";
 import { flattenType } from "services/utils/apiUtils";
@@ -15,17 +15,15 @@ export const githubEventWrapper = async <
 >({
   supabaseClient,
   githubEvent,
-  res,
   handler: handleEvent,
 }: {
   supabaseClient: SupabaseClient<Database>;
   githubEvent: T;
-  res: NextApiResponse;
   handler: (
     event: T["payload"],
     baseProps: BaseGithubHanderProps,
   ) => Promise<void>;
-}): Promise<void> => {
+}): Promise<NextResponse> => {
   console.log("Got Github Event", {
     action: githubEvent.payload.action,
     id: githubEvent.payload.pull_request.id,
@@ -45,7 +43,10 @@ export const githubEventWrapper = async <
       repositoryId,
       error,
     });
-    return res.status(500).send({ error: "Error finding Github Repository" });
+    return NextResponse.json(
+      { error: "Error finding Github Repository" },
+      { status: 500 },
+    );
   }
 
   const organization = flattenType<Organization>(
@@ -56,7 +57,10 @@ export const githubEventWrapper = async <
     console.warn("No organization found for repository_id: ", {
       orgId: githubEvent.payload.repository.id,
     });
-    return res.status(404).send({ error: "No organization found" });
+    return NextResponse.json(
+      { error: "No Organization found" },
+      { status: 404 },
+    );
   }
 
   const { data: slackIntegration, error: slackIntegrationError } =
@@ -69,7 +73,10 @@ export const githubEventWrapper = async <
 
   if (slackIntegrationError) {
     console.warn("Error finding Slack Integration: ", slackIntegrationError);
-    return res.status(404).send({ error: "No organization found" });
+    return NextResponse.json(
+      { error: "No Slack Integration found" },
+      { status: 404 },
+    );
   }
 
   const slackClient = new SlackClient(
@@ -86,8 +93,11 @@ export const githubEventWrapper = async <
     });
   } catch (error) {
     console.error(`Got error handling event`, error);
-    return res.status(400).send({ error: "Error handling event" });
+    return NextResponse.json(
+      { error: "Error handling event" },
+      { status: 500 },
+    );
   }
 
-  return res.status(200).send({ data: "OK" });
+  return NextResponse.json({ data: "OK" }, { status: 200 });
 };

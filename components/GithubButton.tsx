@@ -6,7 +6,7 @@ interface GithubButtonProps {
   state: string;
 }
 
-export const getGithubAuthorizationUrl = (teamId: string) => {
+export const getGithubAuthorizationUrl = (teamId: string): string => {
   const params = new URLSearchParams();
   params.append("client_id", process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID ?? "");
   params.append(
@@ -18,7 +18,7 @@ export const getGithubAuthorizationUrl = (teamId: string) => {
   const url = new URL("https://github.com/login/oauth/authorize");
   url.search = params.toString();
 
-  return url;
+  return url.toString();
 };
 
 const GithubButton: React.FC<GithubButtonProps> = ({ state }) => {
