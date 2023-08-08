@@ -41,6 +41,7 @@
     "slackify-markdown": "^4.3.1"
   },
   "devDependencies": {
+    "@tanstack/react-query-devtools": "^4.32.6",
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@types/analytics-node": "^3.1.9",

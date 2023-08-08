@@ -1,3 +1,5 @@
+"use client";
+
 import { Github } from "@/components/assets/icons/Github";
 import Button from "@/components/buttons/Button";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";

@@ -1,6 +1,6 @@
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
 import { Toaster } from "react-hot-toast";
+import "../styles/globals.css";
+import Providers from "./providers";
 
 export default function RootLayout({
   // Layouts must accept a children prop.
@@ -9,22 +9,15 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const [queryClient] = useState(() => {
-    return new QueryClient({
-      defaultOptions: {
-        queries: {
-          refetchOnWindowFocus: false,
-          refetchOnReconnect: true,
-          retry: 0,
-        },
-      },
-    });
-  });
-
   return (
-    <QueryClientProvider client={queryClient}>
-      {children}
-      <Toaster position="top-right" />
-    </QueryClientProvider>
+    <html lang="en">
+      <body>
+        <Providers>
+          <>
+            {children} <Toaster position="top-right" />
+          </>
+        </Providers>
+      </body>
+    </html>
   );
 }
