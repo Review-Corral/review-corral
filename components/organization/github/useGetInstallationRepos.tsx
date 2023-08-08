@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import axios, { AxiosError } from "axios";
-import { PutRepositoryArgs } from "../../../pages/api/gh/repositories/[installationId]";
+import { PutRepositoryArgs } from "../../../app/api/gh/repositories/[installationId]/route";
 import { ApiResponse } from "../../../services/utils/apiBaseTypes";
 import { Database } from "../../../types/database-types";
 

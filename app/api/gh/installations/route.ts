@@ -5,7 +5,7 @@ import { AxiomRequest, withAxiom } from "next-axiom";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { Database } from "types/database-types";
-import { InstallationsResponse } from "../../../types/github-api-types";
+import { InstallationsResponse } from "../../../../types/github-api-types";
 
 export const GET = withAxiom(async (req: AxiomRequest) => {
   const supabaseServerClient = createRouteHandlerClient<Database>({ cookies });

@@ -5,13 +5,13 @@ import { AxiomRequest } from "next-axiom/dist/withAxiom";
 import { cookies } from "next/headers";
 import { useSearchParams } from "next/navigation";
 import { NextResponse } from "next/server";
-import { flattenParam } from "../../../../components/utils/flattenParam";
+import { flattenParam } from "../../../../../components/utils/flattenParam";
 import {
   getInstallationAccessToken,
   isValidBody,
-} from "../../../../services/utils/apiUtils";
-import { Database } from "../../../../types/database-types";
-import { InstallationRepositories } from "../../../../types/github-api-types";
+} from "../../../../../services/utils/apiUtils";
+import { Database } from "../../../../../types/database-types";
+import { InstallationRepositories } from "../../../../../types/github-api-types";
 
 export type PutRepositoryArgs = {
   repositoryId: number;

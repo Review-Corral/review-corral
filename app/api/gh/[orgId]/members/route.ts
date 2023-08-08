@@ -1,15 +1,12 @@
+import { flattenParam } from "@/components/utils/flattenParam";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
 import { AxiomAPIRequest, Logger, withAxiom } from "next-axiom";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { getInstallationAccessToken } from "services/utils/apiUtils";
 import { Database } from "types/database-types";
-import { flattenParam } from "../../../../components/utils/flattenParam";
-import { getInstallationAccessToken } from "../../../../services/utils/apiUtils";
-import {
-  InstallationAccessResponse,
-  OrgMember,
-} from "../../../../types/github-api-types";
+import { InstallationAccessResponse, OrgMember } from "types/github-api-types";
 
 export const GET = withAxiom(async (req: AxiomAPIRequest) => {
   const supabaseServerClient = createRouteHandlerClient<Database>({ cookies });

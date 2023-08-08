@@ -4,7 +4,7 @@ import { cookies } from "next/headers";
 import { useSearchParams } from "next/navigation";
 import { NextResponse } from "next/server";
 import { Database } from "types/database-types";
-import { flattenParam } from "../../../../components/utils/flattenParam";
+import { flattenParam } from "../../../../../components/utils/flattenParam";
 
 export const GET = withAxiom(async (req: AxiomAPIRequest) => {
   const supabaseServerClient = createRouteHandlerClient<Database>({ cookies });

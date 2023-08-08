@@ -5,9 +5,9 @@ import { ApiError } from "next/dist/server/api-utils";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { Database } from "types/database-types";
-import { getSlackRedirectUrl } from "../../../components/SlackButton";
-import { flattenParam } from "../../../components/utils/flattenParam";
-import { isValidBody } from "../../../services/utils/apiUtils";
+import { getSlackRedirectUrl } from "../../../../components/SlackButton";
+import { flattenParam } from "../../../../components/utils/flattenParam";
+import { isValidBody } from "../../../../services/utils/apiUtils";
 
 export type SlackAuthQueryParams = {
   code: string;
