@@ -1,11 +1,13 @@
+import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import axios from "axios";
-import { withAxiom } from "next-axiom";
+import { AxiomAPIRequest, withAxiom } from "next-axiom";
 import { ApiError } from "next/dist/server/api-utils";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+import { Database } from "types/database-types";
 import { getSlackRedirectUrl } from "../../../components/SlackButton";
 import { flattenParam } from "../../../components/utils/flattenParam";
 import { isValidBody } from "../../../services/utils/apiUtils";
-import { withProtectedApi } from "../../../services/utils/withProtectedApi";
-import { Database } from "../../../types/database-types";
 
 export type SlackAuthQueryParams = {
   code: string;
@@ -33,20 +35,16 @@ export interface IncomingWebhook {
   url: string;
 }
 
-export default withAxiom(
-  withProtectedApi<Database>(async function ProtectedRoute(
-    req,
-    res,
-    supabaseServerClient,
-  ) {
+export const GET = withAxiom(
+  async (req: AxiomAPIRequest): Promise<NextResponse> => {
+    const supabaseServerClient = createRouteHandlerClient<Database>({
+      cookies,
+    });
     if (!process.env.NEXT_PUBLIC_BASE_URL) {
       throw new ApiError(500, "Missing NEXT_PUBLIC_BASE_URL");
     }
 
-    if (
-      req.method === "GET" &&
-      isValidBody<SlackAuthQueryParams>(req.query, ["code", "state"])
-    ) {
+    if (isValidBody<SlackAuthQueryParams>(req.query, ["code", "state"])) {
       req.log.info("Got request to GET /api/slack: ", req.query);
 
       const state = flattenParam(req.query.state);
@@ -90,17 +88,17 @@ export default withAxiom(
               `Error inserting slack_integration for ${state}`,
               error,
             );
-            return res.status(500).end();
+            return NextResponse.json({ error }, { status: 500 });
           }
 
-          return res.status(200).end();
+          return NextResponse.json({ status: 200 });
         })
         .catch((error) => {
           req.log.error(
             `Error for oAuth with Slack for ${req.body.state}`,
             error,
           );
-          return res.status(500).end();
+          return NextResponse.json({ error }, { status: 500 });
         });
 
       const { data, error } = await supabaseServerClient
@@ -116,14 +114,16 @@ export default withAxiom(
         });
       } else {
         const url = process.env.NEXT_PUBLIC_BASE_UR;
-        req.log.warn("No organization found, redirecting to backup url:", url);
+        req.log.warn("No organization found, redirecting to backup url:", {
+          url,
+        });
         if (error) {
-          req.log.error("Error finding organization for id:", state);
+          req.log.error("Error finding organization for id:", { state });
         }
       }
-      return res.redirect(process.env.NEXT_PUBLIC_BASE_URL).end();
+      return NextResponse.redirect(process.env.NEXT_PUBLIC_BASE_URL);
     } else {
-      return res.status(404);
+      return NextResponse.json({ error: "Invalid request" }, { status: 400 });
     }
-  }),
+  },
 );

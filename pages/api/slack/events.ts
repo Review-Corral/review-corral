@@ -1,10 +1,6 @@
-import withApiSupabase from "../../../services/utils/withApiSupabase";
-import { Database } from "../../../types/database-types";
+import { AxiomAPIRequest, withAxiom } from "next-axiom";
+import { NextResponse } from "next/server";
 
-export default withApiSupabase<Database>(async function ProtectedRoute(
-  req,
-  res,
-  supabaseServerClient,
-) {
-  res.status(200).end();
+export const GET = withAxiom(async (req: AxiomAPIRequest) => {
+  return NextResponse.json({ data: "Hello world" }, { status: 200 });
 });
