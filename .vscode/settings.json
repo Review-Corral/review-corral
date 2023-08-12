@@ -1,6 +1,5 @@
 {
-    "task.allowAutomaticTasks": "on",
-    "githubPullRequests.ignoredPullRequestBranches": [
-        "main"
-    ]
+  "search.exclude": {
+    "**/.sst": true
+  }
 }
