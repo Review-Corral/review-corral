@@ -38,7 +38,7 @@ const LoginView: NextPage = () => {
                 provider: "github",
                 options: {
                   scopes: "repo",
-                  redirectTo: "http://localhost:3000",
+                  redirectTo: `${location.origin}/auth/callback`,
                 },
               });
 
@@ -47,8 +47,9 @@ const LoginView: NextPage = () => {
                 console.error(result.error);
                 setLoginError(result.error.message);
               } else {
+                console.log("Login result: " + result);
                 setIsLoading(false);
-                router.push("/");
+                router.refresh();
               }
             }}
           >

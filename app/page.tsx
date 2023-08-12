@@ -14,6 +14,7 @@ export default async function Home() {
   } = await supabase.auth.getSession();
 
   if (!session) {
+    console.log("No session, redirecting to login");
     // this is a protected route - only users who are signed in can view this route
     redirect("/login");
   }

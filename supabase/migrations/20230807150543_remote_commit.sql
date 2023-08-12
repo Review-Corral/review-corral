@@ -243,4 +243,8 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+CREATE OR REPLACE TRIGGER create_pub_user
+AFTER INSERT ON auth.users
+FOR EACH ROW EXECUTE PROCEDURE public.insert_user();
+
 RESET ALL;

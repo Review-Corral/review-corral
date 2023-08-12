@@ -4,9 +4,9 @@ import { EmitterWebhookEvent } from "@octokit/webhooks";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { SupabaseClient } from "@supabase/supabase-js";
 import { createHmac } from "crypto";
-import { NextApiRequest } from "next";
-import { AxiomAPIRequest, withAxiom } from "next-axiom/dist/withAxiom";
-import { cookies } from "next/headers";
+import { withAxiom } from "next-axiom/dist/withAxiom";
+import { ReadonlyHeaders } from "next/dist/server/web/spec-extension/adapters/headers";
+import { cookies, headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { githubEventWrapper } from "services/github/githubEventWrapper";
 import { handlePullRequestEvent } from "services/github/handlePrEvent";
@@ -14,11 +14,13 @@ import { handlePullRequestCommentEvent } from "services/github/handlePrReviewCom
 import { handlePullRequestReviewEvent } from "services/github/handlePrReviewEvent";
 import { Database } from "types/database-types";
 
-export const POST = withAxiom(async (req: AxiomAPIRequest) => {
+export const POST = withAxiom(async (req: Request) => {
   const supabaseClient = createRouteHandlerClient<Database>({ cookies });
   console.log("Got request to POST /api/gh/events");
 
-  const validEvent = await checkEventWrapper(req);
+  const headersList = headers();
+
+  const validEvent = await checkEventWrapper(req, headersList);
 
   if (!validEvent) {
     console.error("Got event with invalid signature");
@@ -27,9 +29,9 @@ export const POST = withAxiom(async (req: AxiomAPIRequest) => {
 
   console.log("Event has valid signature");
 
-  const githubDelivery = flattenParam(req.headers["x-github-delivery"]);
+  const githubDelivery = flattenParam(headersList.get("x-github-delivery"));
   const githubEventName = flattenParam(
-    req.headers["x-github-event"],
+    headersList.get("x-github-event"),
   ) as EmitterWebhookEvent["name"];
 
   if (!githubDelivery || !githubEventName) {
@@ -44,11 +46,13 @@ export const POST = withAxiom(async (req: AxiomAPIRequest) => {
     return NextResponse.json({ error: "Missing headers" }, { status: 400 });
   }
 
+  const body = await req.json();
+
   const emitterEvent: EmitterWebhookEvent = {
     id: githubDelivery,
     // Typing seems broken here?
     name: githubEventName as any,
-    payload: req.body,
+    payload: body,
   };
 
   try {
@@ -90,13 +94,16 @@ const receiveEvent = async (
   }
 };
 
-const checkEventWrapper = async (req: NextApiRequest) => {
+const checkEventWrapper = async (
+  req: Request,
+  headersList: ReadonlyHeaders,
+) => {
   if (!process.env.GITHUB_WEBHOOK_SECRET) {
     console.error("No GITHUB_WEBHOOK_SECRET set");
     return false;
   }
   try {
-    const signature = req.headers["x-hub-signature-256"];
+    const signature = headersList.get("x-hub-signature-256");
 
     if (!signature) {
       console.debug("No signature found");
@@ -124,12 +131,13 @@ const verifyGithubWebhookSecret = async ({
   signature,
   secret,
 }: {
-  req: NextApiRequest;
+  req: Request;
   signature: string;
   secret: string;
 }) => {
+  const body = await req.text();
   const hmac = createHmac("sha256", secret);
-  hmac.update(JSON.stringify(req.body));
+  hmac.update(JSON.stringify(body));
   const calculated = `sha256=${hmac.digest("hex")}`;
 
   return calculated === signature;
