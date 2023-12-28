@@ -12,15 +12,16 @@
     "remove": "sst remove",
     "console": "sst console",
     "typecheck": "tsc --noEmit",
-    "migrate": "sh ./services/scripts/nvmViteNode.sh ./services/scripts/migrate.ts",
-    "migrate:gen": "pnpm drizzle-kit generate:pg --out ./services/core/db/migrations/ --schema ./services/core/db/schema/*"
+    "migrate": "sh ./scripts/nvmViteNode.sh ./packages/core/scripts/migrate.ts",
+    "migrate:gen": "pnpm drizzle-kit generate:pg --out ./packages/core/db/migrations/ --schema ./packages/core/db/schema.ts"
   },
   "devDependencies": {
-    "sst": "^2.38.7",
+    "@tsconfig/node18": "^18.2.2",
     "aws-cdk-lib": "2.110.1",
     "constructs": "10.3.0",
-    "typescript": "^5.3.3",
-    "@tsconfig/node18": "^18.2.2"
+    "drizzle-kit": "^0.20.7",
+    "sst": "^2.38.7",
+    "typescript": "^5.3.3"
   },
   "workspaces": [
     "packages/*"
