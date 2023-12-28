@@ -1,0 +1,16 @@
+version: "3.8"
+services:
+  postgres:
+    image: "postgres:13-alpine"
+    ports:
+      - "5430:5432"
+    volumes:
+      - review_corral:/var/lib/postgresql/data
+      - ./scripts/localDatabaseInit.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+
+volumes:
+  review_corral:
