@@ -13,15 +13,20 @@ export default {
 } satisfies Config;
 
 async function getDbCredentials() {
-  return process.env.DB_PASSWORD
-    ? {
-        host: assertVarExists("DB_HOST"),
-        port: process.env.DB_PORT ? parseInt("DB_PORT") : undefined,
-        database: assertVarExists("DB_NAME"),
-        user: assertVarExists("DB_USER"),
-        password: assertVarExists("DB_PASSWORD"),
-      }
-    : fetchSecretDbCredentials();
+  if (process.env.DB_PASSWORD) {
+    const creds = {
+      host: process.env.DB_HOST!!,
+      port: parseInt(process.env.DB_PORT!!),
+      database: process.env.DB_NAME!!,
+      user: process.env.DB_USER!!,
+      password: process.env.DB_PASSWORD!!,
+    };
+    console.log("Going to be using these local credentials: ", { creds });
+    return creds;
+  } else {
+    console.log("Going to be fetching remote credentials...");
+    return fetchSecretDbCredentials();
+  }
 }
 
 async function fetchSecretDbCredentials() {
