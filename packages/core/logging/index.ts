@@ -1,8 +1,5 @@
-import { isEnvVarTrue } from "@core/config/helpers";
-import { isSentryEnabled } from "@core/lambdas/helpers";
-import * as Sentry from "@sentry/serverless";
-import config from "domain/config";
 import { z } from "zod";
+import config from "../utils/config";
 import { ConsoleOutput, FileOutput, serializeData } from "./outputs";
 import { LogLevel, LogOutput, LogOutputOptions, LoggerMethods } from "./types";
 
@@ -20,7 +17,7 @@ const DEFAULT_LOG_OUTPUT_OPTIONS: LogOutputOptions = {
 
 export class Logger implements LoggerMethods {
   private static readonly level: LogLevel = Logger.getLevelFromEnv();
-  public static readonly colorize: boolean = isEnvVarTrue(process.env.COLORIZE_LOGS);
+  public static readonly colorize: boolean = !!process.env.COLORIZE_LOGS;
   private static logOutput: LogOutput = new ConsoleOutput(Logger.colorize);
 
   private readonly names: string[] = [];
@@ -57,7 +54,9 @@ export class Logger implements LoggerMethods {
 
   private static getLevelFromEnv(): LogLevel {
     try {
-      return z.nativeEnum(LogLevel).parse((process.env.LOG_LEVEL ?? "").toLowerCase());
+      return z
+        .nativeEnum(LogLevel)
+        .parse((process.env.LOG_LEVEL ?? "").toLowerCase());
     } catch (error) {
       console.warn(
         `Invalid log level, defaulting to ${LogLevel.INFO.toUpperCase()}: ` +
@@ -75,7 +74,12 @@ export class Logger implements LoggerMethods {
   ) {
     if (!this.shouldBeLogged(level)) return;
     const text = `${this.formatPrefix(level)} ${message}`;
-    (this.logOutputOverride ?? Logger.logOutput).log(level, text, data, options);
+    (this.logOutputOverride ?? Logger.logOutput).log(
+      level,
+      text,
+      data,
+      options
+    );
   }
 
   public trace(
@@ -108,7 +112,6 @@ export class Logger implements LoggerMethods {
     options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS
   ) {
     this.log(LogLevel.WARN, message, data, options);
-    if (isSentryEnabled()) Sentry.captureMessage(message, "warning");
   }
 
   /**
@@ -121,13 +124,9 @@ export class Logger implements LoggerMethods {
   public error(message: string, errorOrData?: any, data?: any): void {
     if (errorOrData instanceof Error) {
       this.log(LogLevel.ERROR, message, { ...data, error: errorOrData });
-      if (isSentryEnabled())
-        Sentry.captureException(errorOrData, { extra: { ...data, message } });
     } else {
       const allData = { ...errorOrData, ...data };
       this.log(LogLevel.ERROR, message, allData);
-      if (isSentryEnabled())
-        Sentry.captureException(new Error(message), { extra: allData });
     }
   }
 

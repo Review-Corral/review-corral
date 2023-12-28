@@ -23,9 +23,9 @@ echo "Running using the NVM version of Vite-Node with SST bound"
 if [ "$NODE_DEBUG" == "true" ]
 then
   echo "Debug mode enabled"
-  $NODE_BINARY node_modules/.bin/sst bind --profile main \
+  $NODE_BINARY node_modules/.bin/sst bind --profile rc \
     "$NODE_BINARY --max-old-space-size=16384 --inspect-brk node_modules/.bin/vite-node ${scriptPath} -- $@"
 else
-  $NODE_BINARY node_modules/.bin/sst bind --profile main \
+  $NODE_BINARY node_modules/.bin/sst bind --profile rc \
     "$NODE_BINARY --max-old-space-size=16384 node_modules/.bin/vite-node ${scriptPath} -- $@"
 fi

@@ -12,7 +12,6 @@
     "remove": "sst remove",
     "console": "sst console",
     "typecheck": "tsc --noEmit",
-    "migrate": "sh ./scripts/nvmViteNode.sh ./packages/core/scripts/migrate.ts",
     "migrate:gen": "pnpm drizzle-kit generate:pg --out ./packages/core/db/migrations/ --schema ./packages/core/db/schema.ts"
   },
   "devDependencies": {
