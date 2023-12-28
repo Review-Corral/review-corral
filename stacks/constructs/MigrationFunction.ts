@@ -8,7 +8,7 @@ interface MigrationFunctionProps extends StackProps {
   functionDefaults: FunctionProps;
 }
 
-const MIGRATIONS_PATH_LOCAL = "services/core/db/migrations";
+const MIGRATIONS_PATH_LOCAL = "packages/core/db/migrations";
 const MIGRATIONS_PATH_CONTAINER = "migrations";
 
 export default class MigrationFunction extends Function {
@@ -17,7 +17,7 @@ export default class MigrationFunction extends Function {
 
     super(stack, id, {
       ...functionDefaults,
-      handler: "services/domain/db/migrateToLatest.handler",
+      handler: "packages/functions/src/migrateToLatest.handler",
       // Same timeout as in seed.yml after_deploy stage
       timeout: "10 minutes",
       copyFiles: [

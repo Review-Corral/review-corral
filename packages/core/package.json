@@ -7,6 +7,8 @@
     "typecheck": "tsc -noEmit"
   },
   "devDependencies": {
+    "@middy/core": "^5.1.0",
+    "@types/aws-lambda": "^8.10.130",
     "@types/node": "^20.10.5",
     "@types/pg": "^8.10.9",
     "drizzle-kit": "^0.20.7",
@@ -21,6 +23,7 @@
   "dependencies": {
     "@aws-sdk/client-secrets-manager": "^3.481.0",
     "drizzle-orm": "^0.29.1",
+    "middy": "^0.36.0",
     "pg": "^8.11.3",
     "zod": "^3.22.4"
   }
