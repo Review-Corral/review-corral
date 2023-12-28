@@ -28,7 +28,7 @@
         "label": "Backend",
         "type": "shell",
         "command": "./scripts/nvmPnpm.sh",
-        "args": ["dev", "--profile main"],
+        "args": ["dev"],
         "options": {
           "cwd": "${workspaceFolder}"
         },
