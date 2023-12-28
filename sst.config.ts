@@ -1,4 +1,5 @@
 import { SSTConfig } from "sst";
+import { FrontendStack } from "./stacks/FrontendStack";
 import { MainStack } from "./stacks/MainStack";
 import { PersistedStack } from "./stacks/PersistedStack";
 
@@ -11,6 +12,6 @@ export default {
     };
   },
   stacks(app) {
-    app.stack(PersistedStack).stack(MainStack);
+    app.stack(PersistedStack).stack(MainStack).stack(FrontendStack);
   },
 } satisfies SSTConfig;

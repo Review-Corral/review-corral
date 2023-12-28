@@ -48,4 +48,8 @@ export function MainStack({ stack, app }: StackContext) {
     ApiEndpoint: api.url,
     MigrationFunction: migrationFunction.functionName,
   });
+
+  return {
+    api,
+  };
 }
