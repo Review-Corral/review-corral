@@ -6,10 +6,14 @@
   "scripts": {
     "dev": "sst dev",
     "build": "sst build",
+    "build:core": "tsc -p ./packages/core/tsconfig.json",
+    "build:core:watch": "p build:core --watch",
     "deploy": "sst deploy",
     "remove": "sst remove",
     "console": "sst console",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "migrate": "sh ./services/scripts/nvmViteNode.sh ./services/scripts/migrate.ts",
+    "migrate:gen": "pnpm drizzle-kit generate:pg --out ./services/core/db/migrations/ --schema ./services/core/db/schema/*"
   },
   "devDependencies": {
     "sst": "^2.38.7",
