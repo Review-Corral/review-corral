@@ -7,7 +7,7 @@ export function MainStack({ stack, app }: StackContext) {
   const { vpc, database } = use(PersistedStack);
 
   let functionsSecurityGroup: SecurityGroup | undefined =
-    vpc && database
+    !!vpc && !!database
       ? new SecurityGroup(stack, "FunctionsSecurityGroup", {
           vpc,
         })
@@ -16,7 +16,9 @@ export function MainStack({ stack, app }: StackContext) {
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
     vpc: vpc,
-    securityGroups: functionsSecurityGroup ? [functionsSecurityGroup] : [],
+    securityGroups: functionsSecurityGroup
+      ? [functionsSecurityGroup]
+      : undefined,
     environment: {
       IS_LOCAL: app.local.toString(),
       MIGRATIONS_PATH: "packages/core/src/database/migrations",

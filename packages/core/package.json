@@ -8,12 +8,20 @@
   },
   "devDependencies": {
     "@types/node": "^20.10.5",
+    "@types/pg": "^8.10.9",
     "drizzle-kit": "^0.20.7",
     "sst": "^2.38.7",
     "vitest": "^1.1.0"
   },
+  "paths": {
+    "@core": [
+      "*"
+    ]
+  },
   "dependencies": {
+    "@aws-sdk/client-secrets-manager": "^3.481.0",
     "drizzle-orm": "^0.29.1",
+    "pg": "^8.11.3",
     "zod": "^3.22.4"
   }
 }
