@@ -1,8 +1,8 @@
 export const assertVarExists = <T extends string | number = string>(
-  variable: T | undefined
+  variable: string
 ): T => {
-  if (variable) {
-    return variable;
+  if (process.env[variable]) {
+    return process.env[variable] as T;
   }
 
   const varToString = <T extends string | number>(
