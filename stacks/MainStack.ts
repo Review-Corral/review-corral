@@ -2,6 +2,7 @@ import { SecurityGroup } from "aws-cdk-lib/aws-ec2";
 import { Api, FunctionProps, StackContext, use } from "sst/constructs";
 import { PersistedStack } from "./PersistedStack";
 import { getDbConnectionInfo } from "./constructs/Database";
+import MigrationFunction from "./constructs/MigrationFunction";
 
 export function MainStack({ stack, app }: StackContext) {
   const { vpc, database } = use(PersistedStack);
@@ -29,6 +30,12 @@ export function MainStack({ stack, app }: StackContext) {
 
   stack.setDefaultFunctionProps(functionDefaults);
 
+  const migrationFunction = new MigrationFunction(stack, "MigrateToLatest", {
+    app,
+    database,
+    functionDefaults,
+  });
+
   const api = new Api(stack, "api", {
     routes: {
       "GET /": "packages/functions/src/lambda.handler",
@@ -39,5 +46,6 @@ export function MainStack({ stack, app }: StackContext) {
 
   stack.addOutputs({
     ApiEndpoint: api.url,
+    MigrationFunction: migrationFunction.functionName,
   });
 }

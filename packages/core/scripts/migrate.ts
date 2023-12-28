@@ -1,5 +1,5 @@
-import { migrateToLatest } from "../core/db/db";
-import { Logger } from "../core/logging";
+import { migrateToLatest } from "../db/db";
+import { Logger } from "../logging";
 
 const LOGGER = new Logger("migrate");
 
