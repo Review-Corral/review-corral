@@ -1,0 +1,212 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Frontend",
+        "type": "shell",
+        "command": "./scripts/nvmPnpm.sh",
+        "args": ["dev"],
+        "options": {
+          "cwd": "${workspaceFolder}/frontend"
+        },
+        "icon": {
+          "id": "browser",
+          "color": "terminal.ansiCyan"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "dedicated"
+        },
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "Backend",
+        "type": "shell",
+        "command": "./scripts/nvmPnpm.sh",
+        "args": ["dev", "--profile main"],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "icon": {
+          "id": "vm",
+          "color": "terminal.ansiRed"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "dedicated"
+        },
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "Test (Watch)",
+        "type": "shell",
+        "command": "./scripts/nvmPnpm.sh",
+        "icon": {
+          "id": "beaker",
+          "color": "terminal.ansiGreen"
+        },
+        "args": ["test:watch"],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "dedicated"
+        },
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "Connect to Prod Database",
+        "type": "shell",
+        "command": "sh",
+        "args": ["./scripts/connectDatabase.sh", "staging", "--profile", "main"],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "icon": {
+          "id": "database",
+          "color": "terminal.ansiWhite"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "focus": true,
+          "reveal": "always",
+          "panel": "shared"
+        },
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "Sync Staging Results Buckets",
+        "type": "shell",
+        "icon": {
+          "id": "folder",
+          "color": "terminal.ansiGreen"
+        },
+        "command": "sh",
+        "args": ["./scripts/syncStagingResultsBucket.sh"],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        },
+        "isBackground": true
+      },
+      {
+        "label": "Generate Migrations",
+        "type": "shell",
+        "command": "./scripts/nvmPnpm.sh",
+        "args": ["migrate:gen"],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "icon": {
+          "id": "database",
+          "color": "terminal.ansiBlue"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        },
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "Generate Debug Model Migrations",
+        "type": "shell",
+        "command": "./scripts/nvmPnpm.sh",
+        "args": ["migrate:gen:debugModel"],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "icon": {
+          "id": "database",
+          "color": "terminal.ansiMagenta"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        },
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "Run Migrations",
+        "type": "shell",
+        "command": "./scripts/nvmPnpm.sh",
+        "args": ["migrate"],
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "icon": {
+          "id": "database",
+          "color": "terminal.ansiBlue"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "shared"
+        },
+        "problemMatcher": [],
+        "isBackground": true
+      },
+      {
+        "label": "Drizzle Studio",
+        "type": "shell",
+        "command": "open http://localhost:4983 && pnpm studio",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "icon": {
+          "id": "database",
+          "color": "terminal.ansiRed"
+        },
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "presentation": {
+          "reveal": "always",
+          "panel": "dedicated"
+        },
+        "problemMatcher": [],
+        "isBackground": true
+      }
+    ],
+  }
+  
