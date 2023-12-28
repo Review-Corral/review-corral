@@ -1,7 +1,5 @@
-import { migrateToLatest } from "@core/db/db.js";
-import { Logger } from "../core/logging/index.js";
-
-process.env.MIGRATIONS_PATH = "services/core/db/migrations";
+import { migrateToLatest } from "../core/db/db";
+import { Logger } from "../core/logging";
 
 const LOGGER = new Logger("migrate");
 
