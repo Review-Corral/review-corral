@@ -23,7 +23,8 @@ export function MainStack({ stack, app }: StackContext) {
     environment: {
       IS_LOCAL: app.local.toString(),
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
-      ...(database ? getDbConnectionInfo(app, database) : {}),
+      LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
+      ...getDbConnectionInfo(app, database),
     },
     runtime: "nodejs18.x",
   };
