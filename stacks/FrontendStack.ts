@@ -3,7 +3,7 @@ import { StackContext, StaticSite, use } from "sst/constructs";
 import { MainStack } from "./MainStack";
 
 export function FrontendStack({ stack, app }: StackContext) {
-  const { api } = use(MainStack);
+  const { api, authUrl } = use(MainStack);
 
   // Define our React app
   const site = new StaticSite(stack, "ReactSite", {
@@ -13,6 +13,7 @@ export function FrontendStack({ stack, app }: StackContext) {
     // Pass in our environment variables
     environment: {
       VITE_API_URL: api.url,
+      VITE_AUTH_URL: authUrl,
       VITE_REGION: app.region,
       ...(app.local ? { VITE_LOCAL: "true" } : {}),
     },
