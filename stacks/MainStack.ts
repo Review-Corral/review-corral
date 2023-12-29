@@ -65,7 +65,8 @@ export function MainStack({ stack, app }: StackContext) {
     },
   });
 
-  auth.attach(stack, { api, prefix: "/auth" });
+  const authPostfix = "/auth";
+  auth.attach(stack, { api, prefix: authPostfix });
 
   // ===================
   // Ending Config
@@ -90,6 +91,7 @@ export function MainStack({ stack, app }: StackContext) {
 
   return {
     api,
+    authUrl: `${api.url}${authPostfix}`,
   };
 }
 
