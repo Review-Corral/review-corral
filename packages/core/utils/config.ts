@@ -10,14 +10,11 @@ import {
 const { environment, friendlyName: functionName } =
   getFriendlyNameAndEnvironment();
 const isLocal = getIsLocal();
-const isStaffEnvironment =
-  isLocal || ["intern", "staging"].includes(environment);
 
 const config = {
   region: "us-east-1",
   appName: "review-corral",
   isLocal,
-  isStaffEnvironment,
   isCI: !!process.env.CI,
   debugMode: getDebugMode(),
   frontendBaseUrl: getFrontendUrl(),
