@@ -10,10 +10,7 @@ interface LambdaPermissionsProps {
  * Attaches some permissions to all Lambda functions in the stack
  */
 class LambdaPermissions extends Construct {
-  static readonly globalSecretNames: string[] = [
-    "SegmentWriteKey", // Necessary for analytics
-    "SecApiKey", // Necessary for the SEC-API useage
-  ];
+  static readonly globalSecretNames: string[] = [];
 
   constructor(stack: Stack, id: string, props: LambdaPermissionsProps) {
     super(stack, id);

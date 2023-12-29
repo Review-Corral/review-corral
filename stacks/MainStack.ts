@@ -1,7 +1,7 @@
 import {
   CfnEIP,
   CfnEIPAssociation,
-  SecurityGroup,
+  SubnetType,
   Vpc,
 } from "aws-cdk-lib/aws-ec2";
 import { Construct } from "constructs";
@@ -21,14 +21,7 @@ import LambdaPermissions from "./constructs/LambdaPermissions";
 import MigrationFunction from "./constructs/MigrationFunction";
 
 export function MainStack({ stack, app }: StackContext) {
-  const { vpc, database } = use(PersistedStack);
-
-  let functionsSecurityGroup: SecurityGroup | undefined =
-    !!vpc && !!database
-      ? new SecurityGroup(stack, "FunctionsSecurityGroup", {
-          vpc,
-        })
-      : undefined;
+  const { vpc, database, functionsSecurityGroup } = use(PersistedStack);
 
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
@@ -42,18 +35,27 @@ export function MainStack({ stack, app }: StackContext) {
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
       ...getDbConnectionInfo(app, database),
     },
+    logRetention: app.local ? "one_week" : "one_year",
     runtime: "nodejs18.x",
+    // Combined with the Elastic IP(s), these settings enable outbound internet access
+    // without the need for costly NAT Gateways
+    allowPublicSubnet: Boolean(vpc),
+    vpcSubnets: vpc ? { subnetType: SubnetType.PUBLIC } : undefined,
   };
   stack.setDefaultFunctionProps(functionDefaults);
-
-  if (functionsSecurityGroup && database) {
-    database.allowInboundAccess(functionsSecurityGroup);
-  }
 
   const migrationFunction = new MigrationFunction(stack, "MigrateToLatest", {
     app,
     database,
     functionDefaults,
+  });
+
+  const api = new Api(stack, "api", {
+    routes: {
+      "GET /": "packages/functions/src/lambda.handler",
+      "GET /todo": "packages/functions/src/todo.list",
+      "POST /todo": "packages/functions/src/todo.create",
+    },
   });
 
   // ===================
@@ -71,14 +73,6 @@ export function MainStack({ stack, app }: StackContext) {
     // simply to determine which network interfaces need Elastic IPs
     enableLambdaOutboundNetworking(stack, vpc, migrationFunction);
   }
-
-  const api = new Api(stack, "api", {
-    routes: {
-      "GET /": "packages/functions/src/lambda.handler",
-      "GET /todo": "packages/functions/src/todo.list",
-      "POST /todo": "packages/functions/src/todo.create",
-    },
-  });
 
   stack.addOutputs({
     ApiEndpoint: api.url,

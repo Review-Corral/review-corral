@@ -1,26 +1,26 @@
-import { SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
+import { SecurityGroup, SubnetType, Vpc } from "aws-cdk-lib/aws-ec2";
 import { Stack, StackContext } from "sst/constructs";
 import ProvisionedDatabase from "./constructs/Database";
 
 interface PersistentStackResult {
   vpc: Vpc | undefined;
   database: ProvisionedDatabase | undefined;
+  functionsSecurityGroup: SecurityGroup | undefined;
 }
 
 export function PersistedStack({
   stack,
   app,
 }: StackContext): PersistentStackResult {
-  const { vpc, database } = buildEnvDependantResources({ stack, app });
+  const args = buildEnvDependantResources({ stack, app });
 
   stack.addOutputs({
-    vpcId: vpc?.vpcId,
-    databaseId: database?.instance.instanceResourceId,
+    vpcId: args.vpc?.vpcId,
+    databaseId: args.database?.instance.instanceResourceId,
   });
 
   return {
-    vpc,
-    database,
+    ...args,
   };
 }
 
@@ -32,6 +32,7 @@ function buildEnvDependantResources({
     return {
       vpc: undefined,
       database: undefined,
+      functionsSecurityGroup: undefined,
     };
   }
   const vpc: Vpc = buildVpc(stack);
@@ -40,9 +41,20 @@ function buildEnvDependantResources({
     vpc,
     isLocal: app.local,
   });
+  const functionsSecurityGroup = new SecurityGroup(
+    stack,
+    "FunctionsSecurityGroup",
+    {
+      vpc,
+    }
+  );
+
+  database.allowInboundAccess(functionsSecurityGroup);
+
   return {
     vpc,
     database,
+    functionsSecurityGroup,
   };
 }
 
