@@ -34,6 +34,8 @@ export function MainStack({ stack, app }: StackContext) {
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
+      GH_CLIENT_ID: process.env.GH_CLIENT_ID!,
+      GH_CLIENT_SECRET: process.env.GH_CLIENT_SECRET!,
       ...getDbConnectionInfo(app, database),
     },
     logRetention: app.local ? "one_week" : "one_year",

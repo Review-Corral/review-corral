@@ -6,15 +6,13 @@ export const handler = AuthHandler({
     github: GithubAdapter({
       clientID: assertVarExists("GH_CLIENT_ID"),
       clientSecret: assertVarExists("GH_CLIENT_SECRET"),
-      scope: "repo",
+      scope: "user",
       onSuccess: async (tokenset) => {
         console.log("IN ON AUTH SUCCESS");
-        const claims = tokenset.claims();
-
-        console.log({ claims });
+        console.log({ tokenset });
         return {
           statusCode: 200,
-          body: JSON.stringify(tokenset.claims()),
+          body: JSON.stringify(tokenset),
         };
       },
     }),
