@@ -14,6 +14,7 @@ export function FrontendStack({ stack, app }: StackContext) {
     environment: {
       VITE_API_URL: api.url,
       VITE_REGION: app.region,
+      ...(app.local ? { VITE_LOCAL: "true" } : {}),
     },
   });
 
