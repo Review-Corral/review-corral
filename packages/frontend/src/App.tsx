@@ -1,10 +1,25 @@
+import { useState } from "react";
 import "./App.css";
+import GithubButton from "./GithubLogin";
 
 function App() {
+  const [loginError, setLoginError] = useState<string | undefined>(undefined);
+
   return (
     <>
       <div>{import.meta.env.VITE_API_URL ?? "none"}</div>
-      <div>Login with Github</div>
+      <GithubButton />
+      {loginError && (
+        <div className="mt-6">
+          <div className="relative">
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white text-red-500">
+                Error logging in
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
