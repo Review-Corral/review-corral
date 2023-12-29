@@ -1,7 +1,23 @@
-import { SecurityGroup } from "aws-cdk-lib/aws-ec2";
-import { Api, FunctionProps, StackContext, use } from "sst/constructs";
+import {
+  CfnEIP,
+  CfnEIPAssociation,
+  SecurityGroup,
+  Vpc,
+} from "aws-cdk-lib/aws-ec2";
+import { Construct } from "constructs";
+import {
+  Api,
+  FunctionProps,
+  Function as SstFunction,
+  Stack as SstStack,
+  StackContext,
+  use,
+} from "sst/constructs";
 import { PersistedStack } from "./PersistedStack";
 import { getDbConnectionInfo } from "./constructs/Database";
+import LambdaNaming from "./constructs/LambdaNaming";
+import LambdaNetworkInterface from "./constructs/LambdaNetworkInterface";
+import LambdaPermissions from "./constructs/LambdaPermissions";
 import MigrationFunction from "./constructs/MigrationFunction";
 
 export function MainStack({ stack, app }: StackContext) {
@@ -21,21 +37,40 @@ export function MainStack({ stack, app }: StackContext) {
       ? [functionsSecurityGroup]
       : undefined,
     environment: {
-      IS_LOCAL: app.local.toString(),
+      IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
       ...getDbConnectionInfo(app, database),
     },
     runtime: "nodejs18.x",
   };
-
   stack.setDefaultFunctionProps(functionDefaults);
+
+  if (functionsSecurityGroup && database) {
+    database.allowInboundAccess(functionsSecurityGroup);
+  }
 
   const migrationFunction = new MigrationFunction(stack, "MigrateToLatest", {
     app,
     database,
     functionDefaults,
   });
+
+  // ===================
+  // Ending Config
+  // Must be at the end, after all Lambdas are defined
+  // ===================
+
+  new LambdaNaming(stack, "LambdaNaming");
+  new LambdaPermissions(stack, "LambdaPermissions", {
+    secretArns: database ? [database.secret.secretArn] : [],
+  });
+
+  if (vpc && functionsSecurityGroup) {
+    // It doesn't really matter which Lambda function is passed in here; one is needed
+    // simply to determine which network interfaces need Elastic IPs
+    enableLambdaOutboundNetworking(stack, vpc, migrationFunction);
+  }
 
   const api = new Api(stack, "api", {
     routes: {
@@ -53,4 +88,37 @@ export function MainStack({ stack, app }: StackContext) {
   return {
     api,
   };
+}
+
+/**
+ * Configures outbound internet access for Lambda functions in a VPC without requiring
+ * NAT Gateways. Any arbitrary Lambda function will suffice as a parameter to this
+ * function; it is used to determine which network interfaces need to be associated with
+ * Elastic IPs.
+ */
+function enableLambdaOutboundNetworking(
+  stack: SstStack,
+  vpc: Vpc,
+  lambdaFunction: SstFunction
+): void {
+  for (const subnet of vpc.publicSubnets) {
+    const lambdaEip = new CfnEIP(stack, `LambdaEIP${subnet.node.id}`);
+
+    // Ensure the Elastic IP is released when the subnet is deleted
+    lambdaEip.node.addDependency(subnet.node.defaultChild as Construct);
+
+    const lambdaEni = LambdaNetworkInterface.fromLookup(
+      stack,
+      `LambdaENI${subnet.node.id}`,
+      {
+        lambdaFunction,
+        subnet,
+      }
+    );
+
+    new CfnEIPAssociation(stack, `LambdaEIPAssoc${subnet.node.id}`, {
+      allocationId: lambdaEip.attrAllocationId,
+      networkInterfaceId: lambdaEni.networkInterfaceId,
+    });
+  }
 }
