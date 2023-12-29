@@ -22,28 +22,32 @@ class LambdaPermissions extends Construct {
         `arn:aws:secretsmanager:${stack.region}:${stack.account}:secret:${secretName}-*`
     );
 
-    const policy = new ManagedPolicy(this, "LambdaPermissionsPolicy", {
-      statements: [
-        new PolicyStatement({
-          effect: Effect.ALLOW,
-          actions: [
-            "secretsmanager:DescribeSecret",
-            "secretsmanager:GetSecretValue",
-          ],
-          resources: [...globalSecretArns, ...props.secretArns],
-        }),
-        new PolicyStatement({
-          effect: Effect.ALLOW,
-          actions: ["states:StartExecution"],
-          resources: [
-            `arn:aws:states:${stack.region}:${stack.account}:stateMachine:*`,
-          ],
-        }),
-      ],
-    });
+    const resources = [...globalSecretArns, ...props.secretArns];
 
-    for (const lambdaFunction of stack.getAllFunctions()) {
-      lambdaFunction.role?.addManagedPolicy(policy);
+    if (resources.length > 0) {
+      const policy = new ManagedPolicy(this, "LambdaPermissionsPolicy", {
+        statements: [
+          new PolicyStatement({
+            effect: Effect.ALLOW,
+            actions: [
+              "secretsmanager:DescribeSecret",
+              "secretsmanager:GetSecretValue",
+            ],
+            resources,
+          }),
+          new PolicyStatement({
+            effect: Effect.ALLOW,
+            actions: ["states:StartExecution"],
+            resources: [
+              `arn:aws:states:${stack.region}:${stack.account}:stateMachine:*`,
+            ],
+          }),
+        ],
+      });
+
+      for (const lambdaFunction of stack.getAllFunctions()) {
+        lambdaFunction.role?.addManagedPolicy(policy);
+      }
     }
   }
 }

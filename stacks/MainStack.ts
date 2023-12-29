@@ -7,6 +7,7 @@ import {
 import { Construct } from "constructs";
 import {
   Api,
+  Auth,
   FunctionProps,
   Function as SstFunction,
   Stack as SstStack,
@@ -57,6 +58,14 @@ export function MainStack({ stack, app }: StackContext) {
       "POST /todo": "packages/functions/src/todo.create",
     },
   });
+
+  const auth = new Auth(stack, "auth", {
+    authenticator: {
+      handler: "packages/functions/src/auth.handler",
+    },
+  });
+
+  auth.attach(stack, { api, prefix: "/auth" });
 
   // ===================
   // Ending Config
