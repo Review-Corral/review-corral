@@ -10,7 +10,7 @@ export async function getJwt(): Promise<nJwt.Jwt> {
 
   const ghClientId = assertVarExists("GH_CLIENT_ID");
 
-  const ghJwtSigningSecret = assertVarExists("GH_APP_JWT_SIGNING_SECRET");
+  const ghJwtSigningSecret = assertVarExists("GH_JWT_SECRET");
 
   const claims = {
     // issued at time, 60 seconds in the past to allow for clock drift
