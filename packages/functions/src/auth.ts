@@ -41,13 +41,13 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
       },
     })
     .json<UserResponse>();
-
+    
   LOGGER.debug("Users fetch response: ", userQuery);
 
   const user = await getOrCreateUser(userQuery, tokenSet.access_token);
 
   return Session.parameter({
-    redirect: "https://example.com",
+    redirect: `${assertVarExists("BASE_FE_URL")}/login/success`,
     type: "user",
     properties: {
       id: user.id,
@@ -58,9 +58,12 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
 const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
   const existingUser = await fetchUserById(user.id);
 
-  if (existingUser) return existingUser;
+  if (existingUser) {
+    LOGGER.info("Found existing user", { id: user.id });
+    return existingUser;
+  }
 
-  LOGGER.info("User does not exist, creating a new user", { user });
+  LOGGER.info("User does not exist, creating a new user", { id: user.id });
   // create a user
   return await insertUser(user, accessToken);
 };
