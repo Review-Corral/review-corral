@@ -1,6 +1,13 @@
 import { Endpoints } from "@octokit/types";
 
 export type UserResponse = Endpoints["GET /user"]["response"]["data"];
+
+// For some of these types, I'm manually creating the types instead of using Octokit
+// because it's currently giving me the wrong result even though it was just installed
+// at the day of writing.
+// Getting the types from here:
+// https://docs.github.com/en/rest/apps/installations?apiVersion=2022-11-28
+
 /**
  * Represents an account in the installation.
  */
