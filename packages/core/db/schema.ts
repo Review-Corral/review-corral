@@ -120,18 +120,17 @@ export const usersAndOrganizations = pgTable("users_and_organizations", {
 });
 
 export const users = pgTable("users", {
-  id: text("id").primaryKey().notNull(),
+  id: bigint("id", { mode: "number" }).primaryKey().notNull(),
   createdAt: timestamp("created_at", {
     withTimezone: true,
     mode: "string",
   }).defaultNow(),
-  email: text("email"),
+  email: text("email").unique(),
   updatedAt: timestamp("updated_at", {
     withTimezone: true,
     mode: "string",
   }).defaultNow(),
   ghAccessToken: text("gh_access_token"),
-  ghRefreshToken: text("gh_refresh_token"),
 });
 
 export const organizations = pgTable(

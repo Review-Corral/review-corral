@@ -1,9 +1,69 @@
 import ky from "ky";
-import { AuthHandler, GithubAdapter } from "sst/node/auth";
+import {
+  AuthHandler,
+  GithubAdapter,
+  OauthBasicConfig,
+  Session,
+} from "sst/node/auth";
+import {
+  UserResponse,
+  fetchUserById,
+  insertUser,
+} from "../../core/db/fetchers/users";
 import { Logger } from "../../core/logging";
 import { assertVarExists } from "../../core/utils/assert";
+import { HttpError } from "../../core/utils/errors/Errors";
+
+declare module "sst/node/auth" {
+  export interface SessionTypes {
+    user: {
+      id: number;
+    };
+  }
+}
 
 const LOGGER = new Logger("functions:auth");
+
+const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
+  LOGGER.info("Successfully authenticated with GitHub");
+  console.log({ tokenSet });
+
+  LOGGER.info("Going to fetch user profile information");
+
+  if (!tokenSet.access_token) throw new HttpError(500, "No access token found");
+
+  // Once we get the user access token, we need to fetch information about the user
+  // from the API to know who the user is
+  const userQuery = await ky
+    .get("https://api.github.com/user", {
+      headers: {
+        Authorization: `token ${tokenSet.access_token}`,
+      },
+    })
+    .json<UserResponse>();
+
+  LOGGER.debug("Users fetch response: ", userQuery);
+
+  const user = await getOrCreateUser(userQuery, tokenSet.access_token);
+
+  return Session.parameter({
+    redirect: "https://example.com",
+    type: "user",
+    properties: {
+      id: user.id,
+    },
+  });
+};
+
+const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
+  const existingUser = await fetchUserById(user.id);
+
+  if (existingUser) return existingUser;
+
+  LOGGER.info("User does not exist, creating a new user", { user });
+  // create a user
+  return await insertUser(user, accessToken);
+};
 
 export const handler = AuthHandler({
   providers: {
@@ -11,27 +71,7 @@ export const handler = AuthHandler({
       clientID: assertVarExists("GH_CLIENT_ID"),
       clientSecret: assertVarExists("GH_CLIENT_SECRET"),
       scope: "user",
-      onSuccess: async (tokenset) => {
-        LOGGER.info("Successfully authenticated with GitHub");
-        console.log({ tokenset });
-
-        LOGGER.info("Going to fetch user profile information");
-
-        const response = await ky
-          .get("https://api.github.com/user", {
-            headers: {
-              Authorization: `token ${tokenset.access_token}`,
-            },
-          })
-          .json();
-
-        LOGGER.debug("Users fetch response: ", response);
-
-        return {
-          statusCode: 200,
-          body: JSON.stringify(tokenset),
-        };
-      },
+      onSuccess,
     }),
   },
 });
