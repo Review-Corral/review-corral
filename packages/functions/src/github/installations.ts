@@ -1,4 +1,3 @@
-import ky from "ky";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import {
@@ -8,8 +7,9 @@ import {
   insertOrganizationAndAssociateUser,
   updateOrganizationInstallationId,
 } from "../../../core/db/fetchers/organizations";
-import { Organization } from "../../../core/db/types";
+import { Organization, User } from "../../../core/db/types";
 import { InstallationsData } from "../../../core/github/endpointTypes";
+import { getUserInstallations } from "../../../core/github/fetchers";
 import { Logger } from "../../../core/logging";
 
 const LOGGER = new Logger("functions:installations");
@@ -26,17 +26,26 @@ export const getInstallations = ApiHandler(async (event, context) => {
   }
 
   // Installations appear to have effectively a 1:1 mapping with organizations
-  const installations = await ky
-    .get("https://api.github.com/user/installations", {
-      headers: {
-        Authorization: `token ${user.ghAccessToken}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    })
-    .json<InstallationsData>();
+  const installations = await getUserInstallations(user);
 
   LOGGER.debug("Installations fetch response: ", { installations });
 
+  const organizations: Organization[] = await getOrganizations(
+    user,
+    installations
+  );
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify(organizations),
+  };
+});
+
+/**
+ * Syncs the local database Organizations with the installations response from
+ * GitHub, then returns the organizations the user has access to.
+ */
+async function getOrganizations(user: User, installations: InstallationsData) {
   const organizations: Organization[] = [];
 
   // The organizations a user is currently mapped to via the m2m table
@@ -91,9 +100,5 @@ export const getInstallations = ApiHandler(async (event, context) => {
       organizations.push(newOrg);
     }
   }
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(organizations),
-  };
-});
+  return organizations;
+}
