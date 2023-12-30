@@ -61,6 +61,8 @@ export function MainStack({ stack, app }: StackContext) {
       "GET /todo": "packages/functions/src/todo.list",
       "POST /todo": "packages/functions/src/todo.create",
       "GET /profile": "packages/functions/src/todo.getUser",
+      "GET /installations":
+        "packages/functions/src/github/installations.getInstallations",
     },
   });
 

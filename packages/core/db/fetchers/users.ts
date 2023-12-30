@@ -1,11 +1,9 @@
-import { Endpoints } from "@octokit/types";
 import { eq } from "drizzle-orm";
+import { UserResponse } from "../../github/endpointTypes";
 import { DB } from "../db";
 import { users } from "../schema";
 import { User } from "../types";
 import { takeFirst, takeFirstOrThrow } from "./utils";
-
-export type UserResponse = Endpoints["GET /user"]["response"]["data"];
 
 /**
  * Fetches a user by their id
@@ -17,6 +15,9 @@ export const fetchUserById = async (id: number): Promise<User | undefined> =>
     .limit(1)
     .then(takeFirst);
 
+/**
+ * Creates a user. Should only be used when logging in and the user doesn't exist
+ */
 export const insertUser = async (
   user: UserResponse,
   accessToken: string

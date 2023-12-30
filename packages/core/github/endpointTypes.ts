@@ -1,0 +1,68 @@
+import { Endpoints } from "@octokit/types";
+
+export type UserResponse = Endpoints["GET /user"]["response"]["data"];
+/**
+ * Represents an account in the installation.
+ */
+export type Account = {
+  login: string;
+  id: number;
+  node_id: string;
+  avatar_url: string;
+  gravatar_id: string;
+  url: string;
+  html_url: string;
+  followers_url: string;
+  following_url: string;
+  gists_url: string;
+  starred_url: string;
+  subscriptions_url: string;
+  organizations_url: string;
+  repos_url: string;
+  events_url: string;
+  received_events_url: string;
+  type: "Organization" | "User";
+  site_admin: boolean;
+};
+
+/**
+ * Represents the permissions in the installation.
+ */
+export type Permission = {
+  checks: string;
+  metadata: string;
+  contents: string;
+};
+
+/**
+ * Represents an installation.
+ */
+export type Installation = {
+  id: number;
+  account: Account;
+  access_tokens_url: string;
+  repositories_url: string;
+  html_url: string;
+  app_id: number;
+  target_id: number;
+  target_type: string;
+  permissions: Permission;
+  events: string[];
+  single_file_name: string;
+  has_multiple_single_files: boolean;
+  single_file_paths: string[];
+  repository_selection: string;
+  created_at: string;
+  updated_at: string;
+  app_slug: string;
+  suspended_at: null | string;
+  suspended_by: null | string;
+};
+
+/**
+ * Represents the entire structure of the installations data.
+ */
+export type InstallationsData = {
+  total_count: number;
+  installations: Installation[];
+};

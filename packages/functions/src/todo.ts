@@ -1,8 +1,11 @@
 import { ApiHandler } from "sst/node/api";
 import { useSession } from "sst/node/auth";
 import { DB } from "../../core/db/db";
-import { fetchUserById } from "../../core/db/fetchers/users";
 import { organizations } from "../../core/db/schema";
+import { Logger } from "../../core/logging";
+import { useUser } from "./utils/useUser";
+
+const LOGGER = new Logger("functions:todo");
 
 export const create = ApiHandler(async (_evt) => {
   return {
@@ -19,28 +22,23 @@ export const list = ApiHandler(async (_evt) => {
   };
 });
 
-const _getUser = ApiHandler(async (event, context) => {
+export const getUser = ApiHandler(async (_event) => {
   const session = useSession();
 
-  if (session.type !== "user") {
-    throw new Error("User not set in session");
-  }
+  console.log({ session });
 
-  const userId = session.properties.id;
+  const { user, error } = await useUser();
 
-  if (!userId) {
+  if (!user) {
+    LOGGER.error("No user found in session", { error });
     return {
       statusCode: 401,
-      body: JSON.stringify({ message: "No context user Id" }),
+      body: JSON.stringify({ message: "Unauthorized" }),
     };
   }
-
-  const user = await fetchUserById(userId);
 
   return {
     statusCode: 200,
     body: JSON.stringify(user),
   };
 });
-
-export const getUser = _getUser;
