@@ -20,11 +20,7 @@ export async function getJwt(): Promise<nJwt.Jwt> {
     iss: ghClientId,
   };
 
-  const jwt = nJwt.create(
-    claims,
-    Buffer.from(ghJwtSigningSecret, "base64"),
-    "RS256"
-  );
+  const jwt = nJwt.create(claims, ghJwtSigningSecret, "RS256");
 
   return jwt.setExpiration(new Date().getTime() + 60 * 2);
 }
