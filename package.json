@@ -19,7 +19,7 @@
     "aws-cdk-lib": "2.110.1",
     "constructs": "10.3.0",
     "drizzle-kit": "^0.20.7",
-    "sst": "^2.38.7",
+    "sst": "2.38.7",
     "typescript": "^5.3.3"
   },
   "workspaces": [
