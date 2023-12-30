@@ -2,8 +2,11 @@ import ky from "ky";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import {
+  associateOrganizationWithUser,
   fetchOrganizationByAccountId,
+  fetchUsersOrganizations,
   insertOrganizationAndAssociateUser,
+  updateOrganizationInstallationId,
 } from "../../../core/db/fetchers/organizations";
 import { Organization } from "../../../core/db/types";
 import { InstallationsData } from "../../../core/github/endpointTypes";
@@ -36,6 +39,10 @@ export const getInstallations = ApiHandler(async (event, context) => {
 
   const organizations: Organization[] = [];
 
+  // The organizations a user is currently mapped to via the m2m table
+  const usersOrganizations = await fetchUsersOrganizations(user.id);
+  const usersOrganizationsIds = usersOrganizations.map((org) => org.id);
+
   for (const installation of installations.installations) {
     // Try to see if we find an organization with the same id (account id)
     // as the installation's account_id
@@ -50,11 +57,25 @@ export const getInstallations = ApiHandler(async (event, context) => {
 
     if (organization) {
       LOGGER.debug("Found organization for installation", { organization });
-      // TODO: apparently we should update the installation ID if it's different
-      // Also check that the m2m of the user and the organization is setup in case
-      // a different user installed it
+      // We should update the installation ID if it's different
+      if (organization.installationId !== installation.id) {
+        updateOrganizationInstallationId({
+          id: organization.id,
+          installationId: installation.id,
+        });
+      }
+
+      // If the user isn't part of the existing organization (m2m), then add them to
+      // it. this can happen if someone else installed the app into an organization
+      // that the user is part of.
+      if (!usersOrganizationsIds.includes(organization.id)) {
+        LOGGER.info(
+          "User is not part of organization. Associating user with organization..."
+        );
+        associateOrganizationWithUser(organization, user);
+      }
+
       organizations.push(organization);
-      continue;
     } else {
       LOGGER.info("No organization found for installation. Inserting...");
       const newOrg = await insertOrganizationAndAssociateUser(
