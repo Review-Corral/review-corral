@@ -3,7 +3,8 @@ import "./App.css";
 import GithubButton from "./GithubLogin";
 
 function App() {
-  const [loginError, setLoginError] = useState<string | undefined>(undefined);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [loginError, _setLoginError] = useState<string | undefined>(undefined);
 
   return (
     <>

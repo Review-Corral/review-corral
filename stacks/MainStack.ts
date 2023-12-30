@@ -14,6 +14,7 @@ import {
   StackContext,
   use,
 } from "sst/constructs";
+import { getBaseUrl } from "./FrontendStack";
 import { PersistedStack } from "./PersistedStack";
 import { getDbConnectionInfo } from "./constructs/Database";
 import LambdaNaming from "./constructs/LambdaNaming";
@@ -31,6 +32,7 @@ export function MainStack({ stack, app }: StackContext) {
       ? [functionsSecurityGroup]
       : undefined,
     environment: {
+      BASE_FE_URL: getBaseUrl(app.local),
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
