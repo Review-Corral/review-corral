@@ -1,6 +1,13 @@
 #!/bin/bash
 
+# This testing script generates a JWT for use with the Review Corral API. It should NOT
+# be used in production as it's expiry is only 10 minutes (the max allowed).
+
 # Path to the private key
+# Test App
+PRIVATE_KEY_PATH="/Users/alex/ssh/review-corral/test-review-corral.2023-12-30.private-key.pem"
+
+# Prod App
 PRIVATE_KEY_PATH="/Users/Alex/ssh/review-corral/review-corral.2022-08-11.private-key.pem"
 
 # Generate payload with `iat`, `exp`, and `iss`
