@@ -1,5 +1,5 @@
 {
-  "id": "ea5b2f6d-114a-4fb7-810e-63e99a1b646c",
+  "id": "cc9097f4-e628-4ef3-b505-9c0c6dd87eba",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -59,7 +59,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": true,
           "notNull": true
         },
@@ -76,12 +76,6 @@
           "primaryKey": false,
           "notNull": false,
           "default": "now()"
-        },
-        "repository_id": {
-          "name": "repository_id",
-          "type": "bigint",
-          "primaryKey": false,
-          "notNull": true
         },
         "repository_name": {
           "name": "repository_name",
@@ -104,7 +98,7 @@
         },
         "organization_id": {
           "name": "organization_id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         }
@@ -126,15 +120,7 @@
         }
       },
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "github_repositories_repository_id_key": {
-          "name": "github_repositories_repository_id_key",
-          "nullsNotDistinct": false,
-          "columns": [
-            "repository_id"
-          ]
-        }
-      }
+      "uniqueConstraints": {}
     },
     "organizations": {
       "name": "organizations",
@@ -142,19 +128,13 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": true,
           "notNull": true
         },
         "account_name": {
           "name": "account_name",
           "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "account_id": {
-          "name": "account_id",
-          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
@@ -195,13 +175,6 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {
-        "organizations_account_id_key": {
-          "name": "organizations_account_id_key",
-          "nullsNotDistinct": false,
-          "columns": [
-            "account_id"
-          ]
-        },
         "organizations_installation_id_key": {
           "name": "organizations_installation_id_key",
           "nullsNotDistinct": false,
@@ -217,7 +190,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": true,
           "notNull": true
         },
@@ -234,15 +207,9 @@
           "primaryKey": false,
           "notNull": false
         },
-        "pr_id": {
-          "name": "pr_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
         "organization_id": {
           "name": "organization_id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         },
@@ -277,13 +244,6 @@
           "nullsNotDistinct": false,
           "columns": [
             "thread_ts"
-          ]
-        },
-        "unique_pr_id": {
-          "name": "unique_pr_id",
-          "nullsNotDistinct": false,
-          "columns": [
-            "pr_id"
           ]
         }
       }
@@ -344,7 +304,7 @@
         },
         "organization_id": {
           "name": "organization_id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         }
@@ -406,7 +366,7 @@
         },
         "organization_id": {
           "name": "organization_id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": false
         }
@@ -444,7 +404,7 @@
       "columns": {
         "id": {
           "name": "id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": true,
           "notNull": true
         },
@@ -473,18 +433,20 @@
           "type": "text",
           "primaryKey": false,
           "notNull": false
-        },
-        "gh_refresh_token": {
-          "name": "gh_refresh_token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {},
       "foreignKeys": {},
       "compositePrimaryKeys": {},
-      "uniqueConstraints": {}
+      "uniqueConstraints": {
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": [
+            "email"
+          ]
+        }
+      }
     },
     "users_and_organizations": {
       "name": "users_and_organizations",
@@ -498,13 +460,13 @@
         },
         "user_id": {
           "name": "user_id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
         "org_id": {
           "name": "org_id",
-          "type": "text",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },

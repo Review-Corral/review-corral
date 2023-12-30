@@ -38,14 +38,15 @@ export const githubIntegration = pgTable(
 export const pullRequests = pgTable(
   "pull_requests",
   {
-    id: text("id").primaryKey().notNull(),
+    id: bigint("id", { mode: "number" }).primaryKey().notNull(),
     createdAt: timestamp("created_at", {
       withTimezone: true,
       mode: "string",
     }).defaultNow(),
     threadTs: text("thread_ts"),
-    prId: text("pr_id").notNull(),
-    organizationId: text("organization_id").references(() => organizations.id),
+    organizationId: bigint("organization_id", { mode: "number" }).references(
+      () => organizations.id
+    ),
     draft: boolean("draft").default(false).notNull(),
   },
   (table) => {
@@ -53,7 +54,6 @@ export const pullRequests = pgTable(
       pullRequestsThreadTsKey: unique("pull_requests_thread_ts_key").on(
         table.threadTs
       ),
-      uniquePrId: unique("unique_pr_id").on(table.prId),
     };
   }
 );
@@ -71,7 +71,7 @@ export const slackIntegration = pgTable("slack_integration", {
     .notNull(),
   slackTeamName: text("slack_team_name").notNull(),
   slackTeamId: text("slack_team_id").notNull(),
-  organizationId: text("organization_id")
+  organizationId: bigint("organization_id", { mode: "number" })
     .notNull()
     .references(() => organizations.id),
 });
@@ -90,7 +90,9 @@ export const usernameMappings = pgTable(
       withTimezone: true,
       mode: "string",
     }).defaultNow(),
-    organizationId: text("organization_id").references(() => organizations.id),
+    organizationId: bigint("organization_id", { mode: "number" }).references(
+      () => organizations.id
+    ),
   },
   (table) => {
     return {
@@ -103,10 +105,10 @@ export const usernameMappings = pgTable(
 
 export const usersAndOrganizations = pgTable("users_and_organizations", {
   id: text("id").primaryKey().notNull(),
-  userId: text("user_id")
+  userId: bigint("user_id", { mode: "number" })
     .notNull()
     .references(() => users.id),
-  orgId: text("org_id")
+  orgId: bigint("org_id", { mode: "number" })
     .notNull()
     .references(() => organizations.id),
   updatedAt: timestamp("updated_at", {
@@ -136,11 +138,11 @@ export const users = pgTable("users", {
 export const organizations = pgTable(
   "organizations",
   {
-    id: text("id").primaryKey().notNull(),
+    /**
+     * The account id is used for this
+     */
+    id: bigint("id", { mode: "number" }).primaryKey().notNull(),
     accountName: text("account_name").notNull(),
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    accountId: bigint("account_id", { mode: "number" }).notNull(),
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
     installationId: bigint("installation_id", { mode: "number" }).notNull(),
     avatarUrl: text("avatar_url").notNull(),
     updatedAt: timestamp("updated_at", {
@@ -155,9 +157,6 @@ export const organizations = pgTable(
   },
   (table) => {
     return {
-      organizationsAccountIdKey: unique("organizations_account_id_key").on(
-        table.accountId
-      ),
       organizationsInstallationIdKey: unique(
         "organizations_installation_id_key"
       ).on(table.installationId),
@@ -165,32 +164,23 @@ export const organizations = pgTable(
   }
 );
 
-export const githubRepositories = pgTable(
-  "github_repositories",
-  {
-    id: text("id").primaryKey().notNull(),
-    createdAt: timestamp("created_at", {
-      withTimezone: true,
-      mode: "string",
-    }).defaultNow(),
-    updatedAt: timestamp("updated_at", {
-      withTimezone: true,
-      mode: "string",
-    }).defaultNow(),
-    // You can use { mode: "bigint" } if numbers are exceeding js number limitations
-    repositoryId: bigint("repository_id", { mode: "number" }).notNull(),
-    repositoryName: text("repository_name").notNull(),
-    installationId: integer("installation_id").notNull(),
-    isActive: boolean("is_active").default(false).notNull(),
-    organizationId: text("organization_id")
-      .notNull()
-      .references(() => organizations.id),
-  },
-  (table) => {
-    return {
-      githubRepositoriesRepositoryIdKey: unique(
-        "github_repositories_repository_id_key"
-      ).on(table.repositoryId),
-    };
-  }
-);
+export const githubRepositories = pgTable("github_repositories", {
+  /**
+   * The Github repository ID is used for this
+   */
+  id: bigint("id", { mode: "number" }).primaryKey().notNull(),
+  createdAt: timestamp("created_at", {
+    withTimezone: true,
+    mode: "string",
+  }).defaultNow(),
+  updatedAt: timestamp("updated_at", {
+    withTimezone: true,
+    mode: "string",
+  }).defaultNow(),
+  repositoryName: text("repository_name").notNull(),
+  installationId: integer("installation_id").notNull(),
+  isActive: boolean("is_active").default(false).notNull(),
+  organizationId: bigint("organization_id", { mode: "number" })
+    .notNull()
+    .references(() => organizations.id),
+});

@@ -14,39 +14,33 @@ CREATE TABLE IF NOT EXISTS "github_integration" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "github_repositories" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" bigint PRIMARY KEY NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now(),
 	"updated_at" timestamp with time zone DEFAULT now(),
-	"repository_id" bigint NOT NULL,
 	"repository_name" text NOT NULL,
 	"installation_id" integer NOT NULL,
 	"is_active" boolean DEFAULT false NOT NULL,
-	"organization_id" text NOT NULL,
-	CONSTRAINT "github_repositories_repository_id_key" UNIQUE("repository_id")
+	"organization_id" bigint NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "organizations" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" bigint PRIMARY KEY NOT NULL,
 	"account_name" text NOT NULL,
-	"account_id" bigint NOT NULL,
 	"installation_id" bigint NOT NULL,
 	"avatar_url" text NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"created_at" timestamp with time zone DEFAULT now(),
 	"organization_type" "organization_type",
-	CONSTRAINT "organizations_account_id_key" UNIQUE("account_id"),
 	CONSTRAINT "organizations_installation_id_key" UNIQUE("installation_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "pull_requests" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" bigint PRIMARY KEY NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now(),
 	"thread_ts" text,
-	"pr_id" text NOT NULL,
-	"organization_id" text,
+	"organization_id" bigint,
 	"draft" boolean DEFAULT false NOT NULL,
-	CONSTRAINT "pull_requests_thread_ts_key" UNIQUE("thread_ts"),
-	CONSTRAINT "unique_pr_id" UNIQUE("pr_id")
+	CONSTRAINT "pull_requests_thread_ts_key" UNIQUE("thread_ts")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "slack_integration" (
@@ -58,7 +52,7 @@ CREATE TABLE IF NOT EXISTS "slack_integration" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"slack_team_name" text NOT NULL,
 	"slack_team_id" text NOT NULL,
-	"organization_id" text NOT NULL
+	"organization_id" bigint NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "username_mappings" (
@@ -67,23 +61,23 @@ CREATE TABLE IF NOT EXISTS "username_mappings" (
 	"github_username" text NOT NULL,
 	"slack_user_id" text NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now(),
-	"organization_id" text,
+	"organization_id" bigint,
 	CONSTRAINT "username_mappings_slack_username_key" UNIQUE("slack_user_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" bigint PRIMARY KEY NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now(),
 	"email" text,
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"gh_access_token" text,
-	"gh_refresh_token" text
+	CONSTRAINT "users_email_unique" UNIQUE("email")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "users_and_organizations" (
 	"id" text PRIMARY KEY NOT NULL,
-	"user_id" text NOT NULL,
-	"org_id" text NOT NULL,
+	"user_id" bigint NOT NULL,
+	"org_id" bigint NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now(),
 	"created_at" timestamp with time zone DEFAULT now()
 );
