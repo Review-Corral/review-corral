@@ -10,7 +10,12 @@ In order to generate a JWT with a signed secret, we encode the `.pem` file that 
 (somehow) from GitHub and then store that as an evironment variable:
 
 ```bash
-base64 /path/to/your/private-key.pem | pbcopy
+base64 -i /path/to/your/private-key.pem | pbcopy
+```
+
+Example
+```bash
+base64 -i /Users/alex/ssh/review-corral/test-review-corral.2023-12-30.private-key.pem | pbcopy
 ```
 
 This will copy it to your variable so that you can store it in an evironment variable.
