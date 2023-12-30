@@ -7,6 +7,7 @@ import {
   SQSEvent,
 } from "aws-lambda";
 import { gzipSync } from "zlib";
+import { User } from "../../db/types";
 import {
   MessageData,
   StatusCode2XX,
@@ -14,7 +15,9 @@ import {
   StatusCode5XX,
 } from "./responses";
 
-export interface CustomContext extends Context {}
+export interface CustomContext extends Context {
+  userId?: User["id"];
+}
 
 // The JSON_RESPONSE_MIDDLEWARE middleware will serialize the body if it's JsonResponse
 export type CustomAPIGatewayProxyResult =

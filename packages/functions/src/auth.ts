@@ -41,12 +41,12 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
       },
     })
     .json<UserResponse>();
-    
+
   LOGGER.debug("Users fetch response: ", userQuery);
 
   const user = await getOrCreateUser(userQuery, tokenSet.access_token);
 
-  return Session.parameter({
+  return Session.cookie({
     redirect: `${assertVarExists("BASE_FE_URL")}/login/success`,
     type: "user",
     properties: {

@@ -8,7 +8,9 @@ import {
   redirect,
 } from "react-router-dom";
 import App from "./App.tsx";
+import { auth_access_token_key } from "./auth/const.ts";
 import "./index.css";
+import { ProfileView } from "./profile/ProfileView.tsx";
 
 // Route components must be wrapped with the ModalContext here, so the modal components
 // have access to the context from RouterProvider (to navigate around etc.)
@@ -24,19 +26,19 @@ const router = createBrowserRouter([
       const token = url.searchParams.get("token");
 
       if (token) {
-        Cookies.set("sst_auth_access_token", token);
+        Cookies.set(auth_access_token_key, token);
         return redirect("/home");
       } else {
-        return redirect("/404");
+        return redirect("/error");
       }
     },
   },
   {
     path: "/home",
-    element: <div>You're logged in </div>,
+    element: <ProfileView />,
   },
   {
-    path: "/404",
+    path: "/error",
     element: <div>Something went wrong...</div>,
   },
 ]);
