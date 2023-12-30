@@ -10,7 +10,9 @@ export async function getJwt(): Promise<nJwt.Jwt> {
 
   const ghClientId = assertVarExists("GH_CLIENT_ID");
 
-  const ghJwtSigningSecret = assertVarExists("GH_JWT_SECRET");
+  const ghEncodedPem = assertVarExists("GH_ENCODED_PEM");
+  // The PEM is base64 encoded, so we need to decode it
+  const ghDecodedPem = Buffer.from(ghEncodedPem, "base64");
 
   const claims = {
     // issued at time, 60 seconds in the past to allow for clock drift
@@ -20,7 +22,7 @@ export async function getJwt(): Promise<nJwt.Jwt> {
     iss: ghClientId,
   };
 
-  const jwt = nJwt.create(claims, ghJwtSigningSecret, "RS256");
+  const jwt = nJwt.create(claims, ghDecodedPem, "RS256");
 
   return jwt.setExpiration(new Date().getTime() + 60 * 2);
 }
