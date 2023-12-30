@@ -3,13 +3,8 @@ import { useSession } from "sst/node/auth";
 import { DB } from "../../core/db/db";
 import { fetchUserById } from "../../core/db/fetchers/users";
 import { organizations } from "../../core/db/schema";
-import JsonResponse, {
-  CustomAPIGatewayProxyHandler,
-} from "../../core/utils/lambda/types";
 
 export const create = ApiHandler(async (_evt) => {
-  // await Todo.create();
-
   return {
     statusCode: 200,
     body: "Todo created",
@@ -24,14 +19,14 @@ export const list = ApiHandler(async (_evt) => {
   };
 });
 
-const _getUser: CustomAPIGatewayProxyHandler = async (event, context) => {
+const _getUser = ApiHandler(async (event, context) => {
   const session = useSession();
 
   if (session.type !== "user") {
     throw new Error("User not set in session");
   }
 
-  const userId = context.userId;
+  const userId = session.properties.id;
 
   if (!userId) {
     return {
@@ -42,7 +37,10 @@ const _getUser: CustomAPIGatewayProxyHandler = async (event, context) => {
 
   const user = await fetchUserById(userId);
 
-  return new JsonResponse({ statusCode: 201, data: { user } });
-};
+  return {
+    statusCode: 200,
+    body: JSON.stringify(user),
+  };
+});
 
 export const getUser = _getUser;

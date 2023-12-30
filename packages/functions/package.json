@@ -10,13 +10,10 @@
     "@octokit/types": "^12.4.0",
     "@types/aws-lambda": "^8.10.130",
     "@types/node": "^20.10.5",
-    "sst": "^2.38.7",
+    "sst": "2.38.7",
     "vitest": "^1.1.0"
   },
   "dependencies": {
-    "@middy/core": "^5.1.0",
-    "@middy/http-json-body-parser": "^5.2.0",
-    "@middy/validator": "^5.2.0",
     "aws-lambda": "^1.0.7",
     "ky": "^1.1.3"
   }
