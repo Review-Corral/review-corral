@@ -5,11 +5,8 @@ import {
   OauthBasicConfig,
   Session,
 } from "sst/node/auth";
-import {
-  UserResponse,
-  fetchUserById,
-  insertUser,
-} from "../../core/db/fetchers/users";
+import { fetchUserById, insertUser } from "../../core/db/fetchers/users";
+import { UserResponse } from "../../core/github/endpointTypes";
 import { Logger } from "../../core/logging";
 import { assertVarExists } from "../../core/utils/assert";
 import { HttpError } from "../../core/utils/errors/Errors";
@@ -17,7 +14,7 @@ import { HttpError } from "../../core/utils/errors/Errors";
 declare module "sst/node/auth" {
   export interface SessionTypes {
     user: {
-      id: number;
+      userId: number;
     };
   }
 }
@@ -46,11 +43,11 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
 
   const user = await getOrCreateUser(userQuery, tokenSet.access_token);
 
-  return Session.cookie({
+  return Session.parameter({
     redirect: `${assertVarExists("BASE_FE_URL")}/login/success`,
     type: "user",
     properties: {
-      id: user.id,
+      userId: user.id,
     },
   });
 };

@@ -10,7 +10,7 @@ import {
 import App from "./App.tsx";
 import { auth_access_token_key } from "./auth/const.ts";
 import "./index.css";
-import { ProfileView } from "./profile/ProfileView.tsx";
+import { HomeView } from "./profile/ProfileView.tsx";
 
 // Route components must be wrapped with the ModalContext here, so the modal components
 // have access to the context from RouterProvider (to navigate around etc.)
@@ -35,7 +35,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/home",
-    element: <ProfileView />,
+    element: <HomeView />,
   },
   {
     path: "/error",
@@ -44,7 +44,14 @@ const router = createBrowserRouter([
 ]);
 
 // Create a client
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+      refetchOnWindowFocus: false,
+    },
+  },
+});
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
