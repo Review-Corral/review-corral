@@ -1,4 +1,4 @@
-import { eq } from "drizzle-orm";
+import { eq, getTableColumns } from "drizzle-orm";
 import { DB } from "../db";
 import { organizations, usersAndOrganizations } from "../schema";
 import { Organization, OrganizationInsertArgs, User } from "../types";
@@ -26,6 +26,38 @@ export const insertOrganization = async (
     .values(args)
     .returning()
     .then(takeFirstOrThrow);
+};
+
+/**
+ * Updates an organization with the new installation Id, if it's different. I don't know
+ * for sure, but these may get out of a sync if the app is uninstalled and reinstalled
+ * on the same organization.
+ */
+export const updateOrganizationInstallationId = async (
+  args: Pick<OrganizationInsertArgs, "installationId" | "id">
+): Promise<Organization> => {
+  return await DB.update(organizations)
+    .set({
+      installationId: args.installationId,
+    })
+    .where(eq(organizations.id, args.id))
+    .returning()
+    .then(takeFirstOrThrow);
+};
+
+/**
+ * Get all of the organizations a user is currently mapped to
+ */
+export const fetchUsersOrganizations = async (
+  userId: number
+): Promise<Organization[]> => {
+  return await DB.select(getTableColumns(organizations))
+    .from(organizations)
+    .innerJoin(
+      usersAndOrganizations,
+      eq(organizations.id, usersAndOrganizations.orgId)
+    )
+    .where(eq(usersAndOrganizations.userId, userId));
 };
 
 export const insertOrganizationAndAssociateUser = async (
