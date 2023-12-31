@@ -34,6 +34,12 @@ const router = createBrowserRouter([
     },
   },
   {
+    path: "/org",
+  },
+  {
+    path: "/org/:orgId",
+  },
+  {
     path: "/home",
     element: <HomeView />,
   },
