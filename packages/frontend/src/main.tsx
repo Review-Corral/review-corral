@@ -10,6 +10,8 @@ import {
 import App from "./App.tsx";
 import { auth_access_token_key } from "./auth/const.ts";
 import "./index.css";
+import { OrgView } from "./org/OrgView.tsx";
+import { OrgsView } from "./org/OrgsView.tsx";
 import { HomeView } from "./profile/ProfileView.tsx";
 
 // Route components must be wrapped with the ModalContext here, so the modal components
@@ -35,9 +37,11 @@ const router = createBrowserRouter([
   },
   {
     path: "/org",
+    element: <OrgsView />,
   },
   {
     path: "/org/:orgId",
+    element: <OrgView />,
   },
   {
     path: "/home",
