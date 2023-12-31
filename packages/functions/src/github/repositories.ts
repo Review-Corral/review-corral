@@ -1,13 +1,19 @@
 import ky from "ky";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
-import { Organization } from "../../../core/db/types";
+import * as z from "zod";
 import { InstallationsData } from "../../../core/github/endpointTypes";
+import { getInstallationRepositories } from "../../../core/github/fetchers";
 import { Logger } from "../../../core/logging";
 
 const LOGGER = new Logger("functions:installations");
 
+const getInstallationSchema = z.object({
+  installationId: z.number(),
+});
+
 export const getInstallations = ApiHandler(async (event, context) => {
+  const { installationId } = getInstallationSchema.parse(event.pathParameters);
   const { user, error } = await useUser();
 
   if (!user) {
@@ -30,13 +36,20 @@ export const getInstallations = ApiHandler(async (event, context) => {
 
   LOGGER.debug("Installations fetch response: ", { installations });
 
-  const organizations: Organization[] = await getOrganizations(
-    user,
-    installations
-  );
+  const repositories = await getRepositories(installationId);
 
   return {
     statusCode: 200,
-    body: JSON.stringify(organizations),
+    body: JSON.stringify(repositories),
   };
 });
+
+const getRepositories = async (installationId: number) => {
+  const repositories = await getInstallationRepositories(installationId);
+
+  for (const repository of repositories.repositories) {
+    // Check to see if the repository is already in the database
+    // If it is, update the installation id if necessary
+    LOGGER.info("Got repository", { repository });
+  }
+};

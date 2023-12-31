@@ -1,12 +1,19 @@
 import ky from "ky";
 import { User } from "../db/types";
-import { InstallationsData } from "./endpointTypes";
+import { getJwt } from "../utils/jwt/createGithubJwt";
+import {
+  InstallationAccessTokenResponse,
+  InstallationRespositoriesResponse,
+  InstallationsData,
+} from "./endpointTypes";
 
 const defaultHeaders = {
   "X-GitHub-Api-Version": "2022-11-28",
 };
 
-export const getUserInstallations = async (user: User) =>
+export const getUserInstallations = async (
+  user: User
+): Promise<InstallationsData> =>
   await ky
     .get("https://api.github.com/user/installations", {
       headers: {
@@ -16,10 +23,24 @@ export const getUserInstallations = async (user: User) =>
     })
     .json<InstallationsData>();
 
-export const getInstallationAccessToken = async () => {
-  await ky.post(
-    "https://api.github.com/app/installations/${installationId}/access_tokens"
-  );
+/**
+ * Gets the installation access token for a given installation
+ */
+export const getInstallationAccessToken = async (
+  installationId: number
+): Promise<InstallationAccessTokenResponse> => {
+  const jwt = await getJwt();
+  return await ky
+    .post(
+      `https://api.github.com/app/installations/${installationId}/access_tokens`,
+      {
+        headers: {
+          ...defaultHeaders,
+          Authorization: `Bearer ${jwt.compact()}`,
+        },
+      }
+    )
+    .json<InstallationAccessTokenResponse>();
 };
 
 /**
@@ -27,13 +48,17 @@ export const getInstallationAccessToken = async () => {
  * access token as apposed to the user's access token to retrieve
  */
 export const getInstallationRepositories = async (
-  installationAccessToken: string
-) =>
-  await ky
+  installationId: number
+): Promise<InstallationRespositoriesResponse> => {
+  const installationAccessToken = await getInstallationAccessToken(
+    installationId
+  );
+  return await ky
     .get("https://api.github.com/installation/repositoriess", {
       headers: {
         ...defaultHeaders,
         Authorization: `token ${installationAccessToken}`,
       },
     })
-    .json();
+    .json<InstallationRespositoriesResponse>();
+};
