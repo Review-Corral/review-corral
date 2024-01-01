@@ -8,7 +8,7 @@ export async function getJwt(): Promise<nJwt.Jwt> {
   const now = Math.floor(Date.now() / 1000) - 30;
   const expiration = now + 120; // JWT expiration time (10 minute maximum)
 
-  const ghClientId = assertVarExists("GH_CLIENT_ID");
+  const ghClientId = assertVarExists("GH_APP_ID");
 
   const ghEncodedPem = assertVarExists("GH_ENCODED_PEM");
   // The PEM is base64 encoded, so we need to decode it
