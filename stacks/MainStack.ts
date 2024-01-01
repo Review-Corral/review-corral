@@ -36,8 +36,10 @@ export function MainStack({ stack, app }: StackContext) {
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
+      GH_APP_ID: process.env.GH_APP_ID!,
       GH_CLIENT_ID: process.env.GH_CLIENT_ID!,
       GH_CLIENT_SECRET: process.env.GH_CLIENT_SECRET!,
+      GH_ENCODED_PEM: process.env.GH_ENCODED_PEM!,
       ...getDbConnectionInfo(app, database),
     },
     logRetention: app.local ? "one_week" : "one_year",
@@ -64,7 +66,7 @@ export function MainStack({ stack, app }: StackContext) {
       "GET /installations":
         "packages/functions/src/github/installations.getInstallations",
       "GET /installations/{installationId}/repositories":
-        "packages/functions/src/github/repositories.getRepositories",
+        "packages/functions/src/github/repositories.getRepositoriesForInstallation",
     },
   });
 

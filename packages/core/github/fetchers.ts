@@ -1,11 +1,14 @@
 import ky from "ky";
 import { User } from "../db/types";
+import { Logger } from "../logging";
 import { getJwt } from "../utils/jwt/createGithubJwt";
 import {
   InstallationAccessTokenResponse,
   InstallationRespositoriesResponse,
   InstallationsData,
 } from "./endpointTypes";
+
+const LOGGER = new Logger("github.fetchers.ts");
 
 const defaultHeaders = {
   "X-GitHub-Api-Version": "2022-11-28",
@@ -30,7 +33,8 @@ export const getInstallationAccessToken = async (
   installationId: number
 ): Promise<InstallationAccessTokenResponse> => {
   const jwt = await getJwt();
-  return await ky
+  LOGGER.debug("JWT created", { jwt: jwt.compact() });
+  const accessTokenResponse = await ky
     .post(
       `https://api.github.com/app/installations/${installationId}/access_tokens`,
       {
@@ -41,6 +45,9 @@ export const getInstallationAccessToken = async (
       }
     )
     .json<InstallationAccessTokenResponse>();
+
+  LOGGER.debug("Access token response", { accessTokenResponse });
+  return accessTokenResponse;
 };
 
 /**
@@ -54,10 +61,10 @@ export const getInstallationRepositories = async (
     installationId
   );
   return await ky
-    .get("https://api.github.com/installation/repositoriess", {
+    .get("https://api.github.com/installation/repositories", {
       headers: {
         ...defaultHeaders,
-        Authorization: `token ${installationAccessToken}`,
+        Authorization: `Bearer ${installationAccessToken.token}`,
       },
     })
     .json<InstallationRespositoriesResponse>();

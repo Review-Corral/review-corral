@@ -8,41 +8,45 @@ import { Logger } from "../../../core/logging";
 
 const LOGGER = new Logger("functions:installations");
 
-const getInstallationSchema = z.object({
-  installationId: z.number(),
+const getRepositoriesForInstallationSchema = z.object({
+  installationId: z.string(),
 });
 
-export const getInstallations = ApiHandler(async (event, context) => {
-  const { installationId } = getInstallationSchema.parse(event.pathParameters);
-  const { user, error } = await useUser();
+export const getRepositoriesForInstallation = ApiHandler(
+  async (event, context) => {
+    const { installationId } = getRepositoriesForInstallationSchema.parse(
+      event.pathParameters
+    );
+    const { user, error } = await useUser();
 
-  if (!user) {
-    LOGGER.error("No user found in session", { error });
+    if (!user) {
+      LOGGER.error("No user found in session", { error });
+      return {
+        statusCode: 401,
+        body: JSON.stringify({ message: "Unauthorized" }),
+      };
+    }
+
+    // Installations appear to have effectively a 1:1 mapping with organizations
+    const installations = await ky
+      .get("https://api.github.com/user/installations", {
+        headers: {
+          Authorization: `token ${user.ghAccessToken}`,
+          "X-GitHub-Api-Version": "2022-11-28",
+        },
+      })
+      .json<InstallationsData>();
+
+    LOGGER.debug("Installations fetch response: ", { installations });
+
+    const repositories = await getRepositories(Number(installationId));
+
     return {
-      statusCode: 401,
-      body: JSON.stringify({ message: "Unauthorized" }),
+      statusCode: 200,
+      body: JSON.stringify(repositories),
     };
   }
-
-  // Installations appear to have effectively a 1:1 mapping with organizations
-  const installations = await ky
-    .get("https://api.github.com/user/installations", {
-      headers: {
-        Authorization: `token ${user.ghAccessToken}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-      },
-    })
-    .json<InstallationsData>();
-
-  LOGGER.debug("Installations fetch response: ", { installations });
-
-  const repositories = await getRepositories(installationId);
-
-  return {
-    statusCode: 200,
-    body: JSON.stringify(repositories),
-  };
-});
+);
 
 const getRepositories = async (installationId: number) => {
   const repositories = await getInstallationRepositories(installationId);
