@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { DB } from "../db";
 import { repositories } from "../schema";
 import { Repository, RepositoryInsertArgs } from "../types";
+import { takeFirstOrThrow } from "./utils";
 
 export const fetchRepositoriesForOrganization = async (
   organizationId: number
@@ -12,13 +13,15 @@ export const fetchRepositoriesForOrganization = async (
 
 export const insertRepository = async (
   args: RepositoryInsertArgs
-): Promise<void> => {
-  await DB.insert(repositories)
+): Promise<Repository> => {
+  return await DB.insert(repositories)
     .values(args)
     .onConflictDoUpdate({
       target: [repositories.id],
       set: args,
-    });
+    })
+    .returning()
+    .then(takeFirstOrThrow);
 };
 
 export const removeRepository = async (id: number): Promise<void> => {
