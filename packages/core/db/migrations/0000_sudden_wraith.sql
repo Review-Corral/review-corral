@@ -4,25 +4,6 @@ EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "github_integration" (
-	"id" text PRIMARY KEY NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now(),
-	"team_id" text NOT NULL,
-	"access_token" text NOT NULL,
-	"updated_at" timestamp with time zone,
-	CONSTRAINT "github_integration_team_id_key" UNIQUE("team_id")
-);
---> statement-breakpoint
-CREATE TABLE IF NOT EXISTS "github_repositories" (
-	"id" bigint PRIMARY KEY NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now(),
-	"updated_at" timestamp with time zone DEFAULT now(),
-	"repository_name" text NOT NULL,
-	"installation_id" integer NOT NULL,
-	"is_active" boolean DEFAULT false NOT NULL,
-	"organization_id" bigint NOT NULL
-);
---> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "organizations" (
 	"id" bigint PRIMARY KEY NOT NULL,
 	"account_name" text NOT NULL,
@@ -41,6 +22,15 @@ CREATE TABLE IF NOT EXISTS "pull_requests" (
 	"organization_id" bigint,
 	"draft" boolean DEFAULT false NOT NULL,
 	CONSTRAINT "pull_requests_thread_ts_key" UNIQUE("thread_ts")
+);
+--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS "repositories" (
+	"id" bigint PRIMARY KEY NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now(),
+	"updated_at" timestamp with time zone DEFAULT now(),
+	"name" text NOT NULL,
+	"organization_id" bigint NOT NULL,
+	"is_active" boolean DEFAULT false NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "slack_integration" (
@@ -83,13 +73,13 @@ CREATE TABLE IF NOT EXISTS "users_and_organizations" (
 );
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "github_repositories" ADD CONSTRAINT "github_repositories_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "pull_requests" ADD CONSTRAINT "pull_requests_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;
 --> statement-breakpoint
 DO $$ BEGIN
- ALTER TABLE "pull_requests" ADD CONSTRAINT "pull_requests_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE no action ON UPDATE no action;
+ ALTER TABLE "repositories" ADD CONSTRAINT "repositories_organization_id_organizations_id_fk" FOREIGN KEY ("organization_id") REFERENCES "organizations"("id") ON DELETE no action ON UPDATE no action;
 EXCEPTION
  WHEN duplicate_object THEN null;
 END $$;

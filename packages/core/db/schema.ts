@@ -156,8 +156,8 @@ export const repositories = pgTable("repositories", {
     mode: "string",
   }).defaultNow(),
   name: text("name").notNull(),
-  installationId: bigint("installation_id", { mode: "number" })
+  organizationId: bigint("organization_id", { mode: "number" })
     .notNull()
-    .references(() => organizations.installationId),
+    .references(() => organizations.id),
   isActive: boolean("is_active").default(false).notNull(),
 });
