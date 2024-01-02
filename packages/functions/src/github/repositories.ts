@@ -7,19 +7,19 @@ import {
   insertRepository,
   removeRepository,
 } from "../../../core/db/fetchers/repositories";
-import { Organization } from "../../../core/db/types";
+import { Organization, Repository } from "../../../core/db/types";
 import { getInstallationRepositories } from "../../../core/github/fetchers";
 import { Logger } from "../../../core/logging";
 
 const LOGGER = new Logger("functions:installations");
 
-const getRepositoriesForInstallationSchema = z.object({
+const getRepositoriesForOrganizationSchena = z.object({
   organizationId: z.string(),
 });
 
 export const getRepositoriesForOrganization = ApiHandler(
   async (event, context) => {
-    const { organizationId } = getRepositoriesForInstallationSchema.parse(
+    const { organizationId } = getRepositoriesForOrganizationSchena.parse(
       event.pathParameters
     );
     const { user, error } = await useUser();
@@ -50,23 +50,30 @@ export const getRepositoriesForOrganization = ApiHandler(
   }
 );
 
-const getRepositories = async (organization: Organization) => {
+const getRepositories = async (
+  organization: Organization
+): Promise<Repository[]> => {
   const repositories = await getInstallationRepositories(
     organization.installationId
   );
 
   const allInstallRepos = await fetchRepositoriesForOrganization(
-    organization.installationId
+    organization.id
   );
 
   const allInstalledRepoIds = allInstallRepos.map((repo) => repo.id);
 
+  const allOriginRepoIds = repositories.repositories.map((repo) => repo.id);
+
   const reposToInsert = repositories.repositories.filter(
-    (repo) => !(repo.id in allInstalledRepoIds)
+    (repo) => !allInstalledRepoIds.includes(repo.id)
+  );
+  const reposToRemove = allInstalledRepoIds.filter(
+    (id) => !allOriginRepoIds.includes(id)
   );
 
-  const reposToRemove = allInstalledRepoIds.filter(
-    (id) => !(id in repositories.repositories)
+  const reposToReturn = allInstallRepos.filter((repo) =>
+    allOriginRepoIds.includes(repo.id)
   );
 
   LOGGER.debug("Repos to insert/delete: ", {
@@ -80,15 +87,19 @@ const getRepositories = async (organization: Organization) => {
   // repos in the database for an old installation and now we'd be trying to insert them
   // again (and they'd have the same Ids)
   for (const repoToInsert of reposToInsert) {
-    await insertRepository({
-      id: repoToInsert.id,
-      name: repoToInsert.name,
-      organizationId: organization.id,
-      isActive: false,
-    });
+    reposToReturn.push(
+      await insertRepository({
+        id: repoToInsert.id,
+        name: repoToInsert.name,
+        organizationId: organization.id,
+        isActive: false,
+      })
+    );
   }
 
   for (const repoToRemoveId of reposToRemove) {
     await removeRepository(repoToRemoveId);
   }
+
+  return reposToReturn;
 };

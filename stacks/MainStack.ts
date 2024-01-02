@@ -65,8 +65,8 @@ export function MainStack({ stack, app }: StackContext) {
       "GET /profile": "packages/functions/src/todo.getUser",
       "GET /installations":
         "packages/functions/src/github/installations.getInstallations",
-      "GET /installations/{installationId}/repositories":
-        "packages/functions/src/github/repositories.getRepositoriesForInstallation",
+      "GET /installations/{organizationId}/repositories":
+        "packages/functions/src/github/repositories.getRepositoriesForOrganization",
     },
   });
 
