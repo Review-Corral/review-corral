@@ -8,6 +8,20 @@
       "when": 1703900994168,
       "tag": "0000_awesome_ezekiel_stane",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1704172098494,
+      "tag": "0001_talented_sage",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1704173084408,
+      "tag": "0002_lonely_thor",
+      "breakpoints": true
     }
   ]
 }

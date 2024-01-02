@@ -2,6 +2,11 @@ import ky from "ky";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
+import {
+  fetchRepositoriesForInstallation,
+  insertRepository,
+  removeRepository,
+} from "../../../core/db/fetchers/repositories";
 import { InstallationsData } from "../../../core/github/endpointTypes";
 import { getInstallationRepositories } from "../../../core/github/fetchers";
 import { Logger } from "../../../core/logging";
@@ -51,9 +56,40 @@ export const getRepositoriesForInstallation = ApiHandler(
 const getRepositories = async (installationId: number) => {
   const repositories = await getInstallationRepositories(installationId);
 
-  for (const repository of repositories.repositories) {
-    // Check to see if the repository is already in the database
-    // If it is, update the installation id if necessary
-    LOGGER.info("Got repository", { repository });
+  const allInstallRepos = await fetchRepositoriesForInstallation(
+    installationId
+  );
+
+  const allInstalledRepoIds = allInstallRepos.map((repo) => repo.id);
+
+  const reposToInsert = repositories.repositories.filter(
+    (repo) => !(repo.id in allInstalledRepoIds)
+  );
+
+  const reposToRemove = allInstalledRepoIds.filter(
+    (id) => !(id in repositories.repositories)
+  );
+
+  LOGGER.debug("Repos to insert/delete: ", {
+    reposToInsert,
+    reposToRemove,
+  });
+
+  // This is less effecient, but I'm inserting these one at a time so that we can do
+  // an onConflictDoUpdate. This allows us to handle the edge case that the there was
+  // a new installation setup for the same organization, which would result in us having
+  // repos in the database for an old installation and now we'd be trying to insert them
+  // again (and they'd have the same Ids)
+  for (const repoToInsert of reposToInsert) {
+    await insertRepository({
+      id: repoToInsert.id,
+      name: repoToInsert.name,
+      installationId,
+      isActive: false,
+    });
+  }
+
+  for (const repoToRemoveId of reposToRemove) {
+    await removeRepository(repoToRemoveId);
   }
 };

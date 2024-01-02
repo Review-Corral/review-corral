@@ -1,7 +1,6 @@
 import {
   bigint,
   boolean,
-  integer,
   pgEnum,
   pgTable,
   text,
@@ -13,27 +12,6 @@ export const organizationType = pgEnum("organization_type", [
   "User",
   "Organization",
 ]);
-
-export const githubIntegration = pgTable(
-  "github_integration",
-  {
-    id: text("id").primaryKey().notNull(),
-    createdAt: timestamp("created_at", {
-      withTimezone: true,
-      mode: "string",
-    }).defaultNow(),
-    teamId: text("team_id").notNull(),
-    accessToken: text("access_token").notNull(),
-    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" }),
-  },
-  (table) => {
-    return {
-      githubIntegrationTeamIdKey: unique("github_integration_team_id_key").on(
-        table.teamId
-      ),
-    };
-  }
-);
 
 export const pullRequests = pgTable(
   "pull_requests",
@@ -164,7 +142,7 @@ export const organizations = pgTable(
   }
 );
 
-export const githubRepositories = pgTable("github_repositories", {
+export const repositories = pgTable("repositories", {
   /**
    * The Github repository ID is used for this
    */
@@ -177,10 +155,9 @@ export const githubRepositories = pgTable("github_repositories", {
     withTimezone: true,
     mode: "string",
   }).defaultNow(),
-  repositoryName: text("repository_name").notNull(),
-  installationId: integer("installation_id").notNull(),
-  isActive: boolean("is_active").default(false).notNull(),
-  organizationId: bigint("organization_id", { mode: "number" })
+  name: text("name").notNull(),
+  installationId: bigint("installation_id", { mode: "number" })
     .notNull()
-    .references(() => organizations.id),
+    .references(() => organizations.installationId),
+  isActive: boolean("is_active").default(false).notNull(),
 });
