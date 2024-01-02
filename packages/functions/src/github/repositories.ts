@@ -1,25 +1,25 @@
-import ky from "ky";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
+import { fetchOrganizationById } from "../../../core/db/fetchers/organizations";
 import {
-  fetchRepositoriesForInstallation,
+  fetchRepositoriesForOrganization,
   insertRepository,
   removeRepository,
 } from "../../../core/db/fetchers/repositories";
-import { InstallationsData } from "../../../core/github/endpointTypes";
+import { Organization } from "../../../core/db/types";
 import { getInstallationRepositories } from "../../../core/github/fetchers";
 import { Logger } from "../../../core/logging";
 
 const LOGGER = new Logger("functions:installations");
 
 const getRepositoriesForInstallationSchema = z.object({
-  installationId: z.string(),
+  organizationId: z.string(),
 });
 
-export const getRepositoriesForInstallation = ApiHandler(
+export const getRepositoriesForOrganization = ApiHandler(
   async (event, context) => {
-    const { installationId } = getRepositoriesForInstallationSchema.parse(
+    const { organizationId } = getRepositoriesForInstallationSchema.parse(
       event.pathParameters
     );
     const { user, error } = await useUser();
@@ -32,19 +32,16 @@ export const getRepositoriesForInstallation = ApiHandler(
       };
     }
 
-    // Installations appear to have effectively a 1:1 mapping with organizations
-    const installations = await ky
-      .get("https://api.github.com/user/installations", {
-        headers: {
-          Authorization: `token ${user.ghAccessToken}`,
-          "X-GitHub-Api-Version": "2022-11-28",
-        },
-      })
-      .json<InstallationsData>();
+    const organization = await fetchOrganizationById(Number(organizationId));
 
-    LOGGER.debug("Installations fetch response: ", { installations });
+    if (!organization) {
+      return {
+        statusCode: 404,
+        body: JSON.stringify({ message: "Organization not found" }),
+      };
+    }
 
-    const repositories = await getRepositories(Number(installationId));
+    const repositories = await getRepositories(organization);
 
     return {
       statusCode: 200,
@@ -53,11 +50,13 @@ export const getRepositoriesForInstallation = ApiHandler(
   }
 );
 
-const getRepositories = async (installationId: number) => {
-  const repositories = await getInstallationRepositories(installationId);
+const getRepositories = async (organization: Organization) => {
+  const repositories = await getInstallationRepositories(
+    organization.installationId
+  );
 
-  const allInstallRepos = await fetchRepositoriesForInstallation(
-    installationId
+  const allInstallRepos = await fetchRepositoriesForOrganization(
+    organization.installationId
   );
 
   const allInstalledRepoIds = allInstallRepos.map((repo) => repo.id);
@@ -84,7 +83,7 @@ const getRepositories = async (installationId: number) => {
     await insertRepository({
       id: repoToInsert.id,
       name: repoToInsert.name,
-      installationId,
+      organizationId: organization.id,
       isActive: false,
     });
   }

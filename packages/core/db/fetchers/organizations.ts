@@ -60,6 +60,15 @@ export const fetchUsersOrganizations = async (
     .where(eq(usersAndOrganizations.userId, userId));
 };
 
+export const fetchOrganizationById = async (
+  id: number
+): Promise<Organization | undefined> =>
+  await DB.select()
+    .from(organizations)
+    .where(eq(organizations.id, id))
+    .limit(1)
+    .then(takeFirst);
+
 export const insertOrganizationAndAssociateUser = async (
   args: OrganizationInsertArgs,
   user: User

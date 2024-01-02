@@ -3,15 +3,12 @@ import { DB } from "../db";
 import { repositories } from "../schema";
 import { Repository, RepositoryInsertArgs } from "../types";
 
-/**
- * Fetches all repositories for a given installationId
- */
-export const fetchRepositoriesForInstallation = async (
-  installationId: number
+export const fetchRepositoriesForOrganization = async (
+  organizationId: number
 ): Promise<Repository[]> =>
   await DB.select()
     .from(repositories)
-    .where(eq(repositories.installationId, installationId));
+    .where(eq(repositories.organizationId, organizationId));
 
 export const insertRepository = async (
   args: RepositoryInsertArgs
