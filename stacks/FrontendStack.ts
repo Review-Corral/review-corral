@@ -21,7 +21,9 @@ export function FrontendStack({ stack, app }: StackContext) {
     environment: {
       VITE_API_URL: api.url,
       VITE_AUTH_URL: authUrl,
+      VITE_SLACK_AUTH_URL: `${api.url}/slack/oauth`,
       VITE_REGION: app.region,
+      VITE_SLACK_BOT_ID: process.env.SLACK_BOT_ID!,
       ...(app.local ? { VITE_LOCAL: "true" } : {}),
     },
   });

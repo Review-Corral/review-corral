@@ -1,5 +1,4 @@
-import { Test } from "@";
-import { Button } from "@components/ui";
+import { Button } from "@components/ui/button";
 import React from "react";
 import { useQueryClient } from "react-query";
 import { Link } from "react-router-dom";
@@ -9,7 +8,6 @@ interface SlackButtonProps {
 }
 
 const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
-  const slackRedirectUrl = getSlackRedirectUrl();
   const queryClient = useQueryClient();
 
   if (!process.env.NEXT_PUBLIC_SLACK_BOT_ID) {
@@ -18,8 +16,8 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
 
   const searchParams = new URLSearchParams({
     state: organizationId,
-    redirect_uri: slackRedirectUrl,
-    client_id: process.env.NEXT_PUBLIC_SLACK_BOT_ID,
+    redirect_uri: import.meta.env.VITE_SLACK_AUTH_URL,
+    client_id: import.meta.env.VITE_SLACK_BOT_ID,
     scope:
       "channels:history,chat:write,commands,groups:history,incoming-webhook,users:read",
     user_scope: "",
@@ -27,7 +25,6 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
 
   return (
     <div>
-      <Test />
       <Link
         to={`https://slack.com/oauth/v2/authorize?${searchParams.toString()}`}
         onClick={() => {
@@ -35,23 +32,10 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
           queryClient.invalidateQueries([]);
         }}
       >
-        <Button color="indigo">Connect to Slack</Button>
+        <Button>Connect to Slack</Button>
       </Link>
     </div>
   );
 };
 
 export default SlackButton;
-
-export const getSlackRedirectUrl = (): string => {
-  // TODO: this is much more complicated than it should be
-  if (process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL) {
-    return process.env.NEXT_PUBLIC_SLACK_REDIRECT_URL;
-  }
-
-  if (!process.env.NEXT_PUBLIC_BASE_URL) {
-    throw Error("NEXT_PUBLIC_SLACK_REDIRECT_URL not set");
-  }
-
-  return `${process.env.NEXT_PUBLIC_BASE_URL}api/slack/oauth`;
-};
