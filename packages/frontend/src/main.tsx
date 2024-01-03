@@ -3,23 +3,41 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import { QueryClient, QueryClientProvider } from "react-query";
 import {
+  LoaderFunction,
+  LoaderFunctionArgs,
   RouterProvider,
   createBrowserRouter,
   redirect,
 } from "react-router-dom";
 import App from "./App.tsx";
 import { auth_access_token_key } from "./auth/const.ts";
+import { userIsLoggedIn } from "./auth/utils.ts";
 import "./index.css";
 import { OrgView } from "./org/OrgView.tsx";
 import { OrgsView } from "./org/OrgsView.tsx";
 import { HomeView } from "./profile/ProfileView.tsx";
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const protectedLoader: LoaderFunction = async (args: LoaderFunctionArgs) => {
+  if (!userIsLoggedIn()) {
+    return redirect("/login");
+  }
+
+  return null;
+};
+
 // Route components must be wrapped with the ModalContext here, so the modal components
 // have access to the context from RouterProvider (to navigate around etc.)
 const router = createBrowserRouter([
   {
-    path: "/",
+    path: "/login",
     element: <App />,
+    loader: async () => {
+      if (userIsLoggedIn()) {
+        return redirect("/");
+      }
+      return null;
+    },
   },
   {
     path: "/login/success",
@@ -38,14 +56,17 @@ const router = createBrowserRouter([
   {
     path: "/org",
     element: <OrgsView />,
+    loader: protectedLoader,
   },
   {
     path: "/org/:orgId",
     element: <OrgView />,
+    loader: protectedLoader,
   },
   {
-    path: "/home",
+    path: "/",
     element: <HomeView />,
+    loader: protectedLoader,
   },
   {
     path: "/error",
