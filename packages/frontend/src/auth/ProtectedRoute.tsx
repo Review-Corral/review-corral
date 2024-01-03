@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 import { Navigate } from "react-router-dom";
-import { getSessionToken } from "./getSessionToken";
+import { userIsLoggedIn } from "./utils";
 
 export const ProtectedRoute: React.FC<
   PropsWithChildren & { redirectPath?: string }
@@ -10,13 +10,4 @@ export const ProtectedRoute: React.FC<
   }
 
   return children;
-};
-
-const userIsLoggedIn = () => {
-  try {
-    getSessionToken();
-    return true;
-  } catch (error) {
-    return false;
-  }
 };
