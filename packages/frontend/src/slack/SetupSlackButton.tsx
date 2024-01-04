@@ -4,7 +4,7 @@ import { useQueryClient } from "react-query";
 import { Link } from "react-router-dom";
 
 interface SlackButtonProps {
-  organizationId: string;
+  organizationId: number;
 }
 
 const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
@@ -15,7 +15,7 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
   }
 
   const searchParams = new URLSearchParams({
-    state: organizationId,
+    state: organizationId.toString(),
     redirect_uri: import.meta.env.VITE_SLACK_AUTH_URL,
     client_id: import.meta.env.VITE_SLACK_BOT_ID,
     scope:
