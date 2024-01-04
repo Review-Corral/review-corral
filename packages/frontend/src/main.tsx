@@ -14,8 +14,8 @@ import { auth_access_token_key } from "./auth/const.ts";
 import { userIsLoggedIn } from "./auth/utils.ts";
 import { HomeView } from "./home/HomeView.tsx";
 import "./index.css";
-import { OrgView } from "./org/OrgView.tsx";
 import { OrgsView } from "./org/OrgsView.tsx";
+import { OrgView } from "./organization/OrgView.tsx";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const protectedLoader: LoaderFunction = async (args: LoaderFunctionArgs) => {
@@ -61,7 +61,20 @@ const router = createBrowserRouter([
   {
     path: "/org/:orgId",
     element: <OrgView />,
-    loader: protectedLoader,
+    loader: async (args) => {
+      const protectedResult = await protectedLoader(args);
+      if (protectedResult) return protectedResult;
+
+      const { orgId } = args.params;
+
+      console.log("Got orgId in params:", orgId);
+
+      if (!orgId) {
+        throw new Response("Not Found", { status: 404 });
+      }
+
+      return { orgId };
+    },
   },
   {
     path: "/",
