@@ -12,10 +12,10 @@ import {
 import App from "./App.tsx";
 import { auth_access_token_key } from "./auth/const.ts";
 import { userIsLoggedIn } from "./auth/utils.ts";
+import { HomeView } from "./home/HomeView.tsx";
 import "./index.css";
 import { OrgView } from "./org/OrgView.tsx";
 import { OrgsView } from "./org/OrgsView.tsx";
-import { HomeView } from "./profile/ProfileView.tsx";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const protectedLoader: LoaderFunction = async (args: LoaderFunctionArgs) => {
@@ -47,7 +47,7 @@ const router = createBrowserRouter([
 
       if (token) {
         Cookies.set(auth_access_token_key, token);
-        return redirect("/home");
+        return redirect("/");
       } else {
         return redirect("/error");
       }
