@@ -11,7 +11,7 @@ import { Organization, Repository } from "../../../core/db/types";
 import { getInstallationRepositories } from "../../../core/github/fetchers";
 import { Logger } from "../../../core/logging";
 
-const LOGGER = new Logger("functions:installations");
+const LOGGER = new Logger("github:repositories");
 
 const getRepositoriesForOrganizationSchena = z.object({
   organizationId: z.string(),

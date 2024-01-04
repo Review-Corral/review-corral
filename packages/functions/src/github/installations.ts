@@ -12,7 +12,7 @@ import { InstallationsData } from "../../../core/github/endpointTypes";
 import { getUserInstallations } from "../../../core/github/fetchers";
 import { Logger } from "../../../core/logging";
 
-const LOGGER = new Logger("functions:installations");
+const LOGGER = new Logger("github:installations");
 
 export const getInstallations = ApiHandler(async (event, context) => {
   const { user, error } = await useUser();
@@ -81,7 +81,7 @@ async function getOrganizations(user: User, installations: InstallationsData) {
         LOGGER.info(
           "User is not part of organization. Associating user with organization..."
         );
-        associateOrganizationWithUser(organization, user);
+        await associateOrganizationWithUser(organization, user);
       }
 
       organizations.push(organization);

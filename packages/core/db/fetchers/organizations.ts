@@ -83,9 +83,11 @@ export const associateOrganizationWithUser = async (
   organization: Organization,
   user: User
 ) => {
-  DB.insert(usersAndOrganizations).values({
-    id: `${user.id}-${organization.id}`,
-    userId: user.id,
-    orgId: organization.id,
-  });
+  return await DB.insert(usersAndOrganizations)
+    .values({
+      id: `${user.id}-${organization.id}`,
+      userId: user.id,
+      orgId: organization.id,
+    })
+    .returning();
 };
