@@ -3,7 +3,7 @@ import ky from "ky";
 import { useQuery } from "react-query";
 import { auth_access_token_key } from "../auth/const";
 
-export const HomeView: React.FC = () => {
+export const OldHomeView: React.FC = () => {
   return (
     <>
       <div className="text-xl">Home</div>
