@@ -1,26 +1,26 @@
-import { Organization, SlackIntegration } from "@core/db/types";
+import { Repository } from "@core/db/types";
 import ky from "ky";
 import { useQuery } from "react-query";
 import { getSessionToken } from "src/auth/getSessionToken";
 
-export const SLACK_INTEGRATIONS_QUERY_KEY = "slack-integrations";
+export const reposKey = "repositories";
 
-export const useSlackIntegrations = (organizationId: Organization["id"]) => {
+export const useOrganizationRepositories = (orgId: number) => {
   return useQuery({
-    queryKey: [SLACK_INTEGRATIONS_QUERY_KEY],
+    queryKey: [reposKey, orgId],
     queryFn: async () => {
       return await ky
         .get(
           `${
             import.meta.env.VITE_API_URL
-          }/slack/${organizationId.toString()}/installations`,
+          }/gh/installations/${orgId}/repositories`,
           {
             headers: {
               Authorization: `Bearer ${getSessionToken()}`,
             },
           }
         )
-        .json<SlackIntegration[]>();
+        .json<Repository[]>();
     },
   });
 };

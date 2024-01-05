@@ -10,8 +10,9 @@ interface SlackButtonProps {
 const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
   const queryClient = useQueryClient();
 
-  if (!process.env.NEXT_PUBLIC_SLACK_BOT_ID) {
-    throw Error("NEXT_PUBLIC_SLACK_BOT_ID not set");
+  const slackBotId = import.meta.env.VITE_SLACK_BOT_ID;
+  if (!slackBotId) {
+    throw Error("VITE_SLACK_BOT_ID not set");
   }
 
   const searchParams = new URLSearchParams({
