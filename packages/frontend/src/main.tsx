@@ -54,6 +54,13 @@ const router = createBrowserRouter([
     },
   },
   {
+    path: "/logout",
+    loader: async () => {
+      Cookies.remove(auth_access_token_key);
+      return redirect("/login");
+    },
+  },
+  {
     path: "/org",
     element: <OrgsView />,
     loader: protectedLoader,
