@@ -1,8 +1,8 @@
-import { SetupSlackCard } from "@components/slack/SetupSlackCard";
-import { useSlackIntegrations } from "@components/slack/useSlackIntegrations";
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Slack } from "lucide-react";
 import { FC } from "react";
+import { SetupSlackCard } from "src/slack/SetupSlackCard";
+import { useSlackIntegrations } from "src/slack/useSlackIntegrations";
 import { OrgViewProps } from "./shared";
 
 interface SlackOverviewCardProps extends OrgViewProps {}
@@ -35,7 +35,7 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
         <div className="space-y-4">
           {Array.from(Array(3).keys()).map((num) => (
             <div
-              key={num}
+              key={num.toString()}
               className="flex flex-row animate-pulse p-4 rounded-md bg-gray-100 text-gray-100"
             >
               <div className="truncate">{num}</div>
@@ -61,7 +61,7 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
           <div
             className="border border-gray-200 rounded-md p-4 truncate"
             id="slack-channel"
-            key={channel.id}
+            key={`${channel.slackTeamId}-${channel.channelId}`}
           >
             <span className="text-gray-400 mr-2">{channel.slackTeamName}</span>
             {channel.channelName}

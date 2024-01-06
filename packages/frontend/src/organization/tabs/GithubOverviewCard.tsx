@@ -1,12 +1,13 @@
-import { useSlackIntegrations } from "@components/slack/useSlackIntegrations";
-import { ActiveLight } from "@components/ui/activeLight";
 import { Button } from "@components/ui/button";
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
+import { Switch } from "@components/ui/switch";
 import { Organization } from "@core/db/types";
 import { Github } from "lucide-react";
 import { FC } from "react";
 import Xarrow from "react-xarrows";
+import { useSetRepoActive } from "src/github/useRepos";
 import { useOrganizationRepositories } from "src/org/useOrgRepos";
+import { useSlackIntegrations } from "src/slack/useSlackIntegrations";
 import { OrgViewProps } from "./shared";
 
 interface GithubCardProps extends OrgViewProps {
@@ -46,6 +47,8 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
 
   const { data: slackData } = useSlackIntegrations(organization.id);
 
+  const setRepoActive = useSetRepoActive();
+
   if (getInstalledRepos.isLoading) {
     return (
       <div>
@@ -71,7 +74,7 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
     return <ErrorCard message="You need to setup your integration!" />;
   }
 
-  const activeRepos = getInstalledRepos.data.filter((item) => item.isActive);
+  const activeRepos = getInstalledRepos.data;
 
   if (activeRepos.length < 1) {
     return (
@@ -89,26 +92,36 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
     <div>
       <div className="space-y-2">
         {activeRepos.map((repo) => (
-          <div key={repo.id}>
+          <div key={repo.id.toString()}>
             <div
-              className="flex flex-row gap-4 items-center border border-gray-200 rounded-md p-4 bg-white"
+              className="flex flex-row gap-4 items-center justify-between border border-gray-200 rounded-md p-4 bg-white"
               id={repo.id.toString()}
             >
-              <ActiveLight />
               <div className="truncate">{repo.name}</div>
+              <Switch
+                id={repo.id.toString()}
+                onClick={() => {
+                  setRepoActive.mutate({
+                    id: repo.id,
+                    isActive: !repo.isActive,
+                  });
+                }}
+              />
             </div>
 
             {/* TODO: in the future the target should be found from a m2m table of Github <-> slack */}
             {/* Only show the Arrows if the slack data has loaded and there's at least one entry */}
-            {slackData != undefined && slackData.length > 0 && (
-              <Xarrow
-                start={repo.id.toString()}
-                end="slack-channel"
-                showHead={false}
-                color={"#6366f1"}
-                strokeWidth={2}
-              />
-            )}
+            {slackData != undefined &&
+              slackData.length > 0 &&
+              repo.isActive && (
+                <Xarrow
+                  start={repo.id.toString()}
+                  end="slack-channel"
+                  showHead={false}
+                  color={"#6366f1"}
+                  strokeWidth={2}
+                />
+              )}
           </div>
         ))}
       </div>

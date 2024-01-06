@@ -79,7 +79,9 @@ export function MainStack({ stack, app }: StackContext) {
       "GET /gh/installations":
         "packages/functions/src/github/installations.getInstallations",
       "GET /gh/installations/{organizationId}/repositories":
-        "packages/functions/src/github/repositories.getRepositoriesForOrganization",
+        "packages/functions/src/github/repositories.getAll.handler",
+      "PUT /gh/repositories/{repositoryId}":
+        "packages/functions/src/github/repositories/setStatus.handler",
       "GET /slack/{organizationId}/installations":
         "packages/functions/src/slack/installations.getSlackInstallations",
       "GET /slack/oauth": "packages/functions/src/slack/oauth.handler",
