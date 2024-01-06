@@ -3,6 +3,7 @@ import {
   boolean,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   unique,
@@ -36,23 +37,30 @@ export const pullRequests = pgTable(
   }
 );
 
-export const slackIntegration = pgTable("slack_integration", {
-  id: text("id").primaryKey().notNull(),
-  createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
-    .defaultNow()
-    .notNull(),
-  accessToken: text("access_token").notNull(),
-  channelId: text("channel_id").notNull(),
-  channelName: text("channel_name").notNull(),
-  updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
-    .defaultNow()
-    .notNull(),
-  slackTeamName: text("slack_team_name").notNull(),
-  slackTeamId: text("slack_team_id").notNull(),
-  organizationId: bigint("organization_id", { mode: "number" })
-    .notNull()
-    .references(() => organizations.id),
-});
+export const slackIntegration = pgTable(
+  "slack_integration",
+  {
+    createdAt: timestamp("created_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    accessToken: text("access_token").notNull(),
+    channelId: text("channel_id").notNull(),
+    channelName: text("channel_name").notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true, mode: "string" })
+      .defaultNow()
+      .notNull(),
+    slackTeamName: text("slack_team_name").notNull(),
+    slackTeamId: text("slack_team_id").notNull(),
+    organizationId: bigint("organization_id", { mode: "number" })
+      .notNull()
+      .references(() => organizations.id),
+  },
+  (table) => ({
+    pk: primaryKey({
+      columns: [table.organizationId, table.slackTeamId, table.channelId],
+    }),
+  })
+);
 
 export const usernameMappings = pgTable(
   "username_mappings",

@@ -1,5 +1,4 @@
 import { eq } from "drizzle-orm";
-import { nanoid } from "nanoid";
 import { DB } from "../db/db";
 import { slackIntegration } from "../db/schema";
 import {
@@ -17,9 +16,20 @@ export const getSlackInstallationsForOrganization = async (
 };
 
 export const insertSlackIntegration = async (
-  args: Omit<SlackIntegrationInsertionArgs, "id">
+  args: SlackIntegrationInsertionArgs
 ) => {
   return await DB.insert(slackIntegration)
-    .values({ id: nanoid(), ...args })
-    .returning();
+    .values(args)
+    .returning()
+    .onConflictDoUpdate({
+      target: [
+        slackIntegration.organizationId,
+        slackIntegration.slackTeamId,
+        slackIntegration.channelId,
+      ],
+      set: {
+        updatedAt: new Date().toISOString(),
+        accessToken: args.accessToken,
+      },
+    });
 };
