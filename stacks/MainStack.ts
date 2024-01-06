@@ -36,6 +36,8 @@ export function MainStack({ stack, app }: StackContext) {
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
+      // TODO: this should be shared with the frontend for DRY
+      SLACK_AUTH_URL: `${getBaseUrl(app.local)}/slack/oauth`,
       GH_APP_ID: process.env.GH_APP_ID!,
       GH_CLIENT_ID: process.env.GH_CLIENT_ID!,
       GH_CLIENT_SECRET: process.env.GH_CLIENT_SECRET!,
@@ -69,6 +71,7 @@ export function MainStack({ stack, app }: StackContext) {
         "packages/functions/src/github/repositories.getRepositoriesForOrganization",
       "GET /slack/{organizationId}/installations":
         "packages/functions/src/slack/installations.getSlackInstallations",
+      "GET /slack/oauth": "packages/functions/src/slack/oauth.handler",
     },
   });
 
