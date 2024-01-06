@@ -1,6 +1,7 @@
 import Cookies from "js-cookie";
 import React from "react";
 import ReactDOM from "react-dom/client";
+import { Toaster } from "react-hot-toast";
 import { QueryClient, QueryClientProvider } from "react-query";
 import {
   LoaderFunction,
@@ -107,6 +108,7 @@ const queryClient = new QueryClient({
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
+      <Toaster position="top-right" reverseOrder={false} />
       <RouterProvider router={router} />
     </QueryClientProvider>
   </React.StrictMode>
