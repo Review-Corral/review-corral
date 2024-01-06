@@ -140,29 +140,6 @@
       "isBackground": true
     },
     {
-      "label": "Generate Debug Model Migrations",
-      "type": "shell",
-      "command": "./scripts/nvmPnpm.sh",
-      "args": ["migrate:gen:debugModel"],
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "icon": {
-        "id": "database",
-        "color": "terminal.ansiMagenta"
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "shared"
-      },
-      "problemMatcher": [],
-      "isBackground": true
-    },
-    {
       "label": "Run Migrations",
       "type": "shell",
       "command": "./scripts/nvmPnpm.sh",

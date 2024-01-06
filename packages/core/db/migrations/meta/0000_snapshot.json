@@ -1,5 +1,5 @@
 {
-  "id": "050bf662-cee8-4b7a-8f53-c33a07a88914",
+  "id": "727859cd-f1ba-4c2d-b732-2399223e7df4",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "5",
   "dialect": "pg",
@@ -197,12 +197,6 @@
       "name": "slack_integration",
       "schema": "",
       "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true
-        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -270,7 +264,16 @@
           "onUpdate": "no action"
         }
       },
-      "compositePrimaryKeys": {},
+      "compositePrimaryKeys": {
+        "slack_integration_organization_id_slack_team_id_channel_id_pk": {
+          "name": "slack_integration_organization_id_slack_team_id_channel_id_pk",
+          "columns": [
+            "organization_id",
+            "slack_team_id",
+            "channel_id"
+          ]
+        }
+      },
       "uniqueConstraints": {}
     },
     "username_mappings": {
