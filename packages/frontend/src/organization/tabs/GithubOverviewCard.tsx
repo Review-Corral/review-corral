@@ -4,6 +4,7 @@ import { Switch } from "@components/ui/switch";
 import { Organization } from "@core/db/types";
 import { Github } from "lucide-react";
 import { FC } from "react";
+import toast from "react-hot-toast";
 import Xarrow from "react-xarrows";
 import { useSetRepoActive } from "src/github/useRepos";
 import { useOrganizationRepositories } from "src/org/useOrgRepos";
@@ -101,10 +102,20 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
               <Switch
                 id={repo.id.toString()}
                 onClick={() => {
-                  setRepoActive.mutate({
-                    id: repo.id,
-                    isActive: !repo.isActive,
-                  });
+                  const verb = repo.isActive ? "disabl" : "enabl";
+                  toast.promise(
+                    setRepoActive.mutateAsync({
+                      id: repo.id,
+                      isActive: !repo.isActive,
+                    }),
+                    {
+                      loading: repo.isActive
+                        ? `${verb}ing ${repo.name}`
+                        : `${verb}ing ${repo.name}`,
+                      success: `${repo.name} ${verb}ed`,
+                      error: `There wasn an error ${verb}ing ${repo.name}`,
+                    }
+                  );
                 }}
               />
             </div>
