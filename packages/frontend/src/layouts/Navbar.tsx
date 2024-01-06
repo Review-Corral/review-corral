@@ -10,7 +10,7 @@ export interface NavbarProps {
 
 const userNavigation = [
   { name: "Your Profile", href: "/profile" },
-  { name: "Sign out", href: "/signout" },
+  { name: "Sign out", href: "/logout" },
 ];
 
 export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
