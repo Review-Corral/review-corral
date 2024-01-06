@@ -34,7 +34,6 @@ CREATE TABLE IF NOT EXISTS "repositories" (
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "slack_integration" (
-	"id" text PRIMARY KEY NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"access_token" text NOT NULL,
 	"channel_id" text NOT NULL,
@@ -42,7 +41,8 @@ CREATE TABLE IF NOT EXISTS "slack_integration" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"slack_team_name" text NOT NULL,
 	"slack_team_id" text NOT NULL,
-	"organization_id" bigint NOT NULL
+	"organization_id" bigint NOT NULL,
+	CONSTRAINT "slack_integration_organization_id_slack_team_id_channel_id_pk" PRIMARY KEY("organization_id","slack_team_id","channel_id")
 );
 --> statement-breakpoint
 CREATE TABLE IF NOT EXISTS "username_mappings" (
