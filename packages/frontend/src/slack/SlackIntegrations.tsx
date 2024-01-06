@@ -1,15 +1,15 @@
 import { FC } from "react";
-import SlackButton from "../../SlackButton";
+import SlackButton from "./SetupSlackButton";
 import { useSlackIntegrations } from "./useSlackIntegrations";
 
 interface SlackIntegrationsProps {
-  organizationId: string;
+  organizationId: number;
 }
 
 export const SlackIntegrations: FC<SlackIntegrationsProps> = ({
   organizationId,
 }) => {
-  const { isLoading, data, error } = useSlackIntegrations({ organizationId });
+  const { isLoading, data } = useSlackIntegrations(organizationId);
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -26,8 +26,11 @@ export const SlackIntegrations: FC<SlackIntegrationsProps> = ({
   return (
     <div className="">
       {data.map((integration) => (
-        <div key={integration.id} className="flex flex-row">
-          <div>{integration.channel_name}</div>
+        <div
+          key={`${integration.slackTeamId}-${integration.channelId}`}
+          className="flex flex-row"
+        >
+          <div>{integration.channelName}</div>
         </div>
       ))}
     </div>

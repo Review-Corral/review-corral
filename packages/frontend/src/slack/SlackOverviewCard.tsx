@@ -64,7 +64,7 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
           <div
             className="border border-gray-200 rounded-md p-4 truncate"
             id="slack-channel"
-            key={channel.id}
+            key={`${channel.slackTeamId}-${channel.channelId}`}
           >
             <span className="text-gray-400 mr-2">{channel.slackTeamName}</span>
             {channel.channelName}

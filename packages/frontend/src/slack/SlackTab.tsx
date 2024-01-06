@@ -1,14 +1,14 @@
 import { FC } from "react";
-import { ErrorAlert } from "../../common/alerts/Error";
-import { ActiveLight } from "../../common/misc/activeLight";
-import { Header, OrgViewProps } from "../shared";
+
+import { ActiveLight } from "@components/ui/activeLight";
+import { ErrorCard } from "@components/ui/cards/ErrorCard";
+import { Header } from "@components/ui/header";
+import { OrgViewProps } from "src/organization/tabs/shared";
 import { SetupSlackCard } from "./SetupSlackCard";
 import { useSlackIntegrations } from "./useSlackIntegrations";
 
 export const SlackTab: FC<OrgViewProps> = ({ organization }) => {
-  const slackIntegration = useSlackIntegrations({
-    organizationId: organization.id,
-  });
+  const slackIntegration = useSlackIntegrations(organization.id);
 
   const slackTable = (
     <div className="mt-8 flex flex-col">
@@ -68,19 +68,19 @@ export const SlackTab: FC<OrgViewProps> = ({ organization }) => {
                 ) : (
                   <>
                     {slackIntegration.data?.map((channel) => (
-                      <tr key={channel.id}>
+                      <tr key={`${channel.slackTeamId}-${channel.channelId}`}>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
-                          {channel.channel_name}
+                          {channel.channelName}
                         </td>
                         <td className="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">
-                          {channel.slack_team_name}
+                          {channel.slackTeamName}
                         </td>
                         <td className="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          {new Date(channel.updated_at!).toLocaleString()}
+                          {new Date(channel.updatedAt).toLocaleString()}
                         </td>
                         <td className="relative whitespace-nowrap py-4 pl-3 pr-4 text-sm font-medium sm:pr-6">
                           <div className="flex items-center justify-end gap-4">
-                            <ActiveLight />
+                            <ActiveLight isActive />
                             <span>Active</span>
                           </div>
                         </td>
@@ -100,7 +100,7 @@ export const SlackTab: FC<OrgViewProps> = ({ organization }) => {
     <div className="space-y-12">
       <Header>Slack</Header>
       {slackIntegration.error ? (
-        <ErrorAlert
+        <ErrorCard
           message={"There was an unexpected error fetching your Slack data"}
         />
       ) : !slackIntegration.isLoading &&
