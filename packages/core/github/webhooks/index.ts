@@ -1,10 +1,13 @@
-import { WebhookEventMap } from "@octokit/webhooks-types";
+import { eq } from "drizzle-orm";
 import * as z from "zod";
-import { safeFetchRepository } from "../../db/fetchers/repositories";
+import { DB } from "../../db/db";
 import { takeFirst } from "../../db/fetchers/utils";
+import { organizations, repositories } from "../../db/schema";
 import { Logger } from "../../logging";
 import { SlackClient } from "../../slack/SlackClient";
 import { getSlackInstallationsForOrganization } from "../../slack/fetchers";
+import { handlePullRequestEvent } from "./handlers/pullRequest";
+import { GithubWebhookEventHander, handledEventNames } from "./types";
 
 const LOGGER = new Logger("core.github.events");
 
@@ -17,21 +20,15 @@ export const githubWebhookBodySchema = z.object({
   }),
 });
 
-type githubWebhookBody = z.infer<typeof githubWebhookBodySchema>;
+export type githubWebhookBody = z.infer<typeof githubWebhookBodySchema>;
 
-const handlePullRequestEvent = async () => {};
-const handlePullRequestCommentEvent = async () => {};
-const handlePullRequestReviewEvent = async () => {};
-
-type handledEventNames = keyof Pick<
-  WebhookEventMap,
-  "pull_request" | "pull_request_review_comment" | "pull_request_review"
->;
+const handlePullRequestCommentEvent: GithubWebhookEventHander = async () => {};
+const handlePullRequestReviewEvent: GithubWebhookEventHander = async () => {};
 
 const eventHandlers: Record<
   handledEventNames,
   {
-    handler: (event: githubWebhookBody) => Promise<void>;
+    handler: GithubWebhookEventHander;
   }
 > = {
   pull_request: { handler: handlePullRequestEvent },
@@ -47,11 +44,29 @@ export const handleGithubWebhookEvent = async ({
   eventName: string;
 }) => {
   if (eventName in eventHandlers) {
-    const repository = await safeFetchRepository(event.repository.id);
+    const repository = await DB.select({
+      repositoryId: repositories.id,
+      isActive: repositories.isActive,
+      organizationId: organizations.id,
+      installationId: organizations.installationId,
+    })
+      .from(repositories)
+      .where(eq(repositories.id, event.repository.id))
+      .fullJoin(
+        organizations,
+        eq(organizations.id, repositories.organizationId)
+      )
+      .then(takeFirst);
 
-    if (!repository) {
+    if (
+      !repository ||
+      !repository.organizationId ||
+      !repository.installationId
+    ) {
       LOGGER.info("Recieved event for repository not in the database", {
         repositoryId: event.repository.id,
+        organizationId: repository?.organizationId,
+        installationId: repository?.installationId,
       });
       return;
     }
@@ -82,7 +97,12 @@ export const handleGithubWebhookEvent = async ({
       slackIntegration.accessToken
     );
 
-    await eventHandlers[eventName as handledEventNames].handler(event);
+    await eventHandlers[eventName as handledEventNames].handler({
+      event,
+      slackClient,
+      installationId: repository.installationId,
+      organizationId: repository.organizationId,
+    });
   } else {
     LOGGER.debug("Recieved event we're not handling", { eventName });
   }
