@@ -22,13 +22,21 @@ export const githubWebhookBodySchema = z.object({
 
 export type githubWebhookBody = z.infer<typeof githubWebhookBodySchema>;
 
-const handlePullRequestCommentEvent: GithubWebhookEventHander = async () => {};
-const handlePullRequestReviewEvent: GithubWebhookEventHander = async () => {};
+const handlePullRequestCommentEvent: GithubWebhookEventHander<
+  any
+> = async () => {
+  throw new Error("Not implemented");
+};
+const handlePullRequestReviewEvent: GithubWebhookEventHander<
+  any
+> = async () => {
+  throw new Error("Not implemented");
+};
 
 const eventHandlers: Record<
   handledEventNames,
   {
-    handler: GithubWebhookEventHander;
+    handler: GithubWebhookEventHander<any>;
   }
 > = {
   pull_request: { handler: handlePullRequestEvent },
