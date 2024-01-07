@@ -30,7 +30,7 @@ export const handler = ApiHandler(async (event, context) => {
 
   const usersOrganizations = await fetchUsersOrganizations(user.id);
 
-  const repository = await fetchRepository({ id: Number(repositoryId) });
+  const repository = await fetchRepository(Number(repositoryId));
 
   // Ensure that the repository is associated with one of the users organizations
   if (!usersOrganizations.some((org) => org.id === repository.organizationId)) {

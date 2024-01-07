@@ -1,7 +1,23 @@
-import { WebhookEvent, WebhookEventMap } from "@octokit/webhooks-types";
+import { WebhookEventMap } from "@octokit/webhooks-types";
+import * as z from "zod";
+import { safeFetchRepository } from "../../db/fetchers/repositories";
+import { takeFirst } from "../../db/fetchers/utils";
 import { Logger } from "../../logging";
+import { SlackClient } from "../../slack/SlackClient";
+import { getSlackInstallationsForOrganization } from "../../slack/fetchers";
 
 const LOGGER = new Logger("core.github.events");
+
+// Purposefully leaving this out of the githubWebhookEventSchema so that we
+// can parse them seperately
+export const githubWebhookBodySchema = z.object({
+  action: z.string(),
+  repository: z.object({
+    id: z.number(),
+  }),
+});
+
+type githubWebhookBody = z.infer<typeof githubWebhookBodySchema>;
 
 const handlePullRequestEvent = async () => {};
 const handlePullRequestCommentEvent = async () => {};
@@ -15,7 +31,7 @@ type handledEventNames = keyof Pick<
 const eventHandlers: Record<
   handledEventNames,
   {
-    handler: (event: WebhookEvent) => Promise<void>;
+    handler: (event: githubWebhookBody) => Promise<void>;
   }
 > = {
   pull_request: { handler: handlePullRequestEvent },
@@ -27,11 +43,44 @@ export const handleGithubWebhookEvent = async ({
   event,
   eventName,
 }: {
-  event: WebhookEvent;
+  event: githubWebhookBody;
   eventName: string;
 }) => {
   if (eventName in eventHandlers) {
-    // do setup
+    const repository = await safeFetchRepository(event.repository.id);
+
+    if (!repository) {
+      LOGGER.info("Recieved event for repository not in the database", {
+        repositoryId: event.repository.id,
+      });
+      return;
+    }
+
+    if (!repository.isActive) {
+      LOGGER.info("Recieved event for inactive repository", {
+        repositoryId: event.repository.id,
+      });
+    }
+
+    const slackIntegration = await getSlackInstallationsForOrganization(
+      repository.organizationId
+    ).then(takeFirst);
+
+    if (!slackIntegration) {
+      LOGGER.info(
+        "Recieved event for active repository in organization with no enabled slack app",
+        {
+          repositoryId: event.repository.id,
+          organizationId: repository.organizationId,
+        }
+      );
+      return;
+    }
+
+    const slackClient = new SlackClient(
+      slackIntegration.channelId,
+      slackIntegration.accessToken
+    );
 
     await eventHandlers[eventName as handledEventNames].handler(event);
   } else {

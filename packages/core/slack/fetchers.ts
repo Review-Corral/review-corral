@@ -1,18 +1,14 @@
 import { eq } from "drizzle-orm";
 import { DB } from "../db/db";
 import { slackIntegration } from "../db/schema";
-import {
-  Organization,
-  SlackIntegration,
-  SlackIntegrationInsertionArgs,
-} from "../db/types";
+import { SlackIntegration, SlackIntegrationInsertionArgs } from "../db/types";
 
 export const getSlackInstallationsForOrganization = async (
-  organization: Organization
+  organizationId: number
 ): Promise<SlackIntegration[]> => {
   return await DB.select()
     .from(slackIntegration)
-    .where(eq(slackIntegration.organizationId, organization.id));
+    .where(eq(slackIntegration.organizationId, organizationId));
 };
 
 export const insertSlackIntegration = async (
