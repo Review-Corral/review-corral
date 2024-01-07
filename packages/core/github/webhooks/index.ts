@@ -7,6 +7,8 @@ import { Logger } from "../../logging";
 import { SlackClient } from "../../slack/SlackClient";
 import { getSlackInstallationsForOrganization } from "../../slack/fetchers";
 import { handlePullRequestEvent } from "./handlers/pullRequest";
+import { handlePullRequestCommentEvent } from "./handlers/pullRequestComment";
+import { handlePullRequestReviewEvent } from "./handlers/pullRequestReview";
 import { GithubWebhookEventHander, handledEventNames } from "./types";
 
 const LOGGER = new Logger("core.github.events");
@@ -21,17 +23,6 @@ export const githubWebhookBodySchema = z.object({
 });
 
 export type githubWebhookBody = z.infer<typeof githubWebhookBodySchema>;
-
-const handlePullRequestCommentEvent: GithubWebhookEventHander<
-  any
-> = async () => {
-  throw new Error("Not implemented");
-};
-const handlePullRequestReviewEvent: GithubWebhookEventHander<
-  any
-> = async () => {
-  throw new Error("Not implemented");
-};
 
 const eventHandlers: Record<
   handledEventNames,
