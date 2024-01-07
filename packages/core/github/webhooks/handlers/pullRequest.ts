@@ -1,52 +1,75 @@
+import {
+  PullRequestConvertedToDraftEvent,
+  PullRequestEvent,
+} from "@octokit/webhooks-types";
+import ky from "ky";
+import {
+  fetchPullRequestById,
+  insertPullRequest,
+  updatePullRequest,
+} from "../../../db/fetchers/pullRequests";
+import { PullRequest } from "../../../db/types";
 import { Logger } from "../../../logging";
-import { GithubWebhookEventHander } from "../types";
+import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
+import { PullRequestReviewCommentsResponse } from "../../endpointTypes";
+import { getInstallationAccessToken } from "../../fetchers";
+import {
+  BaseGithubWebhookEventHanderArgs,
+  GithubWebhookEventHander,
+} from "../types";
+import { getSlackUserName, getThreadTs } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
-export const handlePullRequestEvent: GithubWebhookEventHander = async ({
-  event,
-  slackClient,
-}) => {
-  LOGGER.info("Hanlding PR event with action: ", { action: event.action });
-  if (event.action === "opened" || event.action === "ready_for_review") {
-    return await handleNewPr(event, props);
+export const handlePullRequestEvent: GithubWebhookEventHander<
+  PullRequestEvent
+> = async ({ event, ...props }) => {
+  const payload = event;
+
+  LOGGER.debug("Hanlding PR event with action: ", event.action);
+  if (event.action === "opened" || payload.action === "ready_for_review") {
+    return await handleNewPr(
+      // TODO: can we avoid this dangerous cast?
+      payload as PullRequestEventOpenedOrReadyForReview,
+      props
+    );
   } else {
-    const threadTs = await getThreadTs(event.pull_request.id, props.database);
+    const threadTs = await getThreadTs(payload.pull_request.id);
 
     if (!threadTs) {
       // No thread found, so log and return
-      console.debug(`Got non-created event and didn't find a threadTS`, {
-        action: event.action,
-        prId: event.pull_request.id,
+      LOGGER.debug(`Got non-created event and didn't find a threadTS`, {
+        action: payload.action,
+        prId: payload.pull_request.id,
       });
       return;
     }
 
-    switch (event.action) {
+    switch (payload.action) {
       case "converted_to_draft":
-        return await handleConvertedToDraft(threadTs, event, props);
+        return await handleConvertedToDraft(threadTs, payload, props);
       case "closed":
-        if (event.pull_request.merged) {
+        if (payload.pull_request.merged) {
           await props.slackClient.postPrMerged(
-            event,
+            payload,
             threadTs,
-            await getSlackUserName(event.sender.login, props)
+            await getSlackUserName(payload.sender.login, props)
           );
           return;
         } else {
           await props.slackClient.postPrClosed(
-            event,
+            payload,
             threadTs,
-            await getSlackUserName(event.sender.login, props)
+            await getSlackUserName(payload.sender.login, props)
           );
           return;
         }
       case "review_requested":
-        if ("requested_reviewer" in event) {
+        if ("requested_reviewer" in payload) {
           await props.slackClient.postMessage({
             message: {
               text: `Review request for ${await getSlackUserName(
-                event.requested_reviewer.login,
+                payload.requested_reviewer.login,
                 props
               )}`,
             },
@@ -55,9 +78,9 @@ export const handlePullRequestEvent: GithubWebhookEventHander = async ({
         }
         return;
       default:
-        console.debug(`Got unhandled pull_request event`, {
-          action: event.action,
-          prId: event.pull_request.id,
+        LOGGER.debug(`Got unhandled pull_request event`, {
+          action: payload.action,
+          prId: payload.pull_request.id,
         });
     }
   }
@@ -66,7 +89,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander = async ({
 const handleConvertedToDraft = async (
   threadTs: string,
   event: PullRequestConvertedToDraftEvent,
-  props: BaseGithubHanderProps
+  props: BaseGithubWebhookEventHanderArgs
 ) => {
   await props.slackClient.postConvertedToDraft(
     event,
@@ -77,24 +100,27 @@ const handleConvertedToDraft = async (
 
 const handleNewPr = async (
   payload: PullRequestEventOpenedOrReadyForReview,
-  props: BaseGithubHanderProps
+  props: BaseGithubWebhookEventHanderArgs
 ) => {
-  console.log("Handling new PR");
+  LOGGER.debug("Handling new PR");
   // If the PR is opened or ready for review but in draft, save the PR in the database
   // but don't post it
   if (payload.pull_request.draft) {
-    console.log("Handling draft PR");
-    await props.database.insertPullRequest({
-      pr_id: payload.pull_request.id.toString(),
+    LOGGER.debug("Handling draft PR");
+    await insertPullRequest({
+      id: payload.pull_request.id,
       draft: true,
-      thread_ts: null,
-      organization_id: props.organizationId,
+      threadTs: null,
+      organizationId: props.organizationId,
     });
   } else {
-    console.log("Pull request is not draft");
     const { threadTs, wasCreated } = await getThreadTsForNewPr(payload, props);
 
-    console.log("Got threadTs: ", threadTs, " and wasCreated: ", wasCreated);
+    LOGGER.debug("Pull request is not draft", {
+      threadTs,
+      wasCreated,
+      prId: payload.pull_request.id,
+    });
 
     if (threadTs) {
       if (wasCreated) {
@@ -112,7 +138,7 @@ const handleNewPr = async (
         });
       }
     } else {
-      console.error(
+      LOGGER.error(
         "Error posting new thread for PR opened message to Slack: " +
           "Didn't get message response back to thread messages PR ID: ",
         { prId: payload.pull_request.id }
@@ -123,7 +149,7 @@ const handleNewPr = async (
   async function postAllCommentsForNewPrThread(
     threadTs: string,
     body: PullRequestEventOpenedOrReadyForReview,
-    baseProps: BaseGithubHanderProps
+    baseProps: BaseGithubWebhookEventHanderArgs
   ) {
     const accessToken = await getInstallationAccessToken(
       baseProps.installationId
@@ -150,40 +176,38 @@ const handleNewPr = async (
   }
 
   /**
-   * Only to be used for 'new' PRs where it will try and find the thread_ts
+   * Only to be used for 'new' PRs where it will try and find the threadTs
    * in the database if one exists (this will happen if it started out as a draft), or
    * create a new one if it doesn't exist.
    */
   async function getThreadTsForNewPr(
     body: PullRequestEventOpenedOrReadyForReview,
-    baseProps: BaseGithubHanderProps
+    baseProps: BaseGithubWebhookEventHanderArgs
   ): Promise<{
     threadTs?: string;
     wasCreated: boolean;
   }> {
     // If the PR was opened
     if (body.action === "opened") {
-      console.log("PR was opened, creating new thread...");
+      LOGGER.debug("PR was opened, creating new thread...");
       return {
         threadTs: await createNewThread({
-          existingPullRequest: null,
+          existingPullRequest: undefined,
           body,
           baseProps,
         }),
         wasCreated: true,
       };
     } else {
-      console.log("PR was not opened, trying to find existing thread...");
+      LOGGER.debug("PR was not opened, trying to find existing thread...");
       // This should trigger for 'ready_for_review' events
-      const existingPullRequest = (
-        await baseProps.database.getPullRequest({
-          prId: body.pull_request.id.toString(),
-        })
-      ).data;
+      const existingPullRequest = await fetchPullRequestById(
+        body.pull_request.id
+      );
 
       // If we still couldn't find a thread, then post a new one.
-      if (!existingPullRequest?.thread_ts) {
-        console.log("Couldn't find existing thread, creating new thread...");
+      if (!existingPullRequest?.threadTs) {
+        LOGGER.debug("Couldn't find existing thread, creating new thread...");
         return {
           threadTs: await createNewThread({
             existingPullRequest,
@@ -193,9 +217,9 @@ const handleNewPr = async (
           wasCreated: true,
         };
       } else {
-        console.log("Found existing thread");
+        LOGGER.debug("Found existing thread");
         return {
-          threadTs: existingPullRequest.thread_ts,
+          threadTs: existingPullRequest.threadTs,
           wasCreated: false,
         };
       }
@@ -207,9 +231,9 @@ const handleNewPr = async (
     body,
     baseProps,
   }: {
-    existingPullRequest: PullRequestRow | null;
+    existingPullRequest: PullRequest | undefined;
     body: PullRequestEventOpenedOrReadyForReview;
-    baseProps: BaseGithubHanderProps;
+    baseProps: BaseGithubWebhookEventHanderArgs;
   }): Promise<string> {
     try {
       const response = await baseProps.slackClient.postPrReady(
@@ -218,31 +242,31 @@ const handleNewPr = async (
       );
 
       if (response && response.ts) {
-        console.debug(
-          "Succesfully created new thread_ts. About to update database",
+        LOGGER.debug(
+          "Succesfully created new threadTs. About to update database",
           {
             prId: body.pull_request.id,
             organizationId: baseProps.organizationId,
-            existingPrId: existingPullRequest?.pr_id,
+            existingPrId: existingPullRequest?.id,
             threadTs: response.ts,
           }
         );
         if (existingPullRequest) {
-          console.debug(
-            `Updating existing PR record of id ${existingPullRequest.pr_id}}`
+          LOGGER.debug(
+            `Updating existing PR record of id ${existingPullRequest.id}}`
           );
-          await baseProps.database.updatePullRequest({
-            pr_id: existingPullRequest?.pr_id,
+          await updatePullRequest({
+            id: existingPullRequest.id,
             draft: body.pull_request.draft,
-            thread_ts: response.ts,
+            threadTs: response.ts,
           });
         } else {
-          console.debug(`Creating new PR record`);
-          await baseProps.database.insertPullRequest({
-            pr_id: body.pull_request.id.toString(),
+          LOGGER.debug(`Creating new PR record`);
+          await insertPullRequest({
+            id: body.pull_request.id,
             draft: body.pull_request.draft,
-            thread_ts: response.ts,
-            organization_id: baseProps.organizationId,
+            threadTs: response.ts,
+            organizationId: baseProps.organizationId,
           });
         }
 
@@ -260,18 +284,20 @@ const handleNewPr = async (
 
   async function postCommentsForNewPR(
     body: PullRequestEventOpenedOrReadyForReview,
-    accessToken: InstallationAccessResponse,
+    accessToken: Awaited<ReturnType<typeof getInstallationAccessToken>>,
     threadTs: string,
-    baseProps: BaseGithubHanderProps
+    baseProps: BaseGithubWebhookEventHanderArgs
   ) {
     try {
-      const response = await axios.get(body.pull_request.comments_url, {
-        headers: {
-          Authorization: `bearer ${accessToken.token}`,
-        },
-      });
+      const response = await ky
+        .get(body.pull_request.comments_url, {
+          headers: {
+            Authorization: `bearer ${accessToken.token}`,
+          },
+        })
+        .json<PullRequestReviewCommentsResponse>();
 
-      for (const comment of response.data) {
+      for (const comment of response) {
         if (comment.user.type === "User") {
           await baseProps.slackClient.postComment({
             prId: body.pull_request.id,
@@ -286,7 +312,12 @@ const handleNewPr = async (
         }
       }
     } catch (error) {
-      console.error("Error getting comments: ", error);
+      LOGGER.error("Error getting comments", {
+        error,
+        prId: body.pull_request.id,
+        installationId: baseProps.installationId,
+        organizationId: baseProps.organizationId,
+      });
     }
   }
 };
