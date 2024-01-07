@@ -1,25 +1,8 @@
-import {
-  CfnEIP,
-  CfnEIPAssociation,
-  SubnetType,
-  Vpc,
-} from "aws-cdk-lib/aws-ec2";
-import { Construct } from "constructs";
-import {
-  Api,
-  Auth,
-  FunctionProps,
-  Function as SstFunction,
-  Stack as SstStack,
-  StackContext,
-  use,
-} from "sst/constructs";
+import { SubnetType } from "aws-cdk-lib/aws-ec2";
+import { Api, Auth, FunctionProps, StackContext, use } from "sst/constructs";
 import { getBaseUrl } from "./FrontendStack";
 import { PersistedStack } from "./PersistedStack";
 import { getDbConnectionInfo } from "./constructs/Database";
-import LambdaNaming from "./constructs/LambdaNaming";
-import LambdaNetworkInterface from "./constructs/LambdaNetworkInterface";
-import LambdaPermissions from "./constructs/LambdaPermissions";
 import MigrationFunction from "./constructs/MigrationFunction";
 import { assertVarExists } from "./utils/asserts";
 
@@ -103,17 +86,6 @@ export function MainStack({ stack, app }: StackContext) {
   // Must be at the end, after all Lambdas are defined
   // ===================
 
-  new LambdaNaming(stack, "LambdaNaming");
-  new LambdaPermissions(stack, "LambdaPermissions", {
-    secretArns: database ? [database.secret.secretArn] : [],
-  });
-
-  if (vpc && functionsSecurityGroup) {
-    // It doesn't really matter which Lambda function is passed in here; one is needed
-    // simply to determine which network interfaces need Elastic IPs
-    enableLambdaOutboundNetworking(stack, vpc, migrationFunction);
-  }
-
   stack.addOutputs({
     ApiEndpoint: api.url,
     MigrationFunction: migrationFunction.functionName,
@@ -123,38 +95,8 @@ export function MainStack({ stack, app }: StackContext) {
     api,
     authUrl: `${api.url}${authPostfix}`,
     slackEnvVars,
+    vpc,
+    functionsSecurityGroup,
+    migrationFunction,
   };
-}
-
-/**
- * Configures outbound internet access for Lambda functions in a VPC without requiring
- * NAT Gateways. Any arbitrary Lambda function will suffice as a parameter to this
- * function; it is used to determine which network interfaces need to be associated with
- * Elastic IPs.
- */
-function enableLambdaOutboundNetworking(
-  stack: SstStack,
-  vpc: Vpc,
-  lambdaFunction: SstFunction
-): void {
-  for (const subnet of vpc.publicSubnets) {
-    const lambdaEip = new CfnEIP(stack, `LambdaEIP${subnet.node.id}`);
-
-    // Ensure the Elastic IP is released when the subnet is deleted
-    lambdaEip.node.addDependency(subnet.node.defaultChild as Construct);
-
-    const lambdaEni = LambdaNetworkInterface.fromLookup(
-      stack,
-      `LambdaENI${subnet.node.id}`,
-      {
-        lambdaFunction,
-        subnet,
-      }
-    );
-
-    new CfnEIPAssociation(stack, `LambdaEIPAssoc${subnet.node.id}`, {
-      allocationId: lambdaEip.attrAllocationId,
-      networkInterfaceId: lambdaEni.networkInterfaceId,
-    });
-  }
 }
