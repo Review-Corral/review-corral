@@ -1,5 +1,5 @@
 import { SubnetType } from "aws-cdk-lib/aws-ec2";
-import { Api, Auth, FunctionProps, StackContext, use } from "sst/constructs";
+import { FunctionProps, StackContext, use } from "sst/constructs";
 import { getBaseUrl } from "./FrontendStack";
 import { PersistedStack } from "./PersistedStack";
 import { getDbConnectionInfo } from "./constructs/Database";
@@ -46,7 +46,8 @@ export function MainStack({ stack, app }: StackContext) {
     allowPublicSubnet: Boolean(vpc),
     vpcSubnets: vpc ? { subnetType: SubnetType.PUBLIC } : undefined,
   };
-  stack.setDefaultFunctionProps(functionDefaults);
+  // Set the default props for all stacks
+  app.setDefaultFunctionProps(functionDefaults);
 
   const migrationFunction = new MigrationFunction(stack, "MigrateToLatest", {
     app,
@@ -54,48 +55,14 @@ export function MainStack({ stack, app }: StackContext) {
     functionDefaults,
   });
 
-  const api = new Api(stack, "api", {
-    routes: {
-      "GET /": "packages/functions/src/lambda.handler",
-      "GET /todo": "packages/functions/src/todo.list",
-      "POST /todo": "packages/functions/src/todo.create",
-      "GET /profile": "packages/functions/src/todo.getUser",
-      "GET /gh/installations":
-        "packages/functions/src/github/installations.getInstallations",
-      "GET /gh/installations/{organizationId}/repositories":
-        "packages/functions/src/github/repositories/getAll.handler",
-      "PUT /gh/repositories/{repositoryId}":
-        "packages/functions/src/github/repositories/setStatus.handler",
-      "GET /slack/{organizationId}/installations":
-        "packages/functions/src/slack/installations.getSlackInstallations",
-      "GET /slack/oauth": "packages/functions/src/slack/oauth.handler",
-    },
-  });
-
-  const auth = new Auth(stack, "auth", {
-    authenticator: {
-      handler: "packages/functions/src/auth.handler",
-    },
-  });
-
-  const authPostfix = "/auth";
-  auth.attach(stack, { api, prefix: authPostfix });
-
-  // ===================
-  // Ending Config
-  // Must be at the end, after all Lambdas are defined
-  // ===================
-
   stack.addOutputs({
-    ApiEndpoint: api.url,
     MigrationFunction: migrationFunction.functionName,
   });
 
   return {
-    api,
-    authUrl: `${api.url}${authPostfix}`,
     slackEnvVars,
     vpc,
+    database,
     functionsSecurityGroup,
     migrationFunction,
   };

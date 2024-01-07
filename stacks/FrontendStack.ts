@@ -1,5 +1,7 @@
 import { StackContext, StaticSite, use } from "sst/constructs";
 
+import { ApiStack } from "./ApiStack";
+import { AuthStack } from "./AuthStack";
 import { MainStack } from "./MainStack";
 
 export const getBaseUrl = (isLocal: boolean) => {
@@ -10,7 +12,9 @@ export const getBaseUrl = (isLocal: boolean) => {
 };
 
 export function FrontendStack({ stack, app }: StackContext) {
-  const { api, authUrl, slackEnvVars } = use(MainStack);
+  const { slackEnvVars } = use(MainStack);
+  const { authUrl } = use(AuthStack);
+  const { api } = use(ApiStack);
 
   // Define our React app
   const site = new StaticSite(stack, "ReactSite", {
