@@ -3,7 +3,10 @@ import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { createHmac } from "crypto";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
-import { handleGithubWebhookEvent } from "../../../core/github/webhooks";
+import {
+  githubWebhookBodySchema,
+  handleGithubWebhookEvent,
+} from "../../../core/github/webhooks";
 import { Logger } from "../../../core/logging";
 
 const LOGGER = new Logger("functions.github.events");
@@ -37,9 +40,11 @@ export const handler = ApiHandler(async (event, context) => {
       };
     }
 
-    if (!isWebhookEvent(parsedEvent.data.body)) {
+    const parsedBody = githubWebhookBodySchema.safeParse(parsedEvent.data.body);
+
+    if (!parsedBody.success) {
       LOGGER.debug("Recieved unexpected structure to event", {
-        parsedResult: parsedEvent,
+        parsedResult: parsedBody,
         event,
       });
       return {
@@ -49,7 +54,7 @@ export const handler = ApiHandler(async (event, context) => {
     }
 
     await handleGithubWebhookEvent({
-      event: parsedEvent.data.body,
+      event: parsedBody.data,
       eventName: parsedEvent.data.headers["x-github-event"],
     });
 
@@ -63,7 +68,12 @@ export const handler = ApiHandler(async (event, context) => {
 export const isWebhookEvent = (event: any): event is WebhookEvent => {
   // Implement runtime checks based on the expected structure of WebhookEvent
   // This can be tricky since WebhookEvent may have a complex and varied structure
-  if (event && typeof event === "object" && "action" in event) {
+  if (
+    event &&
+    typeof event === "object" &&
+    "action" in event &&
+    "repository" in event
+  ) {
     // Add more checks as necessary to validate the structure
     return true;
   }

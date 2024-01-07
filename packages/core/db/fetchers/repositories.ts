@@ -1,8 +1,8 @@
-import { and, eq } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { DB } from "../db";
 import { repositories } from "../schema";
 import { Repository, RepositoryInsertArgs } from "../types";
-import { takeFirstOrThrow } from "./utils";
+import { takeFirst, takeFirstOrThrow } from "./utils";
 
 export const fetchRepositoriesForOrganization = async (
   organizationId: number
@@ -40,29 +40,17 @@ export const setRespositoryActiveStatus = async ({
     .where(eq(repositories.id, id));
 };
 
-/**
- * If an organization ID is provided, it will check that it also points to that org Id
- */
-export const fetchRepository = async ({
-  id,
-  organizationId,
-}: {
-  id: number;
-  organizationId?: number;
-}): Promise<Repository> => {
-  if (organizationId) {
-    return await DB.select()
-      .from(repositories)
-      .where(
-        and(
-          eq(repositories.id, id),
-          eq(repositories.organizationId, organizationId)
-        )
-      )
-      .limit(1)
-      .then(takeFirstOrThrow);
-  }
+export const safeFetchRepository = async (
+  id: number
+): Promise<Repository | undefined> => {
+  return await DB.select()
+    .from(repositories)
+    .where(eq(repositories.id, id))
+    .limit(1)
+    .then(takeFirst);
+};
 
+export const fetchRepository = async (id: number): Promise<Repository> => {
   return await DB.select()
     .from(repositories)
     .where(eq(repositories.id, id))
