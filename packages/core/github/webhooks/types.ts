@@ -13,6 +13,11 @@ export interface GithubWebhookEventHanderArgs<EventT> {
   installationId: number;
 }
 
+export type BaseGithubWebhookEventHanderArgs = Omit<
+  GithubWebhookEventHanderArgs<any>,
+  "event"
+>;
+
 export type GithubWebhookEventHander<EventT> = (
   args: GithubWebhookEventHanderArgs<EventT>
 ) => Promise<void>;
