@@ -6,5 +6,13 @@
     "us-east-1d",
     "us-east-1e",
     "us-east-1f"
-  ]
+  ],
+  "hosted-zone:account=277404140474:domainName=reviewcorral.com:region=us-east-1": {
+    "Id": "/hostedzone/Z0490391IX8PBVCD8OH7",
+    "Name": "reviewcorral.com."
+  },
+  "hosted-zone:account=277404140474:domainName=review-corral.com:region=us-east-1": {
+    "Id": "/hostedzone/Z09811182JMY0IZP1GYNM",
+    "Name": "review-corral.com."
+  }
 }

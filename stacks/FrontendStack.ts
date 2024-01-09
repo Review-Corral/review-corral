@@ -23,7 +23,7 @@ export function FrontendStack({ stack, app }: StackContext) {
     buildOutput: "dist",
     // Pass in our environment variables
     environment: {
-      VITE_API_URL: api.url,
+      VITE_API_URL: api.customDomainUrl ?? api.url,
       VITE_REGION: app.region,
       VITE_AUTH_URL: authUrl,
       ...slackEnvVars,
