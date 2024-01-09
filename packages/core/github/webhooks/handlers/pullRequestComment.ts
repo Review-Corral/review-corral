@@ -2,8 +2,11 @@ import {
   PullRequestReviewCommentCreatedEvent,
   WebhookEvent,
 } from "@octokit/webhooks-types";
+import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
 import { getSlackUserName, getThreadTs } from "./shared";
+
+const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
 type t = WebhookEvent;
 
@@ -15,7 +18,7 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
 
     if (!threadTs) {
       // write error log
-      console.warn("Got a comment event but couldn't find the thread", {
+      LOGGER.warn("Got a comment event but couldn't find the thread", {
         action: event.action,
         prId: event.pull_request.id,
       });

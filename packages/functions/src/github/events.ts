@@ -12,20 +12,28 @@ import { assertVarExists } from "../../../core/utils/assert";
 
 const LOGGER = new Logger("functions.github.events");
 
-const githubWebhookEventSchema = z.object({
-  headers: z.object({
-    "x-github-delivery": z.string(),
-    "x-github-event": z.string(),
-  }),
-  body: z.string(),
-});
+const githubWebhookEventSchema = z
+  .object({
+    headers: z.object({
+      "x-github-delivery": z.string(),
+      "x-github-event": z.string(),
+    }),
+    body: z.string(),
+  })
+  .passthrough();
 
 export type GithubWebhookEventPayload = z.infer<
   typeof githubWebhookEventSchema
 >;
 
 export const handler = ApiHandler(async (event, context) => {
-  LOGGER.debug("Recieved Github event", { event });
+  LOGGER.debug(
+    "Recieved Github event",
+    {
+      event,
+    },
+    { depth: 3 }
+  );
   if (!(await checkEventWrapper(event))) {
     LOGGER.debug("Event didn't pass check", { event });
     return {
@@ -33,32 +41,44 @@ export const handler = ApiHandler(async (event, context) => {
       body: JSON.stringify({ message: "Unauthorized" }),
     };
   } else {
-    const parsedEvent = githubWebhookEventSchema.safeParse(event);
+    const expectedEvent = githubWebhookEventSchema.safeParse(event);
 
-    if (!parsedEvent.success) {
-      LOGGER.debug("Invalid event", { event, parsedResult: parsedEvent });
+    if (!expectedEvent.success) {
+      LOGGER.debug("Invalid event", { event, parsedResult: expectedEvent });
       return {
         statusCode: 400,
         body: JSON.stringify({ message: "Invalid event" }),
       };
     }
 
-    const parsedBody = githubWebhookBodySchema.safeParse(parsedEvent.data.body);
+    const parsedBody = JSON.parse(expectedEvent.data.body);
 
-    if (!parsedBody.success) {
-      LOGGER.debug("Recieved unexpected structure to event", {
-        parsedResult: parsedBody,
-        event,
-      });
+    LOGGER.debug("Parsed event body as JSON", { parsedBody }, { depth: 3 });
+
+    const expectedBody = githubWebhookBodySchema.safeParse(
+      JSON.parse(expectedEvent.data.body)
+    );
+
+    if (!expectedBody.success) {
+      LOGGER.debug(
+        "Recieved unexpected structure to event",
+        {
+          parsedResult: expectedBody,
+          error: expectedBody.error,
+        },
+        {
+          depth: 4,
+        }
+      );
       return {
         statusCode: 400,
-        body: JSON.stringify({ message: "Invalid event" }),
+        body: JSON.stringify({ message: "Invalid event body" }),
       };
     }
 
     await handleGithubWebhookEvent({
-      event: parsedBody.data,
-      eventName: parsedEvent.data.headers["x-github-event"],
+      event: expectedBody.data,
+      eventName: expectedEvent.data.headers["x-github-event"],
     });
 
     return {
