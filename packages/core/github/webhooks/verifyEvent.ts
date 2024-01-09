@@ -1,4 +1,4 @@
-import { createHmac } from "crypto";
+import { createHmac, timingSafeEqual } from "crypto";
 
 export const verifyGithubWebhookSecret = async ({
   signature,
@@ -10,10 +10,10 @@ export const verifyGithubWebhookSecret = async ({
 }) => {
   const calculated = await caculateSignature(args);
 
-  return calculated === signature;
+  return timingSafeEqual(Buffer.from(calculated), Buffer.from(signature));
 };
 
-export const caculateSignature = async ({
+const caculateSignature = async ({
   eventBody,
   secret,
 }: {
