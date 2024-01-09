@@ -15,12 +15,14 @@ const LOGGER = new Logger("core.github.events");
 
 // Purposefully leaving this out of the githubWebhookEventSchema so that we
 // can parse them seperately
-export const githubWebhookBodySchema = z.object({
-  action: z.string(),
-  repository: z.object({
-    id: z.number(),
-  }),
-});
+export const githubWebhookBodySchema = z
+  .object({
+    action: z.string(),
+    repository: z.object({
+      id: z.number(),
+    }),
+  })
+  .passthrough();
 
 export type githubWebhookBody = z.infer<typeof githubWebhookBodySchema>;
 
@@ -42,6 +44,7 @@ export const handleGithubWebhookEvent = async ({
   event: githubWebhookBody;
   eventName: string;
 }) => {
+  LOGGER.debug("Handling event body", { event, eventName });
   if (eventName in eventHandlers) {
     const repository = await DB.select({
       repositoryId: repositories.id,
@@ -95,6 +98,10 @@ export const handleGithubWebhookEvent = async ({
       slackIntegration.channelId,
       slackIntegration.accessToken
     );
+
+    LOGGER.debug("Loaded handler props, now running event handler", {
+      eventName,
+    });
 
     await eventHandlers[eventName as handledEventNames].handler({
       event,
