@@ -55,9 +55,7 @@ export const handler = ApiHandler(async (event, context) => {
 
     LOGGER.debug("Parsed event body as JSON", { parsedBody }, { depth: 3 });
 
-    const expectedBody = githubWebhookBodySchema.safeParse(
-      JSON.parse(expectedEvent.data.body)
-    );
+    const expectedBody = githubWebhookBodySchema.safeParse(parsedBody);
 
     if (!expectedBody.success) {
       LOGGER.debug(

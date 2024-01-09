@@ -1,21 +1,32 @@
 import { APIGatewayProxyEventV2, Context } from "aws-lambda";
+import { beforeEach } from "node:test";
 import { describe, expect, it, vi } from "vitest";
 import { handler } from "./events";
 
+import { handleGithubWebhookEvent } from "../../../core/github/webhooks";
+
 describe("event.spec", () => {
-  it("should test something", async () => {
+  beforeEach(() => {
+    const mocks = vi.hoisted(() => {
+      return {
+        handleGithubWebhookEvent: vi.fn(),
+      };
+    });
+
     vi.mock("../../../core/github/webhooks", async () => {
       const actual = await vi.importActual("../../../core/github/webhooks");
       return {
         ...actual,
-        handleGithubWebhookEvent: vi.fn(),
+        handleGithubWebhookEvent: mocks.handleGithubWebhookEvent,
       };
     });
 
     vi.mock("../../../core/github/webhooks/verifyEvent", () => ({
       verifyGithubWebhookSecret: vi.fn(() => true),
     }));
+  });
 
+  it("should properly parse HTTP JSON body and pass to event handlers", async () => {
     const eventBody = {
       action: "opened",
       repository: {
@@ -40,6 +51,13 @@ describe("event.spec", () => {
       cookies: [],
       statusCode: 200,
       body: '{"message":"Success"}',
+    });
+
+    const handleGithubEventEventMock = handleGithubWebhookEvent;
+    expect(handleGithubEventEventMock).toHaveBeenCalledTimes(1);
+    expect(handleGithubEventEventMock).toHaveBeenCalledWith({
+      event: eventBody,
+      eventName: "pull_request",
     });
   });
 });
