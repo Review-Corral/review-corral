@@ -1,13 +1,14 @@
 import { WebhookEvent } from "@octokit/webhooks-types";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
-import { createHmac } from "crypto";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
 import {
   githubWebhookBodySchema,
   handleGithubWebhookEvent,
 } from "../../../core/github/webhooks";
+import { verifyGithubWebhookSecret } from "../../../core/github/webhooks/verifyEvent";
 import { Logger } from "../../../core/logging";
+import { assertVarExists } from "../../../core/utils/assert";
 
 const LOGGER = new Logger("functions.github.events");
 
@@ -24,7 +25,9 @@ export type GithubWebhookEventPayload = z.infer<
 >;
 
 export const handler = ApiHandler(async (event, context) => {
+  LOGGER.debug("Recieved Github event", { event });
   if (!(await checkEventWrapper(event))) {
+    LOGGER.debug("Event didn't pass check", { event });
     return {
       statusCode: 401,
       body: JSON.stringify({ message: "Unauthorized" }),
@@ -84,10 +87,8 @@ export const isWebhookEvent = (event: any): event is WebhookEvent => {
  * Verifies the signature of the Github webhook event to ensure it came from Github.
  */
 const checkEventWrapper = async (event: APIGatewayProxyEventV2) => {
-  if (!process.env.GITHUB_WEBHOOK_SECRET) {
-    console.error("No GITHUB_WEBHOOK_SECRET set");
-    return false;
-  }
+  const webhookSecret = assertVarExists("GH_WEBHOOK_SECRET");
+
   try {
     const signature = event.headers["x-hub-signature-256"];
 
@@ -105,28 +106,12 @@ const checkEventWrapper = async (event: APIGatewayProxyEventV2) => {
     }
 
     return await verifyGithubWebhookSecret({
-      event,
+      eventBody: event.body,
       signature,
-      secret: process.env.GITHUB_WEBHOOK_SECRET,
+      secret: webhookSecret,
     });
   } catch (error) {
     console.error("Error checking event signature", { error });
     return false;
   }
-};
-
-const verifyGithubWebhookSecret = async ({
-  event,
-  signature,
-  secret,
-}: {
-  event: APIGatewayProxyEventV2;
-  signature: string;
-  secret: string;
-}) => {
-  const hmac = createHmac("sha256", secret);
-  hmac.update(JSON.stringify(event.body));
-  const calculated = `sha256=${hmac.digest("hex")}`;
-
-  return calculated === signature;
 };

@@ -21,6 +21,8 @@ export function ApiStack({ stack, app }: StackContext) {
       "GET /profile": "packages/functions/src/todo.getUser",
 
       ...buildPaths("/gh", {
+        // Handles incoming webhooks from Github
+        "POST /webhook-event": "packages/functions/src/github/events.handler",
         ...buildPaths("installations", {
           "GET /":
             "packages/functions/src/github/installations.getInstallations",
