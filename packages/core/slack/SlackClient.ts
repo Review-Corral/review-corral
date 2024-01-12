@@ -49,10 +49,14 @@ export class SlackClient {
     try {
       return await this.client.chat.postMessage(payload);
     } catch (error) {
-      LOGGER.error("Error posting message: ", {
-        error,
-        payload,
-      });
+      LOGGER.error(
+        "Error posting message: ",
+        {
+          error,
+          payload,
+        },
+        { depth: 10 }
+      );
     }
   }
 
@@ -377,7 +381,7 @@ export class SlackClient {
           elements: [
             {
               type: "image",
-              image_url: body.repository?.owner?.avatar_url,
+              image_url: body.repository.owner.avatar_url,
               alt_text: "repo owner url",
             },
             {
@@ -395,9 +399,10 @@ export class SlackClient {
             },
             {
               type: "image",
-              image_url: `${assertVarExists(
-                "BASE_FE_URL"
-              )}/plus-minus-diff-icon-alt.png`,
+              // image_url: `${assertVarExists(
+              //   "BASE_FE_URL"
+              // )}/plus-minus-diff-icon-alt.png`,
+              image_url: `https://www.reviewcorral.io/plus-minus-diff-icon-alt.png`,
               alt_text: "plus-minus-icon",
             },
             {
