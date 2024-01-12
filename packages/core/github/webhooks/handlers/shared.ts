@@ -6,13 +6,13 @@ export async function getSlackUserName(
   githubLogin: string,
   props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">
 ): Promise<string> {
-  const usernameMappings = await getSlackUseridFromGithubLogin({
+  const usernameMap = await getSlackUseridFromGithubLogin({
     githubLogin,
     organizationId: props.organizationId,
   });
 
-  if (usernameMappings) {
-    return usernameMappings.slackUserId;
+  if (usernameMap) {
+    return `<@${usernameMap.slackUserId}>`;
   }
 
   return githubLogin;
