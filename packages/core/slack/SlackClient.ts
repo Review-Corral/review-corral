@@ -13,19 +13,23 @@ import {
   WebClient,
 } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
+import { Logger } from "../logging";
+import { assertVarExists } from "../utils/assert";
 
 export type PullRequestEventOpenedOrReadyForReview =
   | PullRequestOpenedEvent
   | PullRequestReadyForReviewEvent;
 
 export const getSlackWebClient = () =>
-  new WebClient(process.env.SLACK_BOT_TOKEN);
+  new WebClient(assertVarExists<string>("SLACK_BOT_TOKEN"));
+
+const LOGGER = new Logger("core.SlackClient");
 
 export class SlackClient {
   readonly client: WebClient;
 
   constructor(readonly channelId: string, readonly slackToken: string) {
-    this.client = new WebClient(process.env.SLACK_BOT_TOKEN);
+    this.client = getSlackWebClient();
   }
 
   async postMessage({
@@ -45,7 +49,10 @@ export class SlackClient {
     try {
       return await this.client.chat.postMessage(payload);
     } catch (error) {
-      console.error("Error posting message: ", error);
+      LOGGER.error("Error posting message: ", {
+        error,
+        payload,
+      });
     }
   }
 
@@ -388,7 +395,9 @@ export class SlackClient {
             },
             {
               type: "image",
-              image_url: `${process.env.NEXT_PUBLIC_BASE_URL}/plus-minus-diff-icon-alt.png`,
+              image_url: `${assertVarExists(
+                "BASE_FE_URL"
+              )}/plus-minus-diff-icon-alt.png`,
               alt_text: "plus-minus-icon",
             },
             {
