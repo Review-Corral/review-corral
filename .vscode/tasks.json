@@ -11,6 +11,29 @@
       },
       "icon": {
         "id": "browser",
+        "color": "terminal.ansiBlue"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Web",
+      "type": "shell",
+      "command": "./scripts/nvmPnpm.sh",
+      "args": ["dev"],
+      "options": {
+        "cwd": "${workspaceFolder}/packages/web"
+      },
+      "icon": {
+        "id": "browser",
         "color": "terminal.ansiCyan"
       },
       "group": {

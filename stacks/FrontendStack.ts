@@ -20,6 +20,7 @@ export function FrontendStack({ stack, app }: StackContext) {
   const { authUrl } = use(AuthStack);
 
   // Define our React app
+
   const site = new StaticSite(stack, "ReactSite", {
     path: "packages/frontend",
     buildCommand: "pnpm run build",
