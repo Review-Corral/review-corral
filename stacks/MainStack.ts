@@ -31,6 +31,8 @@ export function MainStack({ stack, app }: StackContext) {
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
       ...slackEnvVars,
+      // This isn't in the slackEnvVars because we don't want it on the frontend
+      SLACK_BOT_TOKEN: assertVarExists("SLACK_BOT_TOKEN"),
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
       GH_APP_ID: assertVarExists("GH_APP_ID"),
       GH_CLIENT_ID: assertVarExists("GH_CLIENT_ID"),

@@ -18,12 +18,15 @@
     "migrate:gen": "pnpm drizzle-kit generate:pg --out ./packages/core/db/migrations/ --schema ./packages/core/db/schema.ts"
   },
   "devDependencies": {
+    "@octokit/webhooks-types": "^7.3.1",
     "@tsconfig/node18": "^18.2.2",
     "aws-cdk-lib": "2.110.1",
     "constructs": "10.3.0",
     "drizzle-kit": "^0.20.7",
+    "node-fetch": "^3.3.2",
     "sst": "2.38.7",
     "typescript": "^5.3.3",
+    "vite-node": "^1.1.3",
     "vitest": "^1.1.0"
   },
   "workspaces": [
