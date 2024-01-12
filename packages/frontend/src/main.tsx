@@ -19,7 +19,7 @@ import { OrgsView } from "./org/OrgsView.tsx";
 import { OrgView } from "./organization/OrgView.tsx";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const protectedLoader: LoaderFunction = async (args: LoaderFunctionArgs) => {
+const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {
   if (!userIsLoggedIn()) {
     return redirect("/login");
   }

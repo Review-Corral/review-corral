@@ -10,7 +10,7 @@ interface OrgViewProps {}
 export const OrgView: FC<OrgViewProps> = () => {
   const { orgId } = useParams();
 
-  const { data, isLoading } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["respositories", orgId],
     queryFn: async () => {
       return await ky

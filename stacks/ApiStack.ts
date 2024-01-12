@@ -5,7 +5,7 @@ export const HOSTED_ZONE = "review-corral.com";
 export const PROD_STAGE = "prod";
 
 const domain = (app: StackContext["app"]) => {
-  if (app.stage.startsWith(PROD_STAGE)) return HOSTED_ZONE;
+  if (app.stage.startsWith(PROD_STAGE)) return `api.${HOSTED_ZONE}`;
 
   return `${app.stage}-api.${HOSTED_ZONE}`;
 };
