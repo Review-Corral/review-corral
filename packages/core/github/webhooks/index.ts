@@ -18,9 +18,11 @@ const LOGGER = new Logger("core.github.events");
 export const githubWebhookBodySchema = z
   .object({
     action: z.string(),
-    repository: z.object({
-      id: z.number(),
-    }),
+    repository: z
+      .object({
+        id: z.number(),
+      })
+      .passthrough(),
   })
   .passthrough();
 

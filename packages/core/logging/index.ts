@@ -121,13 +121,12 @@ export class Logger implements LoggerMethods {
    * @param errorOrData Either an Error or some extra data to log
    * @param data Additional data to log (e.g. if errorOrData is an Error)
    */
-  public error(message: string, errorOrData?: any, data?: any): void {
-    if (errorOrData instanceof Error) {
-      this.log(LogLevel.ERROR, message, { ...data, error: errorOrData });
-    } else {
-      const allData = { ...errorOrData, ...data };
-      this.log(LogLevel.ERROR, message, allData);
-    }
+  public error(
+    message: string,
+    errorOrData?: any,
+    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS
+  ): void {
+    this.log(LogLevel.ERROR, message, errorOrData, options);
   }
 
   private formatPrefix(level: LogLevel): string {
