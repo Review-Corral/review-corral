@@ -1,5 +1,6 @@
 import { execSync } from "child_process";
 import { z } from "zod";
+import { assertVarExists } from "../assert";
 import { LambdaEvent, isApiGatewayProxyEvent } from "./types";
 
 const UNKNOWN_RESULT_TEXT = "UNKOWN";
@@ -26,7 +27,8 @@ export const getAuthClaims = (event: LambdaEvent): AuthClaims | undefined => {
 };
 
 export const getIsLocal = (): boolean => {
-  return !!process.env.IS_LOCAL;
+  const isLocalString = assertVarExists("IS_LOCAL");
+  return /true/i.test(isLocalString);
 };
 
 export const getDebugMode = (): boolean => {
@@ -45,7 +47,7 @@ export const getFrontendUrl = (): string | undefined => {
 export const getReleaseVersion = (): string => {
   return (
     process.env.SENTRY_RELEASE ??
-    (getIsLocal() ? getCurrentCommitSha() : "UNKNOWN")
+    (!!getIsLocal() ? getCurrentCommitSha() : "UNKNOWN")
   );
 };
 
