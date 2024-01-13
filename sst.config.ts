@@ -1,8 +1,6 @@
 import { SSTConfig } from "sst";
-import { ApiStack } from "./stacks/ApiStack";
 import { AuthStack } from "./stacks/AuthStack";
 import { FrontendStack } from "./stacks/FrontendStack";
-import { LambdaPermissionStack } from "./stacks/LambdaPermissionsStack";
 import { MainStack } from "./stacks/MainStack";
 import { PersistedStack } from "./stacks/PersistedStack";
 
@@ -18,9 +16,7 @@ export default {
     app
       .stack(PersistedStack)
       .stack(MainStack)
-      .stack(ApiStack)
       .stack(AuthStack)
-      .stack(LambdaPermissionStack)
       .stack(FrontendStack);
   },
 } satisfies SSTConfig;

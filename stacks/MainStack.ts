@@ -2,9 +2,13 @@ import { SubnetType } from "aws-cdk-lib/aws-ec2";
 import { FunctionProps, StackContext, use } from "sst/constructs";
 import { getBaseUrl } from "./FrontendStack";
 import { PersistedStack } from "./PersistedStack";
+import { Api } from "./constructs/Api";
 import { getDbConnectionInfo } from "./constructs/Database";
 import MigrationFunction from "./constructs/MigrationFunction";
+import LambdaNaming from "./constructs/lambdaPermissions/LambdaNaming";
+import LambdaPolicies from "./constructs/lambdaPermissions/LambdaPolicies";
 import { assertVarExists } from "./utils/asserts";
+import { enableLambdaOutboundNetworking } from "./utils/enableLambdaOutboundNetworking";
 
 export function MainStack({ stack, app }: StackContext) {
   const { vpc, database, functionsSecurityGroup } = use(PersistedStack);
@@ -57,11 +61,27 @@ export function MainStack({ stack, app }: StackContext) {
     functionDefaults,
   });
 
+  const api = new Api(stack, "Api", { app });
+
+  // Needs to be done after ALL lambdas are created
+  new LambdaNaming(stack, "LambdaNaming");
+  new LambdaPolicies(stack, "LambdaPermissions", {
+    secretArns: database ? [database.secret.secretArn] : [],
+  });
+
+  if (vpc && functionsSecurityGroup) {
+    // It doesn't really matter which Lambda function is passed in here; one is needed
+    // simply to determine which network interfaces need Elastic IPs
+    enableLambdaOutboundNetworking(stack, vpc, migrationFunction);
+  }
+
   stack.addOutputs({
     MigrationFunction: migrationFunction.functionName,
+    apiUrl: api.api.customDomainUrl ?? api.api.url,
   });
 
   return {
+    api,
     slackEnvVars,
     vpc,
     database,
