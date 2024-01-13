@@ -1,4 +1,4 @@
-import { App, StackContext, StaticSite, use } from "sst/constructs";
+import { App, NextjsSite, StackContext, StaticSite, use } from "sst/constructs";
 
 import { AuthStack } from "./AuthStack";
 import { MainStack } from "./MainStack";
@@ -41,8 +41,22 @@ export function FrontendStack({ stack, app }: StackContext) {
     },
   });
 
+  const nextJsSite = new NextjsSite(stack, "NextJsSite", {
+    path: "packages/web",
+    buildCommand: "pnpm run build",
+    // Pass in our environment variables
+    environment: {
+      VITE_API_URL: api.customDomainUrl ?? api.url,
+      VITE_REGION: app.region,
+      VITE_AUTH_URL: authUrl,
+      ...slackEnvVars,
+      ...(app.local ? { VITE_LOCAL: "true" } : {}),
+    },
+  });
+
   // Show the url in the output
   stack.addOutputs({
     SiteUrl: site.url,
+    NextJsSiteUrl: nextJsSite.url,
   });
 }
