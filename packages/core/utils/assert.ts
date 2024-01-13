@@ -5,5 +5,5 @@ export const assertVarExists = <T extends string | number = string>(
     return process.env[variable] as T;
   }
 
-  throw new Error(`Environment Variable '${variable}' is not set`);
+  throw new Error(`Environment variable '${variable}' is not set`);
 };

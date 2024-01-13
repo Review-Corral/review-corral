@@ -38,6 +38,7 @@ export const getDbConnectionInfo = (
   database?: Database
 ): Record<string, string> => {
   if (app.local || !database) {
+    console.log("Using local database connection info");
     return {
       DB_HOST: checkEnvSet("DB_HOST"),
       DB_PORT: checkEnvSet("DB_PORT"),
@@ -46,6 +47,9 @@ export const getDbConnectionInfo = (
       DB_PASSWORD: checkEnvSet("DB_PASSWORD"),
     };
   } else {
+    console.log("Using remote database connection info: ", {
+      secretArn: database.secret.secretArn,
+    });
     return {
       DB_CREDENTIALS_SECRET_ARN: database.secret.secretArn,
     };

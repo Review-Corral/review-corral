@@ -1,28 +1,20 @@
 import { SubnetType } from "aws-cdk-lib/aws-ec2";
-import { FunctionProps, StackContext, use } from "sst/constructs";
+import { FunctionProps, StackContext } from "sst/constructs";
 import { getBaseUrl } from "./FrontendStack";
-import { PersistedStack } from "./PersistedStack";
 import { Api } from "./constructs/Api";
 import { getDbConnectionInfo } from "./constructs/Database";
 import MigrationFunction from "./constructs/MigrationFunction";
 import LambdaNaming from "./constructs/lambdaPermissions/LambdaNaming";
 import LambdaPolicies from "./constructs/lambdaPermissions/LambdaPolicies";
 import { assertVarExists } from "./utils/asserts";
+import { buildPersistedResources } from "./utils/buildPerisistedResources";
 import { enableLambdaOutboundNetworking } from "./utils/enableLambdaOutboundNetworking";
 
 export function MainStack({ stack, app }: StackContext) {
-  const { vpc, database, functionsSecurityGroup } = use(PersistedStack);
-
-  // TODO: eventually we'll want to use a static API here
-  // This is just done for testing while we wait for the domains to transfer
-  const apiUrl: string =
-    "https://e1h1w6x6r9.execute-api.us-east-1.amazonaws.com";
-
-  const slackEnvVars = {
-    VITE_SLACK_BOT_ID: assertVarExists("SLACK_BOT_ID"),
-    VITE_SLACK_CLIENT_SECRET: assertVarExists("SLACK_CLIENT_SECRET"),
-    VITE_SLACK_AUTH_URL: `${apiUrl}/slack/oauth`,
-  };
+  const { vpc, database, functionsSecurityGroup } = buildPersistedResources({
+    stack,
+    app,
+  });
 
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
@@ -34,7 +26,6 @@ export function MainStack({ stack, app }: StackContext) {
       BASE_FE_URL: getBaseUrl(app.local),
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
-      ...slackEnvVars,
       // This isn't in the slackEnvVars because we don't want it on the frontend
       SLACK_BOT_TOKEN: assertVarExists("SLACK_BOT_TOKEN"),
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
@@ -53,7 +44,7 @@ export function MainStack({ stack, app }: StackContext) {
     vpcSubnets: vpc ? { subnetType: SubnetType.PUBLIC } : undefined,
   };
   // Set the default props for all stacks
-  app.setDefaultFunctionProps(functionDefaults);
+  stack.setDefaultFunctionProps(functionDefaults);
 
   const migrationFunction = new MigrationFunction(stack, "MigrateToLatest", {
     app,
@@ -62,6 +53,14 @@ export function MainStack({ stack, app }: StackContext) {
   });
 
   const api = new Api(stack, "Api", { app });
+
+  const slackEnvVars = {
+    VITE_SLACK_BOT_ID: assertVarExists("SLACK_BOT_ID"),
+    VITE_SLACK_CLIENT_SECRET: assertVarExists("SLACK_CLIENT_SECRET"),
+    VITE_SLACK_AUTH_URL: `${api.api.url}/slack/oauth`,
+  };
+
+  stack.addDefaultFunctionEnv(slackEnvVars);
 
   // Needs to be done after ALL lambdas are created
   new LambdaNaming(stack, "LambdaNaming");
