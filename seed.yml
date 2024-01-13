@@ -1,15 +1,6 @@
 compile:
   - pnpm install --frozen-lockfile --prefer-offline
 
-before_deploy:
-  # # Sentry token/settings set in environment variables
-  # - curl -sL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION="2.14.4" bash
-  # # SEED uses dash to execute commands so we have to use bash to do var slicing
-  # - sentry-cli releases new $(VAR=$SEED_BUILD_SERVICE_SHA bash -c 'echo ${VAR:0:7}')
-  # - sentry-cli releases files $(VAR=$SEED_BUILD_SERVICE_SHA bash -c 'echo ${VAR:0:7}') upload-sourcemaps --ext map --ext mjs  --url-prefix '/var/task/' .sst/cdk.out/asset.*/
-  # Remove source maps so they're not bundled with the Lambdas
-  - find .sst/cdk.out -type f -name '*.map' -delete
-
 after_deploy:
   # Migrate to latest
   - echo 'export STACK_NAME="${SEED_STAGE_NAME}-review-corral-MainStack"' >> $BASH_ENV
