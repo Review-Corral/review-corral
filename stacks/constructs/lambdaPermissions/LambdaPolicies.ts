@@ -2,20 +2,20 @@ import { Effect, ManagedPolicy, PolicyStatement } from "aws-cdk-lib/aws-iam";
 import { Construct } from "constructs";
 import { Stack } from "sst/constructs";
 
-interface LambdaPermissionsProps {
+interface LambdaPoliciesProps {
   secretArns: string[];
 }
 
 /**
  * Attaches some permissions to all Lambda functions in the stack
  */
-class LambdaPermissions extends Construct {
+class LambdaPolicies extends Construct {
   static readonly globalSecretNames: string[] = [];
 
-  constructor(stack: Stack, id: string, props: LambdaPermissionsProps) {
+  constructor(stack: Stack, id: string, props: LambdaPoliciesProps) {
     super(stack, id);
 
-    const globalSecretArns = LambdaPermissions.globalSecretNames.map(
+    const globalSecretArns = LambdaPolicies.globalSecretNames.map(
       (secretName) =>
         // Note that Secrets Manager appends a random suffix to the secret name when
         // generating a secret's ARN; match the suffix with a wildcard
@@ -52,4 +52,4 @@ class LambdaPermissions extends Construct {
   }
 }
 
-export default LambdaPermissions;
+export default LambdaPolicies;

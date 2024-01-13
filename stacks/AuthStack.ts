@@ -1,8 +1,10 @@
 import { Auth, StackContext, use } from "sst/constructs";
-import { ApiStack } from "./ApiStack";
+import { MainStack } from "./MainStack";
 
-export function AuthStack({ stack, app }: StackContext) {
-  const { api } = use(ApiStack);
+export function AuthStack({ stack }: StackContext) {
+  const {
+    api: { api },
+  } = use(MainStack);
 
   const auth = new Auth(stack, "auth", {
     authenticator: {
@@ -11,7 +13,7 @@ export function AuthStack({ stack, app }: StackContext) {
   });
 
   const authPostfix = "/auth";
-  auth.attach(stack, { api, prefix: authPostfix });
+  auth.attach(stack, { api: api, prefix: authPostfix });
 
   const authUrl = `${api.url}${authPostfix}`;
 
