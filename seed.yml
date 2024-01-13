@@ -1,11 +1,6 @@
 compile:
   - pnpm install --frozen-lockfile --prefer-offline
 
-before_build:
-  # Other packages depend on core
-  - pnpm build:types
-  - pnpm build:core
-
 before_deploy:
   # # Sentry token/settings set in environment variables
   # - curl -sL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION="2.14.4" bash
