@@ -46,10 +46,6 @@ class LambdaPolicies extends Construct {
       });
 
       for (const lambdaFunction of stack.getAllFunctions()) {
-        console.log(
-          "Adding permissions to lambda function: ",
-          lambdaFunction.functionName
-        );
         lambdaFunction.role?.addManagedPolicy(policy);
       }
     }
