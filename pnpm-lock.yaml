@@ -27,8 +27,8 @@ importers:
         specifier: ^3.3.2
         version: 3.3.2
       sst:
-        specifier: 2.38.7
-        version: 2.38.7(pg@8.11.3)
+        specifier: 2.39.5
+        version: 2.39.5(pg@8.11.3)
       typescript:
         specifier: ^5.3.3
         version: 5.3.3
@@ -97,8 +97,8 @@ importers:
         specifier: ^0.20.7
         version: 0.20.7
       sst:
-        specifier: 2.38.7
-        version: 2.38.7(pg@8.11.3)
+        specifier: 2.39.5
+        version: 2.39.5(pg@8.11.3)
       vitest:
         specifier: ^1.1.0
         version: 1.1.0(@types/node@20.10.5)
@@ -234,8 +234,8 @@ importers:
         specifier: ^20.10.5
         version: 20.10.5
       sst:
-        specifier: 2.38.7
-        version: 2.38.7(pg@8.11.3)
+        specifier: 2.39.5
+        version: 2.39.5(pg@8.11.3)
       vitest:
         specifier: ^1.1.0
         version: 1.1.0(@types/node@20.10.5)
@@ -4780,7 +4780,7 @@ packages:
     dependencies:
       '@aws-sdk/util-utf8-browser': 3.259.0
       '@httptoolkit/websocket-stream': 6.0.1
-      axios: 1.6.2
+      axios: 1.6.5
       buffer: 6.0.3
       crypto-js: 4.2.0
       mqtt: 4.3.8
@@ -4830,15 +4830,6 @@ packages:
       uuid: 8.0.0
       xml2js: 0.5.0
 
-  /axios@1.6.2:
-    resolution: {integrity: sha512-7i24Ri4pmDRfJTR7LDBhsOTtcm+9kjX5WiY1X3wIisx6G9So3pfMkEiU7emUBe46oceVImccTEM3k6C5dbVW8A==}
-    dependencies:
-      follow-redirects: 1.15.3
-      form-data: 4.0.0
-      proxy-from-env: 1.1.0
-    transitivePeerDependencies:
-      - debug
-
   /axios@1.6.5:
     resolution: {integrity: sha512-Ii012v05KEVuUoFWmMW/UQv9aRIc3ZwkWDcM+h5Il8izZCtRVpDUfwpoFf7eOtajT3QiGR4yDUx7lPqHJULgbg==}
     dependencies:
@@ -4847,7 +4838,6 @@ packages:
       proxy-from-env: 1.1.0
     transitivePeerDependencies:
       - debug
-    dev: false
 
   /bail@1.0.5:
     resolution: {integrity: sha512-xFbRxM1tahm08yHBP16MMjVUAvDaBMD38zsM9EMAUN61omwLmKlOpB/Zku5QkjZ8TZ4vn53pj+t518cH0S03RQ==}
@@ -6238,15 +6228,6 @@ packages:
     resolution: {integrity: sha512-36yxDn5H7OFZQla0/jFJmbIKTdZAQHngCedGxiMmpNfEZM0sdEeT+WczLQrjK6D7o2aiyLYDnkw0R3JK0Qv1RQ==}
     dev: true
 
-  /follow-redirects@1.15.3:
-    resolution: {integrity: sha512-1VzOtuEM8pC9SFU1E+8KfTjZyMztRsgEfwQl44z8A25uy13jSzTj6dyK2Df52iV0vgHCfBwLhDWevLn95w5v6Q==}
-    engines: {node: '>=4.0'}
-    peerDependencies:
-      debug: '*'
-    peerDependenciesMeta:
-      debug:
-        optional: true
-
   /follow-redirects@1.15.4:
     resolution: {integrity: sha512-Cr4D/5wlrb0z9dgERpUL3LrmPKVDsETIJhaCMeDfuFYcqa5bldGV6wBsAN6X/vxlXQtFBMrXdXxdL8CbDTGniw==}
     engines: {node: '>=4.0'}
@@ -6255,7 +6236,6 @@ packages:
     peerDependenciesMeta:
       debug:
         optional: true
-    dev: false
 
   /for-each@0.3.3:
     resolution: {integrity: sha512-jqYfLp7mo9vIyQf8ykW2v7A+2N4QjeCeI5+Dz9XraiO1ign81wjiH7Fb9vSOWvQfNtmSa4H2RoQTrrXivdUZmw==}
@@ -8767,8 +8747,8 @@ packages:
       fsevents: 2.3.2
     dev: true
 
-  /sst@2.38.7(pg@8.11.3):
-    resolution: {integrity: sha512-1bwPv/8suQQ5qXybAN1C7oHB7gjA/daRCI0TY/jTjgQn7ebJRvCvsoYtoJsf7q3ToPf1xc5X+yo7p0vyeLvmSA==}
+  /sst@2.39.5(pg@8.11.3):
+    resolution: {integrity: sha512-ISXRzPPaGG1QnONkatb2TYEJgda/afpsIFyxyxOdvJ2BiACQe9KrDD+MvLVAZRAnfD8yztF3grFh/r6SW/2JIw==}
     hasBin: true
     peerDependencies:
       '@sls-next/lambda-at-edge': ^3.7.0
