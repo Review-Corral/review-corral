@@ -36,6 +36,7 @@ export class Api extends Construct {
       },
       routes: {
         "GET /": "packages/functions/src/lambda.handler",
+        // TODO: only for testing, should be removed
         "GET /list": "packages/functions/src/todo.list",
         "GET /profile": "packages/functions/src/todo.getUser",
 
