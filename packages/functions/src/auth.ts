@@ -9,6 +9,7 @@ import { fetchUserById, insertUser } from "../../core/db/fetchers/users";
 import { UserResponse } from "../../core/github/endpointTypes";
 import { Logger } from "../../core/logging";
 import { assertVarExists } from "../../core/utils/assert";
+import config from "../../core/utils/config";
 import { HttpError } from "../../core/utils/errors/Errors";
 
 declare module "sst/node/auth" {
@@ -44,7 +45,9 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
   const user = await getOrCreateUser(userQuery, tokenSet.access_token);
 
   return Session.parameter({
-    redirect: `https://${assertVarExists("BASE_FE_URL")}/login/success`,
+    redirect: config.isLocal
+      ? `${assertVarExists("BASE_FE_URL")}/login/success`
+      : `https://${assertVarExists("BASE_FE_URL")}/login/success`,
     type: "user",
     properties: {
       userId: user.id,

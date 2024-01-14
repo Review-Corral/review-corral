@@ -20,7 +20,6 @@ export function MainStack({ stack, app }: StackContext) {
     VITE_SLACK_BOT_ID: assertVarExists("SLACK_BOT_ID"),
     VITE_SLACK_CLIENT_SECRET: assertVarExists("SLACK_CLIENT_SECRET"),
   };
-
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
     vpc: vpc,
@@ -28,7 +27,7 @@ export function MainStack({ stack, app }: StackContext) {
       ? [functionsSecurityGroup]
       : undefined,
     environment: {
-      BASE_FE_URL: getFrontendUrl(stack.stage),
+      BASE_FE_URL: getFrontendUrl(app),
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
       // This isn't in the slackEnvVars because we don't want it on the frontend

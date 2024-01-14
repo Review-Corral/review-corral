@@ -1,10 +1,12 @@
-import { StackContext, StaticSite, use } from "sst/constructs";
+import { App, StackContext, StaticSite, use } from "sst/constructs";
 
 import { AuthStack } from "./AuthStack";
 import { MainStack } from "./MainStack";
 import { HOSTED_ZONE } from "./constructs/Api";
 
-export const getFrontendUrl = (stage: string) => {
+export const getFrontendUrl = ({ local, stage }: App) => {
+  if (local) return "http://localhost:5173";
+
   if (stage === "prod") return HOSTED_ZONE;
 
   return `${stage}.${HOSTED_ZONE}`;
@@ -25,7 +27,7 @@ export function FrontendStack({ stack, app }: StackContext) {
     customDomain: app.local
       ? undefined
       : {
-          domainName: getFrontendUrl(app.stage),
+          domainName: getFrontendUrl(app),
           hostedZone: HOSTED_ZONE,
         },
     // Pass in our environment variables
