@@ -8,7 +8,7 @@ import { getSlackInstallationsForOrganization } from "../../../core/slack/fetche
 const LOGGER = new Logger("slack:installations");
 
 const schema = z.object({
-  organizationId: z.string(),
+  organizationId: z.string().transform(Number),
 });
 
 export const getSlackInstallations = ApiHandler(async (event, context) => {
@@ -34,7 +34,7 @@ export const getSlackInstallations = ApiHandler(async (event, context) => {
   }
 
   const slackIntegration = await getSlackInstallationsForOrganization(
-    organization
+    organizationId
   );
 
   return {

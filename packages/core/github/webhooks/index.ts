@@ -81,6 +81,8 @@ export const handleGithubWebhookEvent = async ({
       });
     }
 
+    // TODO: if we want to support multiple slack channels per organization, we'll
+    // need to change this.
     const slackIntegration = await getSlackInstallationsForOrganization(
       repository.organizationId
     ).then(takeFirst);
