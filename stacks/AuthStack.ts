@@ -18,7 +18,7 @@ export function AuthStack({ stack }: StackContext) {
   const authPostfix = "/auth";
   auth.attach(stack, { api: api, prefix: authPostfix });
 
-  const authUrl = `${api.url}${authPostfix}`;
+  const authUrl = `${api.customDomainUrl ?? api.url}${authPostfix}`;
 
   // Needs to be done after ALL lambdas are created
   new LambdaNaming(stack, "LambdaNaming");
