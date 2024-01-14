@@ -1,6 +1,5 @@
 import { execSync } from "child_process";
 import { z } from "zod";
-import { assertVarExists } from "../assert";
 import { LambdaEvent, isApiGatewayProxyEvent } from "./types";
 
 const UNKNOWN_RESULT_TEXT = "UNKOWN";
@@ -27,7 +26,10 @@ export const getAuthClaims = (event: LambdaEvent): AuthClaims | undefined => {
 };
 
 export const getIsLocal = (): boolean => {
-  const isLocalString = assertVarExists("IS_LOCAL");
+  const isLocalString = process.env.IS_LOCAL;
+
+  if (!isLocalString) return false;
+
   return /true/i.test(isLocalString);
 };
 
