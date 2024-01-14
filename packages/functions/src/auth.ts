@@ -44,7 +44,7 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
   const user = await getOrCreateUser(userQuery, tokenSet.access_token);
 
   return Session.parameter({
-    redirect: `${assertVarExists("BASE_FE_URL")}/login/success`,
+    redirect: `https://${assertVarExists("BASE_FE_URL")}/login/success`,
     type: "user",
     properties: {
       userId: user.id,

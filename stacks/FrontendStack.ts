@@ -22,10 +22,12 @@ export function FrontendStack({ stack, app }: StackContext) {
     path: "packages/frontend",
     buildCommand: "pnpm run build",
     buildOutput: "dist",
-    customDomain: {
-      domainName: getFrontendUrl(app.stage),
-      hostedZone: HOSTED_ZONE,
-    },
+    customDomain: app.local
+      ? undefined
+      : {
+          domainName: getFrontendUrl(app.stage),
+          hostedZone: HOSTED_ZONE,
+        },
     // Pass in our environment variables
     environment: {
       VITE_API_URL: api.customDomainUrl ?? api.url,

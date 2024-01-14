@@ -5,12 +5,11 @@ import { useMutation } from "react-query";
 interface GithubButtonProps {}
 
 const GithubButton: React.FC<GithubButtonProps> = () => {
+  const authUri = import.meta.env.VITE_AUTH_URL;
+  console.log({ authUri });
   const mutation = useMutation({
     mutationFn: async () => {
-      const payload = await ky
-        .get(import.meta.env.VITE_AUTH_URL)
-        .json<{ github: string }>();
-
+      const payload = await ky.get(authUri).json<{ github: string }>();
       window.open(payload.github, "_self");
     },
   });
