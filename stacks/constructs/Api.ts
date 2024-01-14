@@ -1,5 +1,11 @@
 import { Construct } from "constructs";
-import { ApiRouteProps, App, Api as SstApi, Stack } from "sst/constructs";
+import {
+  ApiRouteProps,
+  App,
+  FunctionProps,
+  Api as SstApi,
+  Stack,
+} from "sst/constructs";
 
 export const HOSTED_ZONE = "review-corral.com";
 export const PROD_STAGE = "prod";
@@ -13,13 +19,20 @@ export class Api extends Construct {
     return `${app.stage}-api.${HOSTED_ZONE}`;
   }
 
-  constructor(stack: Stack, id: string, { app }: { app: App }) {
+  constructor(
+    stack: Stack,
+    id: string,
+    { app, functionDefaults }: { app: App; functionDefaults: FunctionProps }
+  ) {
     super(stack, id);
 
     this.api = new SstApi(stack, "api", {
       customDomain: {
         domainName: Api.getDomain(app),
         hostedZone: HOSTED_ZONE,
+      },
+      defaults: {
+        function: functionDefaults,
       },
       routes: {
         "GET /": "packages/functions/src/lambda.handler",

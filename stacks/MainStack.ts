@@ -16,6 +16,11 @@ export function MainStack({ stack, app }: StackContext) {
     app,
   });
 
+  const initalSlackEnvVars = {
+    VITE_SLACK_BOT_ID: assertVarExists("SLACK_BOT_ID"),
+    VITE_SLACK_CLIENT_SECRET: assertVarExists("SLACK_CLIENT_SECRET"),
+  };
+
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
     vpc: vpc,
@@ -52,11 +57,10 @@ export function MainStack({ stack, app }: StackContext) {
     functionDefaults,
   });
 
-  const api = new Api(stack, "Api", { app });
+  const api = new Api(stack, "Api", { app, functionDefaults });
 
   const slackEnvVars = {
-    VITE_SLACK_BOT_ID: assertVarExists("SLACK_BOT_ID"),
-    VITE_SLACK_CLIENT_SECRET: assertVarExists("SLACK_CLIENT_SECRET"),
+    ...initalSlackEnvVars,
     VITE_SLACK_AUTH_URL: `${api.api.url}/slack/oauth`,
   };
 
