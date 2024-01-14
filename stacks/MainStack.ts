@@ -1,6 +1,6 @@
 import { SubnetType } from "aws-cdk-lib/aws-ec2";
 import { FunctionProps, StackContext } from "sst/constructs";
-import { getBaseUrl } from "./FrontendStack";
+import { getFrontendUrl } from "./FrontendStack";
 import { Api } from "./constructs/Api";
 import { getDbConnectionInfo } from "./constructs/Database";
 import MigrationFunction from "./constructs/MigrationFunction";
@@ -23,7 +23,7 @@ export function MainStack({ stack, app }: StackContext) {
       ? [functionsSecurityGroup]
       : undefined,
     environment: {
-      BASE_FE_URL: getBaseUrl(app.local),
+      BASE_FE_URL: getFrontendUrl(stack.stage),
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
       // This isn't in the slackEnvVars because we don't want it on the frontend

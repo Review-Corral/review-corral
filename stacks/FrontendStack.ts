@@ -2,12 +2,12 @@ import { StackContext, StaticSite, use } from "sst/constructs";
 
 import { AuthStack } from "./AuthStack";
 import { MainStack } from "./MainStack";
+import { HOSTED_ZONE } from "./constructs/Api";
 
-export const getBaseUrl = (isLocal: boolean) => {
-  if (isLocal) return "http://localhost:5173";
+export const getFrontendUrl = (stage: string) => {
+  if (stage === "prod") return HOSTED_ZONE;
 
-  // TODO: use the proper domain.
-  return "https://alexmclean.ca";
+  return `${stage}.${HOSTED_ZONE}`;
 };
 
 export function FrontendStack({ stack, app }: StackContext) {
@@ -22,6 +22,10 @@ export function FrontendStack({ stack, app }: StackContext) {
     path: "packages/frontend",
     buildCommand: "pnpm run build",
     buildOutput: "dist",
+    customDomain: {
+      domainName: getFrontendUrl(app.stage),
+      hostedZone: HOSTED_ZONE,
+    },
     // Pass in our environment variables
     environment: {
       VITE_API_URL: api.customDomainUrl ?? api.url,
