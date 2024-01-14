@@ -5,6 +5,7 @@ import {
 import type { Config } from "drizzle-kit";
 import { Logger } from "../logging";
 import { assertVarExists } from "../utils/assert";
+import config from "../utils/config";
 
 const LOGGER = new Logger("drizzle.config.ts");
 
@@ -16,7 +17,7 @@ export default {
 } satisfies Config;
 
 async function getDbCredentials() {
-  if (assertVarExists("IS_LOCAL") === "true") {
+  if (config.isLocal) {
     const creds = {
       host: process.env.DB_HOST!!,
       port: parseInt(process.env.DB_PORT!!),
