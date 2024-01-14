@@ -43,7 +43,7 @@ export class Api extends Construct {
         ...buildPaths("/gh", {
           // Handles incoming webhooks from Github
           "POST /webhook-event": "packages/functions/src/github/events.handler",
-          ...buildPaths("installations", {
+          ...buildPaths("/installations", {
             "GET /":
               "packages/functions/src/github/installations.getInstallations",
             "GET /{organizationId}/repositories":
