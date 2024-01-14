@@ -1,3 +1,5 @@
+import { Outlet, RootRoute } from "@tanstack/react-router";
+import { TanStackRouterDevtools } from "@tanstack/router-devtools";
 import Cookies from "js-cookie";
 import React from "react";
 import ReactDOM from "react-dom/client";
@@ -26,6 +28,28 @@ const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {
 
   return null;
 };
+
+const rootRoute = new RootRoute({
+  component: () => (
+    <>
+      <div className="p-2 flex gap-2">Home page</div>
+      <hr />
+      <Outlet />
+      <TanStackRouterDevtools />
+    </>
+  ),
+});
+
+const dashboard = new RootRoute({
+  component: () => (
+    <>
+      <div className="p-2 flex gap-2">Home page</div>
+      <hr />
+      <Outlet />
+      <TanStackRouterDevtools />
+    </>
+  ),
+});
 
 // Route components must be wrapped with the ModalContext here, so the modal components
 // have access to the context from RouterProvider (to navigate around etc.)
