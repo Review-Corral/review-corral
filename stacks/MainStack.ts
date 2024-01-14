@@ -77,6 +77,7 @@ export function MainStack({ stack, app }: StackContext) {
   stack.addOutputs({
     MigrationFunction: migrationFunction.functionName,
     apiUrl: api.api.customDomainUrl ?? api.api.url,
+    databaseId: database ? database.instance.instanceIdentifier : undefined,
   });
 
   return {
