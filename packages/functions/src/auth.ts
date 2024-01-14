@@ -65,13 +65,15 @@ const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
   return await insertUser(user, accessToken);
 };
 
+const githubAdapter = GithubAdapter({
+  clientID: assertVarExists("GH_CLIENT_ID"),
+  clientSecret: assertVarExists("GH_CLIENT_SECRET"),
+  scope: "user",
+  onSuccess,
+});
+
 export const handler = AuthHandler({
   providers: {
-    github: GithubAdapter({
-      clientID: assertVarExists("GH_CLIENT_ID"),
-      clientSecret: assertVarExists("GH_CLIENT_SECRET"),
-      scope: "user",
-      onSuccess,
-    }),
+    github: githubAdapter,
   },
 });
