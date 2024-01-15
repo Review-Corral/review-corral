@@ -1,30 +1,29 @@
-import { assertVarExists } from "@core/utils/assert";
-import { useMutation } from "@tanstack/react-query";
-import ky from "ky";
-import React from "react";
+"use client";
 
-interface GithubButtonProps {}
+import { Button } from "@/components/ui/button";
+import { ReloadIcon } from "@radix-ui/react-icons";
+import { Github } from "lucide-react";
+import { FC } from "react";
+import { useFormStatus } from "react-dom";
 
-const GithubButton: React.FC<GithubButtonProps> = () => {
-  const authUri = assertVarExists("NEXT_PUBLIC_AUTH_URL");
-  console.log({ authUri });
-  const mutation = useMutation({
-    mutationFn: async () => {
-      const payload = await ky.get(authUri).json<{ github: string }>();
-      window.open(payload.github, "_self");
-    },
-  });
+interface GithubLoginProps {}
 
-  return (
-    <div>
-      <div
-        onClick={() => mutation.mutate()}
-        className="underline cursor-pointer p-1 border-white border rounded-md"
-      >
-        Login with Github
-      </div>
-    </div>
-  );
+export const GithubLoginButton: FC<GithubLoginProps> = () => {
+  const { pending } = useFormStatus();
+
+  if (pending) {
+    return (
+      <Button disabled>
+        <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+        Loading...
+      </Button>
+    );
+  } else {
+    return (
+      <Button type="submit">
+        <Github className="mr-2 h-4 w-4" />
+        Login to Github
+      </Button>
+    );
+  }
 };
-
-export default GithubButton;
