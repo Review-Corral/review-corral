@@ -1,11 +1,27 @@
 import Link from "next/link";
+import { useOptionalUser } from "./dashboard/userActions";
 
-export default function Home() {
+export default async function Home() {
+  const user = await useOptionalUser();
+
   return (
     <main>
-      <div>Hello this is main</div>
+      <div>Welcome to Review Corral!</div>
 
-      <Link href={"/login"}>Login</Link>
+      <Link href={"/dashboard"}>Dashboard</Link>
+
+      <div>
+        {user ? (
+          <div>
+            <div>Logged in as {user.id}</div>
+            <Link href={"/logout"}>Logout</Link>
+          </div>
+        ) : (
+          <div>
+            <Link href={"/login"}>Login</Link>
+          </div>
+        )}
+      </div>
     </main>
   );
 }

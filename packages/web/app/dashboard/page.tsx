@@ -1,4 +1,4 @@
-import { useUser } from "./actions";
+import { useUser } from "./userActions";
 
 export default async function DashboardHome() {
   const user = await useUser();
