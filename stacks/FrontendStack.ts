@@ -5,7 +5,7 @@ import { MainStack } from "./MainStack";
 import { HOSTED_ZONE } from "./constructs/Api";
 
 export const getFrontendUrl = ({ local, stage }: App) => {
-  if (local) return "http://localhost:3001";
+  if (local) return "http://localhost:3000";
 
   if (stage === "prod") return HOSTED_ZONE;
 
