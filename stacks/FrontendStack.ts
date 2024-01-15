@@ -21,6 +21,14 @@ export function FrontendStack({ stack, app }: StackContext) {
 
   // Define our React app
 
+  const viteEnvVars = {
+    VITE_API_URL: api.customDomainUrl ?? api.url,
+    VITE_REGION: app.region,
+    VITE_AUTH_URL: authUrl,
+    ...slackEnvVars,
+    ...(app.local ? { VITE_LOCAL: "true" } : {}),
+  };
+
   const site = new StaticSite(stack, "ReactSite", {
     path: "packages/frontend",
     buildCommand: "pnpm run build",
@@ -32,26 +40,16 @@ export function FrontendStack({ stack, app }: StackContext) {
           hostedZone: HOSTED_ZONE,
         },
     // Pass in our environment variables
-    environment: {
-      VITE_API_URL: api.customDomainUrl ?? api.url,
-      VITE_REGION: app.region,
-      VITE_AUTH_URL: authUrl,
-      ...slackEnvVars,
-      ...(app.local ? { VITE_LOCAL: "true" } : {}),
-    },
+    environment: viteEnvVars,
   });
+
+  const nextjsEnvVars = transformKeys(viteEnvVars);
 
   const nextJsSite = new NextjsSite(stack, "NextJsSite", {
     path: "packages/web",
     buildCommand: "pnpm run build",
     // Pass in our environment variables
-    environment: {
-      VITE_API_URL: api.customDomainUrl ?? api.url,
-      VITE_REGION: app.region,
-      VITE_AUTH_URL: authUrl,
-      ...slackEnvVars,
-      ...(app.local ? { VITE_LOCAL: "true" } : {}),
-    },
+    environment: nextjsEnvVars,
   });
 
   // Show the url in the output
@@ -59,4 +57,24 @@ export function FrontendStack({ stack, app }: StackContext) {
     SiteUrl: site.url,
     NextJsSiteUrl: nextJsSite.url,
   });
+}
+
+/**
+ * Transforms object keys from starting with "VITE" to "NEXT_PUBLIC".
+ * @param obj - The object to transform.
+ * @returns A new object with transformed keys.
+ */
+function transformKeys(obj: Record<string, any>): Record<string, any> {
+  const result: Record<string, any> = {};
+
+  Object.keys(obj).forEach((key) => {
+    if (key.startsWith("VITE")) {
+      const newKey = key.replace("VITE", "NEXT_PUBLIC");
+      result[newKey] = obj[key];
+    } else {
+      result[key] = obj[key];
+    }
+  });
+
+  return result;
 }

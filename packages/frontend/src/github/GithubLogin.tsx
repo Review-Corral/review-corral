@@ -1,3 +1,4 @@
+import { assertVarExists } from "@core/utils/assert";
 import ky from "ky";
 import React from "react";
 import { useMutation } from "react-query";
@@ -5,7 +6,7 @@ import { useMutation } from "react-query";
 interface GithubButtonProps {}
 
 const GithubButton: React.FC<GithubButtonProps> = () => {
-  const authUri = import.meta.env.VITE_AUTH_URL;
+  const authUri = assertVarExists("NEXT_PUBLIC_AUTH_URL");
   console.log({ authUri });
   const mutation = useMutation({
     mutationFn: async () => {
