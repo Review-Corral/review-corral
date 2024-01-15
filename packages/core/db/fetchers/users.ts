@@ -31,3 +31,16 @@ export const insertUser = async (
     .returning()
     .then(takeFirstOrThrow);
 };
+
+export const updateUser = async (
+  user: User,
+  accessToken: string
+): Promise<User> => {
+  return await DB.update(users)
+    .set({
+      ghAccessToken: accessToken,
+    })
+    .where(eq(users.id, user.id))
+    .returning()
+    .then(takeFirstOrThrow);
+};

@@ -1,19 +1,9 @@
-// export const fetchOrganizations = async (orgId: number) => {
-//   return await ky
-//     .get(`${BASE_URL}/gh/installations/${orgId}/repositories`, {
-//       headers: {
-//         Authorization: `Bearer ${getSessionToken()}`,
-//       },
-//     })
-//     .json<Repository[]>();
-// };
+import { AuthedUser } from "@/app/dashboard/userActions";
+import { Organization, Repository } from "@core/db/types";
+import { kyGet } from "./shared";
 
-// export const fetchRepositories = async (orgId: number) => {
-//   return await ky
-//     .get(`${BASE_URL}/gh/installations/${orgId}/repositories`, {
-//       headers: {
-//         Authorization: `Bearer ${getSessionToken()}`,
-//       },
-//     })
-//     .json<Repository[]>();
-// };
+export const useOrganizations = async (user: AuthedUser) =>
+  await kyGet<Organization[]>(`/gh/installations`, user);
+
+export const useRepositories = async (user: AuthedUser, orgId: number) =>
+  await kyGet<Repository[]>(`/gh/installations/${orgId}/repositories`, user);

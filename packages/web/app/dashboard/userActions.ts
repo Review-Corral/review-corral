@@ -1,5 +1,6 @@
 "use server";
 
+import { BASE_URL } from "@/lib/fetchers/shared";
 import { User } from "@core/db/types";
 import { Logger } from "@core/logging";
 import ky from "ky";
@@ -7,25 +8,29 @@ import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-const LOGGER = new Logger("dashboard:actions");
+const LOGGER = new Logger("userActions");
+
+export type AuthedUser = User & {
+  authToken: string;
+};
 
 /**
  * Returns the user if they are logged in, else undefined
  */
-export async function useOptionalUser(): Promise<User | undefined> {
+export async function useOptionalUser(): Promise<AuthedUser | undefined> {
   const authToken = getAuthToken();
 
   if (!authToken) {
     return undefined;
   }
 
-  return fetchUser(authToken.value);
+  return { ...(await fetchUser(authToken.value)), authToken: authToken.value };
 }
 
 /**
  * Returns the user if they are logged in, otherwise redirects to login
  */
-export async function useUser(): Promise<User> {
+export async function useUser(): Promise<AuthedUser> {
   const authToken = getAuthToken();
 
   // Middleware should effectively ensure that this token is set,
@@ -35,17 +40,17 @@ export async function useUser(): Promise<User> {
     redirect("/login");
   }
 
-  return fetchUser(authToken.value);
+  return { ...(await fetchUser(authToken.value)), authToken: authToken.value };
 }
 
-const getAuthToken = (): RequestCookie | undefined => {
+export const getAuthToken = (): RequestCookie | undefined => {
   const cookieStore = cookies();
   return cookieStore.get("authToken");
 };
 
 const fetchUser = async (token: string): Promise<User> =>
   await ky
-    .get(`${process.env.NEXT_PUBLIC_API_URL}/profile`, {
+    .get(`${BASE_URL}/profile`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

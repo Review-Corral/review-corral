@@ -5,7 +5,11 @@ import {
   OauthBasicConfig,
   Session,
 } from "sst/node/auth";
-import { fetchUserById, insertUser } from "../../core/db/fetchers/users";
+import {
+  fetchUserById,
+  insertUser,
+  updateUser,
+} from "../../core/db/fetchers/users";
 import { UserResponse } from "../../core/github/endpointTypes";
 import { Logger } from "../../core/logging";
 import { assertVarExists } from "../../core/utils/assert";
@@ -60,6 +64,15 @@ const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
 
   if (existingUser) {
     LOGGER.info("Found existing user", { id: user.id });
+
+    if (existingUser.ghAccessToken !== accessToken) {
+      LOGGER.info(
+        "Gh access token for user does not match what we have in the DB, updating...",
+        { id: user.id }
+      );
+
+      await updateUser(existingUser, accessToken);
+    }
     return existingUser;
   }
 
