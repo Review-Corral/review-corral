@@ -1,6 +1,19 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Reset margin and padding for html and body */
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+/* Make sure the body takes up the full height */
+body {
+  display: flex;
+  flex-direction: column;
+}
  
 @layer base {
   :root {
