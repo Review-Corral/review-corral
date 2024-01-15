@@ -5,7 +5,7 @@ import { MainStack } from "./MainStack";
 import { HOSTED_ZONE } from "./constructs/Api";
 
 export const getFrontendUrl = ({ local, stage }: App) => {
-  if (local) return "http://localhost:5173";
+  if (local) return "http://localhost:3001";
 
   if (stage === "prod") return HOSTED_ZONE;
 
@@ -44,6 +44,8 @@ export function FrontendStack({ stack, app }: StackContext) {
   });
 
   const nextjsEnvVars = transformKeys(viteEnvVars);
+
+  console.log({ nextjsEnvVars });
 
   const nextJsSite = new NextjsSite(stack, "NextJsSite", {
     path: "packages/web",
