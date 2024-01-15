@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Suspense } from "react";
 import "./globals.css";
+import Nav from "./nav";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +18,17 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body>
+        <div className="min-h-full min-w-[900px] overflow-x-auto">
+          <Suspense>
+            <Nav />
+          </Suspense>
+          {/* <header className="bg-white border-b border-gray-200">{subnav}</header> */}
+          <main className="">
+            <div className="max-w-7xl mx-auto py-6 px-7">{children}</div>
+          </main>
+        </div>
+      </body>
     </html>
   );
 }

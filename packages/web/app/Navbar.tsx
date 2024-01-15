@@ -1,10 +1,14 @@
+"use client";
+
+import { Organization, User } from "@core/db/types";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
-import { UserCircleIcon } from "@heroicons/react/24/outline";
-import { FC, Fragment } from "react";
-import { Link } from "react-router-dom";
-import { useOrganizations } from "src/org/useOrganizations";
+import { UserCircleIcon } from "lucide-react";
+import Link from "next/link";
+import React, { Fragment } from "react";
 
 export interface NavbarProps {
+  user: User;
+  organizations: Organization[];
   activeOrganizationAccountId?: number;
 }
 
@@ -13,13 +17,12 @@ const userNavigation = [
   { name: "Sign out", href: "/logout" },
 ];
 
-export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
-  const organizations = useOrganizations();
-
-  const activeOrg =
-    organizations.data &&
-    activeOrganizationAccountId &&
-    organizations.data.find((org) => org.id === activeOrganizationAccountId);
+export const Navbar: React.FC<NavbarProps> = ({
+  user,
+  organizations,
+  activeOrganizationAccountId,
+}) => {
+  const activeOrg = organizations.at(0);
 
   // const user = useUser();
 
@@ -34,7 +37,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
           <div className="max-w-7xl mx-auto px-6">
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-4">
-                <Link to="/" className="">
+                <Link href="/" className="">
                   <div className="flex-shrink-0 hover:cursor-pointer">
                     <img
                       className="h-12 w-12"
@@ -99,7 +102,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                           <Menu.Item key={item.name}>
                             {({ active }) => (
                               <Link
-                                to={item.href}
+                                href={item.href}
                                 className={classNames(
                                   active ? "bg-gray-100" : "",
                                   "block px-4 py-2 text-sm text-gray-700"
