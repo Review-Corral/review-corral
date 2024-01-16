@@ -1,14 +1,20 @@
-export default async function OrgView({
-  params,
-}: {
-  params: { orgId: string };
-}) {
-  const orgId = params.orgId;
+import { Header } from "@/components/ui/header";
+import { useOrganization } from "@/lib/fetchers/organizations";
+import { useUser } from "../../userActions";
+import { OrgViewPage, orgViewPathSchema } from "./types";
+
+const orgViewPage: OrgViewPage = async function OrgView({ params }) {
+  const { orgId } = orgViewPathSchema.parse(params);
+
+  const user = await useUser();
+  const organization = await useOrganization(orgId, user);
+
   return (
     <>
-      <div className="text-xl">Repositories</div>;
-      <div>This is the org view for orgId: {orgId}</div>
-      <div>Loading: {false ? "true" : "false"}</div>
+      <Header></Header>
+      <div>This is the org view for {organization.accountName} </div>
     </>
   );
-}
+};
+
+export default orgViewPage;

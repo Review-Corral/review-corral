@@ -6,7 +6,11 @@ export const metadata: Metadata = {
   description: "Review Corral Dashboard",
 };
 
-export default function Layout({ children }: { children: React.ReactNode }) {
+export default function DashboardLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <div>
       <Nav />

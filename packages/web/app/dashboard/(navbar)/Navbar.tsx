@@ -7,7 +7,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import React, { Fragment } from "react";
-import { z } from "zod";
+import { optionalOrgViewPathSchema } from "../org/[orgId]/types";
 
 export interface NavbarProps {
   user: User;
@@ -19,19 +19,9 @@ const userNavigation = [
   { name: "Sign out", href: "/logout" },
 ];
 
-const pathSchema = z.object({
-  orgId: z
-    .string()
-    .optional()
-    .transform((val) => {
-      if (!val) return undefined;
-      return Number(val);
-    }),
-});
-
 export const Navbar: React.FC<NavbarProps> = ({ user, organizations }) => {
   const params = useParams<{ orgId: string }>();
-  const activeOrgId = pathSchema.parse(params).orgId;
+  const activeOrgId = optionalOrgViewPathSchema.parse(params).orgId;
 
   const activeOrg = activeOrgId
     ? organizations.find((org) => org.id === activeOrgId)
