@@ -1,7 +1,7 @@
 import { useOrganizations } from "@/lib/fetchers/organizations";
 import * as z from "zod";
-import { Navbar } from "./(navbar)/Navbar";
-import { useUser } from "./userActions";
+import { useUser } from "../userActions";
+import { Navbar } from "./Navbar";
 
 const pathSchema = z.object({
   orgId: z
@@ -14,6 +14,8 @@ const pathSchema = z.object({
 });
 
 export default async function Nav(params: { orgId?: string }) {
+  console.log("Got orgId in params:", params);
+
   const user = await useUser();
   const organizations = await useOrganizations(user);
 

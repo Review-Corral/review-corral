@@ -5,12 +5,13 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { UserCircleIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import React, { Fragment } from "react";
+import { z } from "zod";
 
 export interface NavbarProps {
   user: User;
   organizations: Organization[];
-  activeOrganizationAccountId?: number;
 }
 
 const userNavigation = [
@@ -18,20 +19,25 @@ const userNavigation = [
   { name: "Sign out", href: "/logout" },
 ];
 
-export const Navbar: React.FC<NavbarProps> = ({
-  user,
-  organizations,
-  activeOrganizationAccountId,
-}) => {
-  const activeOrg = activeOrganizationAccountId
-    ? organizations.find((org) => org.id === activeOrganizationAccountId)
+const pathSchema = z.object({
+  orgId: z
+    .string()
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+      return Number(val);
+    }),
+});
+
+export const Navbar: React.FC<NavbarProps> = ({ user, organizations }) => {
+  const params = useParams<{ orgId: string }>();
+  const activeOrgId = pathSchema.parse(params).orgId;
+
+  const activeOrg = activeOrgId
+    ? organizations.find((org) => org.id === activeOrgId)
     : undefined;
 
-  // const user = useUser();
-
   const avatarUrl: string | undefined = undefined;
-  // TODO:
-  // session?.user.user_metadata["avatar_url"];
 
   return (
     <Disclosure as="nav" className="bg-[#f4f4f4]">
