@@ -3,6 +3,7 @@
 import { Organization, User } from "@core/db/types";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { UserCircleIcon } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import React, { Fragment } from "react";
 
@@ -22,7 +23,9 @@ export const Navbar: React.FC<NavbarProps> = ({
   organizations,
   activeOrganizationAccountId,
 }) => {
-  const activeOrg = organizations.at(0);
+  const activeOrg = activeOrganizationAccountId
+    ? organizations.find((org) => org.id === activeOrganizationAccountId)
+    : undefined;
 
   // const user = useUser();
 
@@ -39,8 +42,9 @@ export const Navbar: React.FC<NavbarProps> = ({
               <div className="flex items-center gap-4">
                 <Link href="/" className="">
                   <div className="flex-shrink-0 hover:cursor-pointer">
-                    <img
-                      className="h-12 w-12"
+                    <Image
+                      width={48}
+                      height={48}
                       src="https://avatars.githubusercontent.com/in/203068?s=120&u=4f27b80d54a1405e10756a1dc0175d1ef3866422&v=4"
                       alt="Review Corral logo"
                     />
@@ -55,8 +59,9 @@ export const Navbar: React.FC<NavbarProps> = ({
                     <div className="rounded-md px-2 py- flex gap-2 items-center">
                       <div className="flex items-center space-x-2">
                         <div className="rounded-md overflow-hidden">
-                          <img
+                          <Image
                             src={activeOrg.avatarUrl}
+                            alt={activeOrg.accountName}
                             width={32}
                             height={32}
                           />
@@ -76,15 +81,15 @@ export const Navbar: React.FC<NavbarProps> = ({
                         <span className="sr-only">Open user menu</span>
                         {avatarUrl ? (
                           <div className="rounded-full overflow-hidden border border-gray-200 bg-white">
-                            <img
+                            <Image
                               src={avatarUrl}
                               width={32}
                               height={32}
-                              alt={"User github log"}
+                              alt={"User github avatar"}
                             />
                           </div>
                         ) : (
-                          <UserCircleIcon className="h-8 w-8" />
+                          <UserCircleIcon className="h-6 w-6" />
                         )}
                       </Menu.Button>
                     </div>

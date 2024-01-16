@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Nav from "../nav";
+import Nav from "./nav";
 
 export const metadata: Metadata = {
   title: "Review Corral - Dashboard",

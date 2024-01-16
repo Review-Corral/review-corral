@@ -1,7 +1,7 @@
 import { useOrganizations } from "@/lib/fetchers/organizations";
 import * as z from "zod";
-import { Navbar } from "./Navbar";
-import { useUser } from "./dashboard/userActions";
+import { Navbar } from "./(navbar)/Navbar";
+import { useUser } from "./userActions";
 
 const pathSchema = z.object({
   orgId: z
