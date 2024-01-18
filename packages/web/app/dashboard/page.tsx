@@ -3,10 +3,10 @@ import { Header } from "@/components/ui/header";
 import { useOrganizations } from "@/lib/fetchers/organizations";
 import Image from "next/image";
 import Link from "next/link";
-import { useUser } from "./userActions";
+import { fetchUser } from "./userActions";
 
 export default async function DashboardHome() {
-  const user = await useUser();
+  const user = await fetchUser();
   const organizations = await useOrganizations(user);
 
   return (

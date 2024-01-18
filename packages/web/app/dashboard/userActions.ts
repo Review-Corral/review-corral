@@ -17,20 +17,20 @@ export type AuthedUser = User & {
 /**
  * Returns the user if they are logged in, else undefined
  */
-export async function useOptionalUser(): Promise<AuthedUser | undefined> {
+export async function fetchUserOptional(): Promise<AuthedUser | undefined> {
   const authToken = getAuthToken();
 
   if (!authToken) {
     return undefined;
   }
 
-  return { ...(await fetchUser(authToken.value)), authToken: authToken.value };
+  return { ...(await _fetchUser(authToken.value)), authToken: authToken.value };
 }
 
 /**
  * Returns the user if they are logged in, otherwise redirects to login
  */
-export async function useUser(): Promise<AuthedUser> {
+export async function fetchUser(): Promise<AuthedUser> {
   const authToken = getAuthToken();
 
   // Middleware should effectively ensure that this token is set,
@@ -40,7 +40,7 @@ export async function useUser(): Promise<AuthedUser> {
     redirect("/login");
   }
 
-  return { ...(await fetchUser(authToken.value)), authToken: authToken.value };
+  return { ...(await _fetchUser(authToken.value)), authToken: authToken.value };
 }
 
 export const getAuthToken = (): RequestCookie | undefined => {
@@ -48,7 +48,7 @@ export const getAuthToken = (): RequestCookie | undefined => {
   return cookieStore.get("authToken");
 };
 
-const fetchUser = async (token: string): Promise<User> =>
+const _fetchUser = async (token: string): Promise<User> =>
   await ky
     .get(`${BASE_URL}/profile`, {
       headers: {

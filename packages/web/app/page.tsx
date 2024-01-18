@@ -1,8 +1,8 @@
 import Link from "next/link";
-import { useOptionalUser } from "./dashboard/userActions";
+import { fetchUserOptional } from "./dashboard/userActions";
 
 export default async function Home() {
-  const user = await useOptionalUser();
+  const user = await fetchUserOptional();
 
   return (
     <main>
