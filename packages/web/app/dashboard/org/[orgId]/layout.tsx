@@ -1,5 +1,5 @@
 import { DashboardTabs } from "./tabs";
-import { OrgViewPathParams } from "./types";
+import { OrgViewPathParams, orgViewPathSchema } from "./types";
 
 export default function DashboardLayout({
   children,
@@ -8,15 +8,13 @@ export default function DashboardLayout({
   children: React.ReactNode;
   params: OrgViewPathParams;
 }) {
+  const { orgId } = orgViewPathSchema.parse(params);
   return (
     <div>
       <div>
-        <h1>Dashboard Layout</h1>
-
-        <div>Org ID: {params.orgId}</div>
-        <DashboardTabs />
+        <DashboardTabs orgId={orgId} />
       </div>
-      <div>{children}</div>
+      <div className="max-w-7xl mx-auto py-6 px-7">{children}</div>
     </div>
   );
 }

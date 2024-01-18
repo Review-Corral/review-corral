@@ -32,19 +32,19 @@ const routes: SubNav[] = [
   },
 ];
 
-export const DashboardTabs: React.FC<{}> = () => {
+export const DashboardTabs: React.FC<{ orgId: number }> = ({ orgId }) => {
   const router = useRouter();
   const pathName = usePathname();
 
-  const newPath = pathName.replaceAll(/dashboard\/org\/\d*\/*/gi, "");
+  const currentTabUrl = pathName.replaceAll(/\/dashboard\/org\/\d*\/*/gi, "");
+
+  const currentTab =
+    routes.find((route) => route.page.startsWith(currentTabUrl)) ?? routes[0];
 
   console.log({
-    newPath,
+    currentTabUrl,
     pathName,
   });
-
-  const _page = schema.safeParse(newPath);
-  const page = routes.find((route) => route.page == pathName) ?? routes[0];
 
   return (
     <div className="max-w-7xl mx-auto px-6 pt-4 pb-3 font-medium ">
@@ -55,13 +55,17 @@ export const DashboardTabs: React.FC<{}> = () => {
             className={`
                     inline px-2 py-1 cursor-pointer text-base hover:bg-gray-100 rounded-md
                     `}
-            onClick={() => router.push(route.page)}
+            onClick={() => router.push(`/dashboard/org/${orgId}/${route.page}`)}
           >
             <span
               className={`
                       pb-[0.9rem]
                       px-1
-                      ${page === route ? "border-b-2 border-indigo-500" : ""}
+                      ${
+                        currentTab === route
+                          ? "border-b-2 border-indigo-500"
+                          : ""
+                      }
                     `}
             >
               {route.text}
