@@ -1,7 +1,3 @@
-import { OrgViewPage } from "../types";
-
-const orgViewLoading: OrgViewPage = async function OverviewPage({ params }) {
+export default async function OverviewLoading() {
   return <div>Loading...</div>;
-};
-
-export default orgViewLoading;
+}

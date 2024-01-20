@@ -4,10 +4,6 @@ export interface OrgViewPathParams {
   orgId: string;
 }
 
-export type OrgViewPage = (args: {
-  params: OrgViewPathParams;
-}) => React.ReactNode;
-
 export const optionalOrgViewPathSchema = z.object({
   orgId: z
     .string()

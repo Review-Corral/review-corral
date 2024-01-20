@@ -1,7 +1,3 @@
-import { OrgViewPage } from "../types";
-
-const page: OrgViewPage = async function GithubTab({ params }) {
+export default async function GithubTab() {
   return <div>Github</div>;
-};
-
-export default page;
+}

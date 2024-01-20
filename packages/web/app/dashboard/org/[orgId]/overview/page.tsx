@@ -1,11 +1,15 @@
 import { Header } from "@/components/ui/header";
-import { useOrganization } from "@/lib/fetchers/organizations";
+import { fetchOrganization } from "@/lib/fetchers/organizations";
 import { GithubCard } from "../GithubOverviewCard";
-import { OrgViewPage, orgViewPathSchema } from "../types";
+import { OrgViewPathParams, orgViewPathSchema } from "../types";
 
-const page: OrgViewPage = async function OverviewPage({ params }) {
+export default async function OverviewPage({
+  params,
+}: {
+  params: OrgViewPathParams;
+}) {
   const { orgId } = orgViewPathSchema.parse(params);
-  const organization = await useOrganization(orgId);
+  const organization = await fetchOrganization(orgId);
 
   return (
     <div className="space-y-12">
@@ -21,6 +25,4 @@ const page: OrgViewPage = async function OverviewPage({ params }) {
       </div>
     </div>
   );
-};
-
-export default page;
+}

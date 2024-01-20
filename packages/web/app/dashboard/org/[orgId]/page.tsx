@@ -1,11 +1,15 @@
 import { Header } from "@/components/ui/header";
-import { useOrganization } from "@/lib/fetchers/organizations";
-import { OrgViewPage, orgViewPathSchema } from "./types";
+import { fetchOrganization } from "@/lib/fetchers/organizations";
+import { OrgViewPathParams, orgViewPathSchema } from "./types";
 
-const orgViewPage: OrgViewPage = async function OrgView({ params }) {
+export default async function OrgViewPage({
+  params,
+}: {
+  params: OrgViewPathParams;
+}) {
   const { orgId } = orgViewPathSchema.parse(params);
 
-  const organization = await useOrganization(orgId);
+  const organization = await fetchOrganization(orgId);
 
   return (
     <>
@@ -13,6 +17,4 @@ const orgViewPage: OrgViewPage = async function OrgView({ params }) {
       <div>This is the org view for {organization.accountName} </div>
     </>
   );
-};
-
-export default orgViewPage;
+}

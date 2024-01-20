@@ -1,13 +1,13 @@
+"use server";
+
 import { Button } from "@/components/ui/button";
 import { Header } from "@/components/ui/header";
-import { useOrganizations } from "@/lib/fetchers/organizations";
+import { fetchOrganizations } from "@/lib/fetchers/organizations";
 import Image from "next/image";
 import Link from "next/link";
-import { fetchUser } from "./userActions";
 
 export default async function DashboardHome() {
-  const user = await fetchUser();
-  const organizations = await useOrganizations(user);
+  const organizations = await fetchOrganizations();
 
   return (
     <div className="h-full w-full">
@@ -45,7 +45,11 @@ export default async function DashboardHome() {
           </p>
           <div className="mt-8 inline-flex flex-col gap-2">
             {organizations.map((org) => (
-              <Link key={org.id} href={`/dashboard/org/${org.id}`}>
+              <Link
+                key={org.id}
+                href={`/dashboard/org/${org.id}`}
+                prefetch={true}
+              >
                 <div className="inline-flex items-center space-x-2 w-72 cursor-pointer rounded-md p-4 border border-gray-200 hover:shadow-sm">
                   <div className="rounded-md overflow-hidden">
                     <Image

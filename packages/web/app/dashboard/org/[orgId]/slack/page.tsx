@@ -1,7 +1,9 @@
-import { OrgViewPage } from "../types";
+import { OrgViewPathParams } from "../types";
 
-const page: OrgViewPage = async function OverviewPage({ params }) {
+export default async function SlackTab({
+  params,
+}: {
+  params: OrgViewPathParams;
+}) {
   return <div>Slack</div>;
-};
-
-export default page;
+}

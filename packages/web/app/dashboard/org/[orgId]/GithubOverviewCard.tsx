@@ -2,9 +2,9 @@
 
 import { Button } from "@/components/ui/button";
 import {
+  fetchRepositories,
   setActiveRepo,
-  useRepositories,
-  useSlackRepositories as useSlackIntegrations,
+  fetchSlackRepositories as useSlackIntegrations,
 } from "@/lib/fetchers/organizations";
 import { Github } from "lucide-react";
 import { RepositoryCard } from "./RepositoryCard";
@@ -12,7 +12,7 @@ import { OrgViewProps } from "./shared";
 
 interface GithubCardProps extends OrgViewProps {}
 
-export const GithubCard = ({ organization }: GithubCardProps) => {
+export const GithubCard = async ({ organization }: GithubCardProps) => {
   return (
     <div id="github" className="w-96">
       <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center">
@@ -32,7 +32,7 @@ export const GithubCard = ({ organization }: GithubCardProps) => {
 };
 
 const GithubCardData = async ({ organization }: GithubCardProps) => {
-  const repositories = await useRepositories(organization.id);
+  const repositories = await fetchRepositories(organization.id);
   const slackIntegrations = await useSlackIntegrations(organization.id);
 
   // if (getInstalledRepos.isLoading) {
