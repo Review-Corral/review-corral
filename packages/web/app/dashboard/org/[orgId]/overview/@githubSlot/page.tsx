@@ -40,20 +40,6 @@ const GithubCardData = async ({ organization }: GithubCardProps) => {
                   active={repo.isActive ?? false}
                 />
               </div>
-
-              {/* TODO: in the future the target should be found from a m2m table of Github <-> slack */}
-              {/* Only show the Arrows if the slack data has loaded and there's at least one entry */}
-              {/* {slackData != undefined &&
-                slackData.length > 0 &&
-                repo.isActive && (
-                  <Xarrow
-                    start={repo.id.toString()}
-                    end="slack-channel"
-                    showHead={false}
-                    color={"#6366f1"}
-                    strokeWidth={2}
-                  />
-                )} */}
             </div>
           );
         })}

@@ -1,11 +1,11 @@
 "use server";
 
 import { OrgViewProps } from "@/app/dashboard/org/[orgId]/shared";
-import { fetchSlackRepositories } from "@/lib/fetchers/organizations";
+import { fetchSlackIntegrations } from "@/lib/fetchers/organizations";
 import { SetupSlackCard } from "./SetupSlackCard";
 
 export async function SlackOverviewCard({ organization }: OrgViewProps) {
-  const slackChannels = await fetchSlackRepositories(organization.id);
+  const slackChannels = await fetchSlackIntegrations(organization.id);
 
   if (slackChannels.length === 0) {
     return <SetupSlackCard organization={organization} />;

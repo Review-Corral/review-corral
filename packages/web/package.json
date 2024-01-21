@@ -21,9 +21,9 @@
     "lucide-react": "^0.303.0",
     "next": "14.0.4",
     "react": "^18",
-    "react-arrows": "^1.2.0",
     "react-dom": "^18",
     "react-hot-toast": "^2.4.1",
+    "react-xarrows": "^2.0.2",
     "tailwind-merge": "^2.2.0",
     "tailwindcss-animate": "^1.0.7",
     "zod": "^3.22.4"

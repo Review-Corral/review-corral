@@ -1,7 +1,7 @@
 import { Header } from "@/components/ui/header";
 import { Github, Slack } from "lucide-react";
 
-export default function Layout(props: {
+export default async function Layout(props: {
   children: React.ReactNode;
   githubSlot: React.ReactNode;
   slackSlot: React.ReactNode;
@@ -34,6 +34,7 @@ export default function Layout(props: {
           <div className="py-6">{props.slackSlot}</div>
         </div>
       </div>
+
       {props.children}
     </div>
   );
