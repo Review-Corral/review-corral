@@ -4,6 +4,7 @@ import {
   pullRequests,
   repositories,
   slackIntegration,
+  usernameMappings,
   users,
 } from "./schema";
 
@@ -22,3 +23,8 @@ export type SlackIntegrationInsertionArgs = InferInsertModel<
 
 export type PullRequest = InferSelectModel<typeof pullRequests>;
 export type PullRequestInsertionArgs = InferInsertModel<typeof pullRequests>;
+
+export type UsernameMapping = InferSelectModel<typeof usernameMappings>;
+export type UsernameMappingInsertionArgs = InferInsertModel<
+  typeof usernameMappings
+>;

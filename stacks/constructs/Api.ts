@@ -53,6 +53,9 @@ export class Api extends Construct {
             "packages/functions/src/github/repositories/setStatus.handler",
         }),
 
+        "GET /{organizationId}/usernames":
+          "packages/functions/src/usernames/lambda.getUsernameMappings",
+
         ...buildPaths("/slack", {
           "GET /oauth": "packages/functions/src/slack/oauth.handler",
           "GET /{organizationId}/installations":

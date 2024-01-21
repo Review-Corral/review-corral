@@ -1,11 +1,17 @@
 "use server";
 
 import { fetchUser } from "@/app/dashboard/userActions";
-import { Organization, Repository, SlackIntegration } from "@core/db/types";
+import {
+  Organization,
+  Repository,
+  SlackIntegration,
+  UsernameMapping,
+} from "@core/db/types";
 import { revalidateTag } from "next/cache";
 import { cFetch } from "./shared";
 
 const fetchReposTags = "repos";
+const fetchUsernamesTags = "usernames";
 
 export const fetchOrganizations = async () =>
   await cFetch<Organization[]>(`/gh/installations`, {
@@ -28,6 +34,12 @@ export const fetchRepositories = async (orgId: number) =>
   await cFetch<Repository[]>(`/gh/installations/${orgId}/repositories`, {
     user: await fetchUser(),
     tags: [fetchReposTags],
+  });
+
+export const fetchUsernameMappings = async (orgId: number) =>
+  await cFetch<UsernameMapping[]>(`/${orgId}/usernames`, {
+    user: await fetchUser(),
+    tags: [fetchUsernamesTags],
   });
 
 export const fetchSlackIntegrations = async (orgId: number) =>
