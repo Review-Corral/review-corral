@@ -1,13 +1,28 @@
 "use client";
 
 import { Switch } from "@/components/ui/switch";
-import { FC } from "react";
+import { setActiveRepo } from "@/lib/fetchers/organizations";
+import { useState } from "react";
 
 interface RepositoryCardProps {
   repoId: number;
   active: boolean;
 }
 
-export const RepositoryCard: FC<RepositoryCardProps> = ({ repoId, active }) => {
-  return <Switch value="true" id={repoId.toString()} type="submit" />;
+export const RepositoryCard: React.FC<RepositoryCardProps> = ({
+  repoId,
+  active,
+}) => {
+  const [isActive, setIsActive] = useState<boolean>(active);
+
+  return (
+    <Switch
+      checked={isActive}
+      id={repoId.toString()}
+      onClick={async () => {
+        setIsActive(!isActive);
+        await setActiveRepo(repoId, !isActive);
+      }}
+    />
+  );
 };

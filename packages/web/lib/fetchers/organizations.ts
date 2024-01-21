@@ -2,7 +2,6 @@
 
 import { fetchUser } from "@/app/dashboard/userActions";
 import { Organization, Repository, SlackIntegration } from "@core/db/types";
-import { revalidateTag } from "next/cache";
 import { cFetch } from "./shared";
 
 const fetchReposTags = "repos";
@@ -41,6 +40,6 @@ export const setActiveRepo = async (repoId: number, isActive: boolean) => {
     user: await fetchUser(),
     method: "PUT",
   });
-  revalidateTag(fetchReposTags);
+  // revalidateTag(fetchReposTags);
   return result;
 };

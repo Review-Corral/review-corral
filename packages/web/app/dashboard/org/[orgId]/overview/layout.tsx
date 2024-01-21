@@ -6,7 +6,6 @@ export default function Layout(props: {
   githubSlot: React.ReactNode;
   slackSlot: React.ReactNode;
 }) {
-  console.log("OVERView layout props", props);
   return (
     <div className="space-y-12">
       <Header>Overview</Header>

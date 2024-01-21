@@ -3,7 +3,6 @@
 import {
   fetchOrganization,
   fetchRepositories,
-  setActiveRepo,
 } from "@/lib/fetchers/organizations";
 import { RepositoryCard } from "../../../../../../components/github/RepositoryCard";
 import { OrgViewProps } from "../../shared";
@@ -29,12 +28,6 @@ const GithubCardData = async ({ organization }: GithubCardProps) => {
     <div>
       <div className="space-y-2">
         {repositories.map((repo) => {
-          const setActiveRepoWithId = setActiveRepo.bind(
-            null,
-            repo.id,
-            !repo.isActive
-          );
-
           return (
             <div key={repo.id.toString()}>
               <div
@@ -42,9 +35,10 @@ const GithubCardData = async ({ organization }: GithubCardProps) => {
                 id={repo.id.toString()}
               >
                 <div className="truncate">{repo.name}</div>
-                <form action={setActiveRepoWithId}>
-                  <RepositoryCard repoId={repo.id} active={true} />
-                </form>
+                <RepositoryCard
+                  repoId={repo.id}
+                  active={repo.isActive ?? false}
+                />
               </div>
 
               {/* TODO: in the future the target should be found from a m2m table of Github <-> slack */}
