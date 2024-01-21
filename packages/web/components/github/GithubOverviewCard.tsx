@@ -3,12 +3,12 @@
 import { Button } from "@/components/ui/button";
 import {
   fetchRepositories,
+  fetchSlackRepositories as fetchSlackIntegrations,
   setActiveRepo,
-  fetchSlackRepositories as useSlackIntegrations,
 } from "@/lib/fetchers/organizations";
 import { Github } from "lucide-react";
+import { OrgViewProps } from "../../app/dashboard/org/[orgId]/shared";
 import { RepositoryCard } from "./RepositoryCard";
-import { OrgViewProps } from "./shared";
 
 interface GithubCardProps extends OrgViewProps {}
 
@@ -33,24 +33,7 @@ export const GithubCard = async ({ organization }: GithubCardProps) => {
 
 const GithubCardData = async ({ organization }: GithubCardProps) => {
   const repositories = await fetchRepositories(organization.id);
-  const slackIntegrations = await useSlackIntegrations(organization.id);
-
-  // if (getInstalledRepos.isLoading) {
-  //   return (
-  //     <div>
-  //       <div className="space-y-4">
-  //         {Array.from(Array(3).keys()).map((num) => (
-  //           <div
-  //             key={num}
-  //             className="flex flex-row animate-pulse p-4 rounded-md bg-gray-100 text-gray-100"
-  //           >
-  //             <div className="truncate">{num}</div>
-  //           </div>
-  //         ))}
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  const slackIntegrations = await fetchSlackIntegrations(organization.id);
 
   // if (getInstalledRepos.isError) {
   //   return <ErrorCard message="Error loading your Github integration" />;

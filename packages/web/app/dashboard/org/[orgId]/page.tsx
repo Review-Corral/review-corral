@@ -1,5 +1,5 @@
-import { Header } from "@/components/ui/header";
 import { fetchOrganization } from "@/lib/fetchers/organizations";
+import { redirect } from "next/navigation";
 import { OrgViewPathParams, orgViewPathSchema } from "./types";
 
 export default async function OrgViewPage({
@@ -8,13 +8,7 @@ export default async function OrgViewPage({
   params: OrgViewPathParams;
 }) {
   const { orgId } = orgViewPathSchema.parse(params);
-
   const organization = await fetchOrganization(orgId);
 
-  return (
-    <>
-      <Header></Header>
-      <div>This is the org view for {organization.accountName} </div>
-    </>
-  );
+  return redirect(`/dashboard/org/${organization.id}/overview`);
 }

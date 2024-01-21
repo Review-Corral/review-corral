@@ -1,3 +1,5 @@
+"use client";
+
 import { XCircleIcon } from "lucide-react";
 import { CardProps } from "./types";
 
