@@ -1,3 +1,6 @@
+"use server";
+
+import { SlackOverviewCard } from "@/components/slack/SlackOverviewCard";
 import { Header } from "@/components/ui/header";
 import { fetchOrganization } from "@/lib/fetchers/organizations";
 import { GithubCard } from "../GithubOverviewCard";
@@ -16,12 +19,7 @@ export default async function OverviewPage({
       <Header>Overview</Header>
       <div className="flex justify-between items-start">
         <GithubCard organization={organization} />
-        {/* <SlackOverviewCard
-          organization={organization}
-          onEdit={() => {
-            setPage("slack");
-          }}
-        /> */}
+        <SlackOverviewCard organization={organization} />
       </div>
     </div>
   );

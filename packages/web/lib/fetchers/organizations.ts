@@ -1,7 +1,7 @@
 "use server";
 
 import { fetchUser } from "@/app/dashboard/userActions";
-import { Organization, Repository } from "@core/db/types";
+import { Organization, Repository, SlackIntegration } from "@core/db/types";
 import { cFetch } from "./shared";
 
 export const fetchOrganizations = async () =>
@@ -27,7 +27,7 @@ export const fetchRepositories = async (orgId: number) =>
   });
 
 export const fetchSlackRepositories = async (orgId: number) =>
-  await cFetch<Repository[]>(`/slack/${orgId}/installations`, {
+  await cFetch<SlackIntegration[]>(`/slack/${orgId}/installations`, {
     user: await fetchUser(),
   });
 

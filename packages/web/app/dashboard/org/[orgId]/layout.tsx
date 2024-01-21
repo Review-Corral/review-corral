@@ -14,6 +14,7 @@ export default function DashboardLayout({
       <div>
         <DashboardTabs orgId={orgId} />
       </div>
+      {/* TODO: use same styling (DRY) in ./dashboard */}
       <div className="max-w-7xl mx-auto py-6 px-7">{children}</div>
     </div>
   );
