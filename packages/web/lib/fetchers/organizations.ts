@@ -2,7 +2,10 @@
 
 import { fetchUser } from "@/app/dashboard/userActions";
 import { Organization, Repository, SlackIntegration } from "@core/db/types";
+import { revalidateTag } from "next/cache";
 import { cFetch } from "./shared";
+
+const fetchReposTags = "repos";
 
 export const fetchOrganizations = async () =>
   await cFetch<Organization[]>(`/gh/installations`, {
@@ -24,6 +27,7 @@ export const fetchOrganization = async (orgId: number) => {
 export const fetchRepositories = async (orgId: number) =>
   await cFetch<Repository[]>(`/gh/installations/${orgId}/repositories`, {
     user: await fetchUser(),
+    tags: [fetchReposTags],
   });
 
 export const fetchSlackRepositories = async (orgId: number) =>
@@ -31,9 +35,12 @@ export const fetchSlackRepositories = async (orgId: number) =>
     user: await fetchUser(),
   });
 
-export const setActiveRepo = async (repoId: number, isActive: boolean) =>
-  await cFetch(`/gh/repositories/${repoId}`, {
+export const setActiveRepo = async (repoId: number, isActive: boolean) => {
+  const result = await cFetch(`/gh/repositories/${repoId}`, {
     body: JSON.stringify({ isActive }),
     user: await fetchUser(),
     method: "PUT",
   });
+  revalidateTag(fetchReposTags);
+  return result;
+};

@@ -9,10 +9,12 @@ export const cFetch = async <T extends {}>(
     user,
     method = "GET",
     body,
+    tags,
   }: {
     user: AuthedUser;
     method?: string;
     body?: {};
+    tags?: string[];
   }
 ) => {
   const fullUrl = `${BASE_URL}${url}`;
@@ -23,6 +25,9 @@ export const cFetch = async <T extends {}>(
     body: body ? JSON.stringify(body) : undefined,
     headers: {
       Authorization: `Bearer ${user.authToken}`,
+    },
+    next: {
+      tags: tags,
     },
   }).then((res) => res.json() as Promise<T>);
 };
