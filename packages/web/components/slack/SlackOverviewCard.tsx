@@ -2,26 +2,9 @@
 
 import { OrgViewProps } from "@/app/dashboard/org/[orgId]/shared";
 import { fetchSlackRepositories } from "@/lib/fetchers/organizations";
-import { Slack } from "lucide-react";
 import { SetupSlackCard } from "./SetupSlackCard";
 
 export async function SlackOverviewCard({ organization }: OrgViewProps) {
-  return (
-    <div id="slack" className="w-96">
-      <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center">
-        <div className="flex gap-4 items-center">
-          <Slack className="h-8 w-8 fill-black" />
-          <span className="font-semibold text-lg">Channels</span>
-        </div>
-      </div>
-      <div className="py-6">
-        <SlackCardData organization={organization} />
-      </div>
-    </div>
-  );
-}
-
-const SlackCardData = async ({ organization }: OrgViewProps) => {
   const slackChannels = await fetchSlackRepositories(organization.id);
 
   if (slackChannels.length === 0) {
@@ -46,4 +29,4 @@ const SlackCardData = async ({ organization }: OrgViewProps) => {
       </div>
     );
   }
-};
+}
