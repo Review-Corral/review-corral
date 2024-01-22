@@ -40,21 +40,26 @@ export class Api extends Construct {
         "GET /list": "packages/functions/src/todo.list",
         "GET /profile": "packages/functions/src/todo.getUser",
 
+        "GET /{organizationId}/usernames":
+          "packages/functions/src/usernames/lambda.getUsernameMappings",
+
         ...buildPaths("/gh", {
           // Handles incoming webhooks from Github
           "POST /webhook-event": "packages/functions/src/github/events.handler",
           ...buildPaths("/installations", {
             "GET /":
               "packages/functions/src/github/installations.getInstallations",
-            "GET /{organizationId}/repositories":
-              "packages/functions/src/github/repositories/getAll.handler",
+
+            ...buildPaths("/{organizationId}", {
+              "GET /repositories":
+                "packages/functions/src/github/repositories/getAll.handler",
+              "GET /members":
+                "packages/functions/src/github/members.getOrganizationMembers",
+            }),
           }),
           "PUT /repositories/{repositoryId}":
             "packages/functions/src/github/repositories/setStatus.handler",
         }),
-
-        "GET /{organizationId}/usernames":
-          "packages/functions/src/usernames/lambda.getUsernameMappings",
 
         ...buildPaths("/slack", {
           "GET /oauth": "packages/functions/src/slack/oauth.handler",

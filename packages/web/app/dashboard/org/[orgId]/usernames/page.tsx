@@ -1,5 +1,8 @@
 import { Header } from "@/components/ui/header";
-import { fetchUsernameMappings } from "@/lib/fetchers/organizations";
+import {
+  fetchOranizationMembers,
+  fetchUsernameMappings,
+} from "@/lib/fetchers/organizations";
 import { OrgViewPathParams, orgViewPathSchema } from "../types";
 import { UsernamesTable } from "./table/UsernamesTable";
 
@@ -10,6 +13,12 @@ export default async function UsernamesPage({
 }) {
   const { orgId } = orgViewPathSchema.parse(params);
   const usernames = await fetchUsernameMappings(orgId);
+
+  console.log({ usernames });
+
+  const installationMembers = await fetchOranizationMembers(orgId);
+
+  console.log({ installationMembers });
 
   return (
     <div>

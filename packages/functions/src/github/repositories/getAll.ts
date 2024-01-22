@@ -1,6 +1,5 @@
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
-import * as z from "zod";
 import { fetchOrganizationById } from "../../../../core/db/fetchers/organizations";
 import {
   fetchRepositoriesForOrganization,
@@ -10,15 +9,12 @@ import {
 import { Organization, Repository } from "../../../../core/db/types";
 import { getInstallationRepositories } from "../../../../core/github/fetchers";
 import { Logger } from "../../../../core/logging";
+import { organizationParamSchema } from "../shared";
 
 const LOGGER = new Logger("github:repositories");
 
-const getRepositoriesForOrganizationSchena = z.object({
-  organizationId: z.string(),
-});
-
 export const handler = ApiHandler(async (event, context) => {
-  const { organizationId } = getRepositoriesForOrganizationSchena.parse(
+  const { organizationId } = organizationParamSchema.parse(
     event.pathParameters
   );
   const { user, error } = await useUser();

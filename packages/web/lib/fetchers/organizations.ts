@@ -47,6 +47,11 @@ export const fetchSlackIntegrations = async (orgId: number) =>
     user: await fetchUser(),
   });
 
+export const fetchOranizationMembers = async (orgId: number) =>
+  await cFetch<Organization[]>(`/gh/installations/${orgId}/members`, {
+    user: await fetchUser(),
+  });
+
 export const setActiveRepo = async (repoId: number, isActive: boolean) => {
   const result = await cFetch(`/gh/repositories/${repoId}`, {
     body: JSON.stringify({ isActive }),

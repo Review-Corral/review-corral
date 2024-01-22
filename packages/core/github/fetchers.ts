@@ -1,11 +1,12 @@
 import ky from "ky";
-import { User } from "../db/types";
+import { Organization, User } from "../db/types";
 import { Logger } from "../logging";
 import { getJwt } from "../utils/jwt/createGithubJwt";
 import {
   InstallationAccessTokenResponse,
   InstallationRespositoriesResponse,
   InstallationsData,
+  OrganizationMembersResponse,
 } from "./endpointTypes";
 
 const LOGGER = new Logger("github.fetchers.ts");
@@ -60,12 +61,35 @@ export const getInstallationRepositories = async (
   const installationAccessToken = await getInstallationAccessToken(
     installationId
   );
+  return await ghInstallationQuery<InstallationRespositoriesResponse>({
+    url: "https://api.github.com/installation/repositories",
+    installationId,
+  });
+};
+
+export async function getInstallationMembers(organization: Organization) {
+  return await ghInstallationQuery<OrganizationMembersResponse>({
+    url: `https://api.github.com/orgs/${organization.accountName}/members?per_page=100`,
+    installationId: organization.installationId,
+  });
+}
+
+async function ghInstallationQuery<TData>({
+  installationId,
+  url,
+}: {
+  installationId: number;
+  url: string;
+}) {
+  const installationAccessToken = await getInstallationAccessToken(
+    installationId
+  );
   return await ky
-    .get("https://api.github.com/installation/repositories", {
+    .get(url, {
       headers: {
         ...defaultHeaders,
         Authorization: `Bearer ${installationAccessToken.token}`,
       },
     })
-    .json<InstallationRespositoriesResponse>();
-};
+    .json<TData>();
+}
