@@ -13,7 +13,7 @@ export default async function UsernamesPage({
 
   return (
     <div>
-      <Header>Usernames</Header>
+      <Header classname="pb-8">Usernames</Header>
       <UsernamesTable data={usernames} />
     </div>
   );

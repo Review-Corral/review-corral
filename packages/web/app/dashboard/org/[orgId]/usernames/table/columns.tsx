@@ -12,7 +12,7 @@ export const columns: ColumnDef<UsernameMapping>[] = [
     cell: ({ row }) => {
       return (
         <div className="px-3 py-4">
-          <div className="max-w-[500px] truncate font-semibold">
+          <div className="max-w-[500px] truncate">
             {row.original.githubUsername}
           </div>
         </div>
@@ -28,7 +28,7 @@ export const columns: ColumnDef<UsernameMapping>[] = [
     cell: ({ row }) => {
       return (
         <div className="px-3 py-4">
-          <div className="max-w-[500px] truncate font-semibold">
+          <div className="max-w-[500px] truncate">
             {row.original.slackUserId}
           </div>
         </div>

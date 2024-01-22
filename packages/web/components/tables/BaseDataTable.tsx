@@ -22,7 +22,7 @@ export function BaseDataTable<TData>({
       <div className="rounded-md border">
         <Table className="w-full">
           {children}
-          <TableHeader className="bg-blue-50">
+          <TableHeader className="bg-gray-100 text-black rounded-md">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -40,7 +40,7 @@ export function BaseDataTable<TData>({
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className="bg-white">
+          <TableBody>
             {table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
