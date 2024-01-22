@@ -7,6 +7,7 @@ import {
   SlackIntegration,
   UsernameMapping,
 } from "@core/db/types";
+import { OrganizationMembersResponse } from "@core/github/endpointTypes";
 import { revalidateTag } from "next/cache";
 import { cFetch } from "./shared";
 
@@ -47,10 +48,13 @@ export const fetchSlackIntegrations = async (orgId: number) =>
     user: await fetchUser(),
   });
 
-export const fetchOranizationMembers = async (orgId: number) =>
-  await cFetch<Organization[]>(`/gh/installations/${orgId}/members`, {
-    user: await fetchUser(),
-  });
+export const fetchOrganizationMembers = async (orgId: number) =>
+  await cFetch<OrganizationMembersResponse>(
+    `/gh/installations/${orgId}/members`,
+    {
+      user: await fetchUser(),
+    }
+  );
 
 export const setActiveRepo = async (repoId: number, isActive: boolean) => {
   const result = await cFetch(`/gh/repositories/${repoId}`, {

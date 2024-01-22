@@ -1,10 +1,13 @@
 import { Header } from "@/components/ui/header";
 import {
-  fetchOranizationMembers,
+  fetchOrganizationMembers,
   fetchUsernameMappings,
 } from "@/lib/fetchers/organizations";
 import { OrgViewPathParams, orgViewPathSchema } from "../types";
-import { UsernamesTable } from "./table/UsernamesTable";
+import {
+  GithubAndOptionalPersistedUsername,
+  UsernamesTable,
+} from "./table/UsernamesTable";
 
 export default async function UsernamesPage({
   params,
@@ -13,17 +16,23 @@ export default async function UsernamesPage({
 }) {
   const { orgId } = orgViewPathSchema.parse(params);
   const usernames = await fetchUsernameMappings(orgId);
-
   console.log({ usernames });
 
-  const installationMembers = await fetchOranizationMembers(orgId);
-
+  const installationMembers = await fetchOrganizationMembers(orgId);
   console.log({ installationMembers });
+
+  const mappedUsernames: GithubAndOptionalPersistedUsername[] =
+    installationMembers.map((member) => ({
+      ...member,
+      mappedState: usernames.find(
+        (username) => username.githubUsername === member.login
+      ),
+    }));
 
   return (
     <div>
       <Header classname="pb-8">Usernames</Header>
-      <UsernamesTable data={usernames} />
+      <UsernamesTable data={mappedUsernames} />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { BaseDataTable } from "@/components/tables/BaseDataTable";
+import { fetchOrganizationMembers } from "@/lib/fetchers/organizations";
 import { UsernameMapping } from "@core/db/types";
 import {
   SortingState,
@@ -13,8 +14,22 @@ import {
 import React, { FC } from "react";
 import { columns } from "./columns";
 
+type OrganizationMember = (ReturnType<
+  typeof fetchOrganizationMembers
+> extends Promise<infer T>
+  ? T
+  : never)[number];
+
+/**
+ * A mapping between the members of the Github organization and our persisted
+ * usernames in the database
+ */
+export interface GithubAndOptionalPersistedUsername extends OrganizationMember {
+  mappedState: UsernameMapping | undefined;
+}
+
 interface UsernamesTableProps {
-  data: UsernameMapping[];
+  data: GithubAndOptionalPersistedUsername[];
 }
 
 export const UsernamesTable: FC<UsernamesTableProps> = ({ data }) => {
@@ -40,7 +55,7 @@ export const UsernamesTable: FC<UsernamesTableProps> = ({ data }) => {
   });
 
   return (
-    <BaseDataTable<UsernameMapping> table={table}>
+    <BaseDataTable<GithubAndOptionalPersistedUsername> table={table}>
       <colgroup>
         {/* <col className="w-[40%]" /> */}
         <col />

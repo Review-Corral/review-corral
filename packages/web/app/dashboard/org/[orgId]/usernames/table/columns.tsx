@@ -1,19 +1,28 @@
 import { DataTableColumnHeader } from "@/components/tables/DataTableColumnHeader";
-import { UsernameMapping } from "@core/db/types";
 import { ColumnDef } from "@tanstack/react-table";
+import Image from "next/image";
+import { GithubAndOptionalPersistedUsername } from "./UsernamesTable";
 
-export const columns: ColumnDef<UsernameMapping>[] = [
+export const columns: ColumnDef<GithubAndOptionalPersistedUsername>[] = [
   {
     accessorKey: "githubUsername",
-    accessorFn: (row) => row.githubUsername,
+    accessorFn: (row) => row.login,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Github Username" />
     ),
     cell: ({ row }) => {
       return (
-        <div className="px-3 py-4">
-          <div className="max-w-[500px] truncate">
-            {row.original.githubUsername}
+        <div className="px-3 py-2">
+          <div className="max-w-[500px] flex gap-3 items-center">
+            <Image
+              className="rounded-full"
+              src={row.original.avatar_url}
+              height={36}
+              width={36}
+              alt={"avatar url"}
+            />
+
+            <div className="truncate font-semibold">{row.original.login}</div>
           </div>
         </div>
       );
@@ -21,15 +30,15 @@ export const columns: ColumnDef<UsernameMapping>[] = [
   },
   {
     accessorKey: "slackUserId",
-    accessorFn: (row) => row.slackUserId,
+    accessorFn: (row) => row.mappedState?.slackUserId,
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Slack Username" />
     ),
     cell: ({ row }) => {
       return (
-        <div className="px-3 py-4">
+        <div className="px-3 py-2">
           <div className="max-w-[500px] truncate">
-            {row.original.slackUserId}
+            {row.original.mappedState?.slackUserId ?? "Not mapped"}
           </div>
         </div>
       );
