@@ -10,6 +10,7 @@ import {
   ChatPostMessageResponse,
   ChatUpdateArguments,
   MessageAttachment,
+  UsersListResponse,
   WebClient,
 } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
@@ -30,6 +31,16 @@ export class SlackClient {
 
   constructor(readonly channelId: string, readonly slackToken: string) {
     this.client = getSlackWebClient();
+
+    this.client.users.list();
+  }
+
+  /**
+   * Get the users for a Slack installation
+   * */
+  async getUsers(): Promise<UsersListResponse> {
+    const users = await this.client.users.list();
+    return users;
   }
 
   async postMessage({

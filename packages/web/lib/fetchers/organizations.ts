@@ -8,6 +8,7 @@ import {
   UsernameMapping,
 } from "@core/db/types";
 import { OrganizationMembersResponse } from "@core/github/endpointTypes";
+import { SlackClient } from "@core/slack/SlackClient";
 import { revalidateTag } from "next/cache";
 import { cFetch } from "./shared";
 
@@ -47,6 +48,14 @@ export const fetchSlackIntegrations = async (orgId: number) =>
   await cFetch<SlackIntegration[]>(`/slack/${orgId}/installations`, {
     user: await fetchUser(),
   });
+
+export const fetchSlackIntegrationUsers = async (orgId: number) =>
+  await cFetch<ReturnType<InstanceType<typeof SlackClient>["getUsers"]>>(
+    `/slack/${orgId}/users`,
+    {
+      user: await fetchUser(),
+    }
+  );
 
 export const fetchOrganizationMembers = async (orgId: number) =>
   await cFetch<OrganizationMembersResponse>(

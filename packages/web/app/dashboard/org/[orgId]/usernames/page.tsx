@@ -1,8 +1,10 @@
 import { Header } from "@/components/ui/header";
 import {
   fetchOrganizationMembers,
+  fetchSlackIntegrationUsers,
   fetchUsernameMappings,
 } from "@/lib/fetchers/organizations";
+import { inspect } from "util";
 import { OrgViewPathParams, orgViewPathSchema } from "../types";
 import {
   GithubAndOptionalPersistedUsername,
@@ -16,10 +18,13 @@ export default async function UsernamesPage({
 }) {
   const { orgId } = orgViewPathSchema.parse(params);
   const usernames = await fetchUsernameMappings(orgId);
-  console.log({ usernames });
+  // console.log({ usernames });
 
   const installationMembers = await fetchOrganizationMembers(orgId);
-  console.log({ installationMembers });
+  // console.log({ installationMembers });
+
+  const slackUsers = await fetchSlackIntegrationUsers(orgId);
+  console.log({ slackUsers: inspect(slackUsers) });
 
   const mappedUsernames: GithubAndOptionalPersistedUsername[] =
     installationMembers.map((member) => ({
