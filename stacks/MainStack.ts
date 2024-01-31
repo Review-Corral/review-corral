@@ -1,6 +1,7 @@
 import { SubnetType } from "aws-cdk-lib/aws-ec2";
-import { FunctionProps, StackContext } from "sst/constructs";
+import { FunctionProps, StackContext, use } from "sst/constructs";
 import { getFrontendUrl } from "./FrontendStack";
+import { StorageStack } from "./StorageStack";
 import { Api } from "./constructs/Api";
 import { getDbConnectionInfo } from "./constructs/Database";
 import MigrationFunction from "./constructs/MigrationFunction";
@@ -11,6 +12,7 @@ import { buildPersistedResources } from "./utils/buildPerisistedResources";
 import { enableLambdaOutboundNetworking } from "./utils/enableLambdaOutboundNetworking";
 
 export function MainStack({ stack, app }: StackContext) {
+  const { table } = use(StorageStack);
   const { vpc, database, functionsSecurityGroup } = buildPersistedResources({
     stack,
     app,
@@ -46,6 +48,7 @@ export function MainStack({ stack, app }: StackContext) {
     // without the need for costly NAT Gateways
     allowPublicSubnet: Boolean(vpc),
     vpcSubnets: vpc ? { subnetType: SubnetType.PUBLIC } : undefined,
+    bind: [table],
   };
   // Set the default props for all stacks
   stack.setDefaultFunctionProps(functionDefaults);
