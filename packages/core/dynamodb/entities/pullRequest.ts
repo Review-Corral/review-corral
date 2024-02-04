@@ -1,11 +1,11 @@
 import { Entity } from "electrodb";
-import { Dynamo } from "./dynamo";
+import { Dynamo } from "../dynamo";
 
-export const OrganizationEntity = new Entity(
+export const PullRequestEntity = new Entity(
   {
     model: {
       version: "1",
-      entity: "Organization",
+      entity: "PullRequest",
       service: "scratch",
     },
     attributes: {
@@ -46,14 +46,14 @@ export const OrganizationEntity = new Entity(
         },
       },
       assigned: {
-        collection: "pullRequests",
-        index: "gsi2",
+        collection: "orgPullRequests",
+        index: "gsi1",
         pk: {
-          field: "gsi2pk",
+          field: "gsi1pk",
           composite: ["orgId"],
         },
         sk: {
-          field: "gsi2sk",
+          field: "gsi1sk",
           composite: ["projectId"],
         },
       },
