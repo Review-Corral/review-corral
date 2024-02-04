@@ -1,6 +1,7 @@
 import { CreateEntityItem } from "electrodb";
-import { Db } from "../dynamo";
+import { Db } from "..";
 import { OrganizationEntity } from "../entities/orgnization";
+import { PullRequestEntity } from "../entities/pullRequest";
 import { UserEntity } from "../entities/user";
 
 export async function createOrg(
@@ -40,9 +41,22 @@ export async function getOrgPullRequests(orgId: number) {
 }
 
 export async function createOrgUser(
-  props: Omit<CreateEntityItem<typeof UserEntity>, "createdAt">
+  props: Omit<CreateEntityItem<typeof UserEntity>, "createdAt" | "updatedAt">
 ) {
   const result = await UserEntity.create({
+    ...props,
+  }).go();
+
+  return result.data;
+}
+
+export async function createPullRequest(
+  props: Omit<
+    CreateEntityItem<typeof PullRequestEntity>,
+    "createdAt" | "updatedAt"
+  >
+) {
+  const result = await PullRequestEntity.create({
     ...props,
     createdAt: new Date().toUTCString(),
   }).go();
