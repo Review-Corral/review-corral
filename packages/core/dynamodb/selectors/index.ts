@@ -1,6 +1,6 @@
 import { CreateEntityItem } from "electrodb";
 import { Db } from "..";
-import { OrganizationEntity } from "../entities/orgnization";
+import { OrganizationEntity } from "../entities/organization";
 import { PullRequestEntity } from "../entities/pullRequest";
 import { UserEntity } from "../entities/user";
 
@@ -18,11 +18,9 @@ export async function createOrg(
 }
 
 export async function getOrg(id: number) {
-  const result = await OrganizationEntity.query
-    .primary({
-      orgId: id,
-    })
-    .go();
+  const result = await OrganizationEntity.get({
+    orgId: id,
+  }).go();
 
   return result.data;
 }
