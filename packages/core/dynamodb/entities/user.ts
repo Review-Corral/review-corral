@@ -1,6 +1,6 @@
 import { CreateEntityItem, Entity, EntityItem } from "electrodb";
-import { Dynamo } from "..";
-import { OrgIdAttr } from "./orgnization";
+import { Configuration } from "..";
+import { OrgIdAttr } from "./organization";
 
 export const UserEntity = new Entity(
   {
@@ -69,20 +69,20 @@ export const UserEntity = new Entity(
       },
       orgUsers: {
         collection: "users",
-        index: "gsi1",
+        index: "gsi2",
         type: "clustered",
         pk: {
-          field: "gsi1pk",
+          field: "gsi2pk",
           composite: ["orgId"],
         },
         sk: {
-          field: "gsi1sk",
+          field: "gsi2sk",
           composite: ["createdAt", "status"],
         },
       },
     },
   },
-  Dynamo.Configuration
+  Configuration
 );
 
 export type UserEntityType = EntityItem<typeof UserEntity>;

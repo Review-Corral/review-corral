@@ -1,5 +1,5 @@
 import { Entity } from "electrodb";
-import { Dynamo } from "..";
+import { Configuration } from "..";
 
 export const OrgIdAttr = {
   type: "number",
@@ -56,7 +56,7 @@ export const OrganizationEntity = new Entity(
         },
         sk: {
           field: "sk",
-          composite: ["createdAt"],
+          composite: [],
         },
       },
       pullRequests: {
@@ -86,5 +86,5 @@ export const OrganizationEntity = new Entity(
       },
     },
   },
-  Dynamo.Configuration
+  Configuration
 );
