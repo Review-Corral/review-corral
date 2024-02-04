@@ -1,5 +1,5 @@
 import { CreateEntityItem, Entity, EntityItem } from "electrodb";
-import { Dynamo } from "../dynamo";
+import { Dynamo } from "..";
 import { OrgIdAttr } from "./orgnization";
 
 export const UserEntity = new Entity(
@@ -10,6 +10,7 @@ export const UserEntity = new Entity(
       service: "scratch",
     },
     attributes: {
+      orgId: OrgIdAttr,
       userId: {
         type: "number",
         required: true,
@@ -19,7 +20,10 @@ export const UserEntity = new Entity(
           char: "0",
         },
       },
-      orgId: OrgIdAttr,
+      name: {
+        type: "string",
+        required: true,
+      },
       email: {
         type: "string",
         required: true,
@@ -32,15 +36,24 @@ export const UserEntity = new Entity(
         type: "string",
         required: false,
       },
-      createdAt: {
-        type: "string",
-        required: true,
-        readOnly: true,
-      },
       status: {
         type: ["standard", "admin"] as const,
         default: "standard",
         required: true,
+      },
+      createdAt: {
+        type: "string",
+        readOnly: true,
+        required: true,
+        default: () => new Date().toISOString(),
+        set: () => new Date().toISOString(),
+      },
+      updatedAt: {
+        type: "string",
+        watch: "*",
+        required: true,
+        default: () => new Date().toISOString(),
+        set: () => new Date().toISOString(),
       },
     },
     indexes: {
@@ -57,6 +70,7 @@ export const UserEntity = new Entity(
       orgUsers: {
         collection: "users",
         index: "gsi1",
+        type: "clustered",
         pk: {
           field: "gsi1pk",
           composite: ["orgId"],
