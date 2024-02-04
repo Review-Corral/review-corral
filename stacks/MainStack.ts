@@ -60,6 +60,7 @@ export function MainStack({ stack, app }: StackContext) {
   });
 
   const api = new Api(stack, "Api", { app, functionDefaults });
+  api.api.bind([table]);
 
   const slackEnvVars = {
     ...initalSlackEnvVars,

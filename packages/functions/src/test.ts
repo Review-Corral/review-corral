@@ -1,8 +1,10 @@
 import { ApiHandler } from "sst/node/api";
+import { z } from "zod";
 import {
   createOrg,
   createOrgUser,
   createPullRequest,
+  getOrg,
 } from "../../core/dynamodb/selectors";
 
 export const create = ApiHandler(async (_evt) => {
@@ -35,6 +37,7 @@ export const create = ApiHandler(async (_evt) => {
 
   const user2 = await createOrgUser({
     ...baseUserProps,
+    userId: 456,
     orgId: org2.orgId,
   });
 
@@ -52,12 +55,33 @@ export const create = ApiHandler(async (_evt) => {
 
   await createPullRequest({
     orgId: org1.orgId,
+    prId: 4,
+    threadTs: "4",
+  });
+
+  await createPullRequest({
+    orgId: org2.orgId,
     prId: 3,
-    threadTs: "12345",
+    threadTs: "3",
   });
 
   return {
     statusCode: 200,
     body: "Created",
+  };
+});
+
+const schema = z.object({
+  orgId: z.string().transform(Number),
+});
+
+export const getOrganization = ApiHandler(async (_evt) => {
+  const { orgId } = schema.parse(_evt.pathParameters);
+
+  const result = await getOrg(Number(orgId));
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify(result),
   };
 });

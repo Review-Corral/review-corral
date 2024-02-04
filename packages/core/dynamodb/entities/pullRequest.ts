@@ -1,5 +1,6 @@
 import { Entity } from "electrodb";
-import { Dynamo } from "..";
+import { Configuration } from "..";
+import { OrgIdAttr } from "./organization";
 
 export const PullRequestEntity = new Entity(
   {
@@ -22,11 +23,7 @@ export const PullRequestEntity = new Entity(
         type: "string",
         required: true,
       },
-      orgId: {
-        type: "number",
-        required: true,
-        readOnly: true,
-      },
+      orgId: OrgIdAttr,
       isDraft: {
         type: "boolean",
         default: false,
@@ -72,5 +69,5 @@ export const PullRequestEntity = new Entity(
       },
     },
   },
-  Dynamo.Configuration
+  Configuration
 );
