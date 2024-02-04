@@ -1,5 +1,5 @@
 import { Entity } from "electrodb";
-import { Dynamo } from "../dynamo";
+import { Dynamo } from "..";
 
 export const PullRequestEntity = new Entity(
   {
@@ -9,10 +9,14 @@ export const PullRequestEntity = new Entity(
       service: "scratch",
     },
     attributes: {
-      id: {
+      prId: {
         type: "number",
         required: true,
         readOnly: true,
+        padding: {
+          length: 20,
+          char: "0",
+        },
       },
       threadTs: {
         type: "string",
@@ -23,15 +27,24 @@ export const PullRequestEntity = new Entity(
         required: true,
         readOnly: true,
       },
-      createdAt: {
-        type: "string",
-        required: true,
-        readOnly: true,
-      },
-      draft: {
+      isDraft: {
         type: "boolean",
         default: false,
         required: true,
+      },
+      createdAt: {
+        type: "string",
+        readOnly: true,
+        required: true,
+        default: () => new Date().toISOString(),
+        set: () => new Date().toISOString(),
+      },
+      updatedAt: {
+        type: "string",
+        watch: "*",
+        required: true,
+        default: () => new Date().toISOString(),
+        set: () => new Date().toISOString(),
       },
     },
     indexes: {
@@ -42,7 +55,7 @@ export const PullRequestEntity = new Entity(
         },
         sk: {
           field: "sk",
-          composite: [],
+          composite: ["createdAt", "isDraft"],
         },
       },
       assigned: {
@@ -54,7 +67,7 @@ export const PullRequestEntity = new Entity(
         },
         sk: {
           field: "gsi1sk",
-          composite: ["projectId"],
+          composite: ["prId"],
         },
       },
     },

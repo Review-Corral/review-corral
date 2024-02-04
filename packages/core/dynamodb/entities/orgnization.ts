@@ -1,5 +1,5 @@
 import { Entity } from "electrodb";
-import { Dynamo } from "../dynamo";
+import { Dynamo } from "..";
 
 export const OrgIdAttr = {
   type: "number",
@@ -74,6 +74,7 @@ export const OrganizationEntity = new Entity(
       users: {
         collection: "users",
         index: "gsi2",
+        type: "clustered",
         pk: {
           field: "gsi2pk",
           composite: ["orgId"],
