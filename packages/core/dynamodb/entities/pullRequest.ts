@@ -48,14 +48,14 @@ export const PullRequestEntity = new Entity(
       primary: {
         pk: {
           field: "pk",
-          composite: ["orgId"],
+          composite: ["orgId", "prId"],
         },
         sk: {
           field: "sk",
-          composite: ["createdAt", "isDraft"],
+          composite: [],
         },
       },
-      assigned: {
+      byOrg: {
         collection: "orgPullRequests",
         index: "gsi1",
         pk: {

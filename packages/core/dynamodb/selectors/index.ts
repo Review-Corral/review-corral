@@ -4,11 +4,10 @@ import { OrganizationEntity } from "../entities/organization";
 import { PullRequestEntity } from "../entities/pullRequest";
 import { UserEntity } from "../entities/user";
 
+type DateMetadataTypes = "createdAt" | "updatedAt";
+
 export async function createOrg(
-  props: Omit<
-    CreateEntityItem<typeof OrganizationEntity>,
-    "createdAt" | "updatedAt"
-  >
+  props: Omit<CreateEntityItem<typeof OrganizationEntity>, DateMetadataTypes>
 ) {
   const result = await OrganizationEntity.create({
     ...props,
@@ -17,7 +16,7 @@ export async function createOrg(
   return result.data;
 }
 
-export async function getOrg(id: number) {
+export async function selectOrg(id: number) {
   const result = await OrganizationEntity.get({
     orgId: id,
   }).go();
@@ -25,7 +24,7 @@ export async function getOrg(id: number) {
   return result.data;
 }
 
-export async function getOrgPullRequests(orgId: number) {
+export async function selectOrgPrs(orgId: number) {
   const result = await Db.collections
     .orgPullRequests({
       orgId,
@@ -38,7 +37,7 @@ export async function getOrgPullRequests(orgId: number) {
   return result.data;
 }
 
-export async function createOrgUser(
+export async function insertOrgUser(
   props: Omit<CreateEntityItem<typeof UserEntity>, "createdAt" | "updatedAt">
 ) {
   const result = await UserEntity.create({
@@ -48,11 +47,8 @@ export async function createOrgUser(
   return result.data;
 }
 
-export async function createPullRequest(
-  props: Omit<
-    CreateEntityItem<typeof PullRequestEntity>,
-    "createdAt" | "updatedAt"
-  >
+export async function insertPr(
+  props: Omit<CreateEntityItem<typeof PullRequestEntity>, DateMetadataTypes>
 ) {
   const result = await PullRequestEntity.create({
     ...props,
@@ -62,7 +58,32 @@ export async function createPullRequest(
   return result.data;
 }
 
-export async function getOrgUsers(orgId: number) {
+export async function updatePr(
+  props: Omit<CreateEntityItem<typeof PullRequestEntity>, DateMetadataTypes>
+) {
+  const { orgId, prId, ...remainingProps } = props;
+  const result = await PullRequestEntity.update({
+    orgId: orgId,
+    prId: prId,
+  })
+    .set({
+      ...remainingProps,
+    })
+    .go();
+
+  return result.data;
+}
+
+export async function selectPullRequest(orgId: number, prId: number) {
+  const result = await PullRequestEntity.get({
+    orgId,
+    prId,
+  }).go();
+
+  return result.data;
+}
+
+export async function selectOrgUsers(orgId: number) {
   const result = await Db.collections.users({ orgId }).go();
 
   return result.data;

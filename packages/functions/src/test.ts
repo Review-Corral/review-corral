@@ -2,86 +2,129 @@ import { ApiHandler } from "sst/node/api";
 import { z } from "zod";
 import {
   createOrg,
-  createOrgUser,
-  createPullRequest,
-  getOrg,
+  insertOrgUser,
+  insertPr,
+  selectOrg,
+  selectOrgPrs,
+  selectPullRequest,
 } from "../../core/dynamodb/selectors";
 
-export const create = ApiHandler(async (_evt) => {
-  const baseUserProps = {
-    userId: 123,
-    email: "test@gmail.com",
-    name: "user1",
-    avatarUrl: "https://google.com",
-    status: "standard",
-  } as const;
-
-  const org1 = await createOrg({
-    orgId: 1234,
-    name: "org1",
-    avatarUrl: "https://google.com",
-    type: "Organization",
-  });
-
-  const user1 = await createOrgUser({
-    ...baseUserProps,
-    orgId: org1.orgId,
-  });
-
-  const org2 = await createOrg({
-    orgId: 5678,
-    name: "org2",
-    avatarUrl: "https://google.com",
-    type: "Organization",
-  });
-
-  const user2 = await createOrgUser({
-    ...baseUserProps,
-    userId: 456,
-    orgId: org2.orgId,
-  });
-
-  await createPullRequest({
-    orgId: org1.orgId,
-    prId: 1,
-    threadTs: "123",
-  });
-
-  await createPullRequest({
-    orgId: org1.orgId,
-    prId: 2,
-    threadTs: "1234",
-  });
-
-  await createPullRequest({
-    orgId: org1.orgId,
-    prId: 4,
-    threadTs: "4",
-  });
-
-  await createPullRequest({
-    orgId: org2.orgId,
-    prId: 3,
-    threadTs: "3",
-  });
-
-  return {
-    statusCode: 200,
-    body: "Created",
-  };
-});
-
-const schema = z.object({
+const orgPathSchema = z.object({
   orgId: z.string().transform(Number),
 });
 
-export const getOrganization = ApiHandler(async (_evt) => {
-  const { orgId } = schema.parse(_evt.pathParameters);
+const userInsertBodySchema = z.object({
+  user: z.object({
+    userId: z.number(),
+    email: z.string(),
+    name: z.string(),
+    avatarUrl: z.string(),
+  }),
+  orgs: z.array(
+    z.object({
+      orgId: z.number(),
+      name: z.string(),
+      avatarUrl: z.string(),
+    })
+  ),
+});
 
-  const result = await getOrg(Number(orgId));
+export const createUserOrgs = ApiHandler(async (_evt) => {
+  const { user, orgs } = userInsertBodySchema.parse(
+    JSON.parse(_evt.body ?? "")
+  );
+
+  const createdOrgs = [];
+  const createdUsers = [];
+
+  for (const org of orgs) {
+    const createdOrg = await createOrg({ ...org, type: "Organization" });
+    const createdUser = await insertOrgUser({
+      ...user,
+      orgId: createdOrg.orgId,
+    });
+
+    createdOrgs.push(createdOrg);
+    createdUsers.push(createdUser);
+  }
+
+  return {
+    statusCode: 201,
+    body: JSON.stringify({
+      createdOrgs,
+      createdUsers,
+    }),
+  };
+});
+
+const createPrBodySchema = z.array(
+  z.object({
+    prId: z.number(),
+  })
+);
+
+export const createOrgPrs = ApiHandler(async (_evt) => {
+  const { orgId } = orgPathSchema.parse(_evt.pathParameters);
+  const prs = createPrBodySchema.parse(JSON.parse(_evt.body ?? ""));
+
+  const createdPrs = [];
+
+  for (const pr of prs)
+    createdPrs.push(
+      await insertPr({
+        orgId,
+        ...pr,
+        threadTs: "123",
+      })
+    );
+
+  return {
+    statusCode: 201,
+    body: JSON.stringify(createdPrs),
+  };
+});
+
+export const getOrg = ApiHandler(async (_evt) => {
+  const { orgId } = orgPathSchema.parse(_evt.pathParameters);
+
+  const result = await selectOrg(orgId);
 
   return {
     statusCode: 200,
     body: JSON.stringify(result),
+  };
+});
+
+export const getOrgPrs = ApiHandler(async (_evt) => {
+  const { orgId } = orgPathSchema.parse(_evt.pathParameters);
+
+  const result = await selectOrgPrs(orgId);
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify(result),
+  };
+});
+
+const prSchema = z.object({
+  prId: z.string().transform(Number),
+});
+
+export const getPr = ApiHandler(async (_evt) => {
+  const { orgId } = orgPathSchema.parse(_evt.pathParameters);
+  const { prId } = prSchema.parse(JSON.parse(_evt.body ?? ""));
+
+  const result = await selectPullRequest(orgId, prId);
+
+  return {
+    statusCode: 200,
+    body: JSON.stringify(result),
+  };
+});
+
+export const updatePr = ApiHandler(async (_evt) => {
+  return {
+    statusCode: 200,
+    body: "Updated",
   };
 });
