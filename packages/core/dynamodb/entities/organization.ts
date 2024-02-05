@@ -1,4 +1,4 @@
-import { Entity } from "electrodb";
+import { Attribute, Entity } from "electrodb";
 import { Configuration } from "..";
 
 export const OrgIdAttr = {
@@ -9,7 +9,7 @@ export const OrgIdAttr = {
     length: 20,
     char: "0",
   },
-} as const;
+} satisfies Attribute;
 
 export const OrganizationEntity = new Entity(
   {

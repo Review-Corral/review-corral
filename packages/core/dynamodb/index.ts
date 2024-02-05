@@ -10,7 +10,7 @@ import { UserEntity } from "./entities/user";
 export const Client = new DynamoDBClient({});
 
 export const Configuration: EntityConfiguration = {
-  table: Table.db.tableName,
+  table: Table.db3.tableName,
   client: Client,
 };
 
