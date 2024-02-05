@@ -60,8 +60,12 @@ export class Api extends Construct {
         }),
 
         ...buildPaths("/test", {
-          "POST /create": "packages/functions/src/test.create",
-          "GET /{orgId}": "packages/functions/src/test.getOrganization",
+          "POST /create": "packages/functions/src/test.createUserOrgs",
+          ...buildPaths("/{orgId}", {
+            "GET /": "packages/functions/src/test.getOrg",
+            "GET /prs": "packages/functions/src/test.getOrgPrs",
+            "POST /prs": "packages/functions/src/test.createOrgPrs",
+          }),
         }),
       },
     });

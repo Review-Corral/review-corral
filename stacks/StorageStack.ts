@@ -1,10 +1,11 @@
 import { StackContext, Table } from "sst/constructs";
 
 export function StorageStack({ stack, app }: StackContext) {
-  const table = new Table(stack, "db", {
+  const table = new Table(stack, "db3", {
     fields: {
       pk: "string",
       sk: "string",
+      lsi1sk: "string",
       gsi1pk: "string",
       gsi1sk: "string",
       gsi2pk: "string",
@@ -22,6 +23,11 @@ export function StorageStack({ stack, app }: StackContext) {
       gsi2: {
         partitionKey: "gsi2pk",
         sortKey: "gsi2sk",
+      },
+    },
+    localIndexes: {
+      lsi1: {
+        sortKey: "lsi1sk",
       },
     },
   });

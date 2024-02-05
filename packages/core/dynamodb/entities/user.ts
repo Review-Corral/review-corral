@@ -60,11 +60,11 @@ export const UserEntity = new Entity(
       primary: {
         pk: {
           field: "pk",
-          composite: ["userId"],
+          composite: ["orgId"],
         },
         sk: {
           field: "sk",
-          composite: [],
+          composite: ["userId"],
         },
       },
       orgUsers: {
@@ -98,8 +98,14 @@ export async function create(
   return result.data;
 }
 
-export async function get({ userId }: { userId: number }) {
-  const result = await UserEntity.get({ userId }).go();
+export async function get({
+  userId,
+  orgId,
+}: {
+  userId: number;
+  orgId: number;
+}) {
+  const result = await UserEntity.get({ userId, orgId }).go();
 
   return result.data;
 }
