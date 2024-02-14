@@ -1,15 +1,29 @@
 import { eq } from "drizzle-orm";
+import { Db } from "../../dynamodb";
+import { PullRequest } from "../../dynamodb/entities/types";
 import { DB } from "../db";
 import { pullRequests } from "../schema";
-import { PullRequest, PullRequestInsertionArgs } from "../types";
-import { takeFirst, takeFirstOrThrow } from "./utils";
+import { PullRequestInsertionArgs } from "../types";
+import { takeFirstOrThrow } from "./utils";
 
-export const fetchPullRequestById = async (pullRequestId: number) => {
-  return await DB.select()
-    .from(pullRequests)
-    .where(eq(pullRequests.id, pullRequestId))
-    .limit(1)
-    .then(takeFirst);
+export const fetchPullRequestById = async ({
+  pullRequestId,
+  repoId,
+}: {
+  pullRequestId: number;
+  repoId: number;
+}): Promise<PullRequest> => {
+  return await Db.entities.pullRequest
+    .get({ prId: pullRequestId, repoId })
+    .go()
+    .then(({ data }) => {
+      if (!data) {
+        throw new Error(
+          `Could not find pull request with id: ${pullRequestId} in repoId: ${repoId}`
+        );
+      }
+      return data;
+    });
 };
 
 export const insertPullRequest = async (
