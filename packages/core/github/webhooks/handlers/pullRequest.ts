@@ -8,7 +8,7 @@ import {
   insertPullRequest,
   updatePullRequest,
 } from "../../../db/fetchers/pullRequests";
-import { PullRequest } from "../../../db/types";
+import { PullRequest } from "../../../dynamodb/entities/types";
 import { Logger } from "../../../logging";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
 import { PullRequestReviewCommentsResponse } from "../../endpointTypes";
@@ -108,10 +108,10 @@ const handleNewPr = async (
   if (payload.pull_request.draft) {
     LOGGER.debug("Handling draft PR");
     await insertPullRequest({
-      id: payload.pull_request.id,
-      draft: true,
-      threadTs: null,
-      organizationId: props.organizationId,
+      prId: payload.pull_request.id,
+      isDraft: true,
+      threadTs: undefined,
+      repoId: payload.repository.id,
     });
   } else {
     const { threadTs, wasCreated } = await getThreadTsForNewPr(payload, props);
@@ -202,7 +202,7 @@ const handleNewPr = async (
       LOGGER.debug("PR was not opened, trying to find existing thread...");
       // This should trigger for 'ready_for_review' events
       const existingPullRequest = await fetchPullRequestById({
-        pullRequestId: body.organization?.id,
+        pullRequestId: body.pull_request.id,
         repoId: body.pull_request.id,
       });
 
@@ -248,26 +248,27 @@ const handleNewPr = async (
           {
             prId: body.pull_request.id,
             organizationId: baseProps.organizationId,
-            existingPrId: existingPullRequest?.id,
+            existingPrId: existingPullRequest?.prId,
             threadTs: response.ts,
           }
         );
         if (existingPullRequest) {
           LOGGER.debug(
-            `Updating existing PR record of id ${existingPullRequest.id}}`
+            `Updating existing PR record of id ${existingPullRequest.prId}}`
           );
           await updatePullRequest({
-            id: existingPullRequest.id,
-            draft: body.pull_request.draft,
+            pullRequestId: existingPullRequest.prId,
+            repoId: body.repository.id,
+            isDraft: body.pull_request.draft,
             threadTs: response.ts,
           });
         } else {
           LOGGER.debug(`Creating new PR record`);
           await insertPullRequest({
-            id: body.pull_request.id,
-            draft: body.pull_request.draft,
+            prId: body.pull_request.id,
+            repoId: body.repository.id,
+            isDraft: body.pull_request.draft,
             threadTs: response.ts,
-            organizationId: baseProps.organizationId,
           });
         }
 
