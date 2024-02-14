@@ -1,16 +1,17 @@
 import { Entity } from "electrodb";
 import { Configuration } from "..";
-import { RepoIdAttr } from "./repository";
+import { OrgIdAttr } from "./organization";
 
-export const PullRequestEntity = new Entity(
+export const UserAndOrganization = new Entity(
   {
     model: {
       version: "1",
-      entity: "PullRequest",
+      entity: "User",
       service: "scratch",
     },
     attributes: {
-      prId: {
+      orgId: OrgIdAttr,
+      userId: {
         type: "number",
         required: true,
         readOnly: true,
@@ -19,15 +20,9 @@ export const PullRequestEntity = new Entity(
           char: "0",
         },
       },
-      repoId: RepoIdAttr,
-      threadTs: {
+      slackId: {
         type: "string",
-        required: true,
-      },
-      isDraft: {
-        type: "boolean",
-        default: false,
-        required: true,
+        required: false,
       },
       createdAt: {
         type: "string",
@@ -48,11 +43,24 @@ export const PullRequestEntity = new Entity(
       primary: {
         pk: {
           field: "pk",
-          composite: ["prId"],
+          composite: ["userId"],
         },
         sk: {
           field: "sk",
-          composite: [],
+          composite: ["orgId"],
+        },
+      },
+      orgUsers: {
+        collection: "users",
+        index: "gsi2",
+        type: "clustered",
+        pk: {
+          field: "gsi2pk",
+          composite: ["orgId"],
+        },
+        sk: {
+          field: "gsi2sk",
+          composite: ["userId", "status"],
         },
       },
     },

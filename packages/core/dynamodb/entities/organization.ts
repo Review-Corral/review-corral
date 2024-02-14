@@ -59,8 +59,8 @@ export const OrganizationEntity = new Entity(
           composite: [],
         },
       },
-      pullRequests: {
-        collection: "orgPullRequests",
+      repositories: {
+        collection: "orgRepositories",
         index: "gsi1",
         pk: {
           field: "gsi1pk",

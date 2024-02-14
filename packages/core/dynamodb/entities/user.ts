@@ -1,6 +1,5 @@
-import { CreateEntityItem, Entity, EntityItem } from "electrodb";
+import { Entity } from "electrodb";
 import { Configuration } from "..";
-import { OrgIdAttr } from "./organization";
 
 export const UserEntity = new Entity(
   {
@@ -10,7 +9,6 @@ export const UserEntity = new Entity(
       service: "scratch",
     },
     attributes: {
-      orgId: OrgIdAttr,
       userId: {
         type: "number",
         required: true,
@@ -26,7 +24,6 @@ export const UserEntity = new Entity(
       },
       email: {
         type: "string",
-        required: true,
       },
       avatarUrl: {
         type: "string",
@@ -60,52 +57,14 @@ export const UserEntity = new Entity(
       primary: {
         pk: {
           field: "pk",
-          composite: ["orgId"],
+          composite: [],
         },
         sk: {
           field: "sk",
           composite: ["userId"],
         },
       },
-      orgUsers: {
-        collection: "users",
-        index: "gsi2",
-        type: "clustered",
-        pk: {
-          field: "gsi2pk",
-          composite: ["orgId"],
-        },
-        sk: {
-          field: "gsi2sk",
-          composite: ["createdAt", "status"],
-        },
-      },
     },
   },
   Configuration
 );
-
-export type UserEntityType = EntityItem<typeof UserEntity>;
-
-export async function create(
-  props: Omit<CreateEntityItem<typeof UserEntity>, "createdAt">
-) {
-  const result = await UserEntity.create({
-    ...props,
-    createdAt: new Date().toUTCString(),
-  }).go();
-
-  return result.data;
-}
-
-export async function get({
-  userId,
-  orgId,
-}: {
-  userId: number;
-  orgId: number;
-}) {
-  const result = await UserEntity.get({ userId, orgId }).go();
-
-  return result.data;
-}

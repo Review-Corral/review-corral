@@ -5,6 +5,7 @@ import { EntityConfiguration, Service } from "electrodb";
 import { Table } from "sst/node/table";
 import { OrganizationEntity } from "./entities/organization";
 import { PullRequestEntity } from "./entities/pullRequest";
+import { RepositoryEntity } from "./entities/repository";
 import { UserEntity } from "./entities/user";
 
 export const Client = new DynamoDBClient({});
@@ -18,6 +19,7 @@ export const Db = new Service(
   {
     organization: OrganizationEntity,
     pullRequest: PullRequestEntity,
+    repository: RepositoryEntity,
     user: UserEntity,
   },
   Configuration
