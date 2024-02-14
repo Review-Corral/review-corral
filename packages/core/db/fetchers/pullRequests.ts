@@ -1,10 +1,9 @@
-import { eq } from "drizzle-orm";
 import { Db } from "../../dynamodb";
-import { PullRequest } from "../../dynamodb/entities/types";
-import { DB } from "../db";
-import { pullRequests } from "../schema";
-import { PullRequestInsertionArgs } from "../types";
-import { takeFirstOrThrow } from "./utils";
+import {
+  PullRequest,
+  PullRequestInsertArgs,
+  PullRequestUpdateArgs,
+} from "../../dynamodb/entities/types";
 
 export const fetchPullRequestById = async ({
   pullRequestId,
@@ -27,15 +26,22 @@ export const fetchPullRequestById = async ({
 };
 
 export const insertPullRequest = async (
-  args: PullRequestInsertionArgs
+  args: PullRequestInsertArgs
 ): Promise<PullRequest> =>
-  await DB.insert(pullRequests).values(args).returning().then(takeFirstOrThrow);
+  await Db.entities.pullRequest
+    .create(args)
+    .go()
+    .then(({ data }) => data);
 
-export const updatePullRequest = async (
-  args: PullRequestInsertionArgs
-): Promise<PullRequest> =>
-  await DB.update(pullRequests)
+export const updatePullRequest = async ({
+  pullRequestId,
+  repoId,
+  ...args
+}: PullRequestUpdateArgs & {
+  pullRequestId: number;
+  repoId: number;
+}) =>
+  await Db.entities.pullRequest
+    .patch({ prId: pullRequestId, repoId })
     .set(args)
-    .where(eq(pullRequests.id, args.id))
-    .returning()
-    .then(takeFirstOrThrow);
+    .go();

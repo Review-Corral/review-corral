@@ -48,7 +48,7 @@ export const PullRequestEntity = new Entity(
       primary: {
         pk: {
           field: "pk",
-          composite: ["prId"],
+          composite: ["repoId", "prId"],
         },
         sk: {
           field: "sk",
