@@ -201,9 +201,10 @@ const handleNewPr = async (
     } else {
       LOGGER.debug("PR was not opened, trying to find existing thread...");
       // This should trigger for 'ready_for_review' events
-      const existingPullRequest = await fetchPullRequestById(
-        body.pull_request.id
-      );
+      const existingPullRequest = await fetchPullRequestById({
+        pullRequestId: body.organization?.id,
+        repoId: body.pull_request.id,
+      });
 
       // If we still couldn't find a thread, then post a new one.
       if (!existingPullRequest?.threadTs) {

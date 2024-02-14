@@ -1,33 +1,39 @@
-import { Entity } from "electrodb";
+import { Attribute, Entity } from "electrodb";
 import { Configuration } from "..";
-import { RepoIdAttr } from "./repository";
+import { OrgIdAttr } from "./organization";
 
-export const PullRequestEntity = new Entity(
+export const RepoIdAttr = {
+  type: "number",
+  required: true,
+  readOnly: true,
+  padding: {
+    length: 20,
+    char: "0",
+  },
+} satisfies Attribute;
+
+export const RepositoryEntity = new Entity(
   {
     model: {
       version: "1",
-      entity: "PullRequest",
+      entity: "Repository",
       service: "scratch",
     },
     attributes: {
-      prId: {
-        type: "number",
-        required: true,
-        readOnly: true,
-        padding: {
-          length: 20,
-          char: "0",
-        },
-      },
+      orgId: OrgIdAttr,
       repoId: RepoIdAttr,
-      threadTs: {
+      name: {
         type: "string",
         required: true,
       },
-      isDraft: {
+      avatarUrl: {
+        type: "string",
+        required: false,
+      },
+      isEnabled: {
         type: "boolean",
-        default: false,
         required: true,
+        default: false,
       },
       createdAt: {
         type: "string",
@@ -48,11 +54,11 @@ export const PullRequestEntity = new Entity(
       primary: {
         pk: {
           field: "pk",
-          composite: ["prId"],
+          composite: ["orgId"],
         },
         sk: {
           field: "sk",
-          composite: [],
+          composite: ["repoId"],
         },
       },
     },

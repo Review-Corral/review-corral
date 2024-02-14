@@ -19,7 +19,7 @@ export async function getSlackUserName(
 }
 
 export async function getThreadTs(prId: number): Promise<string | undefined> {
-  const pullRequest = await fetchPullRequestById(prId);
+  const pullRequest = await fetchPullRequestById({ pullRequestId: prId });
 
   return pullRequest?.threadTs ?? undefined;
 }
