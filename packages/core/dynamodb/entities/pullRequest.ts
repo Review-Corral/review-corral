@@ -22,7 +22,7 @@ export const PullRequestEntity = new Entity(
       repoId: RepoIdAttr,
       threadTs: {
         type: "string",
-        required: true,
+        required: false,
       },
       isDraft: {
         type: "boolean",
