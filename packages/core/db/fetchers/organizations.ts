@@ -1,20 +1,23 @@
-import { eq, getTableColumns } from "drizzle-orm";
-import { DB } from "../db";
-import { organizations, usersAndOrganizations } from "../schema";
-import { Organization, OrganizationInsertArgs, User } from "../types";
-import { takeFirst, takeFirstOrThrow } from "./utils";
+import { Db } from "../../dynamodb";
+
+import {
+  Organization,
+  OrganizationInsertArgs,
+} from "../../dynamodb/entities/types";
+import { Logger } from "../../logging";
+
+const LOGGER = new Logger("fetchers.organizations");
 
 /**
- * Fetches a user by their id
+ * Fetches an organization by it's ID
  */
 export const fetchOrganizationByAccountId = async (
   accountId: number
-): Promise<Organization | undefined> =>
-  await DB.select()
-    .from(organizations)
-    .where(eq(organizations.id, accountId))
-    .limit(1)
-    .then(takeFirst);
+): Promise<Organization | null> =>
+  await Db.entities.organization
+    .get({ orgId: accountId })
+    .go()
+    .then(({ data }) => data);
 
 /**
  * Creates a user. Should only be used when logging in and the user doesn't exist
@@ -22,10 +25,10 @@ export const fetchOrganizationByAccountId = async (
 export const insertOrganization = async (
   args: OrganizationInsertArgs
 ): Promise<Organization> => {
-  return await DB.insert(organizations)
-    .values(args)
-    .returning()
-    .then(takeFirstOrThrow);
+  return await Db.entities.organization
+    .create(args)
+    .go()
+    .then(({ data }) => data);
 };
 
 /**
@@ -33,16 +36,16 @@ export const insertOrganization = async (
  * for sure, but these may get out of a sync if the app is uninstalled and reinstalled
  * on the same organization.
  */
-export const updateOrganizationInstallationId = async (
-  args: Pick<OrganizationInsertArgs, "installationId" | "id">
-): Promise<Organization> => {
-  return await DB.update(organizations)
-    .set({
-      installationId: args.installationId,
+export const updateOrganizationInstallationId = async (args: {
+  orgId: number;
+  installationId: number;
+}): Promise<void> => {
+  await Db.entities.organization
+    .patch({
+      orgId: args.orgId,
     })
-    .where(eq(organizations.id, args.id))
-    .returning()
-    .then(takeFirstOrThrow);
+    .set({ installationId: args.installationId })
+    .go();
 };
 
 /**
@@ -51,43 +54,19 @@ export const updateOrganizationInstallationId = async (
 export const fetchUsersOrganizations = async (
   userId: number
 ): Promise<Organization[]> => {
-  return await DB.select(getTableColumns(organizations))
-    .from(organizations)
-    .innerJoin(
-      usersAndOrganizations,
-      eq(organizations.id, usersAndOrganizations.orgId)
-    )
-    .where(eq(usersAndOrganizations.userId, userId));
+  const data = await Db.collections
+    .usersOrgs({
+      userId,
+    })
+    .go()
+    .then(({ data }) => data);
+
+  return data.organization;
 };
 
+// TODO: this is a duplicated method, remove
 export const fetchOrganizationById = async (
   id: number
-): Promise<Organization | undefined> =>
-  await DB.select()
-    .from(organizations)
-    .where(eq(organizations.id, id))
-    .limit(1)
-    .then(takeFirst);
-
-export const insertOrganizationAndAssociateUser = async (
-  args: OrganizationInsertArgs,
-  user: User
-): Promise<Organization> => {
-  const organization = await insertOrganization(args);
-  associateOrganizationWithUser(organization, user);
-
-  return organization;
-};
-
-export const associateOrganizationWithUser = async (
-  organization: Organization,
-  user: User
-) => {
-  return await DB.insert(usersAndOrganizations)
-    .values({
-      id: `${user.id}-${organization.id}`,
-      userId: user.id,
-      orgId: organization.id,
-    })
-    .returning();
+): Promise<Organization | null> => {
+  return await fetchOrganizationByAccountId(id);
 };
