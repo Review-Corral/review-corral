@@ -2,23 +2,38 @@ import { Entity } from "electrodb";
 import { Configuration } from "..";
 import { OrgIdAttr } from "./organization";
 
-export const UserAndOrganization = new Entity(
+export const MemberEntity = new Entity(
   {
     model: {
       version: "1",
-      entity: "User",
+      entity: "Member",
       service: "scratch",
     },
     attributes: {
-      orgId: OrgIdAttr,
-      userId: {
+      memberId: {
         type: "number",
         required: true,
         readOnly: true,
         padding: {
-          length: 20,
+          length: 14,
           char: "0",
         },
+      },
+      orgId: OrgIdAttr,
+      name: {
+        type: "string",
+        required: true,
+      },
+      email: {
+        type: "string",
+      },
+      avatarUrl: {
+        type: "string",
+        required: false,
+      },
+      ghAccessToken: {
+        type: "string",
+        required: false,
       },
       slackId: {
         type: "string",
@@ -43,24 +58,11 @@ export const UserAndOrganization = new Entity(
       primary: {
         pk: {
           field: "pk",
-          composite: ["userId"],
+          composite: ["orgId"],
         },
         sk: {
           field: "sk",
-          composite: ["orgId"],
-        },
-      },
-      orgUsers: {
-        collection: "users",
-        index: "gsi2",
-        type: "clustered",
-        pk: {
-          field: "gsi2pk",
-          composite: ["orgId"],
-        },
-        sk: {
-          field: "gsi2sk",
-          composite: ["userId", "status"],
+          composite: ["memberId"],
         },
       },
     },

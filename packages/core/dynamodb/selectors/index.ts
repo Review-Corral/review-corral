@@ -1,8 +1,8 @@
 import { CreateEntityItem } from "electrodb";
 import { Db } from "..";
+import { MemberEntity } from "../entities/member";
 import { OrganizationEntity } from "../entities/organization";
 import { PullRequestEntity } from "../entities/pullRequest";
-import { UserEntity } from "../entities/user";
 
 type DateMetadataTypes = "createdAt" | "updatedAt";
 
@@ -38,9 +38,9 @@ export async function selectOrgPrs(orgId: number) {
 }
 
 export async function insertOrgUser(
-  props: Omit<CreateEntityItem<typeof UserEntity>, "createdAt" | "updatedAt">
+  props: Omit<CreateEntityItem<typeof MemberEntity>, "createdAt" | "updatedAt">
 ) {
-  const result = await UserEntity.create({
+  const result = await MemberEntity.create({
     ...props,
   }).go();
 

@@ -3,6 +3,7 @@ export * as Dynamo from ".";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { EntityConfiguration, Service } from "electrodb";
 import { Table } from "sst/node/table";
+import { MemberEntity } from "./entities/member";
 import { OrganizationEntity } from "./entities/organization";
 import { PullRequestEntity } from "./entities/pullRequest";
 import { RepositoryEntity } from "./entities/repository";
@@ -20,6 +21,7 @@ export const Db = new Service(
     organization: OrganizationEntity,
     pullRequest: PullRequestEntity,
     repository: RepositoryEntity,
+    member: MemberEntity,
     user: UserEntity,
   },
   Configuration
