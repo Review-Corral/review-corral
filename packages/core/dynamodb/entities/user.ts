@@ -14,7 +14,7 @@ export const UserEntity = new Entity(
         required: true,
         readOnly: true,
         padding: {
-          length: 20,
+          length: 14,
           char: "0",
         },
       },
@@ -24,6 +24,7 @@ export const UserEntity = new Entity(
       },
       email: {
         type: "string",
+        required: false,
       },
       avatarUrl: {
         type: "string",
@@ -57,10 +58,22 @@ export const UserEntity = new Entity(
       primary: {
         pk: {
           field: "pk",
-          composite: [],
+          composite: ["userId"],
         },
         sk: {
           field: "sk",
+          composite: [],
+        },
+      },
+      usersOrgs: {
+        index: "gsi3",
+        collection: "usersOrgs",
+        pk: {
+          field: "gsi3pk",
+          composite: [],
+        },
+        sk: {
+          field: "gsi3sk",
           composite: ["userId"],
         },
       },

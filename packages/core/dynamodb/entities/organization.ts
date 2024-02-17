@@ -6,7 +6,7 @@ export const OrgIdAttr = {
   required: true,
   readOnly: true,
   padding: {
-    length: 20,
+    length: 14,
     char: "0",
   },
 } satisfies Attribute;
@@ -26,6 +26,10 @@ export const OrganizationEntity = new Entity(
       },
       avatarUrl: {
         type: "string",
+        required: true,
+      },
+      installationId: {
+        type: "number",
         required: true,
       },
       type: {
@@ -71,16 +75,27 @@ export const OrganizationEntity = new Entity(
           composite: ["createdAt"],
         },
       },
-      users: {
-        collection: "users",
+      members: {
+        collection: "orgMembers",
         index: "gsi2",
-        type: "clustered",
         pk: {
           field: "gsi2pk",
           composite: ["orgId"],
         },
         sk: {
           field: "gsi2sk",
+          composite: [],
+        },
+      },
+      usersOrgs: {
+        collection: "usersOrgs",
+        index: "gsi3",
+        pk: {
+          field: "gsi3pk",
+          composite: [],
+        },
+        sk: {
+          field: "gsi3sk",
           composite: [],
         },
       },

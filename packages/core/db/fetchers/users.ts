@@ -1,16 +1,19 @@
 import { Db } from "../../dynamodb";
 import { User } from "../../dynamodb/entities/types";
 import { UserResponse } from "../../github/endpointTypes";
+import { Logger } from "../../logging";
+
+const LOGGER = new Logger("fetchers.users");
 
 /**
  * Fetches a user by their id
  */
-export const fetchUserById = async (id: number): Promise<User | null> =>
-  await Db.entities.user
+export const fetchUserById = async (id: number): Promise<User | null> => {
+  return await Db.entities.user
     .get({ userId: id })
     .go()
     .then(({ data }) => data);
-
+};
 /**
  * Creates a user. Should only be used when logging in and the user doesn't exist
  */
