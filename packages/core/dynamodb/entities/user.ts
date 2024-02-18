@@ -6,7 +6,7 @@ export const UserEntity = new Entity(
     model: {
       version: "1",
       entity: "User",
-      service: "scratch",
+      service: "rc",
     },
     attributes: {
       userId: {
@@ -59,18 +59,6 @@ export const UserEntity = new Entity(
         sk: {
           field: "sk",
           composite: [],
-        },
-      },
-      usersOrgs: {
-        index: "gsi3",
-        collection: "usersOrgs",
-        pk: {
-          field: "gsi3pk",
-          composite: [],
-        },
-        sk: {
-          field: "gsi3sk",
-          composite: ["userId"],
         },
       },
     },

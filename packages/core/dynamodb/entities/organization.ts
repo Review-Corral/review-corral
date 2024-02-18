@@ -12,7 +12,7 @@ export const OrganizationEntity = new Entity(
     model: {
       version: "1",
       entity: "Organization",
-      service: "scratch",
+      service: "rc",
     },
     attributes: {
       orgId: OrgIdAttr,
@@ -80,18 +80,6 @@ export const OrganizationEntity = new Entity(
         },
         sk: {
           field: "gsi2sk",
-          composite: [],
-        },
-      },
-      usersOrgs: {
-        collection: "usersOrgs",
-        index: "gsi3",
-        pk: {
-          field: "gsi3pk",
-          composite: [],
-        },
-        sk: {
-          field: "gsi3sk",
           composite: [],
         },
       },

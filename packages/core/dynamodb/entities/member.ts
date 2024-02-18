@@ -7,7 +7,7 @@ export const MemberEntity = new Entity(
     model: {
       version: "1",
       entity: "Member",
-      service: "scratch",
+      service: "rc",
     },
     attributes: {
       memberId: {
@@ -55,6 +55,17 @@ export const MemberEntity = new Entity(
         sk: {
           field: "sk",
           composite: ["memberId"],
+        },
+      },
+      membersOrgs: {
+        index: "gsi3",
+        pk: {
+          field: "gsi3pk",
+          composite: ["memberId"],
+        },
+        sk: {
+          field: "gsi3sk",
+          composite: ["orgId"],
         },
       },
     },
