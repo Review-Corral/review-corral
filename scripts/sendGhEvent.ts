@@ -72,7 +72,7 @@ const payload: PullRequestEvent = {
       },
     },
   },
-};
+} as any as PullRequestEvent;
 
 if (!secret) {
   throw new Error("GH_WEBHOOK_SECRET environment variable is not set");

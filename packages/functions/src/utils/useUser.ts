@@ -1,6 +1,6 @@
 import { useSession } from "sst/node/auth";
 import { fetchUserById } from "../../../core/db/fetchers/users";
-import { User } from "../../../core/db/types";
+import { User } from "../../../core/dynamodb/entities/types";
 
 export const useUser = async (): Promise<{
   user: User | null;

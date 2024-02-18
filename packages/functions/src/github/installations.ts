@@ -1,13 +1,13 @@
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
+import { addOrganizationMember } from "../../../core/db/fetchers/members";
 import {
-  associateOrganizationWithUser,
   fetchOrganizationByAccountId,
   fetchUsersOrganizations,
   insertOrganizationAndAssociateUser,
   updateOrganizationInstallationId,
 } from "../../../core/db/fetchers/organizations";
-import { Organization, User } from "../../../core/db/types";
+import { Organization, User } from "../../../core/dynamodb/entities/types";
 import { InstallationsData } from "../../../core/github/endpointTypes";
 import { getUserInstallations } from "../../../core/github/fetchers";
 import { Logger } from "../../../core/logging";
@@ -48,9 +48,8 @@ export const getInstallations = ApiHandler(async (event, context) => {
 async function getOrganizations(user: User, installations: InstallationsData) {
   const organizations: Organization[] = [];
 
-  // The organizations a user is currently mapped to via the m2m table
-  const usersOrganizations = await fetchUsersOrganizations(user.id);
-  const usersOrganizationsIds = usersOrganizations.map((org) => org.id);
+  const usersOrganizations = await fetchUsersOrganizations(user.userId);
+  const usersOrganizationsIds = usersOrganizations.map((org) => org.orgId);
 
   for (const installation of installations.installations) {
     // Try to see if we find an organization with the same id (account id)
@@ -69,7 +68,7 @@ async function getOrganizations(user: User, installations: InstallationsData) {
       // We should update the installation ID if it's different
       if (organization.installationId !== installation.id) {
         updateOrganizationInstallationId({
-          id: organization.id,
+          orgId: organization.orgId,
           installationId: installation.id,
         });
       }
@@ -77,26 +76,26 @@ async function getOrganizations(user: User, installations: InstallationsData) {
       // If the user isn't part of the existing organization (m2m), then add them to
       // it. this can happen if someone else installed the app into an organization
       // that the user is part of.
-      if (!usersOrganizationsIds.includes(organization.id)) {
+      if (!usersOrganizationsIds.includes(organization.orgId)) {
         LOGGER.info(
           "User is not part of organization. Associating user with organization..."
         );
-        await associateOrganizationWithUser(organization, user);
+        await addOrganizationMember({ orgId: organization.orgId, user });
       }
 
       organizations.push(organization);
     } else {
       LOGGER.info("No organization found for installation. Inserting...");
-      const newOrg = await insertOrganizationAndAssociateUser(
-        {
-          id: installation.account.id,
-          accountName: installation.account.login,
+      const newOrg = await insertOrganizationAndAssociateUser({
+        createOrgArgs: {
+          orgId: installation.account.id,
+          name: installation.account.login,
           avatarUrl: installation.account.avatar_url,
           installationId: installation.id,
-          organizationType: installation.account.type,
+          type: installation.account.type,
         },
-        user
-      );
+        user,
+      });
       organizations.push(newOrg);
     }
   }

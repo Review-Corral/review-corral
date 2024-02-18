@@ -14,10 +14,6 @@ export const PullRequestEntity = new Entity(
         type: "number",
         required: true,
         readOnly: true,
-        padding: {
-          length: 20,
-          char: "0",
-        },
       },
       repoId: RepoIdAttr,
       threadTs: {

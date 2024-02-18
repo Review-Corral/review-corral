@@ -28,6 +28,7 @@
     "@aws-sdk/client-dynamodb": "^3.503.1",
     "@aws-sdk/client-secrets-manager": "^3.481.0",
     "@slack/web-api": "^6.11.1",
+    "date-fns": "^3.3.1",
     "drizzle-orm": "^0.29.1",
     "electrodb": "^2.13.1",
     "ky": "^1.1.3",

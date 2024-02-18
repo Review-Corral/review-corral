@@ -14,7 +14,10 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
   PullRequestReviewCommentCreatedEvent
 > = async ({ event, slackClient, ...args }) => {
   if (event.action === "created" && event.comment.user.type === "User") {
-    const threadTs = await getThreadTs(event.pull_request.id);
+    const threadTs = await getThreadTs({
+      prId: event.pull_request.id,
+      repoId: event.repository.id,
+    });
 
     if (!threadTs) {
       // write error log

@@ -28,12 +28,14 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
-  const usersOrganizations = await fetchUsersOrganizations(user.id);
+  const usersOrganizations = await fetchUsersOrganizations(user.userId);
 
   const repository = await fetchRepository(Number(repositoryId));
 
   // Ensure that the repository is associated with one of the users organizations
-  if (!usersOrganizations.some((org) => org.id === repository.organizationId)) {
+  if (
+    !usersOrganizations.some((org) => org.orgId === repository.organizationId)
+  ) {
     return {
       statusCode: 403,
       body: JSON.stringify({ message: "Forbidden" }),
