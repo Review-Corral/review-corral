@@ -7,7 +7,7 @@ export const PullRequestEntity = new Entity(
     model: {
       version: "1",
       entity: "PullRequest",
-      service: "scratch",
+      service: "rc",
     },
     attributes: {
       prId: {
