@@ -46,7 +46,7 @@ export const HomeView: FC<HomeViewProps> = () => {
           </p>
           <div className="mt-8 inline-flex flex-col gap-2">
             {data?.map((org) => (
-              <Link key={org.id} to={`/org/${org.id}`}>
+              <Link key={org.orgId} to={`/org/${org.orgId}`}>
                 <div className="inline-flex items-center space-x-2 w-72 cursor-pointer rounded-md p-4 border border-gray-200 hover:shadow-sm">
                   <div className="rounded-md overflow-hidden">
                     <img
@@ -56,7 +56,7 @@ export const HomeView: FC<HomeViewProps> = () => {
                       height={32}
                     />
                   </div>
-                  <div>{org.accountName}</div>
+                  <div>{org.name}</div>
                 </div>
               </Link>
             ))}

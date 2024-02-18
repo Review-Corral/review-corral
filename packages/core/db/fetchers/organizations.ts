@@ -56,14 +56,19 @@ export const updateOrganizationInstallationId = async (args: {
 export const fetchUsersOrganizations = async (
   userId: number
 ): Promise<Organization[]> => {
-  const data = await Db.collections
-    .usersOrgs({
-      userId,
+  const memberInOrgs = await Db.entities.member.query
+    .membersOrgs({
+      memberId: userId,
     })
     .go()
     .then(({ data }) => data);
 
-  return data.organization;
+  const orgs = await Db.entities.organization
+    .get(memberInOrgs.map((m) => ({ orgId: m.orgId })))
+    .go()
+    .then(({ data }) => data);
+
+  return orgs;
 };
 
 // TODO: this is a duplicated method, remove

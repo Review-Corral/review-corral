@@ -13,7 +13,7 @@ export const RepositoryEntity = new Entity(
     model: {
       version: "1",
       entity: "Repository",
-      service: "scratch",
+      service: "rc",
     },
     attributes: {
       orgId: OrgIdAttr,

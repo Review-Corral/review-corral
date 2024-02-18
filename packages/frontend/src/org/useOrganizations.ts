@@ -1,4 +1,4 @@
-import { Organization } from "@core/db/types";
+import { Organization } from "@core/dynamodb/entities/types";
 import ky from "ky";
 import { useQuery } from "react-query";
 import { getSessionToken } from "src/auth/getSessionToken";
