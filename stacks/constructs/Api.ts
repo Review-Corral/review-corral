@@ -58,15 +58,6 @@ export class Api extends Construct {
           "GET /{organizationId}/installations":
             "packages/functions/src/slack/installations.getSlackInstallations",
         }),
-
-        ...buildPaths("/test", {
-          "POST /create": "packages/functions/src/test.createUserOrgs",
-          ...buildPaths("/{orgId}", {
-            "GET /": "packages/functions/src/test.getOrg",
-            "GET /prs": "packages/functions/src/test.getOrgPrs",
-            "POST /prs": "packages/functions/src/test.createOrgPrs",
-          }),
-        }),
       },
     });
   }
