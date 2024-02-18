@@ -3,8 +3,10 @@ import { Db } from "../../dynamodb";
 import {
   Organization,
   OrganizationInsertArgs,
+  User,
 } from "../../dynamodb/entities/types";
 import { Logger } from "../../logging";
+import { addOrganizationMember } from "./members";
 
 const LOGGER = new Logger("fetchers.organizations");
 
@@ -69,4 +71,16 @@ export const fetchOrganizationById = async (
   id: number
 ): Promise<Organization | null> => {
   return await fetchOrganizationByAccountId(id);
+};
+
+export const insertOrganizationAndAssociateUser = async ({
+  user,
+  createOrgArgs,
+}: {
+  user: User;
+  createOrgArgs: OrganizationInsertArgs;
+}) => {
+  const org = await insertOrganization(createOrgArgs);
+  await addOrganizationMember({ orgId: org.orgId, user });
+  return org;
 };

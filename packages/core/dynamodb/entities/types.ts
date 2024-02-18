@@ -20,4 +20,4 @@ export type PullRequestUpdateArgs = UpdateEntityItem<typeof PullRequestEntity>;
 
 export type UserInsertArgs = CreateEntityItem<typeof UserEntity>;
 
-export type MemmberInsertArgs = CreateEntityItem<typeof MemberEntity>;
+export type MemberInsertArgs = CreateEntityItem<typeof MemberEntity>;

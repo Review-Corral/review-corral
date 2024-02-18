@@ -13,10 +13,6 @@ export const UserEntity = new Entity(
         type: "number",
         required: true,
         readOnly: true,
-        padding: {
-          length: 14,
-          char: "0",
-        },
       },
       name: {
         type: "string",

@@ -6,10 +6,6 @@ export const RepoIdAttr = {
   type: "number",
   required: true,
   readOnly: true,
-  padding: {
-    length: 20,
-    char: "0",
-  },
 } satisfies Attribute;
 
 export const RepositoryEntity = new Entity(
