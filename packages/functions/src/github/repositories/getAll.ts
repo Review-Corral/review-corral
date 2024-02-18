@@ -7,7 +7,8 @@ import {
   insertRepository,
   removeRepository,
 } from "../../../../core/db/fetchers/repositories";
-import { Organization, Repository } from "../../../../core/db/types";
+import { Repository } from "../../../../core/db/types";
+import { Organization } from "../../../../core/dynamodb/entities/types";
 import { getInstallationRepositories } from "../../../../core/github/fetchers";
 import { Logger } from "../../../../core/logging";
 
@@ -56,7 +57,7 @@ const getRepositories = async (
   );
 
   const allInstallRepos = await fetchRepositoriesForOrganization(
-    organization.id
+    organization.orgId
   );
 
   const allInstalledRepoIds = allInstallRepos.map((repo) => repo.id);
@@ -89,7 +90,7 @@ const getRepositories = async (
       await insertRepository({
         id: repoToInsert.id,
         name: repoToInsert.name,
-        organizationId: organization.id,
+        organizationId: organization.orgId,
         isActive: false,
       })
     );

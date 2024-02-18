@@ -14,10 +14,6 @@ export const MemberEntity = new Entity(
         type: "number",
         required: true,
         readOnly: true,
-        padding: {
-          length: 14,
-          char: "0",
-        },
       },
       orgId: OrgIdAttr,
       name: {
@@ -28,10 +24,6 @@ export const MemberEntity = new Entity(
         type: "string",
       },
       avatarUrl: {
-        type: "string",
-        required: false,
-      },
-      ghAccessToken: {
         type: "string",
         required: false,
       },

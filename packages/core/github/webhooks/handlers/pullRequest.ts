@@ -34,7 +34,10 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
       props
     );
   } else {
-    const threadTs = await getThreadTs(payload.pull_request.id);
+    const threadTs = await getThreadTs({
+      prId: payload.pull_request.id,
+      repoId: payload.repository.id,
+    });
 
     if (!threadTs) {
       // No thread found, so log and return

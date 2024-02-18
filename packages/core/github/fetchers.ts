@@ -1,5 +1,5 @@
 import ky from "ky";
-import { User } from "../db/types";
+import { User } from "../dynamodb/entities/types";
 import { Logger } from "../logging";
 import { getJwt } from "../utils/jwt/createGithubJwt";
 import {

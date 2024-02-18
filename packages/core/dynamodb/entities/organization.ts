@@ -5,10 +5,6 @@ export const OrgIdAttr = {
   type: "number",
   required: true,
   readOnly: true,
-  padding: {
-    length: 14,
-    char: "0",
-  },
 } satisfies Attribute;
 
 export const OrganizationEntity = new Entity(

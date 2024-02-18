@@ -18,8 +18,17 @@ export async function getSlackUserName(
   return githubLogin;
 }
 
-export async function getThreadTs(prId: number): Promise<string | undefined> {
-  const pullRequest = await fetchPullRequestById({ pullRequestId: prId });
+export async function getThreadTs({
+  prId,
+  repoId,
+}: {
+  prId: number;
+  repoId: number;
+}): Promise<string | undefined> {
+  const pullRequest = await fetchPullRequestById({
+    pullRequestId: prId,
+    repoId,
+  });
 
   return pullRequest?.threadTs ?? undefined;
 }
