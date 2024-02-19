@@ -1,7 +1,6 @@
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
-import { fetchUsersOrganizations } from "../../../../core/db/fetchers/organizations";
 import {
   fetchRepository,
   setRespositoryActiveStatus,
@@ -28,20 +27,10 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
-  const usersOrganizations = await fetchUsersOrganizations(user.userId);
-
   const repository = await fetchRepository({
     repoId: repositoryId,
     orgId: organizationId,
   });
-
-  // Ensure that the repository is associated with one of the users organizations
-  if (!usersOrganizations.some((org) => org.orgId === repository.orgId)) {
-    return {
-      statusCode: 403,
-      body: JSON.stringify({ message: "Forbidden" }),
-    };
-  }
 
   await setRespositoryActiveStatus({
     orgId: repository.orgId,

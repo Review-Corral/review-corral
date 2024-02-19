@@ -62,7 +62,7 @@ const getRepositories = async (
     organization.orgId
   );
 
-  const allInstalledRepoIds = allInstallRepos.map((repo) => repo.id);
+  const allInstalledRepoIds = allInstallRepos.map((repo) => repo.repoId);
 
   const allOriginRepoIds = repositories.repositories.map((repo) => repo.id);
 
@@ -74,7 +74,7 @@ const getRepositories = async (
   );
 
   const reposToReturn = allInstallRepos.filter((repo) =>
-    allOriginRepoIds.includes(repo.id)
+    allOriginRepoIds.includes(repo.repoId)
   );
 
   LOGGER.debug("Repos to insert/delete: ", {
@@ -99,7 +99,10 @@ const getRepositories = async (
   }
 
   for (const repoToRemoveId of reposToRemove) {
-    await removeRepository(repoToRemoveId);
+    await removeRepository({
+      orgId: organization.orgId,
+      repoId: repoToRemoveId,
+    });
   }
 
   return reposToReturn;

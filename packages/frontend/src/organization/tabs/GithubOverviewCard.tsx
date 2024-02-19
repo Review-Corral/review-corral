@@ -101,6 +101,7 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
               <div className="truncate">{repo.name}</div>
               <Switch
                 id={repo.repoId.toString()}
+                checked={repo.isEnabled}
                 onClick={() => {
                   const verb = repo.isEnabled ? "disabl" : "enabl";
                   toast.promise(
