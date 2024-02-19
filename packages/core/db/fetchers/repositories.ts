@@ -1,59 +1,86 @@
-import { eq } from "drizzle-orm";
-import { DB } from "../db";
-import { repositories } from "../schema";
-import { Repository, RepositoryInsertArgs } from "../types";
-import { takeFirst, takeFirstOrThrow } from "./utils";
+import { Db } from "../../dynamodb";
+import {
+  Repository,
+  RepositoryInsertArgs,
+} from "../../dynamodb/entities/types";
 
 export const fetchRepositoriesForOrganization = async (
   organizationId: number
 ): Promise<Repository[]> =>
-  await DB.select()
-    .from(repositories)
-    .where(eq(repositories.organizationId, organizationId));
+  await Db.entities.repository.query
+    .primary({
+      orgId: organizationId,
+    })
+    .go({
+      pages: "all",
+    })
+    .then(({ data }) => data);
 
 export const insertRepository = async (
   args: RepositoryInsertArgs
 ): Promise<Repository> => {
-  return await DB.insert(repositories)
-    .values(args)
-    .onConflictDoUpdate({
-      target: [repositories.id],
-      set: args,
-    })
-    .returning()
-    .then(takeFirstOrThrow);
+  return await Db.entities.repository
+    .create(args)
+    .go()
+    .then(({ data }) => data);
 };
 
-export const removeRepository = async (id: number): Promise<void> => {
-  await DB.delete(repositories).where(eq(repositories.id, id));
+export const removeRepository = async ({
+  orgId,
+  repoId,
+}: {
+  orgId: number;
+  repoId: number;
+}): Promise<void> => {
+  await Db.entities.repository.delete({ orgId, repoId }).go();
 };
 
 /**
  * Sets the active status of a repository
  */
 export const setRespositoryActiveStatus = async ({
-  id,
-  isActive,
-}: Required<Pick<Repository, "id" | "isActive">>) => {
-  await DB.update(repositories)
-    .set({ isActive })
-    .where(eq(repositories.id, id));
+  orgId,
+  repoId,
+  isEnabled,
+}: Required<Pick<Repository, "repoId" | "isEnabled" | "orgId">>) => {
+  await Db.entities.repository
+    .patch({ orgId, repoId })
+    .set({
+      isEnabled,
+    })
+    .go();
 };
 
-export const safeFetchRepository = async (
-  id: number
-): Promise<Repository | undefined> => {
-  return await DB.select()
-    .from(repositories)
-    .where(eq(repositories.id, id))
-    .limit(1)
-    .then(takeFirst);
+export const safeFetchRepository = async ({
+  orgId,
+  repoId,
+}: {
+  orgId: number;
+  repoId: number;
+}): Promise<Repository | undefined> => {
+  const repository = await Db.entities.repository
+    .get({ orgId, repoId })
+    .go()
+    .then(({ data }) => data);
+
+  if (!repository) {
+    return undefined;
+  }
 };
 
-export const fetchRepository = async (id: number): Promise<Repository> => {
-  return await DB.select()
-    .from(repositories)
-    .where(eq(repositories.id, id))
-    .limit(1)
-    .then(takeFirstOrThrow);
+export const fetchRepository = async ({
+  orgId,
+  repoId,
+}: {
+  orgId: number;
+  repoId: number;
+}): Promise<Repository> => {
+  const result = await safeFetchRepository({ orgId, repoId });
+  if (!result) {
+    throw new Error(
+      `Repository not found for orgId: ${orgId} and repoId: ${repoId}`
+    );
+  }
+
+  return result;
 };

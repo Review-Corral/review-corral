@@ -1,7 +1,7 @@
 import { Button } from "@components/ui/button";
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Switch } from "@components/ui/switch";
-import { Organization } from "@core/db/types";
+import { Organization } from "@core/dynamodb/entities/types";
 import { Github } from "lucide-react";
 import { FC } from "react";
 import toast from "react-hot-toast";
@@ -44,9 +44,9 @@ interface GithubCardDataProps {
 }
 
 const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
-  const getInstalledRepos = useOrganizationRepositories(organization.id);
+  const getInstalledRepos = useOrganizationRepositories(organization.orgId);
 
-  const { data: slackData } = useSlackIntegrations(organization.id);
+  const { data: slackData } = useSlackIntegrations(organization.orgId);
 
   const setRepoActive = useSetRepoActive();
 
@@ -93,23 +93,23 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
     <div>
       <div className="space-y-2">
         {activeRepos.map((repo) => (
-          <div key={repo.id.toString()}>
+          <div key={repo.repoId.toString()}>
             <div
               className="flex flex-row gap-4 items-center justify-between border border-gray-200 rounded-md p-4 bg-white"
-              id={repo.id.toString()}
+              id={repo.repoId.toString()}
             >
               <div className="truncate">{repo.name}</div>
               <Switch
-                id={repo.id.toString()}
+                id={repo.repoId.toString()}
                 onClick={() => {
-                  const verb = repo.isActive ? "disabl" : "enabl";
+                  const verb = repo.isEnabled ? "disabl" : "enabl";
                   toast.promise(
                     setRepoActive.mutateAsync({
-                      id: repo.id,
-                      isActive: !repo.isActive,
+                      repoId: repo.repoId,
+                      isEnabled: !repo.isEnabled,
                     }),
                     {
-                      loading: repo.isActive
+                      loading: repo.isEnabled
                         ? `${verb}ing ${repo.name}`
                         : `${verb}ing ${repo.name}`,
                       success: `${repo.name} ${verb}ed`,
@@ -124,9 +124,9 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
             {/* Only show the Arrows if the slack data has loaded and there's at least one entry */}
             {slackData != undefined &&
               slackData.length > 0 &&
-              repo.isActive && (
+              repo.isEnabled && (
                 <Xarrow
-                  start={repo.id.toString()}
+                  start={repo.repoId.toString()}
                   end="slack-channel"
                   showHead={false}
                   color={"#6366f1"}
