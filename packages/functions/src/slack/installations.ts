@@ -2,8 +2,8 @@ import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
 import { fetchOrganizationById } from "../../../core/db/fetchers/organizations";
+import { getSlackInstallationsForOrganization } from "../../../core/db/fetchers/slack";
 import { Logger } from "../../../core/logging";
-import { getSlackInstallationsForOrganization } from "../../../core/slack/fetchers";
 
 const LOGGER = new Logger("slack:installations");
 

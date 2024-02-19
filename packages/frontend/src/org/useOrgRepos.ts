@@ -1,4 +1,4 @@
-import { Repository } from "@core/db/types";
+import { Repository } from "@core/dynamodb/entities/types";
 import ky from "ky";
 import { useQuery } from "react-query";
 import { getSessionToken } from "src/auth/getSessionToken";
