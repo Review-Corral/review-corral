@@ -39,7 +39,6 @@ export class Api extends Construct {
         // TODO: only for testing, should be removed
         "GET /list": "packages/functions/src/todo.list",
         "GET /profile": "packages/functions/src/todo.getUser",
-
         ...buildPaths("/gh", {
           // Handles incoming webhooks from Github
           "POST /webhook-event": "packages/functions/src/github/events.handler",
