@@ -4,7 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "react-query";
 import { getSessionToken } from "src/auth/getSessionToken";
 
 type setRepoActiveStatusArgs = Required<
-  Pick<Repository, "repoId" | "isEnabled">
+  Pick<Repository, "repoId" | "isEnabled" | "orgId">
 >;
 export const reposKey = "repositories";
 
@@ -40,12 +40,17 @@ export const useSetRepoActive = () => {
     ["repo", "setActive"],
     async (args) => {
       return await ky
-        .put(`${import.meta.env.VITE_API_URL}/gh/repositories/${args.repoId}`, {
-          body: JSON.stringify({ isActive: args.isEnabled }),
-          headers: {
-            Authorization: `Bearer ${getSessionToken()}`,
-          },
-        })
+        .put(
+          `${import.meta.env.VITE_API_URL}/gh/${args.orgId}/repositories/${
+            args.repoId
+          }`,
+          {
+            body: JSON.stringify({ isActive: args.isEnabled }),
+            headers: {
+              Authorization: `Bearer ${getSessionToken()}`,
+            },
+          }
+        )
         .json<Repository>();
     },
     {
