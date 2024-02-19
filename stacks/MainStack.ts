@@ -1,5 +1,5 @@
 import { SubnetType } from "aws-cdk-lib/aws-ec2";
-import { FunctionProps, StackContext, use } from "sst/constructs";
+import { Function, FunctionProps, StackContext, use } from "sst/constructs";
 import { getFrontendUrl } from "./FrontendStack";
 import { StorageStack } from "./StorageStack";
 import { Api } from "./constructs/Api";
@@ -60,6 +60,14 @@ export function MainStack({ stack, app }: StackContext) {
     database,
     functionDefaults,
   });
+
+  const getInstallationAccessToken = new Function(
+    stack,
+    "GetInstallationAccessToken",
+    {
+      handler: "packages/functions/src/admin/installationAccessToken.handler",
+    }
+  );
 
   const api = new Api(stack, "Api", { app, functionDefaults });
   api.api.bind([table]);
