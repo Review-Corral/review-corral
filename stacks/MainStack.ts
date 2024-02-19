@@ -18,9 +18,10 @@ export function MainStack({ stack, app }: StackContext) {
     app,
   });
 
-  const initalSlackEnvVars = {
+  const slackEnvVars = {
     VITE_SLACK_BOT_ID: assertVarExists("SLACK_BOT_ID"),
     VITE_SLACK_CLIENT_SECRET: assertVarExists("SLACK_CLIENT_SECRET"),
+    VITE_SLACK_AUTH_URL: `https://${Api.getDomain(app)}/slack/oauth`,
   };
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
@@ -41,6 +42,7 @@ export function MainStack({ stack, app }: StackContext) {
       GH_ENCODED_PEM: assertVarExists("GH_ENCODED_PEM"),
       GH_WEBHOOK_SECRET: assertVarExists("GH_WEBHOOK_SECRET"),
       ...getDbConnectionInfo(app, database),
+      ...slackEnvVars,
     },
     logRetention: app.local ? "one_week" : "one_year",
     runtime: "nodejs18.x",
@@ -61,13 +63,6 @@ export function MainStack({ stack, app }: StackContext) {
 
   const api = new Api(stack, "Api", { app, functionDefaults });
   api.api.bind([table]);
-
-  const slackEnvVars = {
-    ...initalSlackEnvVars,
-    VITE_SLACK_AUTH_URL: `${api.api.url}/slack/oauth`,
-  };
-
-  stack.addDefaultFunctionEnv(slackEnvVars);
 
   // Needs to be done after ALL lambdas are created
   new LambdaNaming(stack, "LambdaNaming");
