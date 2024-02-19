@@ -11,13 +11,13 @@ import { Logger } from "../../../../core/logging";
 const LOGGER = new Logger("github:repositories:setStatus");
 
 const setRepositoryActiveStatusSchema = z.object({
-  repositoryId: z.string(),
+  repositoryId: z.string().transform((val) => Number(val)),
+  organizationId: z.string().transform((val) => Number(val)),
 });
 
 export const handler = ApiHandler(async (event, context) => {
-  const { repositoryId } = setRepositoryActiveStatusSchema.parse(
-    event.pathParameters
-  );
+  const { repositoryId, organizationId } =
+    setRepositoryActiveStatusSchema.parse(event.pathParameters);
   const { user, error } = await useUser();
 
   if (!user) {
@@ -30,12 +30,13 @@ export const handler = ApiHandler(async (event, context) => {
 
   const usersOrganizations = await fetchUsersOrganizations(user.userId);
 
-  const repository = await fetchRepository(Number(repositoryId));
+  const repository = await fetchRepository({
+    repoId: repositoryId,
+    orgId: organizationId,
+  });
 
   // Ensure that the repository is associated with one of the users organizations
-  if (
-    !usersOrganizations.some((org) => org.orgId === repository.organizationId)
-  ) {
+  if (!usersOrganizations.some((org) => org.orgId === repository.orgId)) {
     return {
       statusCode: 403,
       body: JSON.stringify({ message: "Forbidden" }),
@@ -43,8 +44,9 @@ export const handler = ApiHandler(async (event, context) => {
   }
 
   await setRespositoryActiveStatus({
-    id: repository.id,
-    isActive: !repository.isActive,
+    orgId: repository.orgId,
+    repoId: repository.repoId,
+    isEnabled: !repository.isEnabled,
   });
 
   return {
