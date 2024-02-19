@@ -1,4 +1,4 @@
-import { Organization } from "@core/db/types";
+import { Organization } from "@core/dynamodb/entities/types";
 import { FC, ReactNode, useEffect, useState } from "react";
 import {
   redirect,
@@ -76,9 +76,9 @@ export const OrgView: FC<OrgViewProps> = () => {
         setPage(page);
         let route = "";
         if (page) {
-          route = `/org/${organization.id}?page=${page}`;
+          route = `/org/${organization.orgId}?page=${page}`;
         } else {
-          route = `/org/${organization.id}`;
+          route = `/org/${organization.orgId}`;
         }
         navigate(route);
       }
@@ -89,7 +89,7 @@ export const OrgView: FC<OrgViewProps> = () => {
   // the database
   useEffect(() => {
     if (data) {
-      const org = data.find((org) => org.id === Number(orgId));
+      const org = data.find((org) => org.orgId === Number(orgId));
       if (org) {
         setOrganization(org);
         return;
@@ -104,7 +104,7 @@ export const OrgView: FC<OrgViewProps> = () => {
   return (
     <DashboardLayout
       title="Organization"
-      activeOrganizationAccountId={organization?.id}
+      activeOrganizationAccountId={organization?.orgId}
       subnav={
         <>
           <div className="max-w-7xl mx-auto px-6 pt-4 pb-3 font-medium ">

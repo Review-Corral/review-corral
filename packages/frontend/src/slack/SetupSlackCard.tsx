@@ -1,4 +1,4 @@
-import { Organization } from "@core/db/types";
+import { Organization } from "@core/dynamodb/entities/types";
 import { FC } from "react";
 import SlackButton from "src/slack/SetupSlackButton";
 
@@ -7,7 +7,7 @@ interface SetupSlackCardProps {
 }
 
 export const SetupSlackCard: FC<SetupSlackCardProps> = ({
-  organization: { id: organizationId },
+  organization: { orgId: organizationId },
 }) => {
   return (
     <div className="p-4 border border-grey-200 rounded-md space-y-6 max-w-xl">

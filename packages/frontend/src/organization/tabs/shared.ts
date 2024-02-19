@@ -1,4 +1,4 @@
-import { Organization } from "@core/db/types";
+import { Organization } from "@core/dynamodb/entities/types";
 import { Page } from "../OrgView";
 
 export interface OrgViewProps {
