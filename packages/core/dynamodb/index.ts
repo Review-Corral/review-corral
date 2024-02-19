@@ -7,6 +7,7 @@ import { MemberEntity } from "./entities/member";
 import { OrganizationEntity } from "./entities/organization";
 import { PullRequestEntity } from "./entities/pullRequest";
 import { RepositoryEntity } from "./entities/repository";
+import { SlackEntity } from "./entities/slack";
 import { UserEntity } from "./entities/user";
 
 export const Client = new DynamoDBClient({});
@@ -23,6 +24,7 @@ export const Db = new Service(
     repository: RepositoryEntity,
     member: MemberEntity,
     user: UserEntity,
+    slack: SlackEntity,
   },
   Configuration
 );
