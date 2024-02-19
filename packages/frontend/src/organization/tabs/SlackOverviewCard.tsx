@@ -27,7 +27,7 @@ export const SlackOverviewCard: FC<SlackOverviewCardProps> = ({
 };
 
 const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
-  const slackChannels = useSlackIntegrations(organization.id);
+  const slackChannels = useSlackIntegrations(organization.orgId);
 
   if (slackChannels.isLoading) {
     return (

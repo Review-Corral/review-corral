@@ -1,11 +1,11 @@
-import { Organization, SlackIntegration } from "@core/db/types";
+import { Organization, SlackIntegration } from "@core/dynamodb/entities/types";
 import ky from "ky";
 import { useQuery } from "react-query";
 import { getSessionToken } from "src/auth/getSessionToken";
 
 export const SLACK_INTEGRATIONS_QUERY_KEY = "slack-integrations";
 
-export const useSlackIntegrations = (organizationId: Organization["id"]) => {
+export const useSlackIntegrations = (organizationId: Organization["orgId"]) => {
   return useQuery({
     queryKey: [SLACK_INTEGRATIONS_QUERY_KEY],
     queryFn: async () => {

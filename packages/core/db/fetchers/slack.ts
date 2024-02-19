@@ -1,6 +1,6 @@
 import { Db } from "../../dynamodb";
 import {
-  Slack as SlackIntegration,
+  SlackIntegration,
   SlackIntegrationInsertArgs,
 } from "../../dynamodb/entities/types";
 
