@@ -1,9 +1,11 @@
-import { Repository } from "@core/db/types";
+import { Repository } from "@core/dynamodb/entities/types";
 import ky from "ky";
 import { useMutation, useQuery, useQueryClient } from "react-query";
 import { getSessionToken } from "src/auth/getSessionToken";
 
-type setRepoActiveStatusArgs = Required<Pick<Repository, "id" | "isActive">>;
+type setRepoActiveStatusArgs = Required<
+  Pick<Repository, "repoId" | "isEnabled">
+>;
 export const reposKey = "repositories";
 
 export const useOrganizationRepositories = (orgId: number) => {
@@ -38,8 +40,8 @@ export const useSetRepoActive = () => {
     ["repo", "setActive"],
     async (args) => {
       return await ky
-        .put(`${import.meta.env.VITE_API_URL}/gh/repositories/${args.id}`, {
-          body: JSON.stringify({ isActive: args.isActive }),
+        .put(`${import.meta.env.VITE_API_URL}/gh/repositories/${args.repoId}`, {
+          body: JSON.stringify({ isActive: args.isEnabled }),
           headers: {
             Authorization: `Bearer ${getSessionToken()}`,
           },

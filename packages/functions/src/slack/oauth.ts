@@ -1,8 +1,8 @@
 import ky from "ky";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
+import { insertSlackIntegration } from "../../../core/db/fetchers/slack";
 import { Logger } from "../../../core/logging";
-import { insertSlackIntegration } from "../../../core/slack/fetchers";
 import { assertVarExists } from "../../../core/utils/assert";
 
 const LOGGER = new Logger("slack:oauth");
@@ -65,6 +65,12 @@ export const handler = ApiHandler(async (event, context) => {
   formData.append("client_secret", assertVarExists("VITE_SLACK_CLIENT_SECRET"));
   formData.append("redirect_uri", assertVarExists("VITE_SLACK_AUTH_URL"));
 
+  const orgId = Number(searchParams.state);
+
+  LOGGER.debug("Recieved Slack oAuth request", {
+    orgId,
+  });
+
   const slackResponse = await ky.post("https://slack.com/api/oauth.v2.access", {
     body: formData,
   });
@@ -101,7 +107,7 @@ export const handler = ApiHandler(async (event, context) => {
       channelName: parsedBody.incoming_webhook.channel,
       slackTeamName: parsedBody.team.name,
       slackTeamId: parsedBody.team.id,
-      organizationId: Number(searchParams.state),
+      orgId,
     });
 
     return {

@@ -1,11 +1,11 @@
 import { eq } from "drizzle-orm";
 import * as z from "zod";
 import { DB } from "../../db/db";
+import { getSlackInstallationsForOrganization } from "../../db/fetchers/slack";
 import { takeFirst } from "../../db/fetchers/utils";
 import { organizations, repositories } from "../../db/schema";
 import { Logger } from "../../logging";
 import { SlackClient } from "../../slack/SlackClient";
-import { getSlackInstallationsForOrganization } from "../../slack/fetchers";
 import { handlePullRequestEvent } from "./handlers/pullRequest";
 import { handlePullRequestCommentEvent } from "./handlers/pullRequestComment";
 import { handlePullRequestReviewEvent } from "./handlers/pullRequestReview";
