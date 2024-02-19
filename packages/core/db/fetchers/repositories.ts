@@ -58,14 +58,12 @@ export const safeFetchRepository = async ({
   orgId: number;
   repoId: number;
 }): Promise<Repository | undefined> => {
-  const repository = await Db.entities.repository
-    .get({ orgId, repoId })
-    .go()
-    .then(({ data }) => data);
-
-  if (!repository) {
-    return undefined;
-  }
+  return (
+    (await Db.entities.repository
+      .get({ orgId, repoId })
+      .go()
+      .then(({ data }) => data)) ?? undefined
+  );
 };
 
 export const fetchRepository = async ({
