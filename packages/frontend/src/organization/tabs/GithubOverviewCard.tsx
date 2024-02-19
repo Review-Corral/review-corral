@@ -105,6 +105,7 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
                   const verb = repo.isEnabled ? "disabl" : "enabl";
                   toast.promise(
                     setRepoActive.mutateAsync({
+                      orgId: organization.orgId,
                       repoId: repo.repoId,
                       isEnabled: !repo.isEnabled,
                     }),

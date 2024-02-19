@@ -46,11 +46,13 @@ export class Api extends Construct {
           ...buildPaths("/installations", {
             "GET /":
               "packages/functions/src/github/installations.getInstallations",
-            "GET /{organizationId}/repositories":
-              "packages/functions/src/github/repositories/getAll.handler",
           }),
-          "PUT /repositories/{repositoryId}":
-            "packages/functions/src/github/repositories/setStatus.handler",
+          ...buildPaths("/{organizationId}/repositories", {
+            "GET /":
+              "packages/functions/src/github/repositories/getAll.handler",
+            "PUT /{repositoryId}":
+              "packages/functions/src/github/repositories/setStatus.handler",
+          }),
         }),
 
         ...buildPaths("/slack", {
