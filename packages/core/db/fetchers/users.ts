@@ -1,4 +1,4 @@
-import { Db } from "../../dynamodb";
+import { Db } from "../../dynamodb/client";
 import { User } from "../../dynamodb/entities/types";
 import { UserResponse } from "../../github/endpointTypes";
 import { Logger } from "../../logging";

@@ -11,7 +11,7 @@ import {
   usernameMappings,
 } from "../../../core/db/schema";
 import { Organization } from "../../../core/db/types";
-import { Db as DynamoDb } from "../../../core/dynamodb";
+import { Db as DynamoDb } from "../../../core/dynamodb/client";
 import {
   MemberInsertArgs,
   OrganizationInsertArgs,

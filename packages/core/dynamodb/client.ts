@@ -1,4 +1,4 @@
-export * as Dynamo from ".";
+export * as Dynamo from "./client";
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { EntityConfiguration, Service } from "electrodb";

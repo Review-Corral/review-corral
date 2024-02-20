@@ -1,4 +1,4 @@
-import { Db } from "../../dynamodb";
+import { Db } from "../../dynamodb/client";
 
 import {
   Organization,
