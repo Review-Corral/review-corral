@@ -2,6 +2,7 @@ import { App, StackContext, StaticSite, use } from "sst/constructs";
 
 import { AuthStack } from "./AuthStack";
 import { MainStack } from "./MainStack";
+import { StorageStack } from "./StorageStack";
 import { HOSTED_ZONE } from "./constructs/Api";
 
 export const getFrontendUrl = ({ local, stage }: App) => {
@@ -17,6 +18,8 @@ export function FrontendStack({ stack, app }: StackContext) {
     slackEnvVars,
     api: { api },
   } = use(MainStack);
+  // Just here to try and fix typing
+  use(StorageStack);
   const { authUrl } = use(AuthStack);
 
   // Define our React app
