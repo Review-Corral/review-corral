@@ -22,6 +22,7 @@ export const MemberEntity = new Entity(
       },
       email: {
         type: "string",
+        required: false,
       },
       avatarUrl: {
         type: "string",

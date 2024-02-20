@@ -6,6 +6,7 @@ import {
   InstallationAccessTokenResponse,
   InstallationRespositoriesResponse,
   InstallationsData,
+  OrgMembers,
   RepositoryPullRequestsResponse,
 } from "./endpointTypes";
 
@@ -76,20 +77,37 @@ export const getInstallationRepositories = async ({
 };
 
 export const getRepositoryPullRequests = async ({
-  orgId,
-  repoId,
+  orgName,
+  repoName,
   accessToken,
 }: {
-  orgId: number;
-  repoId: number;
+  orgName: string;
+  repoName: string;
   accessToken: string;
 }): Promise<RepositoryPullRequestsResponse> => {
   return await ky
-    .get(`https://api.github.com/repos/${orgId}/${repoId}/pulls`, {
+    .get(`https://api.github.com/repos/${orgName}/${repoName}/pulls`, {
       headers: {
         ...defaultHeaders,
         Authorization: `Bearer ${accessToken}`,
       },
     })
     .json<RepositoryPullRequestsResponse>();
+};
+
+export const getOrgMembers = async ({
+  orgName,
+  accessToken,
+}: {
+  orgName: string;
+  accessToken: string;
+}): Promise<OrgMembers> => {
+  return await ky
+    .get(`https://api.github.com/orgs/${orgName}/members`, {
+      headers: {
+        ...defaultHeaders,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .json<OrgMembers>();
 };
