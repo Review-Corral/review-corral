@@ -52,8 +52,17 @@ export function MainStack({ stack, app }: StackContext) {
     vpcSubnets: vpc ? { subnetType: SubnetType.PUBLIC } : undefined,
     bind: [table],
   };
-  // Set the default props for all stacks
+
   stack.setDefaultFunctionProps(functionDefaults);
+
+  new Function(stack, "GetInstallationAccessToken", {
+    handler: "packages/functions/src/admin/installationAccessToken.handler",
+  });
+
+  new Function(stack, "MigrateToDynamo", {
+    handler: "packages/functions/src/admin/migrateToDynamo.handler",
+    timeout: "5 minutes",
+  });
 
   const migrationFunction = new MigrationFunction(stack, "MigrateToLatest", {
     app,
@@ -61,13 +70,7 @@ export function MainStack({ stack, app }: StackContext) {
     functionDefaults,
   });
 
-  const getInstallationAccessToken = new Function(
-    stack,
-    "GetInstallationAccessToken",
-    {
-      handler: "packages/functions/src/admin/installationAccessToken.handler",
-    }
-  );
+  // Set the default props for all stacks
 
   const api = new Api(stack, "Api", { app, functionDefaults });
   api.api.bind([table]);
