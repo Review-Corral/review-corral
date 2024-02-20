@@ -1,7 +1,7 @@
 import { StackContext, Table } from "sst/constructs";
 
 export function StorageStack({ stack, app }: StackContext) {
-  const table = new Table(stack, "db3", {
+  const table = new Table(stack, "main", {
     fields: {
       pk: "string",
       sk: "string",
