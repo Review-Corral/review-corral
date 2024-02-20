@@ -8,6 +8,9 @@ export type InstallationAccessTokenResponse =
 export type InstallationRespositoriesResponse =
   Endpoints["GET /installation/repositories"]["response"]["data"];
 
+export type RepositoryPullRequestsResponse =
+  Endpoints["GET /repos/{owner}/{repo}/pulls"]["response"]["data"];
+
 export type PullRequestReviewCommentsResponse =
   Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}/comments"]["response"]["data"];
 

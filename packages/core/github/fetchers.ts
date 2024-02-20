@@ -6,6 +6,7 @@ import {
   InstallationAccessTokenResponse,
   InstallationRespositoriesResponse,
   InstallationsData,
+  RepositoryPullRequestsResponse,
 } from "./endpointTypes";
 
 const LOGGER = new Logger("github.fetchers.ts");
@@ -54,12 +55,16 @@ export const getInstallationAccessToken = async (
  * Gets the repositories for a given installation. Must use the installation's
  * access token as apposed to the user's access token to retrieve
  */
-export const getInstallationRepositories = async (
-  installationId: number
-): Promise<InstallationRespositoriesResponse> => {
-  const installationAccessToken = await getInstallationAccessToken(
-    installationId
-  );
+export const getInstallationRepositories = async ({
+  installationId,
+  accessToken,
+}: {
+  installationId: number;
+  accessToken?: string;
+}): Promise<InstallationRespositoriesResponse> => {
+  const installationAccessToken = accessToken
+    ? { token: accessToken }
+    : await getInstallationAccessToken(installationId);
   return await ky
     .get("https://api.github.com/installation/repositories", {
       headers: {
@@ -68,4 +73,23 @@ export const getInstallationRepositories = async (
       },
     })
     .json<InstallationRespositoriesResponse>();
+};
+
+export const getRepositoryPullRequests = async ({
+  orgId,
+  repoId,
+  accessToken,
+}: {
+  orgId: number;
+  repoId: number;
+  accessToken: string;
+}): Promise<RepositoryPullRequestsResponse> => {
+  return await ky
+    .get(`https://api.github.com/repos/${orgId}/${repoId}/pulls`, {
+      headers: {
+        ...defaultHeaders,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .json<RepositoryPullRequestsResponse>();
 };
