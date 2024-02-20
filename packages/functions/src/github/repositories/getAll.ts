@@ -54,9 +54,9 @@ export const handler = ApiHandler(async (event, context) => {
 const getRepositories = async (
   organization: Organization
 ): Promise<Repository[]> => {
-  const repositories = await getInstallationRepositories(
-    organization.installationId
-  );
+  const repositories = await getInstallationRepositories({
+    installationId: organization.installationId,
+  });
 
   const allInstallRepos = await fetchRepositoriesForOrganization(
     organization.orgId
