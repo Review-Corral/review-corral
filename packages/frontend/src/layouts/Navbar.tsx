@@ -19,7 +19,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
   const activeOrg =
     organizations.data &&
     activeOrganizationAccountId &&
-    organizations.data.find((org) => org.id === activeOrganizationAccountId);
+    organizations.data.find((org) => org.orgId === activeOrganizationAccountId);
 
   // const user = useUser();
 
@@ -58,7 +58,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                             height={32}
                           />
                         </div>
-                        <div>{activeOrg.accountName}</div>
+                        <div>{activeOrg.name}</div>
                       </div>
                       {/* <SelectorIcon className="h-5 w-5" /> */}
                     </div>
