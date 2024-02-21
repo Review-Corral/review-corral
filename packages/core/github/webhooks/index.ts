@@ -20,9 +20,11 @@ export const githubWebhookBodySchema = z
     repository: z
       .object({
         id: z.number(),
-        owner: z.object({
-          id: z.number(),
-        }),
+        owner: z
+          .object({
+            id: z.number(),
+          })
+          .passthrough(),
       })
       .passthrough(),
   })
