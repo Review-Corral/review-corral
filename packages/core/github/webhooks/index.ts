@@ -1,9 +1,8 @@
-import { eq } from "drizzle-orm";
 import * as z from "zod";
-import { DB } from "../../db/db";
+import { fetchOrganizationByAccountId } from "../../db/fetchers/organizations";
+import { safeFetchRepository } from "../../db/fetchers/repositories";
 import { getSlackInstallationsForOrganization } from "../../db/fetchers/slack";
 import { takeFirst } from "../../db/fetchers/utils";
-import { organizations, repositories } from "../../db/schema";
 import { Logger } from "../../logging";
 import { SlackClient } from "../../slack/SlackClient";
 import { handlePullRequestEvent } from "./handlers/pullRequest";
@@ -21,6 +20,9 @@ export const githubWebhookBodySchema = z
     repository: z
       .object({
         id: z.number(),
+        owner: z.object({
+          id: z.number(),
+        }),
       })
       .passthrough(),
   })
@@ -48,43 +50,45 @@ export const handleGithubWebhookEvent = async ({
 }) => {
   LOGGER.debug("Handling event body", { event, eventName });
   if (eventName in eventHandlers) {
-    const repository = await DB.select({
-      repositoryId: repositories.id,
-      isActive: repositories.isActive,
-      organizationId: organizations.id,
-      installationId: organizations.installationId,
-    })
-      .from(repositories)
-      .where(eq(repositories.id, event.repository.id))
-      .fullJoin(
-        organizations,
-        eq(organizations.id, repositories.organizationId)
-      )
-      .then(takeFirst);
+    event.repository.owner.id;
 
-    if (
-      !repository ||
-      !repository.organizationId ||
-      !repository.installationId
-    ) {
+    const repository = await safeFetchRepository({
+      orgId: event.repository.owner.id,
+      repoId: event.repository.id,
+    });
+
+    if (!repository) {
       LOGGER.info("Recieved event for repository not in the database", {
         repositoryId: event.repository.id,
-        organizationId: repository?.organizationId,
-        installationId: repository?.installationId,
+        organizationId: event.repository.owner.id,
       });
       return;
     }
 
-    if (!repository.isActive) {
+    if (!repository.isEnabled) {
       LOGGER.info("Recieved event for inactive repository", {
         repositoryId: event.repository.id,
+        organizationId: repository.orgId,
       });
+    }
+
+    const organization = await fetchOrganizationByAccountId(repository.orgId);
+
+    if (!organization) {
+      LOGGER.warn(
+        "Couldn't load organization for repository from our database",
+        {
+          repositoryId: event.repository.id,
+          organizationId: repository.orgId,
+        }
+      );
+      return;
     }
 
     // TODO: if we want to support multiple slack channels per organization, we'll
     // need to change this.
     const slackIntegration = await getSlackInstallationsForOrganization(
-      repository.organizationId
+      repository.orgId
     ).then(takeFirst);
 
     if (!slackIntegration) {
@@ -92,7 +96,7 @@ export const handleGithubWebhookEvent = async ({
         "Recieved event for active repository in organization with no enabled slack app",
         {
           repositoryId: event.repository.id,
-          organizationId: repository.organizationId,
+          organizationId: repository.orgId,
         }
       );
       return;
@@ -110,8 +114,8 @@ export const handleGithubWebhookEvent = async ({
     await eventHandlers[eventName as handledEventNames].handler({
       event,
       slackClient,
-      installationId: repository.installationId,
-      organizationId: repository.organizationId,
+      installationId: organization.installationId,
+      organizationId: organization.orgId,
     });
   } else {
     LOGGER.debug("Recieved event we're not handling", { eventName });

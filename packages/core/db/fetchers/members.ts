@@ -30,3 +30,18 @@ export const addOrganizationMember = async ({
     .go()
     .then(({ data }) => data);
 };
+
+export const getOrgMember = async ({
+  orgId,
+  githubUsername,
+}: {
+  orgId: number;
+  githubUsername: string;
+}): Promise<Member | undefined> => {
+  const allOrgMembers = await Db.entities.member.query
+    .primary({ orgId })
+    .go()
+    .then(({ data }) => data);
+
+  return allOrgMembers.find((member) => member.name === githubUsername);
+};
