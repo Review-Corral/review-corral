@@ -193,65 +193,73 @@ async function LoadGhPrs(orgs: Organization[]) {
 
   LOGGER.info("About to load all PRs for all repos from Github");
   for (const org of orgs) {
-    LOGGER.info("Loading GH PRs for Org", {
-      org: org.accountName,
-      orgId: org.id,
-    });
-    const accessToken = await tryGetAccessToken(org.installationId);
+    try {
+      LOGGER.info("Loading GH PRs for Org", {
+        org: org.accountName,
+        orgId: org.id,
+      });
+      const accessToken = await tryGetAccessToken(org.installationId);
 
-    if (!accessToken) {
-      continue;
-    }
+      if (!accessToken) {
+        continue;
+      }
 
-    LOGGER.info(`🔑 Got access token for org ${org.accountName}`, {
-      accessToken: accessToken.token,
-    });
-
-    LOGGER.info(`🧬 Getting organization members for org ${org.accountName}`);
-
-    const members = await getOrgMembers({
-      orgName: org.accountName,
-      accessToken: accessToken.token,
-    });
-
-    orgMembers.set(org.id, members);
-
-    const { repositories } = await getInstallationRepositories({
-      accessToken: accessToken.token,
-      installationId: org.installationId,
-    });
-
-    LOGGER.info("Loaded Org Repos", {
-      org: org.accountName,
-      orgId: org.id,
-      reposLength: repositories.length,
-    });
-
-    for (const repo of repositories) {
-      const repoPrs = await getRepositoryPullRequests({
-        orgName: org.accountName,
-        repoName: repo.name,
+      LOGGER.info(`🔑 Got access token for org ${org.accountName}`, {
         accessToken: accessToken.token,
       });
 
-      LOGGER.info(`Loaded PRs for Org ${org.accountName}`, {
-        repo: repo.name,
-        repoId: repo.id,
-        prCount: repoPrs.length,
+      LOGGER.info(`🧬 Getting organization members for org ${org.accountName}`);
+
+      const members = await getOrgMembers({
+        orgName: org.accountName,
+        accessToken: accessToken.token,
       });
 
-      for (const pr of repoPrs) {
-        ghPrs.set(pr.id, { ...pr, repoId: repo.id });
+      orgMembers.set(org.id, members);
+
+      const { repositories } = await getInstallationRepositories({
+        accessToken: accessToken.token,
+        installationId: org.installationId,
+      });
+
+      LOGGER.info("Loaded Org Repos", {
+        org: org.accountName,
+        orgId: org.id,
+        reposLength: repositories.length,
+      });
+
+      for (const repo of repositories) {
+        const repoPrs = await getRepositoryPullRequests({
+          orgName: org.accountName,
+          repoName: repo.name,
+          accessToken: accessToken.token,
+        });
+
+        LOGGER.info(`Loaded PRs for Org ${org.accountName}`, {
+          repo: repo.name,
+          repoId: repo.id,
+          prCount: repoPrs.length,
+        });
+
+        for (const pr of repoPrs) {
+          ghPrs.set(pr.id, { ...pr, repoId: repo.id });
+        }
+
+        await delay(200);
       }
 
-      await delay(200);
+      LOGGER.info("Finished loading GH PRs for Org", {
+        org: org.accountName,
+        orgId: org.id,
+      });
+      await delay(1000);
+    } catch (error) {
+      LOGGER.error(`Error loading for org ${org.accountName}`, {
+        org: org.accountName,
+        orgId: org.id,
+        error: error,
+      });
     }
-
-    LOGGER.info("Finished loading GH PRs for Org", {
-      org: org.accountName,
-      orgId: org.id,
-    });
-    await delay(1000);
   }
 
   return { ghPrs, orgMembers };
