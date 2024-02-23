@@ -1,8 +1,8 @@
-import { Db } from "../../dynamodb/client";
+import { Db } from "../client";
 import {
   SlackIntegration,
   SlackIntegrationInsertArgs,
-} from "../../dynamodb/entities/types";
+} from "../entities/types";
 
 export const getSlackInstallationsForOrganization = async (
   organizationId: number

@@ -3,12 +3,12 @@ import {
   PullRequestEvent,
 } from "@octokit/webhooks-types";
 import ky from "ky";
+import { PullRequest } from "../../../dynamodb/entities/types";
 import {
   fetchPullRequestById,
   insertPullRequest,
   updatePullRequest,
-} from "../../../db/fetchers/pullRequests";
-import { PullRequest } from "../../../dynamodb/entities/types";
+} from "../../../dynamodb/fetchers/pullRequests";
 import { Logger } from "../../../logging";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
 import { PullRequestReviewCommentsResponse } from "../../endpointTypes";

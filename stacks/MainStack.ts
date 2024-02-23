@@ -1,22 +1,12 @@
-import { SubnetType } from "aws-cdk-lib/aws-ec2";
 import { Function, FunctionProps, StackContext, use } from "sst/constructs";
 import { getFrontendUrl } from "./FrontendStack";
 import { StorageStack } from "./StorageStack";
 import { Api } from "./constructs/Api";
-import { getDbConnectionInfo } from "./constructs/Database";
-import MigrationFunction from "./constructs/MigrationFunction";
 import LambdaNaming from "./constructs/lambdaPermissions/LambdaNaming";
-import LambdaPolicies from "./constructs/lambdaPermissions/LambdaPolicies";
 import { assertVarExists } from "./utils/asserts";
-import { buildPersistedResources } from "./utils/buildPerisistedResources";
-import { enableLambdaOutboundNetworking } from "./utils/enableLambdaOutboundNetworking";
 
 export function MainStack({ stack, app }: StackContext) {
   const { table } = use(StorageStack);
-  const { vpc, database, functionsSecurityGroup } = buildPersistedResources({
-    stack,
-    app,
-  });
 
   const slackEnvVars = {
     VITE_SLACK_BOT_ID: assertVarExists("SLACK_BOT_ID"),
@@ -25,10 +15,6 @@ export function MainStack({ stack, app }: StackContext) {
   };
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
-    vpc: vpc,
-    securityGroups: functionsSecurityGroup
-      ? [functionsSecurityGroup]
-      : undefined,
     environment: {
       BASE_FE_URL: getFrontendUrl(app),
       IS_LOCAL: app.local ? "true" : "false",
@@ -41,15 +27,10 @@ export function MainStack({ stack, app }: StackContext) {
       GH_CLIENT_SECRET: assertVarExists("GH_CLIENT_SECRET"),
       GH_ENCODED_PEM: assertVarExists("GH_ENCODED_PEM"),
       GH_WEBHOOK_SECRET: assertVarExists("GH_WEBHOOK_SECRET"),
-      ...getDbConnectionInfo(app, database),
       ...slackEnvVars,
     },
     logRetention: app.local ? "one_week" : "one_year",
     runtime: "nodejs18.x",
-    // Combined with the Elastic IP(s), these settings enable outbound internet access
-    // without the need for costly NAT Gateways
-    allowPublicSubnet: Boolean(vpc),
-    vpcSubnets: vpc ? { subnetType: SubnetType.PUBLIC } : undefined,
     bind: [table],
   };
 
@@ -64,12 +45,6 @@ export function MainStack({ stack, app }: StackContext) {
     timeout: "5 minutes",
   });
 
-  const migrationFunction = new MigrationFunction(stack, "MigrateToLatest", {
-    app,
-    database,
-    functionDefaults,
-  });
-
   // Set the default props for all stacks
 
   const api = new Api(stack, "Api", { app, functionDefaults });
@@ -77,33 +52,13 @@ export function MainStack({ stack, app }: StackContext) {
 
   // Needs to be done after ALL lambdas are created
   new LambdaNaming(stack, "LambdaNaming");
-  new LambdaPolicies(stack, "LambdaPermissions", {
-    secretArns: database ? [database.secret.secretArn] : [],
-  });
-
-  if (vpc && functionsSecurityGroup) {
-    // It doesn't really matter which Lambda function is passed in here; one is needed
-    // simply to determine which network interfaces need Elastic IPs
-    enableLambdaOutboundNetworking(stack, vpc, migrationFunction);
-  }
 
   stack.addOutputs({
-    MigrationFunction: migrationFunction.functionName,
     apiUrl: api.api.customDomainUrl ?? api.api.url,
-    ...(database
-      ? {
-          databaseId: database.instance.instanceIdentifier,
-          secretsArn: database.secret.secretArn,
-        }
-      : {}),
   });
 
   return {
     api,
     slackEnvVars,
-    vpc,
-    database,
-    functionsSecurityGroup,
-    migrationFunction,
   };
 }
