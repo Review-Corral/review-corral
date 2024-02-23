@@ -1,5 +1,5 @@
-import { getOrgMember } from "../../../db/fetchers/members";
-import { fetchPullRequestById } from "../../../db/fetchers/pullRequests";
+import { getOrgMember } from "../../../dynamodb/fetchers/members";
+import { fetchPullRequestById } from "../../../dynamodb/fetchers/pullRequests";
 import { BaseGithubWebhookEventHanderArgs } from "../types";
 
 export async function getSlackUserName(

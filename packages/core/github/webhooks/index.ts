@@ -1,8 +1,8 @@
 import * as z from "zod";
-import { fetchOrganizationByAccountId } from "../../db/fetchers/organizations";
-import { safeFetchRepository } from "../../db/fetchers/repositories";
-import { getSlackInstallationsForOrganization } from "../../db/fetchers/slack";
-import { takeFirst } from "../../db/fetchers/utils";
+import { fetchOrganizationByAccountId } from "../../dynamodb/fetchers/organizations";
+import { safeFetchRepository } from "../../dynamodb/fetchers/repositories";
+import { getSlackInstallationsForOrganization } from "../../dynamodb/fetchers/slack";
+import { takeFirst } from "../../dynamodb/fetchers/utils";
 import { Logger } from "../../logging";
 import { SlackClient } from "../../slack/SlackClient";
 import { handlePullRequestEvent } from "./handlers/pullRequest";

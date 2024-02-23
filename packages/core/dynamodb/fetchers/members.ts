@@ -1,5 +1,5 @@
-import { Db } from "../../dynamodb/client";
-import { Member, User } from "../../dynamodb/entities/types";
+import { Db } from "../client";
+import { Member, User } from "../entities/types";
 
 export const getOrganizationMembers = async (
   orgId: number
