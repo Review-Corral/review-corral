@@ -206,7 +206,7 @@ const handleNewPr = async (
       // This should trigger for 'ready_for_review' events
       const existingPullRequest = await fetchPullRequestById({
         pullRequestId: body.pull_request.id,
-        repoId: body.pull_request.id,
+        repoId: body.repository.id,
       });
 
       // If we still couldn't find a thread, then post a new one.
