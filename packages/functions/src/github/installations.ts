@@ -1,13 +1,13 @@
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
-import { addOrganizationMember } from "../../../core/db/fetchers/members";
+import { Organization, User } from "../../../core/dynamodb/entities/types";
+import { addOrganizationMember } from "../../../core/dynamodb/fetchers/members";
 import {
   fetchOrganizationByAccountId,
   fetchUsersOrganizations,
   insertOrganizationAndAssociateUser,
   updateOrganizationInstallationId,
-} from "../../../core/db/fetchers/organizations";
-import { Organization, User } from "../../../core/dynamodb/entities/types";
+} from "../../../core/dynamodb/fetchers/organizations";
 import { InstallationsData } from "../../../core/github/endpointTypes";
 import { getUserInstallations } from "../../../core/github/fetchers";
 import { Logger } from "../../../core/logging";

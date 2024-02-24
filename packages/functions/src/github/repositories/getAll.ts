@@ -1,16 +1,16 @@
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
-import { fetchOrganizationById } from "../../../../core/db/fetchers/organizations";
-import {
-  fetchRepositoriesForOrganization,
-  insertRepository,
-  removeRepository,
-} from "../../../../core/db/fetchers/repositories";
 import {
   Organization,
   Repository,
 } from "../../../../core/dynamodb/entities/types";
+import { fetchOrganizationById } from "../../../../core/dynamodb/fetchers/organizations";
+import {
+  fetchRepositoriesForOrganization,
+  insertRepository,
+  removeRepository,
+} from "../../../../core/dynamodb/fetchers/repositories";
 import { getInstallationRepositories } from "../../../../core/github/fetchers";
 import { Logger } from "../../../../core/logging";
 

@@ -5,7 +5,7 @@ import {
   OauthBasicConfig,
   Session,
 } from "sst/node/auth";
-import { fetchUserById, insertUser } from "../../core/db/fetchers/users";
+import { fetchUserById, insertUser } from "../../core/dynamodb/fetchers/users";
 import { UserResponse } from "../../core/github/endpointTypes";
 import { Logger } from "../../core/logging";
 import { assertVarExists } from "../../core/utils/assert";

@@ -4,7 +4,7 @@ import * as z from "zod";
 import {
   fetchRepository,
   setRespositoryActiveStatus,
-} from "../../../../core/db/fetchers/repositories";
+} from "../../../../core/dynamodb/fetchers/repositories";
 import { Logger } from "../../../../core/logging";
 
 const LOGGER = new Logger("github:repositories:setStatus");
