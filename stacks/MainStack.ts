@@ -2,7 +2,6 @@ import { Function, FunctionProps, StackContext, use } from "sst/constructs";
 import { getFrontendUrl } from "./FrontendStack";
 import { StorageStack } from "./StorageStack";
 import { Api } from "./constructs/Api";
-import LambdaNaming from "./constructs/lambdaPermissions/LambdaNaming";
 import { assertVarExists } from "./utils/asserts";
 
 export function MainStack({ stack, app }: StackContext) {
@@ -40,18 +39,8 @@ export function MainStack({ stack, app }: StackContext) {
     handler: "packages/functions/src/admin/installationAccessToken.handler",
   });
 
-  new Function(stack, "MigrateToDynamo", {
-    handler: "packages/functions/src/admin/migrateToDynamo.handler",
-    timeout: "5 minutes",
-  });
-
-  // Set the default props for all stacks
-
   const api = new Api(stack, "Api", { app, functionDefaults });
   api.api.bind([table]);
-
-  // Needs to be done after ALL lambdas are created
-  new LambdaNaming(stack, "LambdaNaming");
 
   stack.addOutputs({
     apiUrl: api.api.customDomainUrl ?? api.api.url,
