@@ -1,8 +1,8 @@
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
-import { fetchOrganizationById } from "../../../core/db/fetchers/organizations";
-import { getSlackInstallationsForOrganization } from "../../../core/db/fetchers/slack";
+import { fetchOrganizationById } from "../../../core/dynamodb/fetchers/organizations";
+import { getSlackInstallationsForOrganization } from "../../../core/dynamodb/fetchers/slack";
 import { Logger } from "../../../core/logging";
 
 const LOGGER = new Logger("slack:installations");
@@ -24,7 +24,7 @@ export const getSlackInstallations = ApiHandler(async (event, context) => {
     };
   }
 
-  const organization = await fetchOrganizationById(Number(organizationId));
+  const organization = await fetchOrganizationById(organizationId);
 
   if (!organization) {
     return {
