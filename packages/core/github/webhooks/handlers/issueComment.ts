@@ -11,49 +11,48 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
 > = async ({ event, slackClient, ...props }) => {
   LOGGER.debug("Hanlding Issue comment event with action: ", event.action);
 
+  if (!event.issue.pull_request?.url) {
+    LOGGER.debug("Issue comment is NOT on a pull request");
+    return;
+  }
+
   if (event.action === "created") {
     LOGGER.debug("Issue comment created", { issue: event.issue });
 
-    if (event.issue.pull_request?.url) {
-      LOGGER.debug("Issue comment is on a pull request", {
-        issue: event.issue,
-      });
+    LOGGER.debug("Issue comment is on a pull request", {
+      issue: event.issue,
+    });
 
-      const accessToken = await getInstallationAccessToken(
-        props.installationId
-      );
+    const accessToken = await getInstallationAccessToken(props.installationId);
 
-      const { id: prId } = await getPullRequestInfo({
-        url: event.issue.pull_request.url,
-        accessToken: accessToken.token,
-      });
+    const { id: prId } = await getPullRequestInfo({
+      url: event.issue.pull_request.url,
+      accessToken: accessToken.token,
+    });
 
-      const threadTs = await getThreadTs({
+    const threadTs = await getThreadTs({
+      prId,
+      repoId: event.repository.id,
+    });
+
+    if (!threadTs) {
+      // write error log
+      LOGGER.warn("Got a comment event but couldn't find the thread", {
+        action: event.action,
         prId,
-        repoId: event.repository.id,
       });
 
-      if (!threadTs) {
-        // write error log
-        LOGGER.warn("Got a comment event but couldn't find the thread", {
-          action: event.action,
-          prId,
-        });
-
-        return;
-      }
-
-      await slackClient.postComment({
-        prId,
-        commentBody: event.comment.body,
-        commentUrl: event.comment.html_url,
-        threadTs: threadTs,
-        slackUsername: await getSlackUserName(event.sender.login, props),
-      });
       return;
-    } else {
-      LOGGER.debug("Issue comment is NOT on a pull request");
     }
+
+    await slackClient.postComment({
+      prId,
+      commentBody: event.comment.body,
+      commentUrl: event.comment.html_url,
+      threadTs: threadTs,
+      slackUsername: await getSlackUserName(event.sender.login, props),
+    });
+    return;
   } else {
     LOGGER.debug("Issue comment action not handled", { action: event.action });
   }
