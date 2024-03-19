@@ -3,7 +3,10 @@ import { SlackClient } from "../../slack/SlackClient";
 
 export type handledEventNames = keyof Pick<
   WebhookEventMap,
-  "pull_request" | "pull_request_review_comment" | "pull_request_review"
+  | "pull_request"
+  | "pull_request_review_comment"
+  | "pull_request_review"
+  | "issue_comment"
 >;
 
 export interface GithubWebhookEventHanderArgs<EventT> {

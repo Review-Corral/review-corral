@@ -7,6 +7,7 @@ import {
   InstallationRespositoriesResponse,
   InstallationsData,
   OrgMembers,
+  PullRequestInfoResponse,
   RepositoryPullRequestsResponse,
 } from "./endpointTypes";
 
@@ -93,6 +94,26 @@ export const getRepositoryPullRequests = async ({
       },
     })
     .json<RepositoryPullRequestsResponse>();
+};
+
+/**
+ * Gets the pull request info for a given pull request by it's URL
+ */
+export const getPullRequestInfo = async ({
+  url,
+  accessToken,
+}: {
+  url: string;
+  accessToken: string;
+}): Promise<PullRequestInfoResponse> => {
+  return await ky
+    .get(`url`, {
+      headers: {
+        ...defaultHeaders,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .json<PullRequestInfoResponse>();
 };
 
 export const getOrgMembers = async ({
