@@ -2,31 +2,25 @@ import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { getInstallationAccessToken, getPullRequestInfo } from "../../fetchers";
 import { GithubWebhookEventHander } from "../types";
-import { getThreadTs } from "./shared";
+import { getSlackUserName, getThreadTs } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
 export const handleIssueCommentEvent: GithubWebhookEventHander<
   IssueCommentEvent
-> = async ({ event, ...props }) => {
+> = async ({ event, slackClient, ...props }) => {
   LOGGER.debug("Hanlding Issue comment event with action: ", event.action);
 
   if (event.action === "created") {
     LOGGER.debug("Issue comment created", { issue: event.issue });
 
-    if (!event.installation?.id) {
-      LOGGER.debug("No installation id found on event", { event });
-      return;
-    }
-
     if (event.issue.pull_request?.url) {
-      const { pull_request } = event.issue;
       LOGGER.debug("Issue comment is on a pull request", {
         issue: event.issue,
       });
 
       const accessToken = await getInstallationAccessToken(
-        event.installation.id
+        props.installationId
       );
 
       const { id: prId } = await getPullRequestInfo({
@@ -48,6 +42,15 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
 
         return;
       }
+
+      await slackClient.postComment({
+        prId,
+        commentBody: event.comment.body,
+        commentUrl: event.comment.html_url,
+        threadTs: threadTs,
+        slackUsername: await getSlackUserName(event.sender.login, props),
+      });
+      return;
     } else {
       LOGGER.debug("Issue comment is NOT on a pull request");
     }
