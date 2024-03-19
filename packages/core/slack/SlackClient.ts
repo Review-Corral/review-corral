@@ -402,7 +402,7 @@ export class SlackClient {
               // image_url: `${assertVarExists(
               //   "BASE_FE_URL"
               // )}/plus-minus-diff-icon-alt.png`,
-              image_url: `https://www.reviewcorral.io/plus-minus-diff-icon-alt.png`,
+              image_url: `https://www.review-corral.com/plus-minus-diff-icon-alt.png`,
               alt_text: "plus-minus-icon",
             },
             {
