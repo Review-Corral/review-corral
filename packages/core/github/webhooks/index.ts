@@ -41,6 +41,7 @@ const eventHandlers: Record<
   pull_request: { handler: handlePullRequestEvent },
   pull_request_review_comment: { handler: handlePullRequestCommentEvent },
   pull_request_review: { handler: handlePullRequestReviewEvent },
+  issue_comment: { handler: async () => {} },
 };
 
 export const handleGithubWebhookEvent = async ({
