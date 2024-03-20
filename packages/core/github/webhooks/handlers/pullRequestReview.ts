@@ -1,7 +1,4 @@
-import {
-  PullRequestReview,
-  PullRequestReviewEvent,
-} from "@octokit/webhooks-types";
+import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-types";
 import slackifyMarkdown from "slackify-markdown";
 import { GithubWebhookEventHander } from "../types";
 import { getSlackUserName, getThreadTs } from "./shared";
@@ -34,7 +31,7 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
       message: {
         text: `${await getSlackUserName(
           event.sender.login,
-          args
+          args,
         )} ${getReviewText(event.review)}`,
         attachments: [
           {

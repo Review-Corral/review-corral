@@ -12,8 +12,8 @@ export const SetupSlackCard: FC<SetupSlackCardProps> = ({
   return (
     <div className="p-4 border border-grey-200 rounded-md space-y-6 max-w-xl">
       <span>
-        Setup your slack integration below to enable sending events to the Slack
-        channel of your choosing.
+        Setup your slack integration below to enable sending events to the Slack channel
+        of your choosing.
       </span>
       <div>
         <SlackButton organizationId={organizationId} />

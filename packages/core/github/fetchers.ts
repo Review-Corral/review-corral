@@ -17,9 +17,7 @@ const defaultHeaders = {
   "X-GitHub-Api-Version": "2022-11-28",
 };
 
-export const getUserInstallations = async (
-  user: User
-): Promise<InstallationsData> =>
+export const getUserInstallations = async (user: User): Promise<InstallationsData> =>
   await ky
     .get("https://api.github.com/user/installations", {
       headers: {
@@ -33,20 +31,17 @@ export const getUserInstallations = async (
  * Gets the installation access token for a given installation
  */
 export const getInstallationAccessToken = async (
-  installationId: number
+  installationId: number,
 ): Promise<InstallationAccessTokenResponse> => {
   const jwt = await getJwt();
   LOGGER.debug("JWT created", { jwt: jwt.compact() });
   const accessTokenResponse = await ky
-    .post(
-      `https://api.github.com/app/installations/${installationId}/access_tokens`,
-      {
-        headers: {
-          ...defaultHeaders,
-          Authorization: `Bearer ${jwt.compact()}`,
-        },
-      }
-    )
+    .post(`https://api.github.com/app/installations/${installationId}/access_tokens`, {
+      headers: {
+        ...defaultHeaders,
+        Authorization: `Bearer ${jwt.compact()}`,
+      },
+    })
     .json<InstallationAccessTokenResponse>();
 
   LOGGER.debug("Access token response", { accessTokenResponse });

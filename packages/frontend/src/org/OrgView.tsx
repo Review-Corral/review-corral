@@ -14,14 +14,11 @@ export const OrgView: FC<OrgViewProps> = () => {
     queryKey: ["respositories", orgId],
     queryFn: async () => {
       return await ky
-        .get(
-          `${import.meta.env.VITE_API_URL}/installations/${orgId}/repositories`,
-          {
-            headers: {
-              Authorization: `Bearer ${Cookies.get(auth_access_token_key)}`,
-            },
-          }
-        )
+        .get(`${import.meta.env.VITE_API_URL}/installations/${orgId}/repositories`, {
+          headers: {
+            Authorization: `Bearer ${Cookies.get(auth_access_token_key)}`,
+          },
+        })
         .json();
     },
   });

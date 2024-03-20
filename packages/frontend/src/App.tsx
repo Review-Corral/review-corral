@@ -14,9 +14,7 @@ function App() {
         <div className="mt-6">
           <div className="relative">
             <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-white text-red-500">
-                Error logging in
-              </span>
+              <span className="px-2 bg-white text-red-500">Error logging in</span>
             </div>
           </div>
         </div>

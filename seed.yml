@@ -1,6 +1,5 @@
 compile:
   - pnpm install --frozen-lockfile --prefer-offline
-
 # after_deploy:
 #   # Migrate to latest
 #   - echo 'export STACK_NAME="${SEED_STAGE_NAME}-review-corral-MainStack"' >> $BASH_ENV
@@ -20,6 +19,6 @@ compile:
 #     grep -q '"statusCode":200' response.json ||
 #     (echo "Error: Lambda function did not return a 200 status code." && exit 1)
 
-  # # Finalize the Sentry release
-  # - curl -sL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION="2.14.4" bash
-  # - sentry-cli releases finalize $(VAR=$SEED_BUILD_SERVICE_SHA bash -c 'echo ${VAR:0:7}')
+# # Finalize the Sentry release
+# - curl -sL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION="2.14.4" bash
+# - sentry-cli releases finalize $(VAR=$SEED_BUILD_SERVICE_SHA bash -c 'echo ${VAR:0:7}')

@@ -6,9 +6,7 @@ interface SlackIntegrationsProps {
   organizationId: number;
 }
 
-export const SlackIntegrations: FC<SlackIntegrationsProps> = ({
-  organizationId,
-}) => {
+export const SlackIntegrations: FC<SlackIntegrationsProps> = ({ organizationId }) => {
   const { isLoading, data } = useSlackIntegrations(organizationId);
 
   if (isLoading) {

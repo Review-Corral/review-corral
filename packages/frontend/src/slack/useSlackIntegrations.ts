@@ -18,7 +18,7 @@ export const useSlackIntegrations = (organizationId: Organization["orgId"]) => {
             headers: {
               Authorization: `Bearer ${getSessionToken()}`,
             },
-          }
+          },
         )
         .json<SlackIntegration[]>();
     },

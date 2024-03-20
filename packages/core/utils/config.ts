@@ -7,8 +7,7 @@ import {
   getReleaseVersion,
 } from "./lambda/helpers";
 
-const { environment, friendlyName: functionName } =
-  getFriendlyNameAndEnvironment();
+const { environment, friendlyName: functionName } = getFriendlyNameAndEnvironment();
 const isLocal = getIsLocal();
 
 const config = {

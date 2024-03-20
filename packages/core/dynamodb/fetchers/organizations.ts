@@ -10,7 +10,7 @@ const LOGGER = new Logger("fetchers.organizations");
  * Fetches an organization by it's ID
  */
 export const fetchOrganizationByAccountId = async (
-  accountId: number
+  accountId: number,
 ): Promise<Organization | null> =>
   await Db.entities.organization
     .get({ orgId: accountId })
@@ -21,7 +21,7 @@ export const fetchOrganizationByAccountId = async (
  * Creates a user. Should only be used when logging in and the user doesn't exist
  */
 export const insertOrganization = async (
-  args: OrganizationInsertArgs
+  args: OrganizationInsertArgs,
 ): Promise<Organization> => {
   return await Db.entities.organization
     .create(args)
@@ -50,7 +50,7 @@ export const updateOrganizationInstallationId = async (args: {
  * Get all of the organizations a user is currently mapped to
  */
 export const fetchUsersOrganizations = async (
-  userId: number
+  userId: number,
 ): Promise<Organization[]> => {
   const memberInOrgs = await Db.entities.member.query
     .membersOrgs({
@@ -69,7 +69,7 @@ export const fetchUsersOrganizations = async (
 
 // TODO: this is a duplicated method, remove
 export const fetchOrganizationById = async (
-  id: number
+  id: number,
 ): Promise<Organization | null> => {
   return await fetchOrganizationByAccountId(id);
 };

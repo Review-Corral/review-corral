@@ -4,7 +4,7 @@ import { BaseGithubWebhookEventHanderArgs } from "../types";
 
 export async function getSlackUserName(
   githubLogin: string,
-  props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">
+  props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">,
 ): Promise<string> {
   const usernameMap = await getOrgMember({
     orgId: props.organizationId,

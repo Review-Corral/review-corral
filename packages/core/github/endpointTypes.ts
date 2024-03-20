@@ -14,8 +14,7 @@ export type RepositoryPullRequestsResponse =
 export type PullRequestInfoResponse =
   Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}"]["response"]["data"];
 
-export type OrgMembers =
-  Endpoints["GET /orgs/{org}/members"]["response"]["data"];
+export type OrgMembers = Endpoints["GET /orgs/{org}/members"]["response"]["data"];
 
 export type PullRequestReviewCommentsResponse =
   Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}/comments"]["response"]["data"];

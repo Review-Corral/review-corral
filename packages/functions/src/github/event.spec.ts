@@ -45,7 +45,7 @@ describe("event.spec", () => {
         },
         body: JSON.stringify(eventBody),
       } as any as APIGatewayProxyEventV2,
-      {} as any as Context
+      {} as any as Context,
     );
 
     expect(result).toMatchObject({

@@ -13,9 +13,7 @@ export type PullRequest = EntityItem<typeof PullRequestEntity>;
 export type Repository = EntityItem<typeof RepositoryEntity>;
 export type SlackIntegration = EntityItem<typeof SlackEntity>;
 
-export type OrganizationInsertArgs = CreateEntityItem<
-  typeof OrganizationEntity
->;
+export type OrganizationInsertArgs = CreateEntityItem<typeof OrganizationEntity>;
 export type UserInsertArgs = CreateEntityItem<typeof UserEntity>;
 export type MemberInsertArgs = CreateEntityItem<typeof MemberEntity>;
 export type PullRequestInsertArgs = CreateEntityItem<typeof PullRequestEntity>;

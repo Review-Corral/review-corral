@@ -63,9 +63,7 @@ export const OrgView: FC<OrgViewProps> = () => {
 
   const { data, isLoading } = useOrganizations();
 
-  const [organization, setOrganization] = useState<Organization | undefined>(
-    undefined
-  );
+  const [organization, setOrganization] = useState<Organization | undefined>(undefined);
 
   const navigate = useNavigate();
   const [_page, setPage] = useState<Page>(page);
@@ -121,11 +119,7 @@ export const OrgView: FC<OrgViewProps> = () => {
                     className={`
                       pb-[0.9rem]
                       px-1
-                      ${
-                        _page == route.page
-                          ? "border-b-2 border-indigo-500"
-                          : ""
-                      }
+                      ${_page == route.page ? "border-b-2 border-indigo-500" : ""}
                     `}
                   >
                     {route.text}

@@ -22,7 +22,7 @@ export class Api extends Construct {
   constructor(
     stack: Stack,
     id: string,
-    { app, functionDefaults }: { app: App; functionDefaults: FunctionProps }
+    { app, functionDefaults }: { app: App; functionDefaults: FunctionProps },
   ) {
     super(stack, id);
 
@@ -40,12 +40,10 @@ export class Api extends Construct {
           // Handles incoming webhooks from Github
           "POST /webhook-event": "packages/functions/src/github/events.handler",
           ...buildPaths("/installations", {
-            "GET /":
-              "packages/functions/src/github/installations.getInstallations",
+            "GET /": "packages/functions/src/github/installations.getInstallations",
           }),
           ...buildPaths("/{organizationId}/repositories", {
-            "GET /":
-              "packages/functions/src/github/repositories/getAll.handler",
+            "GET /": "packages/functions/src/github/repositories/getAll.handler",
             "PUT /{repositoryId}":
               "packages/functions/src/github/repositories/setStatus.handler",
           }),
@@ -63,7 +61,7 @@ export class Api extends Construct {
 
 const buildPaths = <T extends ApiRouteProps<string>>(
   basePath: string,
-  routes: Record<string, T>
+  routes: Record<string, T>,
 ) =>
   Object.keys(routes).reduce((acc, key) => {
     const splitKey = key.split(" ");
@@ -71,7 +69,7 @@ const buildPaths = <T extends ApiRouteProps<string>>(
     if (splitKey.length !== 2) {
       throw Error(
         `Invalid route key of '${key}' found.` +
-          `Should contain a method and then the path like so: 'GET /path'`
+          `Should contain a method and then the path like so: 'GET /path'`,
       );
     }
 

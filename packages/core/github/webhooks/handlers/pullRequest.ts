@@ -13,10 +13,7 @@ import { Logger } from "../../../logging";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
 import { PullRequestReviewCommentsResponse } from "../../endpointTypes";
 import { getInstallationAccessToken } from "../../fetchers";
-import {
-  BaseGithubWebhookEventHanderArgs,
-  GithubWebhookEventHander,
-} from "../types";
+import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
 import { getSlackUserName, getThreadTs } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
@@ -31,7 +28,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
     return await handleNewPr(
       // TODO: can we avoid this dangerous cast?
       payload as PullRequestEventOpenedOrReadyForReview,
-      props
+      props,
     );
   } else {
     const threadTs = await getThreadTs({
@@ -56,14 +53,14 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           await props.slackClient.postPrMerged(
             payload,
             threadTs,
-            await getSlackUserName(payload.sender.login, props)
+            await getSlackUserName(payload.sender.login, props),
           );
           return;
         } else {
           await props.slackClient.postPrClosed(
             payload,
             threadTs,
-            await getSlackUserName(payload.sender.login, props)
+            await getSlackUserName(payload.sender.login, props),
           );
           return;
         }
@@ -73,7 +70,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             message: {
               text: `Review request for ${await getSlackUserName(
                 payload.requested_reviewer.login,
-                props
+                props,
               )}`,
             },
             threadTs: threadTs,
@@ -92,18 +89,18 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
 const handleConvertedToDraft = async (
   threadTs: string,
   event: PullRequestConvertedToDraftEvent,
-  props: BaseGithubWebhookEventHanderArgs
+  props: BaseGithubWebhookEventHanderArgs,
 ) => {
   await props.slackClient.postConvertedToDraft(
     event,
     threadTs,
-    await getSlackUserName(event.sender.login, props)
+    await getSlackUserName(event.sender.login, props),
   );
 };
 
 const handleNewPr = async (
   payload: PullRequestEventOpenedOrReadyForReview,
-  props: BaseGithubWebhookEventHanderArgs
+  props: BaseGithubWebhookEventHanderArgs,
 ) => {
   LOGGER.debug("Handling new PR");
   // If the PR is opened or ready for review but in draft, save the PR in the database
@@ -134,17 +131,14 @@ const handleNewPr = async (
         await props.slackClient.postReadyForReview({
           body: payload,
           threadTs,
-          slackUsername: await getSlackUserName(
-            payload.pull_request.user.login,
-            props
-          ),
+          slackUsername: await getSlackUserName(payload.pull_request.user.login, props),
         });
       }
     } else {
       LOGGER.error(
         "Error posting new thread for PR opened message to Slack: " +
           "Didn't get message response back to thread messages PR ID: ",
-        { prId: payload.pull_request.id }
+        { prId: payload.pull_request.id },
       );
     }
   }
@@ -152,11 +146,9 @@ const handleNewPr = async (
   async function postAllCommentsForNewPrThread(
     threadTs: string,
     body: PullRequestEventOpenedOrReadyForReview,
-    baseProps: BaseGithubWebhookEventHanderArgs
+    baseProps: BaseGithubWebhookEventHanderArgs,
   ) {
-    const accessToken = await getInstallationAccessToken(
-      baseProps.installationId
-    );
+    const accessToken = await getInstallationAccessToken(baseProps.installationId);
 
     await postCommentsForNewPR(body, accessToken, threadTs, baseProps);
     // Get all requested Reviews and post
@@ -168,7 +160,7 @@ const handleNewPr = async (
             message: {
               text: `Review request for ${await getSlackUserName(
                 requested_reviewer.login,
-                baseProps
+                baseProps,
               )}`,
             },
             threadTs: threadTs,
@@ -185,7 +177,7 @@ const handleNewPr = async (
    */
   async function getThreadTsForNewPr(
     body: PullRequestEventOpenedOrReadyForReview,
-    baseProps: BaseGithubWebhookEventHanderArgs
+    baseProps: BaseGithubWebhookEventHanderArgs,
   ): Promise<{
     threadTs?: string;
     wasCreated: boolean;
@@ -242,22 +234,19 @@ const handleNewPr = async (
     try {
       const response = await baseProps.slackClient.postPrReady(
         body,
-        await getSlackUserName(body.sender.login, baseProps)
+        await getSlackUserName(body.sender.login, baseProps),
       );
 
       if (response && response.ts) {
-        LOGGER.debug(
-          "Succesfully created new threadTs. About to update database",
-          {
-            prId: body.pull_request.id,
-            organizationId: baseProps.organizationId,
-            existingPrId: existingPullRequest?.prId,
-            threadTs: response.ts,
-          }
-        );
+        LOGGER.debug("Succesfully created new threadTs. About to update database", {
+          prId: body.pull_request.id,
+          organizationId: baseProps.organizationId,
+          existingPrId: existingPullRequest?.prId,
+          threadTs: response.ts,
+        });
         if (existingPullRequest) {
           LOGGER.debug(
-            `Updating existing PR record of id ${existingPullRequest.prId}}`
+            `Updating existing PR record of id ${existingPullRequest.prId}}`,
           );
           await updatePullRequest({
             pullRequestId: existingPullRequest.prId,
@@ -279,7 +268,7 @@ const handleNewPr = async (
       } else {
         throw new Error(
           `Tried to create new thread for PR Id ${body.pull_request.id.toString()} but didn't get a response ts: ` +
-            `\nReceieved Response: ${JSON.stringify(response)}`
+            `\nReceieved Response: ${JSON.stringify(response)}`,
         );
       }
     } catch (error) {
@@ -291,7 +280,7 @@ const handleNewPr = async (
     body: PullRequestEventOpenedOrReadyForReview,
     accessToken: Awaited<ReturnType<typeof getInstallationAccessToken>>,
     threadTs: string,
-    baseProps: BaseGithubWebhookEventHanderArgs
+    baseProps: BaseGithubWebhookEventHanderArgs,
   ) {
     try {
       const response = await ky
@@ -309,10 +298,7 @@ const handleNewPr = async (
             commentBody: comment.body,
             commentUrl: comment.url,
             threadTs: threadTs,
-            slackUsername: await getSlackUserName(
-              comment.user.login,
-              baseProps
-            ),
+            slackUsername: await getSlackUserName(comment.user.login, baseProps),
           });
         }
       }

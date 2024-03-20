@@ -19,7 +19,7 @@ export class ConsoleOutput implements LogOutput {
     level: LogLevel,
     text: string,
     data: any,
-    options: LogOutputOptions = { depth: 2 }
+    options: LogOutputOptions = { depth: 2 },
   ): void {
     const colors = this.colorize ? LOG_LEVEL_COLORS[level] : [];
     const colorizedTextWithData =
@@ -46,7 +46,7 @@ export class FileOutput implements LogOutput {
     level: LogLevel,
     text: string,
     data: any,
-    options: LogOutputOptions = { depth: 2 }
+    options: LogOutputOptions = { depth: 2 },
   ): void {
     const textWithData = `${text}${
       data ? `\n${serializeData(data, false, options.depth)}` : ""
@@ -66,7 +66,7 @@ export class NullOutput implements LogOutput {
 export const serializeData = (
   data: any,
   colorize: boolean,
-  depth: number | null = 2
+  depth: number | null = 2,
 ): string => {
   if (typeof data === "string") return data;
   return inspect(data, { colors: colorize, depth })

@@ -1,9 +1,7 @@
 import { Db } from "../client";
 import { Member, User } from "../entities/types";
 
-export const getOrganizationMembers = async (
-  orgId: number
-): Promise<Member[]> => {
+export const getOrganizationMembers = async (orgId: number): Promise<Member[]> => {
   return await Db.entities.member.query
     .primary({
       orgId,

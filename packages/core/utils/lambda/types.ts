@@ -8,12 +8,7 @@ import {
 } from "aws-lambda";
 import { gzipSync } from "zlib";
 import { User } from "../../dynamodb/entities/types";
-import {
-  MessageData,
-  StatusCode2XX,
-  StatusCode4XX,
-  StatusCode5XX,
-} from "./responses";
+import { MessageData, StatusCode2XX, StatusCode4XX, StatusCode5XX } from "./responses";
 
 export interface CustomContext extends Context {
   userId?: User["userId"];
@@ -26,19 +21,19 @@ export type CustomAPIGatewayProxyResult =
 
 export type CustomAPIGatewayProxyHandler = (
   event: APIGatewayProxyEventV2,
-  context: CustomContext
+  context: CustomContext,
 ) => Promise<CustomAPIGatewayProxyResult>;
 
 export type LambdaEvent = APIGatewayProxyEvent | SQSEvent;
 
 export const isApiGatewayProxyEvent = (
-  event: LambdaEvent
+  event: LambdaEvent,
 ): event is APIGatewayProxyEvent => {
   return (event as APIGatewayProxyEvent)?.requestContext !== undefined;
 };
 
 export const isCustomApiGatewayEvent = (
-  event: middy.Request<any, any, any, any>
+  event: middy.Request<any, any, any, any>,
 ): event is middy.Request<
   APIGatewayProxyEvent,
   APIGatewayProxyStructuredResultV2,
@@ -82,13 +77,7 @@ export default class JsonResponse<Json extends Record<string, any>> {
   public readonly gzip: GzipValue;
   public readonly serializer: (data: Json) => string;
 
-  constructor({
-    statusCode,
-    data,
-    gzip,
-    serializer,
-    ...rest
-  }: ResponseOptions<Json>) {
+  constructor({ statusCode, data, gzip, serializer, ...rest }: ResponseOptions<Json>) {
     this.statusCode = statusCode;
     this.data = data;
     this.apiGatewayResultProps = rest;
