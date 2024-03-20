@@ -1,14 +1,14 @@
+import {
+  githubWebhookBodySchema,
+  handleGithubWebhookEvent,
+} from "@core/github/webhooks";
+import { verifyGithubWebhookSecret } from "@core/github/webhooks/verifyEvent";
+import { Logger } from "@core/logging";
+import { assertVarExists } from "@core/utils/assert";
 import { WebhookEvent } from "@octokit/webhooks-types";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
-import {
-  githubWebhookBodySchema,
-  handleGithubWebhookEvent,
-} from "../../../core/github/webhooks";
-import { verifyGithubWebhookSecret } from "../../../core/github/webhooks/verifyEvent";
-import { Logger } from "../../../core/logging";
-import { assertVarExists } from "../../../core/utils/assert";
 
 const LOGGER = new Logger("functions.github.events");
 

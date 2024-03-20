@@ -1,5 +1,5 @@
-import { getInstallationAccessToken } from "../../../core/github/fetchers";
-import { Logger } from "../../../core/logging";
+import { getInstallationAccessToken } from "@core/github/fetchers";
+import { Logger } from "@core/logging";
 
 const LOGGER = new Logger("admin/installationAccessToken");
 

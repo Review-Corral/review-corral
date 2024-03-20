@@ -1,9 +1,8 @@
+import { handleGithubWebhookEvent } from "@core/github/webhooks";
 import { APIGatewayProxyEventV2, Context } from "aws-lambda";
 import { beforeEach } from "node:test";
 import { describe, expect, it, vi } from "vitest";
 import { handler } from "./events";
-
-import { handleGithubWebhookEvent } from "../../../core/github/webhooks";
 
 describe("event.spec", () => {
   beforeEach(() => {
@@ -13,15 +12,15 @@ describe("event.spec", () => {
       };
     });
 
-    vi.mock("../../../core/github/webhooks", async () => {
-      const actual = await vi.importActual("../../../core/github/webhooks");
+    vi.mock("@core/github/webhooks", async () => {
+      const actual = await vi.importActual("@core/github/webhooks");
       return {
         ...actual,
         handleGithubWebhookEvent: mocks.handleGithubWebhookEvent,
       };
     });
 
-    vi.mock("../../../core/github/webhooks/verifyEvent", () => ({
+    vi.mock("@core/github/webhooks/verifyEvent", () => ({
       verifyGithubWebhookSecret: vi.fn(() => true),
     }));
   });
@@ -31,6 +30,9 @@ describe("event.spec", () => {
       action: "opened",
       repository: {
         id: 123,
+        owner: {
+          id: 456,
+        },
       },
     };
 
