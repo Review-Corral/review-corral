@@ -5,6 +5,7 @@ import { getSlackInstallationsForOrganization } from "../../dynamodb/fetchers/sl
 import { takeFirst } from "../../dynamodb/fetchers/utils";
 import { Logger } from "../../logging";
 import { SlackClient } from "../../slack/SlackClient";
+import { handleIssueCommentEvent } from "./handlers/issueComment";
 import { handlePullRequestEvent } from "./handlers/pullRequest";
 import { handlePullRequestCommentEvent } from "./handlers/pullRequestComment";
 import { handlePullRequestReviewEvent } from "./handlers/pullRequestReview";
@@ -41,7 +42,7 @@ const eventHandlers: Record<
   pull_request: { handler: handlePullRequestEvent },
   pull_request_review_comment: { handler: handlePullRequestCommentEvent },
   pull_request_review: { handler: handlePullRequestReviewEvent },
-  issue_comment: { handler: async () => {} },
+  issue_comment: { handler: handleIssueCommentEvent },
 };
 
 export const handleGithubWebhookEvent = async ({
