@@ -1,16 +1,16 @@
-import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
-import { Organization, User } from "../../../core/dynamodb/entities/types";
-import { addOrganizationMember } from "../../../core/dynamodb/fetchers/members";
+import { Organization, User } from "@core/dynamodb/entities/types";
+import { addOrganizationMember } from "@core/dynamodb/fetchers/members";
 import {
   fetchOrganizationByAccountId,
   fetchUsersOrganizations,
   insertOrganizationAndAssociateUser,
   updateOrganizationInstallationId,
-} from "../../../core/dynamodb/fetchers/organizations";
-import { InstallationsData } from "../../../core/github/endpointTypes";
-import { getUserInstallations } from "../../../core/github/fetchers";
-import { Logger } from "../../../core/logging";
+} from "@core/dynamodb/fetchers/organizations";
+import { InstallationsData } from "@core/github/endpointTypes";
+import { getUserInstallations } from "@core/github/fetchers";
+import { Logger } from "@core/logging";
+import { useUser } from "src/utils/useUser";
+import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("github:installations");
 

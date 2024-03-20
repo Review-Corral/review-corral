@@ -13,8 +13,8 @@
     "console": "sst console",
     "typecheck": "tsc --noEmit && tsc --noEmit --project ./packages/core/tsconfig.json && tsc --noEmit --project ./packages/functions/tsconfig.json && tsc --noEmit --project ./packages/frontend/tsconfig.json",
     "test": "vitest run .spec.ts",
-    "test:ci": "vitest run --silent .spec.ts",
-    "test:watch": "vitest watch .spec.ts",
+    "test:ci": "sst bind vitest run --silent .spec.ts",
+    "test:watch": "sst bind vitest watch .spec.ts",
     "migrate:gen": "pnpm drizzle-kit generate:pg --out ./packages/core/db/migrations/ --schema ./packages/core/db/schema.ts"
   },
   "devDependencies": {
@@ -27,7 +27,7 @@
     "sst": "2.39.5",
     "typescript": "^5.3.3",
     "vite-node": "^1.1.3",
-    "vitest": "^1.1.0"
+    "vitest": "^1.1.3"
   },
   "workspaces": [
     "packages/*"
