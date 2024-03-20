@@ -107,7 +107,7 @@ export const getPullRequestInfo = async ({
   accessToken: string;
 }): Promise<PullRequestInfoResponse> => {
   return await ky
-    .get(`url`, {
+    .get(url, {
       headers: {
         ...defaultHeaders,
         Authorization: `Bearer ${accessToken}`,
