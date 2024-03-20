@@ -212,13 +212,15 @@ export class SlackClient {
   }: {
     prId: number;
     commentBody: string;
-    commentUrl: string;
+    commentUrl: string | undefined;
     threadTs: string;
     slackUsername: string;
   }) {
     await this.postMessage({
       message: {
-        text: `${slackUsername} left <${commentUrl}|a comment>`,
+        text: commentUrl
+          ? `${slackUsername} left <${commentUrl}|a comment>`
+          : `${slackUsername} left a pull request comment`,
         attachments: [
           {
             text: slackifyMarkdown(commentBody),

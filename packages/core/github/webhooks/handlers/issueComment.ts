@@ -48,7 +48,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
     await slackClient.postComment({
       prId,
       commentBody: event.comment.body,
-      commentUrl: event.comment.html_url,
+      commentUrl: undefined,
       threadTs: threadTs,
       slackUsername: await getSlackUserName(event.sender.login, props),
     });
