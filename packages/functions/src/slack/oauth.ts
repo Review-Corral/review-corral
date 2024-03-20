@@ -55,9 +55,7 @@ export const handler = ApiHandler(async (event, context) => {
     queryParams: event.queryStringParameters,
   });
 
-  const searchParams = slackAuthRequestSchema.parse(
-    event.queryStringParameters
-  );
+  const searchParams = slackAuthRequestSchema.parse(event.queryStringParameters);
 
   const formData = new FormData();
   formData.append("client_id", assertVarExists("VITE_SLACK_BOT_ID"));

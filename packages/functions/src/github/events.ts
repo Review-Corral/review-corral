@@ -22,9 +22,7 @@ const githubWebhookEventSchema = z
   })
   .passthrough();
 
-export type GithubWebhookEventPayload = z.infer<
-  typeof githubWebhookEventSchema
->;
+export type GithubWebhookEventPayload = z.infer<typeof githubWebhookEventSchema>;
 
 export const handler = ApiHandler(async (event, context) => {
   LOGGER.debug(
@@ -32,7 +30,7 @@ export const handler = ApiHandler(async (event, context) => {
     {
       event,
     },
-    { depth: 3 }
+    { depth: 3 },
   );
   if (!(await checkEventWrapper(event))) {
     LOGGER.debug("Event didn't pass check", { event });
@@ -66,7 +64,7 @@ export const handler = ApiHandler(async (event, context) => {
         },
         {
           depth: 4,
-        }
+        },
       );
       return {
         statusCode: 400,

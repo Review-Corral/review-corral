@@ -1,10 +1,5 @@
 import ky from "ky";
-import {
-  AuthHandler,
-  GithubAdapter,
-  OauthBasicConfig,
-  Session,
-} from "sst/node/auth";
+import { AuthHandler, GithubAdapter, OauthBasicConfig, Session } from "sst/node/auth";
 import { fetchUserById, insertUser } from "../../core/dynamodb/fetchers/users";
 import { UserResponse } from "../../core/github/endpointTypes";
 import { Logger } from "../../core/logging";

@@ -35,7 +35,7 @@ export class Logger implements LoggerMethods {
     {
       logOutputOverride,
       forceEmitDebugLogs,
-    }: { logOutputOverride?: LogOutput; forceEmitDebugLogs?: boolean } = {}
+    }: { logOutputOverride?: LogOutput; forceEmitDebugLogs?: boolean } = {},
   ) {
     this.names = [config.environment, config.functionName, name];
     this.logOutputOverride = logOutputOverride;
@@ -54,13 +54,11 @@ export class Logger implements LoggerMethods {
 
   private static getLevelFromEnv(): LogLevel {
     try {
-      return z
-        .nativeEnum(LogLevel)
-        .parse((process.env.LOG_LEVEL ?? "").toLowerCase());
+      return z.nativeEnum(LogLevel).parse((process.env.LOG_LEVEL ?? "").toLowerCase());
     } catch (error) {
       console.warn(
         `Invalid log level, defaulting to ${LogLevel.INFO.toUpperCase()}: ` +
-          `${serializeData({ error }, Logger.colorize)}`
+          `${serializeData({ error }, Logger.colorize)}`,
       );
       return LogLevel.INFO;
     }
@@ -70,22 +68,17 @@ export class Logger implements LoggerMethods {
     level: LogLevel,
     message: string,
     data?: any,
-    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS
+    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS,
   ) {
     if (!this.shouldBeLogged(level)) return;
     const text = `${this.formatPrefix(level)} ${message}`;
-    (this.logOutputOverride ?? Logger.logOutput).log(
-      level,
-      text,
-      data,
-      options
-    );
+    (this.logOutputOverride ?? Logger.logOutput).log(level, text, data, options);
   }
 
   public trace(
     message: string,
     data?: any,
-    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS
+    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS,
   ) {
     this.log(LogLevel.TRACE, message, data, options);
   }
@@ -93,7 +86,7 @@ export class Logger implements LoggerMethods {
   public debug(
     message: string,
     data?: any,
-    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS
+    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS,
   ) {
     this.log(LogLevel.DEBUG, message, data, options);
   }
@@ -101,7 +94,7 @@ export class Logger implements LoggerMethods {
   public info(
     message: string,
     data?: any,
-    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS
+    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS,
   ) {
     this.log(LogLevel.INFO, message, data, options);
   }
@@ -109,7 +102,7 @@ export class Logger implements LoggerMethods {
   public warn(
     message: string,
     data?: any,
-    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS
+    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS,
   ) {
     this.log(LogLevel.WARN, message, data, options);
   }
@@ -124,7 +117,7 @@ export class Logger implements LoggerMethods {
   public error(
     message: string,
     errorOrData?: any,
-    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS
+    options: LogOutputOptions = DEFAULT_LOG_OUTPUT_OPTIONS,
   ): void {
     this.log(LogLevel.ERROR, message, errorOrData, options);
   }

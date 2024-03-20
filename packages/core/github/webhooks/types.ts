@@ -22,5 +22,5 @@ export type BaseGithubWebhookEventHanderArgs = Omit<
 >;
 
 export type GithubWebhookEventHander<EventT> = (
-  args: GithubWebhookEventHanderArgs<EventT>
+  args: GithubWebhookEventHanderArgs<EventT>,
 ) => Promise<void>;

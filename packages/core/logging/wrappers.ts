@@ -2,7 +2,7 @@ import { Logger } from ".";
 
 export const withLoggedFileOutput = async <T>(
   fn: (logFilepath: string) => T,
-  filepath: string
+  filepath: string,
 ): Promise<T> => {
   Logger.configureOutput(filepath);
   try {

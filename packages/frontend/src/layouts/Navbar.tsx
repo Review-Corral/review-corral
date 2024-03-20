@@ -52,11 +52,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                     <div className="rounded-md px-2 py- flex gap-2 items-center">
                       <div className="flex items-center space-x-2">
                         <div className="rounded-md overflow-hidden">
-                          <img
-                            src={activeOrg.avatarUrl}
-                            width={32}
-                            height={32}
-                          />
+                          <img src={activeOrg.avatarUrl} width={32} height={32} />
                         </div>
                         <div>{activeOrg.name}</div>
                       </div>
@@ -102,7 +98,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                                 to={item.href}
                                 className={classNames(
                                   active ? "bg-gray-100" : "",
-                                  "block px-4 py-2 text-sm text-gray-700"
+                                  "block px-4 py-2 text-sm text-gray-700",
                                 )}
                               >
                                 {item.name}

@@ -18,7 +18,7 @@ export const fetchPullRequestById = async ({
     .then(({ data }) => {
       if (!data) {
         throw new Error(
-          `Could not find pull request with id: ${pullRequestId} in repoId: ${repoId}`
+          `Could not find pull request with id: ${pullRequestId} in repoId: ${repoId}`,
         );
       }
       return data;
@@ -26,7 +26,7 @@ export const fetchPullRequestById = async ({
 };
 
 export const insertPullRequest = async (
-  args: PullRequestInsertArgs
+  args: PullRequestInsertArgs,
 ): Promise<PullRequest> =>
   await Db.entities.pullRequest
     .create(args)
@@ -41,7 +41,4 @@ export const updatePullRequest = async ({
   pullRequestId: number;
   repoId: number;
 }) =>
-  await Db.entities.pullRequest
-    .patch({ prId: pullRequestId, repoId })
-    .set(args)
-    .go();
+  await Db.entities.pullRequest.patch({ prId: pullRequestId, repoId }).set(args).go();

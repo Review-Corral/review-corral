@@ -48,8 +48,7 @@ export const getFrontendUrl = (): string | undefined => {
 
 export const getReleaseVersion = (): string => {
   return (
-    process.env.SENTRY_RELEASE ??
-    (!!getIsLocal() ? getCurrentCommitSha() : "UNKNOWN")
+    process.env.SENTRY_RELEASE ?? (!!getIsLocal() ? getCurrentCommitSha() : "UNKNOWN")
   );
 };
 
@@ -58,7 +57,7 @@ export const getReleaseVersion = (): string => {
  * to parsing the function name if the environment variables are not set.
  */
 export const getFriendlyNameAndEnvironment = (
-  name: string | undefined = process.env.AWS_LAMBDA_FUNCTION_NAME
+  name: string | undefined = process.env.AWS_LAMBDA_FUNCTION_NAME,
 ) => {
   const matches = (name ?? "").match(/(\w+)-\w+-\w+-\w+-(\w+?)[A-Z0-9]*-\w+/);
   const matchResults =
@@ -94,9 +93,7 @@ export function getCurrentCommitSha(): string {
  */
 export const getCurrentBranchName = (): string => {
   try {
-    const branchName = execSync("git symbolic-ref --short HEAD")
-      .toString()
-      .trim();
+    const branchName = execSync("git symbolic-ref --short HEAD").toString().trim();
     return branchName;
   } catch (error) {
     console.error("Couldn't get current branch name:", error);

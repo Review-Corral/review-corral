@@ -20,14 +20,14 @@ type ColumnComparison<TColumn extends AnyColumn> =
 
 export function any<TColumn extends AnyColumn>(
   left: TColumn,
-  values: ColumnComparison<TColumn>[]
+  values: ColumnComparison<TColumn>[],
 ) {
   return or(...values.map((v) => eq(left, v)));
 }
 
 export function all<TColumn extends AnyColumn>(
   left: TColumn,
-  values: ColumnComparison<TColumn>[]
+  values: ColumnComparison<TColumn>[],
 ) {
   return and(...values.map((v) => eq(left, v)));
 }

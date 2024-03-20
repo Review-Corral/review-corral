@@ -18,11 +18,7 @@ export default {
     };
   },
   stacks(app) {
-    app
-      .stack(StorageStack)
-      .stack(MainStack)
-      .stack(AuthStack)
-      .stack(FrontendStack);
+    app.stack(StorageStack).stack(MainStack).stack(AuthStack).stack(FrontendStack);
 
     if (app.stage !== Stages.PROD) {
       app.setDefaultRemovalPolicy("destroy");

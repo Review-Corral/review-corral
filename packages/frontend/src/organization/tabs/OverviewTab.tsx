@@ -6,10 +6,7 @@ import { OrgViewProps } from "./shared";
 
 interface OverviewProps extends OrgViewProps {}
 
-export const OverviewTab: FC<OverviewProps> = ({
-  organization,
-  onEdit: setPage,
-}) => {
+export const OverviewTab: FC<OverviewProps> = ({ organization, onEdit: setPage }) => {
   return (
     <div className="space-y-12">
       <Header>Overview</Header>

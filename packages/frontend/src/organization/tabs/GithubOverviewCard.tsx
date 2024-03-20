@@ -81,8 +81,8 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
     return (
       <div className="p-4 border border-grey-200 rounded-md space-y-6 max-w-xl">
         <span>
-          Configure your repositories below to tell Review Corral which
-          repositories to post events for and which ones to ignore.
+          Configure your repositories below to tell Review Corral which repositories to
+          post events for and which ones to ignore.
         </span>
         <Button onClick={onEdit}>Setup Github Repositories</Button>
       </div>
@@ -116,7 +116,7 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
                         : `${verb}ing ${repo.name}`,
                       success: `${repo.name} ${verb}ed`,
                       error: `There wasn an error ${verb}ing ${repo.name}`,
-                    }
+                    },
                   );
                 }}
               />
@@ -124,17 +124,15 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
 
             {/* TODO: in the future the target should be found from a m2m table of Github <-> slack */}
             {/* Only show the Arrows if the slack data has loaded and there's at least one entry */}
-            {slackData != undefined &&
-              slackData.length > 0 &&
-              repo.isEnabled && (
-                <Xarrow
-                  start={repo.repoId.toString()}
-                  end="slack-channel"
-                  showHead={false}
-                  color={"#6366f1"}
-                  strokeWidth={2}
-                />
-              )}
+            {slackData != undefined && slackData.length > 0 && repo.isEnabled && (
+              <Xarrow
+                start={repo.repoId.toString()}
+                end="slack-channel"
+                showHead={false}
+                color={"#6366f1"}
+                strokeWidth={2}
+              />
+            )}
           </div>
         ))}
       </div>

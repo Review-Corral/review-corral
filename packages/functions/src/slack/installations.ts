@@ -33,9 +33,7 @@ export const getSlackInstallations = ApiHandler(async (event, context) => {
     };
   }
 
-  const slackIntegration = await getSlackInstallationsForOrganization(
-    organizationId
-  );
+  const slackIntegration = await getSlackInstallationsForOrganization(organizationId);
 
   return {
     statusCode: 200,

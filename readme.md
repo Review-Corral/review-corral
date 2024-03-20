@@ -24,6 +24,7 @@ base64 -i /path/to/your/private-key.pem | pbcopy
 ```
 
 Example
+
 ```bash
 base64 -i /Users/alex/ssh/review-corral/test-review-corral.2023-12-30.private-key.pem | pbcopy
 ```

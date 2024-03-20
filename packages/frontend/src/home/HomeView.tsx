@@ -23,11 +23,11 @@ export const HomeView: FC<HomeViewProps> = () => {
                 Install the Review Corral Github App
               </div>
               <p className="font-normal text-sm">
-                Click the button below to install the Github App into any of the
-                Github Orgnizations and repositories you want to receive events
-                for. Even if you have installed the app for all repositories in
-                an organization, you can still toggle which repositories to
-                listen to events to in this dashboard at any time.
+                Click the button below to install the Github App into any of the Github
+                Orgnizations and repositories you want to receive events for. Even if
+                you have installed the app for all repositories in an organization, you
+                can still toggle which repositories to listen to events to in this
+                dashboard at any time.
               </p>
               <div className="flex gap-2">
                 <Link to={process.env.NEXT_PUBLIC_GITHUB_APP_URL!}>
@@ -41,8 +41,8 @@ export const HomeView: FC<HomeViewProps> = () => {
         <>
           <Header>Your Organizations</Header>
           <p className="mt-1">
-            Here are the organizations you&apos;ve installed the Review Corral
-            bot on in Github
+            Here are the organizations you&apos;ve installed the Review Corral bot on in
+            Github
           </p>
           <div className="mt-8 inline-flex flex-col gap-2">
             {data?.map((org) => (

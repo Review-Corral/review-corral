@@ -79,20 +79,17 @@ export const handleGithubWebhookEvent = async ({
     const organization = await fetchOrganizationByAccountId(repository.orgId);
 
     if (!organization) {
-      LOGGER.warn(
-        "Couldn't load organization for repository from our database",
-        {
-          repositoryId: event.repository.id,
-          organizationId: repository.orgId,
-        }
-      );
+      LOGGER.warn("Couldn't load organization for repository from our database", {
+        repositoryId: event.repository.id,
+        organizationId: repository.orgId,
+      });
       return;
     }
 
     // TODO: if we want to support multiple slack channels per organization, we'll
     // need to change this.
     const slackIntegration = await getSlackInstallationsForOrganization(
-      repository.orgId
+      repository.orgId,
     ).then(takeFirst);
 
     if (!slackIntegration) {
@@ -101,14 +98,14 @@ export const handleGithubWebhookEvent = async ({
         {
           repositoryId: event.repository.id,
           organizationId: repository.orgId,
-        }
+        },
       );
       return;
     }
 
     const slackClient = new SlackClient(
       slackIntegration.channelId,
-      slackIntegration.accessToken
+      slackIntegration.accessToken,
     );
 
     LOGGER.debug("Loaded handler props, now running event handler", {

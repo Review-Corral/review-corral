@@ -13,7 +13,7 @@ require("dotenv").config({ path: `.env.local` });
 async function sendGitHubWebhookEvent(
   secret: string,
   endpoint: string,
-  payload: object
+  payload: object,
 ): Promise<void> {
   // Convert the payload to a JSON string
   const payloadString = JSON.stringify(payload);
@@ -38,7 +38,7 @@ async function sendGitHubWebhookEvent(
   // Check the response status
   if (!response.ok) {
     console.error(
-      `Failed to send webhook event: ${response.status} - ${response.statusText}`
+      `Failed to send webhook event: ${response.status} - ${response.statusText}`,
     );
   } else {
     console.log("Webhook event sent successfully");
@@ -79,5 +79,5 @@ if (!secret) {
 }
 
 sendGitHubWebhookEvent(secret, endpoint, payload).catch((error) =>
-  console.error("Error sending webhook event:", error)
+  console.error("Error sending webhook event:", error),
 );

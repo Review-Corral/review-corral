@@ -28,7 +28,10 @@ const LOGGER = new Logger("core.SlackClient");
 export class SlackClient {
   readonly client: WebClient;
 
-  constructor(readonly channelId: string, readonly slackToken: string) {
+  constructor(
+    readonly channelId: string,
+    readonly slackToken: string,
+  ) {
     this.client = getSlackWebClient();
   }
 
@@ -55,7 +58,7 @@ export class SlackClient {
           error,
           payload,
         },
-        { depth: 10 }
+        { depth: 10 },
       );
     }
   }
@@ -63,7 +66,7 @@ export class SlackClient {
   async postPrMerged(
     body: PullRequestClosedEvent,
     threadTs: string,
-    slackUsername: string
+    slackUsername: string,
   ) {
     await this.postMessage({
       message: {
@@ -75,7 +78,7 @@ export class SlackClient {
 
     if (threadTs) {
       console.debug(
-        `Going to update message ts: ${threadTs} for channel ${this.channelId}`
+        `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
       );
       const payload: ChatUpdateArguments = {
         channel: this.channelId,
@@ -100,7 +103,7 @@ export class SlackClient {
   async postConvertedToDraft(
     body: PullRequestEvent,
     threadTs: string,
-    slackUsername: string
+    slackUsername: string,
   ) {
     await this.postMessage({
       message: {
@@ -111,7 +114,7 @@ export class SlackClient {
     });
 
     console.debug(
-      `Going to update message ts: ${threadTs} for channel ${this.channelId}`
+      `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
     );
 
     const defaultPayload = await this.getBaseChatUpdateArguments({
@@ -128,13 +131,11 @@ export class SlackClient {
           this.getConvertedToDraftAttachment("Pull request marked as draft"),
         ],
       });
-      console.debug(
-        "Succesfully updated message with converted to draft status"
-      );
+      console.debug("Succesfully updated message with converted to draft status");
     } catch (error) {
       console.error(
         "Got error updating thread with converted to draft status: ",
-        error
+        error,
       );
     }
   }
@@ -170,7 +171,7 @@ export class SlackClient {
     });
 
     console.debug(
-      `Going to update message ts: ${threadTs} for channel ${this.channelId}`
+      `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
     );
 
     const defaultPayload = await this.getBaseChatUpdateArguments({
@@ -234,7 +235,7 @@ export class SlackClient {
   async postPrClosed(
     body: PullRequestClosedEvent,
     threadTs: string,
-    slackUsername: string
+    slackUsername: string,
   ) {
     await this.postMessage({
       message: {
@@ -266,7 +267,7 @@ export class SlackClient {
   async postReviewRequested(
     body: PullRequestClosedEvent,
     threadTs: string,
-    slackUsername: string
+    slackUsername: string,
   ) {
     return await this.postMessage({
       message: {
@@ -294,7 +295,7 @@ export class SlackClient {
     review: PullRequestReview,
     login: string,
     threadTs: string,
-    slackUsername: string
+    slackUsername: string,
   ) {
     const getReviewText = (review: PullRequestReview) => {
       switch (review.state) {
@@ -332,14 +333,14 @@ export class SlackClient {
 
   private async getPrOpenedMessage(
     body: PullRequestEvent,
-    slackUsername: string
+    slackUsername: string,
   ): Promise<string> {
     return `Pull request opened by ${slackUsername}`;
   }
 
   private async getPrOpenedBaseAttachment(
     body: PullRequestEvent,
-    slackUsername: string
+    slackUsername: string,
   ) {
     return {
       blocks: [
@@ -423,15 +424,13 @@ export class SlackClient {
 
   async postPrReady(
     body: PullRequestEventOpenedOrReadyForReview,
-    slackUsername: string
+    slackUsername: string,
   ): Promise<ChatPostMessageResponse | undefined> {
     try {
       return this.postMessage({
         message: {
           text: await this.getPrOpenedMessage(body, slackUsername),
-          attachments: [
-            await this.getPrOpenedBaseAttachment(body, slackUsername),
-          ],
+          attachments: [await this.getPrOpenedBaseAttachment(body, slackUsername)],
         },
         threadTs: undefined,
       });
@@ -456,7 +455,7 @@ export class SlackClient {
   }
 
   private getConvertedToDraftAttachment(
-    text: string = "Pull request converted back to draft"
+    text: string = "Pull request converted back to draft",
   ): MessageAttachment {
     return {
       color: "#D9CD27",

@@ -24,10 +24,10 @@
     "baseUrl": ".",
     "paths": {
       "@core/*": ["../core/*"],
-      "@components/*": ["./src/components/*"], 
+      "@components/*": ["./src/components/*"],
       "@lib/*": ["./src/lib/*"]
     }
   },
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }],
+  "references": [{ "path": "./tsconfig.node.json" }]
 }

@@ -19,7 +19,7 @@ export const fetchUserById = async (id: number): Promise<User | null> => {
  */
 export const insertUser = async (
   user: UserResponse,
-  accessToken: string
+  accessToken: string,
 ): Promise<User> => {
   return await Db.entities.user
     .create({

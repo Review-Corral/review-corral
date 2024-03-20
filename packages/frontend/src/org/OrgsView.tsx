@@ -28,9 +28,7 @@ export const OrgsView: FC<OrgsViewProps> = () => {
       <ul>
         {data?.map((installation) => (
           <li key={installation.orgId}>
-            <Link to={`/org/${installation.installationId}`}>
-              {installation.name}
-            </Link>
+            <Link to={`/org/${installation.installationId}`}>{installation.name}</Link>
           </li>
         ))}
       </ul>

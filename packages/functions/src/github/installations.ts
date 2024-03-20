@@ -30,10 +30,7 @@ export const getInstallations = ApiHandler(async (event, context) => {
 
   LOGGER.debug("Installations fetch response: ", { installations });
 
-  const organizations: Organization[] = await getOrganizations(
-    user,
-    installations
-  );
+  const organizations: Organization[] = await getOrganizations(user, installations);
 
   return {
     statusCode: 200,
@@ -59,9 +56,7 @@ async function getOrganizations(user: User, installations: InstallationsData) {
       continue;
     }
 
-    const organization = await fetchOrganizationByAccountId(
-      installation.account.id
-    );
+    const organization = await fetchOrganizationByAccountId(installation.account.id);
 
     if (organization) {
       LOGGER.debug("Found organization for installation", { organization });
@@ -78,7 +73,7 @@ async function getOrganizations(user: User, installations: InstallationsData) {
       // that the user is part of.
       if (!usersOrganizationsIds.includes(organization.orgId)) {
         LOGGER.info(
-          "User is not part of organization. Associating user with organization..."
+          "User is not part of organization. Associating user with organization...",
         );
         await addOrganizationMember({ orgId: organization.orgId, user });
       }

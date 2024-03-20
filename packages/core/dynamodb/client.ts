@@ -26,5 +26,5 @@ export const Db = new Service(
     user: UserEntity,
     slack: SlackEntity,
   },
-  Configuration
+  Configuration,
 );

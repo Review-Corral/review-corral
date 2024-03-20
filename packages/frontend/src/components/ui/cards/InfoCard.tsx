@@ -12,9 +12,7 @@ export const InfoCard: React.FC<CardProps> = ({ message, subMessage }) => {
           <div className="ml-3">
             <h3 className="text-sm font-medium text-blue-800">{message}</h3>
             {subMessage && (
-              <div className="text-sm font-light text-blue-800 pt-1">
-                {subMessage}
-              </div>
+              <div className="text-sm font-light text-blue-800 pt-1">{subMessage}</div>
             )}
           </div>
         </div>

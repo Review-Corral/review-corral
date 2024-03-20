@@ -15,8 +15,9 @@ const setRepositoryActiveStatusSchema = z.object({
 });
 
 export const handler = ApiHandler(async (event, context) => {
-  const { repositoryId, organizationId } =
-    setRepositoryActiveStatusSchema.parse(event.pathParameters);
+  const { repositoryId, organizationId } = setRepositoryActiveStatusSchema.parse(
+    event.pathParameters,
+  );
   const { user, error } = await useUser();
 
   if (!user) {

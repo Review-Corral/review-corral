@@ -2,7 +2,7 @@ import { Db } from "../client";
 import { Repository, RepositoryInsertArgs } from "../entities/types";
 
 export const fetchRepositoriesForOrganization = async (
-  organizationId: number
+  organizationId: number,
 ): Promise<Repository[]> =>
   await Db.entities.repository.query
     .primary({
@@ -14,7 +14,7 @@ export const fetchRepositoriesForOrganization = async (
     .then(({ data }) => data);
 
 export const insertRepository = async (
-  args: RepositoryInsertArgs
+  args: RepositoryInsertArgs,
 ): Promise<Repository> => {
   return await Db.entities.repository
     .create(args)
@@ -72,9 +72,7 @@ export const fetchRepository = async ({
 }): Promise<Repository> => {
   const result = await safeFetchRepository({ orgId, repoId });
   if (!result) {
-    throw new Error(
-      `Repository not found for orgId: ${orgId} and repoId: ${repoId}`
-    );
+    throw new Error(`Repository not found for orgId: ${orgId} and repoId: ${repoId}`);
   }
 
   return result;

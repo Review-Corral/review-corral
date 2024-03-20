@@ -9,17 +9,7 @@ export enum MimeType {
 
 // Not exhaustive; can be added to as needed
 export type StatusCode2XX = 200 | 201 | 202 | 204;
-export type StatusCode4XX =
-  | 400
-  | 401
-  | 403
-  | 404
-  | 405
-  | 406
-  | 408
-  | 409
-  | 410
-  | 429;
+export type StatusCode4XX = 400 | 401 | 403 | 404 | 405 | 406 | 408 | 409 | 410 | 429;
 export type StatusCode5XX = 500 | 501 | 502 | 503 | 504;
 export type StatusCode = StatusCode2XX | StatusCode4XX | StatusCode5XX;
 

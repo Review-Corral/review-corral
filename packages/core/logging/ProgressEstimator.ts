@@ -32,8 +32,7 @@ class ProgressEstimator {
   public getAverageTimePerItemString() {
     const averageTimePerItem = this.getAverageTimePerItem();
     return (
-      formatDistance(averageTimePerItem, 0, { includeSeconds: true }) +
-      " per item"
+      formatDistance(averageTimePerItem, 0, { includeSeconds: true }) + " per item"
     );
   }
 
@@ -58,10 +57,7 @@ class ProgressEstimator {
   public getETAString() {
     const eta = this.getETA();
     const etaDate = new Date(Date.now() + eta);
-    return (
-      formatDistance(etaDate, new Date(), { includeSeconds: true }) +
-      " remaining"
-    );
+    return formatDistance(etaDate, new Date(), { includeSeconds: true }) + " remaining";
   }
 
   public toString() {
