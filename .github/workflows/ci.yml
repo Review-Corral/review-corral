@@ -39,6 +39,8 @@ jobs:
           cache: "pnpm"
       - name: Install Pnpm Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Build types
+        run: pnpm build:types
       - run: pnpm typecheck
 
   unit-tests:

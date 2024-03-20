@@ -7,6 +7,7 @@
     "dev": "sst dev",
     "build": "sst build",
     "build:core": "tsc -p ./packages/core/tsconfig.json",
+    "build:types": "sst types --profile test --stage test",
     "build:core:watch": "p build:core --watch",
     "deploy": "sst deploy",
     "remove": "sst remove",
