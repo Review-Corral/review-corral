@@ -11,6 +11,11 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
 > = async ({ event, slackClient, ...props }) => {
   LOGGER.debug("Hanlding Issue comment event with action: ", event.action);
 
+  if (event.comment.user.type === "Bot") {
+    LOGGER.debug("Issue comment is from a bot--skipping");
+    return;
+  }
+
   if (!event.issue.pull_request?.url) {
     LOGGER.debug("Issue comment is NOT on a pull request");
     return;
