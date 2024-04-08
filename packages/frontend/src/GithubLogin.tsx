@@ -1,6 +1,7 @@
 import ky from "ky";
 import React from "react";
 import { useMutation } from "react-query";
+import githubLogo from "../public/github-mark/github-mark-white.svg";
 
 interface GithubButtonProps {}
 
@@ -21,11 +22,7 @@ const GithubLoginButton: React.FC<GithubButtonProps> = () => {
         className="cursor-pointer border-white border rounded-lg bg-black hover:opacity-80 text-white text-center px-6 py-4 max-w-80"
       >
         <div className="flex items-center justify-left gap-8">
-          <img
-            src="../public/github-mark/github-mark-white.svg"
-            height={12}
-            width={30}
-          />
+          <img src={githubLogo} height={12} width={30} />
           Sign in with Github
         </div>
       </div>
