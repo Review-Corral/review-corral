@@ -1,6 +1,6 @@
 import { useState } from "react";
 import "./App.css";
-import GithubButton from "./GithubLogin";
+import GithubLoginButton from "./GithubLogin";
 
 function App() {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -9,7 +9,7 @@ function App() {
   return (
     <>
       <div>{import.meta.env.VITE_API_URL ?? "none"}</div>
-      <GithubButton />
+      <GithubLoginButton />
       {loginError && (
         <div className="mt-6">
           <div className="relative">

@@ -10,11 +10,11 @@ import {
   createBrowserRouter,
   redirect,
 } from "react-router-dom";
-import App from "./App.tsx";
 import { auth_access_token_key } from "./auth/const.ts";
 import { userIsLoggedIn } from "./auth/utils.ts";
 import { HomeView } from "./home/HomeView.tsx";
 import "./index.css";
+import LoginPage from "./login.tsx";
 import { OrgsView } from "./org/OrgsView.tsx";
 import { OrgView } from "./organization/OrgView.tsx";
 
@@ -32,7 +32,7 @@ const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {
 const router = createBrowserRouter([
   {
     path: "/login",
-    element: <App />,
+    element: <LoginPage />,
     loader: async () => {
       if (userIsLoggedIn()) {
         return redirect("/");

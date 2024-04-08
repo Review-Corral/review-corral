@@ -4,7 +4,7 @@ import { useMutation } from "react-query";
 
 interface GithubButtonProps {}
 
-const GithubButton: React.FC<GithubButtonProps> = () => {
+const GithubLoginButton: React.FC<GithubButtonProps> = () => {
   const authUri = import.meta.env.VITE_AUTH_URL;
   console.log({ authUri });
   const mutation = useMutation({
@@ -18,12 +18,19 @@ const GithubButton: React.FC<GithubButtonProps> = () => {
     <div>
       <div
         onClick={() => mutation.mutate()}
-        className="underline cursor-pointer p-1 border-white border rounded-md"
+        className="cursor-pointer border-white border rounded-lg bg-black hover:opacity-80 text-white text-center px-6 py-4 max-w-80"
       >
-        Login with Github
+        <div className="flex items-center justify-left gap-8">
+          <img
+            src="../public/github-mark/github-mark-white.svg"
+            height={12}
+            width={30}
+          />
+          Sign in with Github
+        </div>
       </div>
     </div>
   );
 };
 
-export default GithubButton;
+export default GithubLoginButton;
