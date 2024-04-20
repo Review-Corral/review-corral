@@ -2,7 +2,7 @@ import { ColumnDef } from "@tanstack/react-table";
 
 import { DataTableColumnHeader } from "@components/table/DataTableColumnHeader";
 import { Member } from "@core/dynamodb/entities/types";
-import { cn } from "@lib/utils";
+import { cn } from "@shadcn/lib/utils";
 
 export const columns: ColumnDef<Member>[] = [
   {

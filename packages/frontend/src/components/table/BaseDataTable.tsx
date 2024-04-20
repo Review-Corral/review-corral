@@ -5,7 +5,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table";
+} from "@shadcn/components/ui/table";
 import { Table as ReactTable, flexRender } from "@tanstack/react-table";
 
 export interface BaseDataTableProps<TData> {

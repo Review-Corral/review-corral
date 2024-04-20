@@ -1,7 +1,7 @@
-import { Button } from "@components/ui/button";
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
-import { Switch } from "@components/ui/switch";
 import { Organization } from "@core/dynamodb/entities/types";
+import { Button } from "@shadcn/components/ui/button";
+import { Switch } from "@shadcn/components/ui/switch";
 import { Github } from "lucide-react";
 import { FC } from "react";
 import toast from "react-hot-toast";

@@ -1,5 +1,5 @@
-import { Button } from "@components/ui/button";
 import { Header } from "@components/ui/header";
+import { Button } from "@shadcn/components/ui/button";
 import { FC } from "react";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";

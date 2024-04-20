@@ -46,7 +46,7 @@ const orgViewParamsSchema = z.object({
   orgId: z.string().transform(Number),
 });
 
-const orgViewSearchParamsSchema = PageSchema.default("overview");
+const orgViewSearchParamsSchema = PageSchema.nullish().default("overview");
 
 export const OrgView: FC<OrgViewProps> = () => {
   const loaderData = useLoaderData();
