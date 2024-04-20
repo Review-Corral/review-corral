@@ -5,7 +5,7 @@ import { getSessionToken } from "src/auth/getSessionToken";
 
 export const ORGANIZATION_MEMBERS_QUERY_KEY = "organizationMembers";
 
-export const useOrganizationMembers = (orgId: string) => {
+export const useOrganizationMembers = (orgId: number) => {
   return useQuery({
     queryKey: [ORGANIZATION_MEMBERS_QUERY_KEY],
     queryFn: async () => {

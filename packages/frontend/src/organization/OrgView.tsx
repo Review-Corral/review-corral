@@ -10,7 +10,7 @@ import { DashboardLayout } from "src/layouts/DashboardLayout";
 import { useOrganizations } from "src/org/useOrganizations";
 import * as z from "zod";
 import { OverviewTab } from "./tabs/OverviewTab";
-import { useOrganizationMembers } from "./useOrganizationMembers";
+import { UsersTab } from "./tabs/UsersTab";
 
 interface OrgViewProps {}
 
@@ -43,15 +43,10 @@ const routes: SubNav[] = [
 ];
 
 const orgViewParamsSchema = z.object({
-  orgId: z.string(),
+  orgId: z.string().transform(Number),
 });
 
-const orgViewSearchParamsSchema = z
-  .object({
-    page: PageSchema.optional().default("overview"),
-  })
-  .optional()
-  .default({ page: "overview" });
+const orgViewSearchParamsSchema = PageSchema.default("overview");
 
 export const OrgView: FC<OrgViewProps> = () => {
   const loaderData = useLoaderData();
@@ -59,14 +54,12 @@ export const OrgView: FC<OrgViewProps> = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchParams, _] = useSearchParams();
 
-  const { page } = orgViewSearchParamsSchema.parse(searchParams);
+  const page = orgViewSearchParamsSchema.parse(searchParams.get("page"));
   const { orgId } = orgViewParamsSchema.parse(loaderData);
 
   const { data, isLoading } = useOrganizations();
 
   const [organization, setOrganization] = useState<Organization | undefined>(undefined);
-
-  const orgMembers = useOrganizationMembers(orgId);
 
   const navigate = useNavigate();
   const [_page, setPage] = useState<Page>(page);
@@ -148,7 +141,7 @@ export const OrgView: FC<OrgViewProps> = () => {
               return <div>Slack</div>;
             // return <SlackTab {...tabProps} />;
             case "usernames":
-              return <div>Usernames</div>;
+              return <UsersTab orgId={orgId} />;
             // return <UsernamesTab {...tabProps} />;
             default:
               return <OverviewTab {...tabProps} />;
