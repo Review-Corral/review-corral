@@ -10,6 +10,7 @@ import { DashboardLayout } from "src/layouts/DashboardLayout";
 import { useOrganizations } from "src/org/useOrganizations";
 import * as z from "zod";
 import { OverviewTab } from "./tabs/OverviewTab";
+import { useOrganizationMembers } from "./useOrganizationMembers";
 
 interface OrgViewProps {}
 
@@ -64,6 +65,8 @@ export const OrgView: FC<OrgViewProps> = () => {
   const { data, isLoading } = useOrganizations();
 
   const [organization, setOrganization] = useState<Organization | undefined>(undefined);
+
+  const orgMembers = useOrganizationMembers(orgId);
 
   const navigate = useNavigate();
   const [_page, setPage] = useState<Page>(page);

@@ -3,12 +3,15 @@ import ky from "ky";
 import { FC } from "react";
 import { useQuery } from "react-query";
 import { useParams } from "react-router-dom";
+import { useOrganizationMembers } from "src/organization/useOrganizationMembers";
 import { auth_access_token_key } from "../auth/const";
 
 interface OrgViewProps {}
 
 export const OrgView: FC<OrgViewProps> = () => {
   const { orgId } = useParams();
+
+  const orgMembers = useOrganizationMembers(orgId ?? "");
 
   const { isLoading } = useQuery({
     queryKey: ["respositories", orgId],

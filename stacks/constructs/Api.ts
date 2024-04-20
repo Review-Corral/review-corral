@@ -49,6 +49,10 @@ export class Api extends Construct {
           }),
         }),
 
+        ...buildPaths("/org/{organizationId}", {
+          "GET /members": "packages/functions/src/organization/getMembers.handler",
+        }),
+
         ...buildPaths("/slack", {
           "GET /oauth": "packages/functions/src/slack/oauth.handler",
           "GET /{organizationId}/installations":
