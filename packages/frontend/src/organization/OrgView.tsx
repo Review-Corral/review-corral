@@ -10,7 +10,7 @@ import { DashboardLayout } from "src/layouts/DashboardLayout";
 import { useOrganizations } from "src/org/useOrganizations";
 import * as z from "zod";
 import { OverviewTab } from "./tabs/OverviewTab";
-import { UsersTab } from "./tabs/UsersTab";
+import { UsersTab } from "./tabs/users/UsersTab";
 
 interface OrgViewProps {}
 

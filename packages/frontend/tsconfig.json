@@ -24,10 +24,14 @@
     "baseUrl": ".",
     "paths": {
       "@core/*": ["../core/*"],
-      "@components/*": ["./src/components/*"],
-      "@lib/*": ["./src/lib/*"]
+      "@components/*": ["./src/components/*"]
     }
   },
-  "include": ["src"],
+  "include": [
+    "src",
+    "@shadcn/components/ui/switch.tsx",
+    "@shadcn/components/ui/button.tsx",
+    "@shadcn/lib/utils.ts"
+  ],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
