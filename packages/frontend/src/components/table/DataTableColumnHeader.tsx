@@ -19,7 +19,7 @@ export function DataTableColumnHeader<TData, TValue>({
   return (
     <div
       className={cn(
-        `flex items-center py-4 px-3 space-x-2 text-fontGrey uppercase font-semiBold bg-blue-50 ${
+        `flex items-center py-4 px-3 space-x-2 text-fontGrey font-semiBold bg-blue-50 ${
           canSort ? "cursor-pointer" : "cursor-default"
         }`,
         className,
