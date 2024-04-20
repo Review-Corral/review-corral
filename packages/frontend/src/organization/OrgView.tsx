@@ -14,7 +14,7 @@ import { UsersTab } from "./tabs/users/UsersTab";
 
 interface OrgViewProps {}
 
-const PageSchema = z.enum(["github", "slack", "usernames", "overview"]);
+const PageSchema = z.enum(["github", "slack", "users", "overview"]);
 
 export type Page = z.infer<typeof PageSchema>;
 
@@ -37,8 +37,8 @@ const routes: SubNav[] = [
     page: "slack",
   },
   {
-    text: "Usernames",
-    page: "usernames",
+    text: "Users",
+    page: "users",
   },
 ];
 
@@ -46,7 +46,7 @@ const orgViewParamsSchema = z.object({
   orgId: z.string().transform(Number),
 });
 
-const orgViewSearchParamsSchema = PageSchema.nullish().default("overview");
+const orgViewSearchParamsSchema = PageSchema.optional().default("overview");
 
 export const OrgView: FC<OrgViewProps> = () => {
   const loaderData = useLoaderData();
@@ -54,7 +54,7 @@ export const OrgView: FC<OrgViewProps> = () => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchParams, _] = useSearchParams();
 
-  const page = orgViewSearchParamsSchema.parse(searchParams.get("page"));
+  const pageParse = orgViewSearchParamsSchema.safeParse(searchParams.get("page"));
   const { orgId } = orgViewParamsSchema.parse(loaderData);
 
   const { data, isLoading } = useOrganizations();
@@ -62,7 +62,9 @@ export const OrgView: FC<OrgViewProps> = () => {
   const [organization, setOrganization] = useState<Organization | undefined>(undefined);
 
   const navigate = useNavigate();
-  const [_page, setPage] = useState<Page>(page);
+  const [_page, setPage] = useState<Page>(
+    pageParse.success ? pageParse.data : "overview",
+  );
 
   const setPageWrapper = (page: Page): void => {
     if (organization) {
@@ -140,7 +142,7 @@ export const OrgView: FC<OrgViewProps> = () => {
             case "slack":
               return <div>Slack</div>;
             // return <SlackTab {...tabProps} />;
-            case "usernames":
+            case "users":
               return <UsersTab orgId={orgId} />;
             // return <UsernamesTab {...tabProps} />;
             default:
