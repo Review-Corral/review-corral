@@ -1,6 +1,6 @@
 import { fetchOrganizationById } from "@core/dynamodb/fetchers/organizations";
 import { getSlackInstallationsForOrganization } from "@core/dynamodb/fetchers/slack";
-import { Logger } from "@core/logging";
+import { Logger } from "@domain/logging";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";

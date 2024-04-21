@@ -8,7 +8,7 @@ import {
 } from "@core/dynamodb/fetchers/organizations";
 import { InstallationsData } from "@core/github/endpointTypes";
 import { getUserInstallations } from "@core/github/fetchers";
-import { Logger } from "@core/logging";
+import { Logger } from "@domain/logging";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 

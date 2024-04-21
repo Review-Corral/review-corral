@@ -3,8 +3,8 @@ import {
   handleGithubWebhookEvent,
 } from "@core/github/webhooks";
 import { verifyGithubWebhookSecret } from "@core/github/webhooks/verifyEvent";
-import { Logger } from "@core/logging";
 import { assertVarExists } from "@core/utils/assert";
+import { Logger } from "@domain/logging";
 import { WebhookEvent } from "@octokit/webhooks-types";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { ApiHandler } from "sst/node/api";
