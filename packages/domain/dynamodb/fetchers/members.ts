@@ -1,5 +1,5 @@
+import { Member, User } from "@core/dynamodb/entities/types";
 import { Db } from "../client";
-import { Member, User } from "../entities/types";
 
 export const getOrganizationMembers = async (orgId: number): Promise<Member[]> => {
   return await Db.entities.member.query

@@ -1,7 +1,11 @@
 import { Db } from "../client";
 
+import {
+  Organization,
+  OrganizationInsertArgs,
+  User,
+} from "@core/dynamodb/entities/types";
 import { Logger } from "../../logging";
-import { Organization, OrganizationInsertArgs, User } from "../entities/types";
 import { addOrganizationMember } from "./members";
 
 const LOGGER = new Logger("fetchers.organizations");
