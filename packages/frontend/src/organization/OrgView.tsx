@@ -29,14 +29,6 @@ const routes: SubNav[] = [
     page: "overview",
   },
   {
-    text: "Github",
-    page: "github",
-  },
-  {
-    text: "Slack",
-    page: "slack",
-  },
-  {
     text: "Users",
     page: "users",
   },
@@ -136,12 +128,6 @@ export const OrgView: FC<OrgViewProps> = () => {
           const tabProps = { organization, onEdit: setPageWrapper };
 
           switch (_page) {
-            case "github":
-              return <div>Github</div>;
-            // return <GithubTab {...tabProps} />;
-            case "slack":
-              return <div>Slack</div>;
-            // return <SlackTab {...tabProps} />;
             case "users":
               return <UsersTab orgId={orgId} />;
             // return <UsernamesTab {...tabProps} />;

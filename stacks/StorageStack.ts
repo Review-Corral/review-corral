@@ -36,6 +36,7 @@ export function StorageStack({ stack, app }: StackContext) {
         sortKey: "lsi1sk",
       },
     },
+    timeToLiveAttribute: "expireAt",
   });
 
   return { table };
