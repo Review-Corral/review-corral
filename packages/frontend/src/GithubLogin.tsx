@@ -10,6 +10,7 @@ const GithubLoginButton: React.FC<GithubButtonProps> = () => {
   console.log({ authUri });
   const mutation = useMutation({
     mutationFn: async () => {
+      console.log("logging in");
       const payload = await ky.get(authUri).json<{ github: string }>();
       window.open(payload.github, "_self");
     },

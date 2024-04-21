@@ -11,6 +11,9 @@ interface UsersTabProps {
 export const UsersTab: FC<UsersTabProps> = ({ orgId }) => {
   const orgMembers = useOrganizationMembers(orgId);
 
+  // TODO: enable this to automatically get Slack user IDs
+  // const slackInstallMembers = useSlackUsers(orgId);
+
   return (
     <SharedLayout title="Users">
       {orgMembers.data && (

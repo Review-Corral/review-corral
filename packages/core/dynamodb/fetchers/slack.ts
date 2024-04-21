@@ -1,3 +1,4 @@
+import { SlackClient } from "../../slack/SlackClient";
 import { Db } from "../client";
 import { SlackIntegration, SlackIntegrationInsertArgs } from "../entities/types";
 
@@ -17,4 +18,19 @@ export const insertSlackIntegration = async (args: SlackIntegrationInsertArgs) =
     .create(args)
     .go()
     .then(({ data }) => data);
+};
+
+export type SlackIntegrationUsers = Awaited<
+  ReturnType<typeof SlackClient.prototype.client.users.list>
+>;
+
+export const getSlackInstallationUsers = async (
+  slackIntegration: SlackIntegration,
+): Promise<SlackIntegrationUsers> => {
+  const slackClient = new SlackClient(
+    slackIntegration.channelId,
+    slackIntegration.accessToken,
+  );
+
+  return await slackClient.client.users.list();
 };
