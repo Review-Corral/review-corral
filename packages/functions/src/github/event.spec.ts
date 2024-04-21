@@ -1,4 +1,4 @@
-import { handleGithubWebhookEvent } from "@core/github/webhooks";
+import { handleGithubWebhookEvent } from "@domain/github/webhooks";
 import { APIGatewayProxyEventV2, Context } from "aws-lambda";
 import { beforeEach } from "node:test";
 import { describe, expect, it, vi } from "vitest";

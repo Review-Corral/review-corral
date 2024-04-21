@@ -13,8 +13,8 @@ import {
   WebClient,
 } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
+import { assertVarExists } from "../../core/utils/assert";
 import { Logger } from "../logging";
-import { assertVarExists } from "../utils/assert";
 
 export type PullRequestEventOpenedOrReadyForReview =
   | PullRequestOpenedEvent

@@ -1,4 +1,4 @@
-import { getInstallationAccessToken } from "@core/github/fetchers";
+import { getInstallationAccessToken } from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
 
 const LOGGER = new Logger("admin/installationAccessToken");
