@@ -15,8 +15,8 @@ import { userIsLoggedIn } from "./auth/utils.ts";
 import { HomeView } from "./home/HomeView.tsx";
 import "./index.css";
 import LoginPage from "./login.tsx";
-import { OrgsView } from "./org/OrgsView.tsx";
 import { OrgView } from "./organization/OrgView.tsx";
+import { OrgsView } from "./organization/OrgsView.tsx";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {

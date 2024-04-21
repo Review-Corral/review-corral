@@ -7,7 +7,7 @@ import { FC } from "react";
 import toast from "react-hot-toast";
 import Xarrow from "react-xarrows";
 import { useSetRepoActive } from "src/github/useRepos";
-import { useOrganizationRepositories } from "src/org/useOrgRepos";
+import { useOrganizationRepositories } from "src/organization/useOrgRepos";
 import { useSlackIntegrations } from "src/slack/useSlackIntegrations";
 import { OrgViewProps } from "./shared";
 
