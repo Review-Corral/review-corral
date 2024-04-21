@@ -10,13 +10,13 @@ import {
   createBrowserRouter,
   redirect,
 } from "react-router-dom";
-import { auth_access_token_key } from "./auth/const.ts";
-import { userIsLoggedIn } from "./auth/utils.ts";
-import { HomeView } from "./home/HomeView.tsx";
+import { auth_access_token_key } from "./auth/const";
+import { userIsLoggedIn } from "./auth/utils";
+import { HomeView } from "./home/HomeView";
 import "./index.css";
-import LoginPage from "./login.tsx";
-import { OrgView } from "./organization/OrgView.tsx";
-import { OrgsView } from "./organization/OrgsView.tsx";
+import LoginPage from "./login";
+import { OrgView } from "./organization/OrgView";
+import { OrgsView } from "./organization/OrgsView";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {
