@@ -2,7 +2,7 @@ import ky from "ky";
 import { useQuery } from "react-query";
 import { getSessionToken } from "src/auth/getSessionToken";
 // THis is super hacky, but gets the job done for now
-import { SlackIntegrationUsers } from "../../../../../domain/slack/types";
+import { SlackUser } from "@core/dynamodb/entities/types";
 
 export const useSlackUsers = (orgId: number) =>
   useQuery({
@@ -14,7 +14,7 @@ export const useSlackUsers = (orgId: number) =>
             Authorization: `Bearer ${getSessionToken()}`,
           },
         })
-        .json<SlackIntegrationUsers>();
+        .json<SlackUser[]>();
     },
     staleTime: 1000 * 60 * 2, // 2 minutes,
   });
