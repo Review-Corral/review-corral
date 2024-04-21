@@ -1,5 +1,5 @@
+import { Repository, RepositoryInsertArgs } from "@core/dynamodb/entities/types";
 import { Db } from "../client";
-import { Repository, RepositoryInsertArgs } from "../entities/types";
 
 export const fetchRepositoriesForOrganization = async (
   organizationId: number,

@@ -1,9 +1,9 @@
-import { Db } from "../client";
 import {
   PullRequest,
   PullRequestInsertArgs,
   PullRequestUpdateArgs,
-} from "../entities/types";
+} from "@core/dynamodb/entities/types";
+import { Db } from "../client";
 
 export const fetchPullRequestById = async ({
   pullRequestId,

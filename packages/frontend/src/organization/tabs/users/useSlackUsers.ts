@@ -1,4 +1,4 @@
-import { SlackIntegrationUsers } from "@core/dynamodb/fetchers/slack";
+import { SlackIntegrationUsers } from "@core/slack/types";
 import ky from "ky";
 import { useQuery } from "react-query";
 import { getSessionToken } from "src/auth/getSessionToken";

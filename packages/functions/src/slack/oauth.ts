@@ -1,5 +1,5 @@
-import { insertSlackIntegration } from "@core/dynamodb/fetchers/slack";
 import { assertVarExists } from "@core/utils/assert";
+import { insertSlackIntegration } from "@domain/dynamodb/fetchers/slack";
 import { Logger } from "@domain/logging";
 import ky from "ky";
 import { ApiHandler } from "sst/node/api";

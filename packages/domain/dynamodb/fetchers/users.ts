@@ -1,7 +1,7 @@
+import { User } from "@core/dynamodb/entities/types";
 import { UserResponse } from "../../github/endpointTypes";
 import { Logger } from "../../logging";
 import { Db } from "../client";
-import { User } from "../entities/types";
 
 const LOGGER = new Logger("fetchers.users");
 

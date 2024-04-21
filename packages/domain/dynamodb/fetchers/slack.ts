@@ -1,6 +1,10 @@
-import { SlackClient } from "../../slack/SlackClient";
+import {
+  SlackIntegration,
+  SlackIntegrationInsertArgs,
+} from "@core/dynamodb/entities/types";
+import { SlackClient } from "@core/slack/SlackClient";
+import { SlackIntegrationUsers } from "@core/slack/types";
 import { Db } from "../client";
-import { SlackIntegration, SlackIntegrationInsertArgs } from "../entities/types";
 
 export const getSlackInstallationsForOrganization = async (
   organizationId: number,
@@ -19,10 +23,6 @@ export const insertSlackIntegration = async (args: SlackIntegrationInsertArgs) =
     .go()
     .then(({ data }) => data);
 };
-
-export type SlackIntegrationUsers = Awaited<
-  ReturnType<typeof SlackClient.prototype.client.users.list>
->;
 
 export const getSlackInstallationUsers = async (
   slackIntegration: SlackIntegration,
