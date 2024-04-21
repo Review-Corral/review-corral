@@ -12,6 +12,8 @@ import { Member } from "@core/dynamodb/entities/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { FC, useMemo } from "react";
 import {
+  Control,
+  Controller,
   FieldArrayWithId,
   UseFormRegister,
   useFieldArray,
@@ -45,8 +47,8 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({ data, slackUsers }) =>
   const onSubmit = (data: FormValues) => console.log(data);
 
   const columns = useMemo(
-    () => getColumns(slackUsers, register),
-    [slackUsers, register],
+    () => getColumns(slackUsers, register, control),
+    [slackUsers, register, control],
   );
 
   return (
@@ -64,6 +66,7 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({ data, slackUsers }) =>
 const getColumns = (
   slackUsers: SlackIntegrationUsers,
   register: UseFormRegister<FormValues>,
+  control: Control<FormValues, unknown>,
 ): ColumnDef<FieldArrayWithId<FormValues, "members", "id">>[] => [
   {
     accessorKey: "avatarUrl",
@@ -110,20 +113,26 @@ const getColumns = (
             {/* <Input {...register(`members.${row.index}.slackId`)}>
               {row.original.slackId}
             </Input> */}
-            <Select>
-              <SelectTrigger className="w-[180px]">
-                <SelectValue placeholder="Select a user" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectGroup>
-                  {slackUsers.map((user) => (
-                    <SelectItem key={user.id!} value={user.id!}>
-                      {user.real_name}
-                    </SelectItem>
-                  ))}
-                </SelectGroup>
-              </SelectContent>
-            </Select>
+            <Controller
+              control={control}
+              name={`members.${row.index}.slackId`}
+              render={({ field }) => (
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Select a user" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      {slackUsers.map((user) => (
+                        <SelectItem key={user.id!} value={user.id!}>
+                          {user.real_name}
+                        </SelectItem>
+                      ))}
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              )}
+            />
           </span>
         </div>
       );
