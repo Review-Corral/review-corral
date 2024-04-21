@@ -19,7 +19,8 @@
     "baseUrl": ".",
     "paths": {
       "@auth/*": ["src/auth/*"],
-      "@components/*": ["src/components/*"], // Required by shadcn/ui
+      "@components/*": ["src/components/*"],
+      "@shadcn/components/ui/*": ["src/components/shadcn/*"],
       "@core/*": ["../core/*"]
     },
     "sourceMap": true

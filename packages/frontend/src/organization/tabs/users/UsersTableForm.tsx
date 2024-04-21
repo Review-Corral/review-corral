@@ -1,9 +1,9 @@
 import { DataTableColumnHeader } from "@components/table/DataTableColumnHeader";
 import { Member } from "@core/dynamodb/entities/types";
-import { cn } from "@shadcn/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { FC } from "react";
 import { FieldArrayWithId, useFieldArray, useForm } from "react-hook-form";
+import { cn } from "src/lib/utils";
 import { UsersTable } from "./UsersTable";
 
 interface UsersTableFormProps {

@@ -1,6 +1,6 @@
-import { cn } from "@shadcn/lib/utils";
 import { Column } from "@tanstack/react-table";
 import { ArrowDownIcon, ArrowUpIcon } from "lucide-react";
+import { cn } from "src/lib/utils";
 
 interface DataTableColumnHeaderProps<TData, TValue>
   extends React.HTMLAttributes<HTMLDivElement> {
