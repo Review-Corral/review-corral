@@ -2,7 +2,7 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { FC, Fragment } from "react";
 import { Link } from "react-router-dom";
-import { useOrganizations } from "src/org/useOrganizations";
+import { useOrganizations } from "src/organization/useOrganizations";
 
 export interface NavbarProps {
   activeOrganizationAccountId?: number;

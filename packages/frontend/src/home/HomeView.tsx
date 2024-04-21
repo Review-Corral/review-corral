@@ -3,7 +3,7 @@ import { Button } from "@shadcn/components/ui/button";
 import { FC } from "react";
 import { Link } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";
-import { useOrganizations } from "src/org/useOrganizations";
+import { useOrganizations } from "src/organization/useOrganizations";
 
 interface HomeViewProps {}
 

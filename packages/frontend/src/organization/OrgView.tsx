@@ -7,7 +7,7 @@ import {
   useSearchParams,
 } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";
-import { useOrganizations } from "src/org/useOrganizations";
+import { useOrganizations } from "src/organization/useOrganizations";
 import * as z from "zod";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { UsersTab } from "./tabs/users/UsersTab";
