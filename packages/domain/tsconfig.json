@@ -6,8 +6,7 @@
     "baseUrl": ".",
     "paths": {
       "@review-corral/core/*": ["../core/src/*"],
-      "@core/*": ["../core/*"],
-      "@domain/*": ["../domain/*"]
+      "@core/*": ["../core/*"]
     }
   }
 }
