@@ -8,7 +8,7 @@ import {
   SelectValue,
 } from "@components/shadcn/select";
 import { DataTableColumnHeader } from "@components/table/DataTableColumnHeader";
-import { Member } from "@core/dynamodb/entities/types";
+import { Member, SlackUser } from "@core/dynamodb/entities/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { FC, useMemo } from "react";
 import {
@@ -20,12 +20,11 @@ import {
   useForm,
 } from "react-hook-form";
 import { cn } from "src/lib/utils";
-import { SlackIntegrationUsers } from "../../../../../domain/slack/types";
 import { UsersTable } from "./UsersTable";
 
 interface UsersTableFormProps {
   data: Member[];
-  slackUsers: SlackIntegrationUsers;
+  slackUsers: SlackUser[];
 }
 
 interface FormValues {
@@ -64,7 +63,7 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({ data, slackUsers }) =>
 };
 
 const getColumns = (
-  slackUsers: SlackIntegrationUsers,
+  slackUsers: SlackUser[],
   register: UseFormRegister<FormValues>,
   control: Control<FormValues, unknown>,
 ): ColumnDef<FieldArrayWithId<FormValues, "members", "id">>[] => [
@@ -110,9 +109,6 @@ const getColumns = (
       return (
         <div className="flex space-x-2 px-3 py-4">
           <span className={cn("max-w-[500px] truncate font-semiBold")}>
-            {/* <Input {...register(`members.${row.index}.slackId`)}>
-              {row.original.slackId}
-            </Input> */}
             <Controller
               control={control}
               name={`members.${row.index}.slackId`}
@@ -124,8 +120,11 @@ const getColumns = (
                   <SelectContent>
                     <SelectGroup>
                       {slackUsers.map((user) => (
-                        <SelectItem key={user.id!} value={user.id!}>
-                          {user.real_name}
+                        <SelectItem key={user.slackUserId} value={user.slackUserId}>
+                          <div className="flex gap-2">
+                            <img src={user.image48} height={12} width={12} />
+                            <span>{user.realNameNormalized}</span>
+                          </div>
                         </SelectItem>
                       ))}
                     </SelectGroup>

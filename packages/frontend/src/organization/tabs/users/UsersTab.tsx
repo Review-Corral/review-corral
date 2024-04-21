@@ -1,5 +1,5 @@
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
-import { Loader2Icon } from "lucide-react";
+import { Loading } from "@components/ui/cards/loading";
 import { FC } from "react";
 import { useOrganizationMembers } from "../../useOrganizationMembers";
 import { SharedLayout } from "../SharedLayout";
@@ -16,12 +16,15 @@ export const UsersTab: FC<UsersTabProps> = ({ orgId }) => {
   const slackInstallMembers = useSlackUsers(orgId);
 
   if (slackInstallMembers.isLoading || orgMembers.isLoading) {
-    return (
-      <div className="flex gap-2 items-center">
-        <Loader2Icon className="animate-spin h-5 w-5 black" />
-        <span>Loading...</span>
-      </div>
-    );
+    return <Loading text="Getting Slack integration users" />;
+  }
+
+  if (slackInstallMembers.error) {
+    return <ErrorCard message="Error getting Slack integration users" />;
+  }
+
+  if (orgMembers.error) {
+    return <ErrorCard message="Error getting Organization members" />;
   }
 
   if (
