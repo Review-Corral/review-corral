@@ -11,8 +11,23 @@ interface UsersTabProps {
 }
 
 export const UsersTab: FC<UsersTabProps> = ({ orgId }) => {
-  const orgMembers = useOrganizationMembers(orgId);
+  return (
+    <SharedLayout title="Users">
+      <div className="flex flex-col gap-12 w-full">
+        <div className="max-w-[40rem]">
+          <p>
+            Use this table to map your Github Users with your Slack users so that Review
+            Corral can properly notify the correct users in Slack on Github events.
+          </p>
+        </div>
+        <UsersTabData orgId={orgId} />
+      </div>
+    </SharedLayout>
+  );
+};
 
+export const UsersTabData: FC<UsersTabProps> = ({ orgId }) => {
+  const orgMembers = useOrganizationMembers(orgId);
   const slackInstallMembers = useSlackUsers(orgId);
 
   if (slackInstallMembers.isLoading || orgMembers.isLoading) {
@@ -38,10 +53,10 @@ export const UsersTab: FC<UsersTabProps> = ({ orgId }) => {
   }
 
   return (
-    <SharedLayout title="Users">
+    <>
       {orgMembers.data && (
         <UsersTableForm data={orgMembers.data} slackUsers={slackInstallMembers.data} />
       )}
-    </SharedLayout>
+    </>
   );
 };

@@ -104,7 +104,9 @@ const getColumns = (
   },
   {
     accessorKey: "slackId",
-    header: ({ column }) => <DataTableColumnHeader column={column} title="Slack ID" />,
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Slack User" />
+    ),
     cell: ({ row }) => {
       return (
         <div className="flex space-x-2 px-3 py-4">
@@ -122,7 +124,12 @@ const getColumns = (
                       {slackUsers.map((user) => (
                         <SelectItem key={user.slackUserId} value={user.slackUserId}>
                           <div className="flex gap-2">
-                            <img src={user.image48} height={12} width={12} />
+                            <img
+                              src={user.image48}
+                              height={8}
+                              width={20}
+                              className="rounded-full"
+                            />
                             <span>{user.realNameNormalized}</span>
                           </div>
                         </SelectItem>
