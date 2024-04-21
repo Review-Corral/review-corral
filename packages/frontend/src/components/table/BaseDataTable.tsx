@@ -5,7 +5,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@shadcn/components/ui/table";
+} from "@components/shadcn/table";
 import { Table as ReactTable, flexRender } from "@tanstack/react-table";
 
 export interface BaseDataTableProps<TData> {
@@ -20,7 +20,7 @@ export function BaseDataTable<TData>({ table, children }: BaseDataTableProps<TDa
       <div className="rounded-md border">
         <Table className="w-full">
           {children}
-          <TableHeader className="bg-blue-50">
+          <TableHeader className="">
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map((header) => {
@@ -38,7 +38,7 @@ export function BaseDataTable<TData>({ table, children }: BaseDataTableProps<TDa
               </TableRow>
             ))}
           </TableHeader>
-          <TableBody className="bg-white">
+          <TableBody className="">
             {table.getRowModel().rows.map((row) => (
               <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                 {row.getVisibleCells().map((cell) => (

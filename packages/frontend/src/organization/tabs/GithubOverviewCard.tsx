@@ -1,7 +1,8 @@
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Organization } from "@core/dynamodb/entities/types";
-import { Button } from "@shadcn/components/ui/button";
-import { Switch } from "@shadcn/components/ui/switch";
+
+import { Button } from "@components/shadcn/button";
+import { Switch } from "@components/shadcn/switch";
 import { Github } from "lucide-react";
 import { FC } from "react";
 import toast from "react-hot-toast";
@@ -22,7 +23,7 @@ export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
       <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center">
         <div className="flex gap-4 items-center">
           <Github className="h-8 w-8 fill-black" />
-          <span className="font-semibold text-lg">Enabled Repositories</span>
+          <span className="font-semibold text-lg">Repositories</span>
         </div>
         <div
           className="cursor-pointer underline text-indigo-500 underline-offset-2"

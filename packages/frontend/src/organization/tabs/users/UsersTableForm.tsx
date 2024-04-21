@@ -1,8 +1,15 @@
+import { Button } from "@components/shadcn/button";
+import { Input } from "@components/shadcn/input";
 import { DataTableColumnHeader } from "@components/table/DataTableColumnHeader";
 import { Member } from "@core/dynamodb/entities/types";
 import { ColumnDef } from "@tanstack/react-table";
-import { FC } from "react";
-import { FieldArrayWithId, useFieldArray, useForm } from "react-hook-form";
+import { FC, useMemo } from "react";
+import {
+  FieldArrayWithId,
+  UseFormRegister,
+  useFieldArray,
+  useForm,
+} from "react-hook-form";
 import { cn } from "src/lib/utils";
 import { UsersTable } from "./UsersTable";
 
@@ -28,14 +35,23 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({ data }) => {
 
   const onSubmit = (data: FormValues) => console.log(data);
 
+  const columns = useMemo(() => getColumns(register), [register]);
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <UsersTable columns={columns} data={fields} />
+    <form onSubmit={handleSubmit(onSubmit)} className="w-full">
+      <div className="flex flex-col gap-6 w-full">
+        <UsersTable columns={columns} data={fields} />
+        <div className="flex flex-row w-full justify-end">
+          <Button>Save</Button>
+        </div>
+      </div>
     </form>
   );
 };
 
-const columns: ColumnDef<FieldArrayWithId<FormValues, "members", "id">>[] = [
+const getColumns = (
+  register: UseFormRegister<FormValues>,
+): ColumnDef<FieldArrayWithId<FormValues, "members", "id">>[] => [
   {
     accessorKey: "avatarUrl",
     header: ({ column }) => <DataTableColumnHeader column={column} title="" />,
@@ -78,7 +94,9 @@ const columns: ColumnDef<FieldArrayWithId<FormValues, "members", "id">>[] = [
       return (
         <div className="flex space-x-2 px-3 py-4">
           <span className={cn("max-w-[500px] truncate font-semiBold")}>
-            {row.original.slackId}
+            <Input {...register(`members.${row.index}.slackId`)}>
+              {row.original.slackId}
+            </Input>
           </span>
         </div>
       );
