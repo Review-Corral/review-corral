@@ -14,6 +14,6 @@ export const useSlackUsers = (orgId: number) =>
             Authorization: `Bearer ${getSessionToken()}`,
           },
         })
-        .json<SlackIntegrationUsers[]>();
+        .json<SlackIntegrationUsers>();
     },
   });

@@ -1,5 +1,12 @@
 import { Button } from "@components/shadcn/button";
-import { Input } from "@components/shadcn/input";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@components/shadcn/select";
 import { DataTableColumnHeader } from "@components/table/DataTableColumnHeader";
 import { Member } from "@core/dynamodb/entities/types";
 import { ColumnDef } from "@tanstack/react-table";
@@ -11,17 +18,19 @@ import {
   useForm,
 } from "react-hook-form";
 import { cn } from "src/lib/utils";
+import { SlackIntegrationUsers } from "../../../../../domain/slack/types";
 import { UsersTable } from "./UsersTable";
 
 interface UsersTableFormProps {
   data: Member[];
+  slackUsers: SlackIntegrationUsers;
 }
 
 interface FormValues {
   members: Member[];
 }
 
-export const UsersTableForm: FC<UsersTableFormProps> = ({ data }) => {
+export const UsersTableForm: FC<UsersTableFormProps> = ({ data, slackUsers }) => {
   const { control, register, handleSubmit } = useForm<FormValues>({
     defaultValues: {
       members: data,
@@ -35,7 +44,10 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({ data }) => {
 
   const onSubmit = (data: FormValues) => console.log(data);
 
-  const columns = useMemo(() => getColumns(register), [register]);
+  const columns = useMemo(
+    () => getColumns(slackUsers, register),
+    [slackUsers, register],
+  );
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-full">
@@ -50,6 +62,7 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({ data }) => {
 };
 
 const getColumns = (
+  slackUsers: SlackIntegrationUsers,
   register: UseFormRegister<FormValues>,
 ): ColumnDef<FieldArrayWithId<FormValues, "members", "id">>[] => [
   {
@@ -94,9 +107,23 @@ const getColumns = (
       return (
         <div className="flex space-x-2 px-3 py-4">
           <span className={cn("max-w-[500px] truncate font-semiBold")}>
-            <Input {...register(`members.${row.index}.slackId`)}>
+            {/* <Input {...register(`members.${row.index}.slackId`)}>
               {row.original.slackId}
-            </Input>
+            </Input> */}
+            <Select>
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Select a user" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  {slackUsers.map((user) => (
+                    <SelectItem key={user.id!} value={user.id!}>
+                      {user.real_name}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
+              </SelectContent>
+            </Select>
           </span>
         </div>
       );
