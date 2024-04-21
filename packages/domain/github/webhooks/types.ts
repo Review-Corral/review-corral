@@ -1,5 +1,5 @@
+import { SlackClient } from "@core/slack/SlackClient";
 import { WebhookEventMap } from "@octokit/webhooks-types";
-import { SlackClient } from "../../slack/SlackClient";
 
 export type handledEventNames = keyof Pick<
   WebhookEventMap,

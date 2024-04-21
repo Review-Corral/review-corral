@@ -1,7 +1,7 @@
+import { User } from "@core/dynamodb/entities/types";
+import { getJwt } from "@core/utils/jwt/createGithubJwt";
 import ky from "ky";
-import { User } from "../dynamodb/entities/types";
 import { Logger } from "../logging";
-import { getJwt } from "../utils/jwt/createGithubJwt";
 import {
   InstallationAccessTokenResponse,
   InstallationRespositoriesResponse,
