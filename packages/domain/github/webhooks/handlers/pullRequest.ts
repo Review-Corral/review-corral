@@ -1,9 +1,9 @@
+import { PullRequest } from "@core/dynamodb/entities/types";
 import {
   PullRequestConvertedToDraftEvent,
   PullRequestEvent,
 } from "@octokit/webhooks-types";
 import ky from "ky";
-import { PullRequest } from "../../../dynamodb/entities/types";
 import {
   fetchPullRequestById,
   insertPullRequest,

@@ -1,10 +1,10 @@
+import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
+import { UserResponse } from "@domain/github/endpointTypes";
+import { Logger } from "@domain/logging";
+import config from "@domain/utils/config";
 import ky from "ky";
 import { AuthHandler, GithubAdapter, OauthBasicConfig, Session } from "sst/node/auth";
-import { fetchUserById, insertUser } from "../../core/dynamodb/fetchers/users";
-import { UserResponse } from "../../core/github/endpointTypes";
-import { Logger } from "../../core/logging";
 import { assertVarExists } from "../../core/utils/assert";
-import config from "../../core/utils/config";
 import { HttpError } from "../../core/utils/errors/Errors";
 
 declare module "sst/node/auth" {

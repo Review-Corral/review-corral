@@ -5,7 +5,7 @@ import {
   getFrontendUrl,
   getIsLocal,
   getReleaseVersion,
-} from "./lambda/helpers";
+} from "../../core/utils/lambda/helpers";
 
 const { environment, friendlyName: functionName } = getFriendlyNameAndEnvironment();
 const isLocal = getIsLocal();

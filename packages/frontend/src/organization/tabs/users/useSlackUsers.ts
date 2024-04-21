@@ -1,7 +1,8 @@
-import { SlackIntegrationUsers } from "@core/slack/types";
 import ky from "ky";
 import { useQuery } from "react-query";
 import { getSessionToken } from "src/auth/getSessionToken";
+// THis is super hacky, but gets the job done for now
+import { SlackIntegrationUsers } from "../../../../../domain/slack/types";
 
 export const useSlackUsers = (orgId: number) =>
   useQuery({

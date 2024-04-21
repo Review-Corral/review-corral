@@ -1,3 +1,4 @@
+import { HttpError } from "@core/utils/errors/Errors";
 import {
   AnyColumn,
   GetColumnData,
@@ -10,7 +11,6 @@ import {
   or,
 } from "drizzle-orm";
 import { AnyPgColumn, PgTable } from "drizzle-orm/pg-core";
-import { HttpError } from "../../utils/errors/Errors";
 
 type ColumnComparison<TColumn extends AnyColumn> =
   | GetColumnData<TColumn, "raw">

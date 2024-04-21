@@ -2,8 +2,8 @@ import {
   SlackIntegration,
   SlackIntegrationInsertArgs,
 } from "@core/dynamodb/entities/types";
-import { SlackClient } from "@core/slack/SlackClient";
-import { SlackIntegrationUsers } from "@core/slack/types";
+import { SlackClient } from "@domain/slack/SlackClient";
+import { SlackIntegrationUsers } from "@domain/slack/types";
 import { Db } from "../client";
 
 export const getSlackInstallationsForOrganization = async (

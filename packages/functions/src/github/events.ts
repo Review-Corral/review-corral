@@ -1,9 +1,9 @@
+import { assertVarExists } from "@core/utils/assert";
 import {
   githubWebhookBodySchema,
   handleGithubWebhookEvent,
-} from "@core/github/webhooks";
-import { verifyGithubWebhookSecret } from "@core/github/webhooks/verifyEvent";
-import { assertVarExists } from "@core/utils/assert";
+} from "@domain/github/webhooks";
+import { verifyGithubWebhookSecret } from "@domain/github/webhooks/verifyEvent";
 import { Logger } from "@domain/logging";
 import { WebhookEvent } from "@octokit/webhooks-types";
 import { APIGatewayProxyEventV2 } from "aws-lambda";

@@ -1,11 +1,11 @@
 import * as z from "zod";
 
-import { SlackClient } from "@core/slack/SlackClient";
-import { fetchOrganizationByAccountId } from "dynamodb/fetchers/organizations";
-import { safeFetchRepository } from "dynamodb/fetchers/repositories";
-import { getSlackInstallationsForOrganization } from "dynamodb/fetchers/slack";
-import { takeFirst } from "dynamodb/fetchers/utils";
-import { Logger } from "logging";
+import { fetchOrganizationByAccountId } from "@domain/dynamodb/fetchers/organizations";
+import { safeFetchRepository } from "@domain/dynamodb/fetchers/repositories";
+import { getSlackInstallationsForOrganization } from "@domain/dynamodb/fetchers/slack";
+import { takeFirst } from "@domain/dynamodb/fetchers/utils";
+import { Logger } from "@domain/logging";
+import { SlackClient } from "@domain/slack/SlackClient";
 import { handleIssueCommentEvent } from "./handlers/issueComment";
 import { handlePullRequestEvent } from "./handlers/pullRequest";
 import { handlePullRequestCommentEvent } from "./handlers/pullRequestComment";
