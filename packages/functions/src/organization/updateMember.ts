@@ -35,7 +35,15 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
-  const body = updateMemberSchema.safeParse(event.body);
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: "Invalid request body" }),
+    };
+  }
+
+  const body = updateMemberSchema.safeParse(JSON.parse(event.body));
+
   if (!body.success) {
     return {
       statusCode: 400,
