@@ -1,5 +1,5 @@
 import { Organization, User } from "@core/dynamodb/entities/types";
-import { addOrganizationMember } from "@domain/dynamodb/fetchers/members";
+import { addOrganizationMemberFromUser } from "@domain/dynamodb/fetchers/members";
 import {
   fetchOrganizationByAccountId,
   fetchUsersOrganizations,
@@ -75,7 +75,7 @@ async function getOrganizations(user: User, installations: InstallationsData) {
         LOGGER.info(
           "User is not part of organization. Associating user with organization...",
         );
-        await addOrganizationMember({ orgId: organization.orgId, user });
+        await addOrganizationMemberFromUser({ orgId: organization.orgId, user });
       }
 
       organizations.push(organization);

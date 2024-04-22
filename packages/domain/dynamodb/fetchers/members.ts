@@ -1,5 +1,6 @@
 import { Member, User } from "@core/dynamodb/entities/types";
 import { UpdateMemberArgs } from "@core/fetchTypes/updateOrgMember";
+import { OrgMembers } from "@domain/github/endpointTypes";
 import { Db } from "../client";
 
 export const getOrganizationMembers = async (orgId: number): Promise<Member[]> => {
@@ -28,7 +29,7 @@ export const updateOrgMember = async (
     .then(({ data }) => data);
 };
 
-export const addOrganizationMember = async ({
+export const addOrganizationMemberFromUser = async ({
   orgId,
   user,
 }: {
@@ -45,6 +46,18 @@ export const addOrganizationMember = async ({
     })
     .go()
     .then(({ data }) => data);
+};
+
+export const addOrganizationMembers = async (orgId: number, members: OrgMembers) => {
+  const memebersToInsert = members.map((m) => ({
+    orgId,
+    memberId: m.id,
+    name: m.login,
+    email: m.email ?? undefined,
+    avatarUrl: m.avatar_url,
+  }));
+
+  return await Db.entities.member.put(memebersToInsert).go();
 };
 
 export const getOrgMember = async ({

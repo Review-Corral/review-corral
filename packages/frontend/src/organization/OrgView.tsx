@@ -1,16 +1,10 @@
-import { Organization } from "@core/dynamodb/entities/types";
-import { FC, ReactNode, useEffect, useState } from "react";
-import {
-  redirect,
-  useLoaderData,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { FC, ReactNode, useState } from "react";
+import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";
-import { useOrganizations } from "src/organization/useOrganizations";
 import * as z from "zod";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { UsersTab } from "./tabs/users/UsersTab";
+import { useOrganization } from "./useOrganization";
 
 interface OrgViewProps {}
 
@@ -49,14 +43,14 @@ export const OrgView: FC<OrgViewProps> = () => {
   const pageParse = orgViewSearchParamsSchema.safeParse(searchParams.get("page"));
   const { orgId } = orgViewParamsSchema.parse(loaderData);
 
-  const { data, isLoading } = useOrganizations();
-
-  const [organization, setOrganization] = useState<Organization | undefined>(undefined);
+  const { data, isLoading } = useOrganization(orgId);
 
   const navigate = useNavigate();
   const [_page, setPage] = useState<Page>(
     pageParse.success ? pageParse.data : "overview",
   );
+
+  const organization = data;
 
   const setPageWrapper = (page: Page): void => {
     if (organization) {
@@ -72,22 +66,6 @@ export const OrgView: FC<OrgViewProps> = () => {
       }
     }
   };
-
-  // Gets the correct organization from the list of organizations fetched from
-  // the database
-  useEffect(() => {
-    if (data) {
-      const org = data.find((org) => org.orgId === Number(orgId));
-      if (org) {
-        setOrganization(org);
-        return;
-      } else {
-        // TODO: I think rendering a 404 would be better
-        redirect("/404");
-      }
-    }
-    setOrganization(undefined);
-  }, [data]);
 
   return (
     <DashboardLayout

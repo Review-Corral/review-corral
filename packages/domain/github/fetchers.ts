@@ -44,7 +44,6 @@ export const getInstallationAccessToken = async (
     })
     .json<InstallationAccessTokenResponse>();
 
-  LOGGER.debug("Access token response", { accessTokenResponse });
   return accessTokenResponse;
 };
 
@@ -118,7 +117,7 @@ export const getOrgMembers = async ({
   orgName: string;
   accessToken: string;
 }): Promise<OrgMembers> => {
-  return await ky
+  const members = await ky
     .get(`https://api.github.com/orgs/${orgName}/members`, {
       headers: {
         ...defaultHeaders,
@@ -126,4 +125,6 @@ export const getOrgMembers = async ({
       },
     })
     .json<OrgMembers>();
+
+  return members;
 };
