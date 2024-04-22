@@ -20,9 +20,11 @@ import {
   useForm,
 } from "react-hook-form";
 import { cn } from "src/lib/utils";
+import { useMutateOrganizationMembers } from "src/organization/useOrganizationMembers";
 import { UsersTable } from "./UsersTable";
 
 interface UsersTableFormProps {
+  orgId: number;
   data: Member[];
   slackUsers: SlackUser[];
 }
@@ -31,7 +33,13 @@ interface FormValues {
   members: Member[];
 }
 
-export const UsersTableForm: FC<UsersTableFormProps> = ({ data, slackUsers }) => {
+export const UsersTableForm: FC<UsersTableFormProps> = ({
+  orgId,
+  data,
+  slackUsers,
+}) => {
+  const updateOrgMember = useMutateOrganizationMembers(orgId);
+
   const { control, register, handleSubmit } = useForm<FormValues>({
     defaultValues: {
       members: data,
@@ -43,7 +51,27 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({ data, slackUsers }) =>
     control, // control props comes from useForm (optional: if you are using FormProvider)
   });
 
-  const onSubmit = (data: FormValues) => console.log(data);
+  const membersById: Record<string, Member> = useMemo(() => {
+    return data.reduce(
+      (acc, member) => {
+        acc[member.memberId] = member;
+        return acc;
+      },
+      {} as Record<string, Member>,
+    );
+  }, [data]);
+
+  const onSubmit = (newMemebrs: FormValues) => {
+    for (const newMember of newMemebrs.members) {
+      if (newMember.slackId !== membersById[newMember.memberId].slackId) {
+        updateOrgMember.mutate({
+          orgId,
+          memberId: newMember.memberId,
+          slackId: newMember.slackId ?? null,
+        });
+      }
+    }
+  };
 
   const columns = useMemo(
     () => getColumns(slackUsers, register, control),

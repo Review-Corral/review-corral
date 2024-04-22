@@ -55,7 +55,11 @@ export const UsersTabData: FC<UsersTabProps> = ({ orgId }) => {
   return (
     <>
       {orgMembers.data && (
-        <UsersTableForm data={orgMembers.data} slackUsers={slackInstallMembers.data} />
+        <UsersTableForm
+          orgId={orgId}
+          data={orgMembers.data}
+          slackUsers={slackInstallMembers.data}
+        />
       )}
     </>
   );
