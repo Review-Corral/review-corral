@@ -1,4 +1,5 @@
 import { Member, User } from "@core/dynamodb/entities/types";
+import { UpdateMemberArgs } from "@core/fetchTypes/updateOrgMember";
 import { Db } from "../client";
 
 export const getOrganizationMembers = async (orgId: number): Promise<Member[]> => {
@@ -7,6 +8,23 @@ export const getOrganizationMembers = async (orgId: number): Promise<Member[]> =
       orgId,
     })
     .go()
+    .then(({ data }) => data);
+};
+
+export const updateOrgMember = async (
+  updateArgs: UpdateMemberArgs,
+): Promise<Member> => {
+  return await Db.entities.member
+    .patch({
+      memberId: updateArgs.memberId,
+      orgId: updateArgs.orgId,
+    })
+    .set({
+      slackId: updateArgs.slackId ?? undefined,
+    })
+    .go({
+      response: "all_new",
+    })
     .then(({ data }) => data);
 };
 
