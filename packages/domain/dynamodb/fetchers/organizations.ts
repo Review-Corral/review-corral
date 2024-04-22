@@ -6,7 +6,7 @@ import {
   User,
 } from "@core/dynamodb/entities/types";
 import { Logger } from "../../logging";
-import { addOrganizationMember } from "./members";
+import { addOrganizationMemberFromUser } from "./members";
 
 const LOGGER = new Logger("fetchers.organizations");
 
@@ -86,6 +86,6 @@ export const insertOrganizationAndAssociateUser = async ({
   createOrgArgs: OrganizationInsertArgs;
 }) => {
   const org = await insertOrganization(createOrgArgs);
-  await addOrganizationMember({ orgId: org.orgId, user });
+  await addOrganizationMemberFromUser({ orgId: org.orgId, user });
   return org;
 };

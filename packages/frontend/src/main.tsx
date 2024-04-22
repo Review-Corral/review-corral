@@ -16,7 +16,6 @@ import { HomeView } from "./home/HomeView";
 import "./index.css";
 import LoginPage from "./login";
 import { OrgView } from "./organization/OrgView";
-import { OrgsView } from "./organization/OrgsView";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {
@@ -60,11 +59,6 @@ const router = createBrowserRouter([
       Cookies.remove(auth_access_token_key);
       return redirect("/login");
     },
-  },
-  {
-    path: "/org",
-    element: <OrgsView />,
-    loader: protectedLoader,
   },
   {
     path: "/org/:orgId",
