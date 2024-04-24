@@ -1,7 +1,7 @@
 import { Logger } from "@domain/logging";
 import { ApiHandler } from "sst/node/api";
 import Stripe from "stripe";
-import { assertVarExists } from "../../core/utils/assert";
+import { assertVarExists } from "../../../core/utils/assert";
 
 const LOGGER = new Logger("stripe.webhook");
 
