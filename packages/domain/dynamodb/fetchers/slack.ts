@@ -66,11 +66,16 @@ export const getSlackInstallationUsers = async (
 
   const response = await slackClient.client.users.list();
 
-  LOGGER.info("Fetched slack users", {
-    response,
-    t: slackClient.slackToken,
-    channelId: slackClient.channelId,
-  });
+  LOGGER.debug(
+    "Fetched slack users",
+    {
+      response,
+      channelId: slackClient.channelId,
+    },
+    {
+      depth: 4,
+    },
+  );
 
   if (response.ok) {
     if (!response.members) {

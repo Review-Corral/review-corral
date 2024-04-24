@@ -13,15 +13,11 @@ import {
   WebClient,
 } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
-import { assertVarExists } from "../../core/utils/assert";
 import { Logger } from "../logging";
 
 export type PullRequestEventOpenedOrReadyForReview =
   | PullRequestOpenedEvent
   | PullRequestReadyForReviewEvent;
-
-export const getSlackWebClient = () =>
-  new WebClient(assertVarExists<string>("SLACK_BOT_TOKEN"));
 
 const LOGGER = new Logger("core.SlackClient");
 
@@ -32,7 +28,7 @@ export class SlackClient {
     readonly channelId: string,
     readonly slackToken: string,
   ) {
-    this.client = getSlackWebClient();
+    this.client = new WebClient(this.slackToken);
   }
 
   async postMessage({
