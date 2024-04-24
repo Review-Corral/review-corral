@@ -36,6 +36,7 @@ export class Api extends Construct {
       },
       routes: {
         "GET /": "packages/functions/src/lambda.handler",
+        "GET /profile": "packages/functions/src/getProfile.handler",
         ...buildPaths("/gh", {
           // Handles incoming webhooks from Github
           "POST /webhook-event": "packages/functions/src/github/events.handler",

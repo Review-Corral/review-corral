@@ -1,3 +1,4 @@
+import { useProfile } from "@auth/useProfile";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { FC, Fragment } from "react";
@@ -21,11 +22,9 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
     activeOrganizationAccountId &&
     organizations.data.find((org) => org.orgId === activeOrganizationAccountId);
 
-  // const user = useUser();
+  const user = useProfile();
 
-  const avatarUrl: string | undefined = undefined;
-  // TODO:
-  // session?.user.user_metadata["avatar_url"];
+  const avatarUrl: string | undefined = user.data?.avatarUrl;
 
   return (
     <Disclosure as="nav" className="bg-[#f4f4f4]">
