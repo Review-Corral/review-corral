@@ -1,8 +1,9 @@
+import { User } from "@core/dynamodb/entities/types";
 import ky from "ky";
 import { useQuery } from "react-query";
 import { getSessionToken } from "./getSessionToken";
 
-export const useUser = () => {
+export const useProfile = () => {
   return useQuery({
     queryKey: ["profile"],
     queryFn: async () => {
@@ -12,7 +13,7 @@ export const useUser = () => {
             Authorization: `Bearer ${getSessionToken()}`,
           },
         })
-        .json();
+        .json<User>();
     },
   });
 };
