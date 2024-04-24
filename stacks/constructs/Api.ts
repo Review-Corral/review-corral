@@ -49,7 +49,9 @@ export class Api extends Construct {
               "packages/functions/src/github/repositories/setStatus.handler",
           }),
         }),
-
+        ...buildPaths("/stripe", {
+          "POST /webhook-event": "packages/functions/src/stripe/webhook.handler",
+        }),
         ...buildPaths("/org/{organizationId}", {
           "GET /": "packages/functions/src/organization/getOrganization.handler",
           "GET /members": "packages/functions/src/organization/getMembers.handler",
