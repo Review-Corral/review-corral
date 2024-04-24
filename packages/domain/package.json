@@ -37,6 +37,7 @@
     "njwt": "^2.0.0",
     "pg": "^8.11.3",
     "slackify-markdown": "^4.4.0",
+    "stripe": "^15.3.0",
     "vite-tsconfig-paths": "^4.2.3",
     "zod": "^3.22.4"
   }
