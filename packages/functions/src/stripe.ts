@@ -34,23 +34,24 @@ export const handler = ApiHandler(async (event, context) => {
     assertVarExists("STRIPE_WEBHOOK_SECRET"),
   );
 
-  // Cast event data to Stripe object
-  if (stripeEvent.type === "payment_intent.succeeded") {
+  if (stripeEvent.type === "customer.subscription.created") {
+    const subscription = stripeEvent.data.object as Stripe.Subscription;
+    LOGGER.info(`🚀 Subscription created: ${subscription.id}`, { subscription });
+  } else if (stripeEvent.type === "payment_intent.succeeded") {
     const stripeObject: Stripe.PaymentIntent = stripeEvent.data
       .object as Stripe.PaymentIntent;
-    LOGGER.info(`💰 PaymentIntent status: ${stripeObject.status}`);
+    LOGGER.info(`💰 PaymentIntent status: ${stripeObject.status}`, { stripeObject });
   } else if (stripeEvent.type === "charge.succeeded") {
     const charge = stripeEvent.data.object as Stripe.Charge;
-    LOGGER.info(`💵 Charge id: ${charge.id}`);
+    LOGGER.info(`💵 Charge id: ${charge.id}`, { charge });
   } else {
-    LOGGER.warn(`🤷‍♀️ Unhandled event type: ${stripeEvent.type}`);
+    LOGGER.warn(`🤷‍♀️ Unhandled event type: ${stripeEvent.type}`, { stripeEvent });
   }
 
   return {
     statusCode: 200,
     body: JSON.stringify({
-      message: "Hello World",
-      input: event,
+      message: "Handled event",
     }),
   };
 });
