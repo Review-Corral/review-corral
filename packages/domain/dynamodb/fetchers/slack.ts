@@ -81,12 +81,14 @@ export const getSlackInstallationUsers = async (
     if (!response.members) {
       LOGGER.error("Slack users response OK, but no members returned", { response });
     } else {
+      const nonBotUsers = response.members.filter((member) => !member.is_bot);
       LOGGER.info("Slack users fetched & response OK", {
         count: response.members.length,
+        nonBotUsersCount: nonBotUsers.length,
       });
       const potentialInsertedCount = await handleSlackMembersResponse(
         slackIntegration,
-        response.members,
+        nonBotUsers,
       );
 
       // Refetch and return
