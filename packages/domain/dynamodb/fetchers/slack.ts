@@ -51,6 +51,10 @@ export const getSlackInstallationUsers = async (
   const dbSlackUsers = await fetchSlackUsers(slackIntegration);
 
   if (dbSlackUsers.length > 0) {
+    LOGGER.info("Returning SlackUsers as cached from DB", {
+      count: dbSlackUsers.length,
+      updatedAt: dbSlackUsers[0].updatedAt,
+    });
     return dbSlackUsers;
   }
 
@@ -61,6 +65,12 @@ export const getSlackInstallationUsers = async (
   );
 
   const response = await slackClient.client.users.list();
+
+  LOGGER.info("Fetched slack users", {
+    response,
+    t: slackClient.slackToken,
+    channelId: slackClient.channelId,
+  });
 
   if (response.ok) {
     if (!response.members) {
