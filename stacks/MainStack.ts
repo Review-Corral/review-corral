@@ -24,6 +24,8 @@ export function MainStack({ stack, app }: StackContext) {
       GH_CLIENT_SECRET: assertVarExists("GH_CLIENT_SECRET"),
       GH_ENCODED_PEM: assertVarExists("GH_ENCODED_PEM"),
       GH_WEBHOOK_SECRET: assertVarExists("GH_WEBHOOK_SECRET"),
+      STRIPE_SECRET_KEY: assertVarExists("STRIPE_SECRET_KEY"),
+      STRIPE_WEBHOOK_SECRET: assertVarExists("STRIPE_WEBHOOK_SECRET"),
       ...slackEnvVars,
     },
     logRetention: app.local ? "one_week" : "one_year",

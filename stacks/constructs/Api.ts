@@ -50,7 +50,7 @@ export class Api extends Construct {
           }),
         }),
         ...buildPaths("/stripe", {
-          "POST /webhook-event": "packages/functions/src/stripe/webhook.handler",
+          "POST /webhook-event": "packages/functions/src/stripe.handler",
         }),
         ...buildPaths("/org/{organizationId}", {
           "GET /": "packages/functions/src/organization/getOrganization.handler",
