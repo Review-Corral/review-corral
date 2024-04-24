@@ -47,6 +47,11 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
+  LOGGER.info("Got Slack Integration for organization", {
+    organizationId,
+    slackIntegration: slackIntegration[0],
+  });
+
   const users = await getSlackInstallationUsers(slackIntegration[0]);
 
   return {
