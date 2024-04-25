@@ -1,10 +1,5 @@
-import { Attribute, Entity } from "electrodb";
-
-export const OrgIdAttr = {
-  type: "number",
-  required: true,
-  readOnly: true,
-} satisfies Attribute;
+import { Entity } from "electrodb";
+import { OrgIdAttr } from "./organization";
 
 export const SubscriptionEntity = new Entity({
   model: {
@@ -18,18 +13,14 @@ export const SubscriptionEntity = new Entity({
       type: "string",
       required: true,
     },
-    avatarUrl: {
+    priceId: {
       type: "string",
       required: true,
     },
-    installationId: {
-      type: "number",
+    isActive: {
+      type: "boolean",
       required: true,
-    },
-    type: {
-      type: ["User", "Organization"] as const,
-      required: true,
-      readOnly: true,
+      default: true,
     },
     createdAt: {
       type: "string",
@@ -45,6 +36,10 @@ export const SubscriptionEntity = new Entity({
       default: () => new Date().toISOString(),
       set: () => new Date().toISOString(),
     },
+    cancelledAt: {
+      type: "string",
+      required: false,
+    },
   },
   indexes: {
     primary: {
@@ -54,31 +49,7 @@ export const SubscriptionEntity = new Entity({
       },
       sk: {
         field: "sk",
-        composite: [],
-      },
-    },
-    repositories: {
-      collection: "orgRepositories",
-      index: "gsi1",
-      pk: {
-        field: "gsi1pk",
-        composite: ["orgId"],
-      },
-      sk: {
-        field: "gsi1sk",
-        composite: ["createdAt"],
-      },
-    },
-    members: {
-      collection: "orgMembers",
-      index: "gsi2",
-      pk: {
-        field: "gsi2pk",
-        composite: ["orgId"],
-      },
-      sk: {
-        field: "gsi2sk",
-        composite: [],
+        composite: ["isActive", "priceId"],
       },
     },
   },

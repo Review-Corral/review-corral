@@ -16,6 +16,8 @@ import { HomeView } from "./home/HomeView";
 import "./index.css";
 import LoginPage from "./login";
 import { OrgView } from "./organization/OrgView";
+import { PaymentFailure } from "./organization/payments/failure";
+import { PaymentsSuccess } from "./organization/payments/success";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {
@@ -24,6 +26,21 @@ const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {
   }
 
   return null;
+};
+
+const orgViewLoader: LoaderFunction = async (args) => {
+  const protectedResult = await protectedLoader(args);
+  if (protectedResult) return protectedResult;
+
+  const { orgId } = args.params;
+
+  console.log("Got orgId in params:", orgId);
+
+  if (!orgId) {
+    throw new Response("Not Found", { status: 404 });
+  }
+
+  return { orgId };
 };
 
 // Route components must be wrapped with the ModalContext here, so the modal components
@@ -63,24 +80,26 @@ const router = createBrowserRouter([
   {
     path: "/org/:orgId",
     element: <OrgView />,
-    loader: async (args) => {
-      const protectedResult = await protectedLoader(args);
-      if (protectedResult) return protectedResult;
-
-      const { orgId } = args.params;
-
-      console.log("Got orgId in params:", orgId);
-
-      if (!orgId) {
-        throw new Response("Not Found", { status: 404 });
-      }
-
-      return { orgId };
-    },
+    loader: orgViewLoader,
+  },
+  {
+    path: "/org/:orgId/payment/success",
+    element: <PaymentsSuccess />,
+    loader: orgViewLoader,
+  },
+  {
+    path: "/org/:orgId/payment/failure",
+    element: <PaymentFailure />,
+    loader: orgViewLoader,
   },
   {
     path: "/",
     element: <HomeView />,
+    loader: protectedLoader,
+  },
+  {
+    path: "/404",
+    element: <div>404</div>,
     loader: protectedLoader,
   },
   {

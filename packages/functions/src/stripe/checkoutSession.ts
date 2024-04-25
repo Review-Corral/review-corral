@@ -1,3 +1,4 @@
+import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { useUser } from "src/utils/useUser";
@@ -8,7 +9,9 @@ const LOGGER = new Logger("stripe.checkoutSession");
 
 const bodySchema = z.object({
   orgId: z.number(),
-  priceId: z.literal("price_1P8xTdBqa9UplzHeYegyhb4p"),
+  priceId: z
+    .literal("price_1P9FpDBqa9UplzHeeJ57VHoc") // test price
+    .or(z.literal("price_1P8CmKBqa9UplzHebShipTnE")), // prod price,
 });
 
 export const handler = ApiHandler(async (event, context) => {
@@ -30,6 +33,17 @@ export const handler = ApiHandler(async (event, context) => {
       statusCode: 400,
       body: JSON.stringify({
         message: "Invalid request body",
+      }),
+    };
+  }
+
+  const organization = await fetchOrganizationById(body.data.orgId);
+
+  if (!organization) {
+    return {
+      statusCode: 404,
+      body: JSON.stringify({
+        message: "Organization not found",
       }),
     };
   }
