@@ -8,19 +8,20 @@ export const SubscriptionEntity = new Entity({
     service: "rc",
   },
   attributes: {
-    orgId: OrgIdAttr,
-    name: {
+    subId: {
       type: "string",
       required: true,
     },
+    orgId: OrgIdAttr,
     priceId: {
       type: "string",
       required: true,
     },
-    isActive: {
-      type: "boolean",
+    // Possible values are:
+    // incomplete, incomplete_expired, trialing, active, past_due, canceled, unpaid, or paused.
+    status: {
+      type: "string",
       required: true,
-      default: true,
     },
     createdAt: {
       type: "string",
@@ -49,7 +50,7 @@ export const SubscriptionEntity = new Entity({
       },
       sk: {
         field: "sk",
-        composite: ["isActive", "priceId"],
+        composite: ["status", "priceId"],
       },
     },
   },
