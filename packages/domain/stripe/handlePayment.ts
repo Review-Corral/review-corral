@@ -5,14 +5,18 @@ import Stripe from "stripe";
 
 const LOGGER = new Logger("stripe.handleSubCreated");
 
-export const handleSubCreated = async (event: Stripe.Subscription) => {
+export const handleSubCreated = async (event: Stripe.CheckoutSessionCompletedEvent) => {
   LOGGER.info(`🚀 Subscription created: ${event.id}`, { event });
-  const metadata = stripeCheckoutCreatedMetadataSchema.safeParse(event.metadata);
+
+  const actualEvent = event.data.object;
+  const metadata = stripeCheckoutCreatedMetadataSchema.safeParse(actualEvent.metadata);
 
   if (!metadata.success) {
     LOGGER.error("Invalid metadata for subCreated event ", { metadata });
     return;
   }
+
+  actualEvent.line_items;
 
   if (event.items.data.length !== 1) {
     LOGGER.warn("Unexpected number of items for subCreated event ", {
