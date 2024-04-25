@@ -1,8 +1,9 @@
+import { assertVarExists } from "@core/utils/assert";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
+import { handleSubCreated } from "@domain/stripe/handlePayment";
 import { ApiHandler } from "sst/node/api";
 import Stripe from "stripe";
-import { assertVarExists } from "../../../core/utils/assert";
 
 const LOGGER = new Logger("stripe.webhook");
 
@@ -35,7 +36,7 @@ export const handler = ApiHandler(async (event, context) => {
 
   if (stripeEvent.type === "customer.subscription.created") {
     const subscription = stripeEvent.data.object as Stripe.Subscription;
-    LOGGER.info(`🚀 Subscription created: ${subscription.id}`, { subscription });
+    await handleSubCreated(subscription);
   } else if (stripeEvent.type === "payment_intent.succeeded") {
     const stripeObject: Stripe.PaymentIntent = stripeEvent.data
       .object as Stripe.PaymentIntent;
@@ -44,7 +45,11 @@ export const handler = ApiHandler(async (event, context) => {
     const charge = stripeEvent.data.object as Stripe.Charge;
     LOGGER.info(`💵 Charge id: ${charge.id}`, { charge });
   } else {
-    LOGGER.warn(`🤷‍♀️ Unhandled event type: ${stripeEvent.type}`, { stripeEvent });
+    LOGGER.warn(
+      `🤷‍♀️ Unhandled event type: ${stripeEvent.type}`,
+      { stripeEvent },
+      { depth: 5 },
+    );
   }
 
   return {

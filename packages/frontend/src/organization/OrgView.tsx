@@ -2,13 +2,14 @@ import { FC, ReactNode, useState } from "react";
 import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";
 import * as z from "zod";
+import { BillingTab } from "./tabs/BillingTab";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { UsersTab } from "./tabs/users/UsersTab";
 import { useOrganization } from "./useOrganization";
 
 interface OrgViewProps {}
 
-const PageSchema = z.enum(["github", "slack", "users", "overview"]);
+const PageSchema = z.enum(["billing", "users", "overview"]);
 
 export type Page = z.infer<typeof PageSchema>;
 
@@ -25,6 +26,10 @@ const routes: SubNav[] = [
   {
     text: "Users",
     page: "users",
+  },
+  {
+    text: "Billing",
+    page: "billing",
   },
 ];
 
@@ -108,7 +113,8 @@ export const OrgView: FC<OrgViewProps> = () => {
           switch (_page) {
             case "users":
               return <UsersTab orgId={orgId} />;
-            // return <UsernamesTab {...tabProps} />;
+            case "billing":
+              return <BillingTab orgId={orgId} />;
             default:
               return <OverviewTab {...tabProps} />;
           }

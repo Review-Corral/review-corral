@@ -2,6 +2,7 @@ import {
   StripeCheckoutCreatedMetadata,
   createCheckoutSessionBodySchema,
 } from "@core/stripe/types";
+import { assertVarExists } from "@core/utils/assert";
 import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
@@ -22,9 +23,10 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
-  const body = createCheckoutSessionBodySchema.safeParse(event.body);
+  const body = createCheckoutSessionBodySchema.safeParse(JSON.parse(event.body ?? ""));
 
   if (!body.success) {
+    LOGGER.error("Invalid request body", { body: event.body, error: body.error });
     return {
       statusCode: 400,
       body: JSON.stringify({
@@ -49,6 +51,10 @@ export const handler = ApiHandler(async (event, context) => {
     orgId: body.data.orgId,
   };
 
+  const frontendUrl = assertVarExists("BASE_FE_URL");
+
+  LOGGER.info("frontendUrl", { frontendUrl });
+
   const session = await StripeClient.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [
@@ -59,9 +65,8 @@ export const handler = ApiHandler(async (event, context) => {
     ],
     mode: "subscription",
     metadata: metaData,
-    // TODO:
-    success_url: "https://example.com/success",
-    cancel_url: "https://example.com/cancel",
+    success_url: `${frontendUrl}/org/${body.data.orgId}/payment/success`,
+    cancel_url: `${frontendUrl}/org/${body.data.orgId}/payment/failure`,
   });
 
   if (!session.url) {
@@ -74,10 +79,12 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
+  LOGGER.info("Returning session URL", { url: session.url });
+
   return {
-    statusCode: 302,
-    headers: {
-      Location: session.url,
-    },
+    statusCode: 200,
+    body: JSON.stringify({
+      url: session.url,
+    }),
   };
 });
