@@ -50,6 +50,32 @@ export const updateOrganizationInstallationId = async (args: {
     .go();
 };
 
+export const updateOrgBillingEmail = async ({
+  newEmail,
+  orgId,
+}: {
+  newEmail: string;
+  orgId: number;
+}) => {
+  return await Db.entities.organization
+    .patch({ orgId })
+    .set({ billingEmail: newEmail })
+    .go();
+};
+
+export const updateOrgCustomerId = async ({
+  customerId,
+  orgId,
+}: {
+  customerId: string;
+  orgId: number;
+}) => {
+  return await Db.entities.organization
+    .patch({ orgId })
+    .set({ customerId: customerId })
+    .go();
+};
+
 /**
  * Get all of the organizations a user is currently mapped to
  */

@@ -22,6 +22,15 @@ export const OrganizationEntity = new Entity({
       type: "string",
       required: true,
     },
+    billingEmail: {
+      type: "string",
+      required: false,
+    },
+    // For Stripe
+    customerId: {
+      type: "string",
+      required: false,
+    },
     installationId: {
       type: "number",
       required: true,
