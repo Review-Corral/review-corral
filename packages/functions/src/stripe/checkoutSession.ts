@@ -1,18 +1,14 @@
+import {
+  StripeCheckoutCreatedMetadata,
+  createCheckoutSessionBodySchema,
+} from "@core/stripe/types";
 import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
-import z from "zod";
 
 const LOGGER = new Logger("stripe.checkoutSession");
-
-const bodySchema = z.object({
-  orgId: z.number(),
-  priceId: z
-    .literal("price_1P9FpDBqa9UplzHeeJ57VHoc") // test price
-    .or(z.literal("price_1P8CmKBqa9UplzHebShipTnE")), // prod price,
-});
 
 export const handler = ApiHandler(async (event, context) => {
   const { user, error } = await useUser();
@@ -26,7 +22,7 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
-  const body = bodySchema.safeParse(event.body);
+  const body = createCheckoutSessionBodySchema.safeParse(event.body);
 
   if (!body.success) {
     return {
@@ -48,6 +44,11 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
+  const metaData: StripeCheckoutCreatedMetadata = {
+    userId: user.userId,
+    orgId: body.data.orgId,
+  };
+
   const session = await StripeClient.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [
@@ -57,10 +58,7 @@ export const handler = ApiHandler(async (event, context) => {
       },
     ],
     mode: "subscription",
-    metadata: {
-      user_id: user.userId,
-      customer_id: body.data.orgId,
-    },
+    metadata: metaData,
     // TODO:
     success_url: "https://example.com/success",
     cancel_url: "https://example.com/cancel",
