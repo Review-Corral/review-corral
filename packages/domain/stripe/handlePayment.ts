@@ -22,11 +22,18 @@ export const handleSubCreated = async (event: Stripe.Subscription) => {
   }
 
   for (const item of event.items.data) {
-    await insertSubscription({
+    const createdSubscription = await insertSubscription({
       orgId: metadata.data.orgId,
       subId: event.id,
       priceId: item.id,
       status: event.status,
+    });
+
+    LOGGER.info(`Subscription created`, {
+      subId: createdSubscription.subId,
+      orgId: createdSubscription.orgId,
+      priceId: createdSubscription.priceId,
+      status: createdSubscription.status,
     });
   }
 };

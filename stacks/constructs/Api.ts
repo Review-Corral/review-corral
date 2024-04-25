@@ -50,7 +50,7 @@ export class Api extends Construct {
           }),
         }),
         ...buildPaths("/stripe", {
-          "GET /checkout-session":
+          "POST /checkout-session":
             "packages/functions/src/stripe/checkoutSession.handler",
           "POST /webhook-event": "packages/functions/src/stripe/webhookEvent.handler",
         }),
