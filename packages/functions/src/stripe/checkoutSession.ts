@@ -1,45 +1,15 @@
-import { Organization } from "@core/dynamodb/entities/types";
 import {
   StripeCheckoutCreatedMetadata,
   createCheckoutSessionBodySchema,
 } from "@core/stripe/types";
 import { assertVarExists } from "@core/utils/assert";
-import {
-  fetchOrganizationById,
-  updateOrgCustomerId,
-} from "@domain/dynamodb/fetchers/organizations";
+import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("stripe.checkoutSession");
-
-const getOrCreateCustomer = async (organization: Organization): Promise<string> => {
-  if (organization.customerId) return organization.customerId;
-
-  LOGGER.info("Organization does not have a customerId; will attempt to create one", {
-    organization,
-  });
-
-  if (!organization.billingEmail) {
-    throw new Error("Organization does not have a billing email");
-  }
-
-  const result = await StripeClient.customers.create({
-    email: organization.billingEmail,
-    metadata: {
-      orgId: organization.orgId,
-    },
-  });
-
-  await updateOrgCustomerId({
-    customerId: result.id,
-    orgId: organization.orgId,
-  });
-
-  return result.id;
-};
 
 export const handler = ApiHandler(async (event, context) => {
   const { user, error } = await useUser();
@@ -76,19 +46,6 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
-  let customerId: string;
-  try {
-    customerId = await getOrCreateCustomer(organization);
-  } catch (e) {
-    LOGGER.error("Failed to create customer", { orgId: organization.orgId, error: e });
-    return {
-      statusCode: 500,
-      body: JSON.stringify({
-        message: "Failed to create customer",
-      }),
-    };
-  }
-
   const metaData: StripeCheckoutCreatedMetadata = {
     userId: user.userId,
     orgId: body.data.orgId,
@@ -108,7 +65,7 @@ export const handler = ApiHandler(async (event, context) => {
     ],
     mode: "subscription",
     metadata: metaData,
-    customer: customerId,
+    customer_email: organization.billingEmail,
     success_url: `${frontendUrl}/org/${body.data.orgId}/payment/success`,
     cancel_url: `${frontendUrl}/org/${body.data.orgId}/payment/failure`,
   });

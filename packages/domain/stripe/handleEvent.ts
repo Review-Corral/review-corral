@@ -122,6 +122,11 @@ export const handleSubUpdated = async (
   LOGGER.info(`Subscription updated`, args);
 };
 
+/**
+ * The metadata sent to the checkout session (annoyingly) wont be attached to
+ * the subscription events, so we use this event to set these properties which we can
+ * then use later
+ */
 export const handleSessionCompleted = async (
   event: Stripe.CheckoutSessionCompletedEvent,
 ) => {

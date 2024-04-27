@@ -1,7 +1,11 @@
 import { assertVarExists } from "@core/utils/assert";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
-import { handleSubCreated, handleSubUpdated } from "@domain/stripe/handleEvent";
+import {
+  handleSessionCompleted,
+  handleSubCreated,
+  handleSubUpdated,
+} from "@domain/stripe/handleEvent";
 import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("stripe.webhook");
@@ -39,6 +43,9 @@ export const handler = ApiHandler(async (event, context) => {
       break;
     case "customer.subscription.updated":
       handleSubUpdated(stripeEvent);
+      break;
+    case "checkout.session.completed":
+      handleSessionCompleted(stripeEvent);
       break;
     default:
       LOGGER.warn(
