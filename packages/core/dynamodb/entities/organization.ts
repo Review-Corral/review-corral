@@ -44,7 +44,7 @@ export const OrganizationEntity = new Entity({
     },
     stripeSubStatus: {
       type: "string",
-      required: true,
+      required: false,
     },
     // =============
     // END Stripe Stuff
