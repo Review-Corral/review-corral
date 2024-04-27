@@ -26,11 +26,6 @@ export const OrganizationEntity = new Entity({
       type: "string",
       required: false,
     },
-    // For Stripe
-    customerId: {
-      type: "string",
-      required: false,
-    },
     installationId: {
       type: "number",
       required: true,
@@ -40,6 +35,30 @@ export const OrganizationEntity = new Entity({
       required: true,
       readOnly: true,
     },
+    // =============
+    // Stripe Stuff
+    // =============
+    customerId: {
+      type: "string",
+      required: false,
+    },
+    subId: {
+      type: "string",
+      required: true,
+    },
+    priceId: {
+      type: "string",
+      required: true,
+    },
+    // Possible values are:
+    // incomplete, incomplete_expired, trialing, active, past_due, canceled, unpaid, or paused.
+    status: {
+      type: "string",
+      required: true,
+    },
+    // =============
+    // END Stripe Stuff
+    // =============
     createdAt: {
       type: "string",
       readOnly: true,

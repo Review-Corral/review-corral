@@ -16,10 +16,32 @@ const LOGGER = new Logger("fetchers.organizations");
 export const fetchOrganizationByAccountId = async (
   accountId: number,
 ): Promise<Organization | null> =>
-  await Db.entities.organization
-    .get({ orgId: accountId })
+  await Db.entities.organization.query
+    .primary({ orgId: accountId })
+    .go()
+    .then(({ data }) => (data.length > 0 ? data[0] : null));
+
+export const fetchOrganizationByStripeCustomerId = async (
+  stripeCustomerId: string,
+): Promise<Organization | null> => {
+  const organizationsWithCustomerId = await Db.entities.organization
+    .match({ customerId: stripeCustomerId })
     .go()
     .then(({ data }) => data);
+
+  if (organizationsWithCustomerId.length === 0) {
+    return null;
+  }
+
+  if (organizationsWithCustomerId.length > 1) {
+    LOGGER.error(
+      `Found multiple organizations with the same stripeCustomerId: ${stripeCustomerId}`,
+    );
+    return null;
+  }
+
+  return organizationsWithCustomerId[0];
+};
 
 /**
  * Creates a user. Should only be used when logging in and the user doesn't exist
@@ -48,6 +70,29 @@ export const updateOrganizationInstallationId = async (args: {
     })
     .set({ installationId: args.installationId })
     .go();
+};
+
+/**
+ * Updates the Stripe billing attributes for an organization
+ */
+type UpdateOrgStripeSubscriptionArgs =
+  | {
+      customerId: string;
+      subId: string;
+      priceId: string;
+      status: string;
+    }
+  | {
+      status: string;
+    };
+
+export const updateOrgStripeSubscription = async ({
+  orgId,
+  ...stripeArgs
+}: {
+  orgId: number;
+} & UpdateOrgStripeSubscriptionArgs) => {
+  return await Db.entities.organization.patch({ orgId }).set(stripeArgs).go();
 };
 
 export const updateOrgBillingEmail = async ({

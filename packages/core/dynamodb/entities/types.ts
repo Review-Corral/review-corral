@@ -5,7 +5,6 @@ import { PullRequestEntity } from "./pullRequest";
 import { RepositoryEntity } from "./repository";
 import { SlackEntity } from "./slack";
 import { SlackUserEntity } from "./slackUser";
-import { SubscriptionEntity } from "./subscription";
 import { UserEntity } from "./user";
 
 export type Organization = EntityItem<typeof OrganizationEntity>;
@@ -15,7 +14,6 @@ export type PullRequest = EntityItem<typeof PullRequestEntity>;
 export type Repository = EntityItem<typeof RepositoryEntity>;
 export type SlackIntegration = EntityItem<typeof SlackEntity>;
 export type SlackUser = EntityItem<typeof SlackUserEntity>;
-export type SubscriptionEntity = EntityItem<typeof SubscriptionEntity>;
 
 export type OrganizationInsertArgs = CreateEntityItem<typeof OrganizationEntity>;
 export type UserInsertArgs = CreateEntityItem<typeof UserEntity>;
@@ -24,6 +22,5 @@ export type PullRequestInsertArgs = CreateEntityItem<typeof PullRequestEntity>;
 export type SlackIntegrationInsertArgs = CreateEntityItem<typeof SlackEntity>;
 export type SlackUserInsertArgs = CreateEntityItem<typeof SlackUserEntity>;
 export type RepositoryInsertArgs = CreateEntityItem<typeof RepositoryEntity>;
-export type SubscriptionInsertArgs = CreateEntityItem<typeof SubscriptionEntity>;
 
 export type PullRequestUpdateArgs = UpdateEntityItem<typeof PullRequestEntity>;
