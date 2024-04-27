@@ -38,6 +38,10 @@ export const OrganizationEntity = new Entity({
     // =============
     // Stripe Stuff
     // =============
+    customerId: {
+      type: "string",
+      required: false,
+    },
     stripeSubStatus: {
       type: "string",
       required: true,
