@@ -9,18 +9,8 @@ interface OverviewProps extends OrgViewProps {}
 export const OverviewTab: FC<OverviewProps> = ({ organization, onEdit: setPage }) => {
   return (
     <SharedLayout title="Overview">
-      <GithubOverviewCard
-        organization={organization}
-        onEdit={() => {
-          setPage("github");
-        }}
-      />
-      <SlackOverviewCard
-        organization={organization}
-        onEdit={() => {
-          setPage("slack");
-        }}
-      />
+      <GithubOverviewCard organization={organization} onEdit={() => {}} />
+      <SlackOverviewCard organization={organization} onEdit={() => {}} />
     </SharedLayout>
   );
 };
