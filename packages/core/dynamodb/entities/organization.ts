@@ -38,21 +38,7 @@ export const OrganizationEntity = new Entity({
     // =============
     // Stripe Stuff
     // =============
-    customerId: {
-      type: "string",
-      required: false,
-    },
-    subId: {
-      type: "string",
-      required: true,
-    },
-    priceId: {
-      type: "string",
-      required: true,
-    },
-    // Possible values are:
-    // incomplete, incomplete_expired, trialing, active, past_due, canceled, unpaid, or paused.
-    status: {
+    stripeSubStatus: {
       type: "string",
       required: true,
     },
