@@ -72,29 +72,6 @@ export const updateOrganizationInstallationId = async (args: {
     .go();
 };
 
-/**
- * Updates the Stripe billing attributes for an organization
- */
-type UpdateOrgStripeSubscriptionArgs =
-  | {
-      customerId: string;
-      subId: string;
-      priceId: string;
-      status: string;
-    }
-  | {
-      status: string;
-    };
-
-export const updateOrgStripeSubscription = async ({
-  orgId,
-  ...stripeArgs
-}: {
-  orgId: number;
-} & UpdateOrgStripeSubscriptionArgs) => {
-  return await Db.entities.organization.patch({ orgId }).set(stripeArgs).go();
-};
-
 export const updateOrgBillingEmail = async ({
   newEmail,
   orgId,
@@ -105,19 +82,6 @@ export const updateOrgBillingEmail = async ({
   return await Db.entities.organization
     .patch({ orgId })
     .set({ billingEmail: newEmail })
-    .go();
-};
-
-export const updateOrgCustomerId = async ({
-  customerId,
-  orgId,
-}: {
-  customerId: string;
-  orgId: number;
-}) => {
-  return await Db.entities.organization
-    .patch({ orgId })
-    .set({ customerId: customerId })
     .go();
 };
 

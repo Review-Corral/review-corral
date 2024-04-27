@@ -34,9 +34,16 @@ export const handler = ApiHandler(async (event, context) => {
     assertVarExists("STRIPE_WEBHOOK_SECRET"),
   );
 
+  switch (stripeEvent.type) {
+    case "customer.subscription.created":
+      handleSubCreated(stripeEvent as Stripe.Subscription);
+      break;
+  }
+
   if (stripeEvent.type === "checkout.session.completed") {
-    const subscription = stripeEvent.data.object as Stripe.Checkout.Session;
-    await handleSubCreated(subscription);
+    const checkoutDone = stripeEvent.data.object as Stripe.Checkout.Session;
+    checkoutDone.metadata;
+    await handleSubCreated(checkoutDone);
   } else if (stripeEvent.type === "payment_intent.succeeded") {
     const stripeObject: Stripe.PaymentIntent = stripeEvent.data
       .object as Stripe.PaymentIntent;
