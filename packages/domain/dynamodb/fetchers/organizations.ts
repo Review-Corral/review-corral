@@ -21,28 +21,6 @@ export const fetchOrganizationByAccountId = async (
     .go()
     .then(({ data }) => (data.length > 0 ? data[0] : null));
 
-export const fetchOrganizationByStripeCustomerId = async (
-  stripeCustomerId: string,
-): Promise<Organization | null> => {
-  const organizationsWithCustomerId = await Db.entities.organization
-    .match({ customerId: stripeCustomerId })
-    .go()
-    .then(({ data }) => data);
-
-  if (organizationsWithCustomerId.length === 0) {
-    return null;
-  }
-
-  if (organizationsWithCustomerId.length > 1) {
-    LOGGER.error(
-      `Found multiple organizations with the same stripeCustomerId: ${stripeCustomerId}`,
-    );
-    return null;
-  }
-
-  return organizationsWithCustomerId[0];
-};
-
 /**
  * Creates a user. Should only be used when logging in and the user doesn't exist
  */
@@ -69,6 +47,23 @@ export const updateOrganizationInstallationId = async (args: {
       orgId: args.orgId,
     })
     .set({ installationId: args.installationId })
+    .go();
+};
+
+export const updateOrganizationStripeProps = async ({
+  orgId,
+  customerId,
+  stripeSubStatus,
+}: {
+  orgId: number;
+  customerId: string;
+  stripeSubStatus: string;
+}): Promise<void> => {
+  await Db.entities.organization
+    .patch({
+      orgId: orgId,
+    })
+    .set({ customerId, stripeSubStatus })
     .go();
 };
 

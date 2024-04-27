@@ -1,9 +1,8 @@
 import { assertVarExists } from "@core/utils/assert";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
-import { handleSubCreated } from "@domain/stripe/handlePayment";
+import { handleSubCreated, handleSubUpdated } from "@domain/stripe/handleEvent";
 import { ApiHandler } from "sst/node/api";
-import Stripe from "stripe";
 
 const LOGGER = new Logger("stripe.webhook");
 
@@ -36,27 +35,17 @@ export const handler = ApiHandler(async (event, context) => {
 
   switch (stripeEvent.type) {
     case "customer.subscription.created":
-      handleSubCreated(stripeEvent as Stripe.Subscription);
+      handleSubCreated(stripeEvent);
       break;
-  }
-
-  if (stripeEvent.type === "checkout.session.completed") {
-    const checkoutDone = stripeEvent.data.object as Stripe.Checkout.Session;
-    checkoutDone.metadata;
-    await handleSubCreated(checkoutDone);
-  } else if (stripeEvent.type === "payment_intent.succeeded") {
-    const stripeObject: Stripe.PaymentIntent = stripeEvent.data
-      .object as Stripe.PaymentIntent;
-    LOGGER.info(`💰 PaymentIntent status: ${stripeObject.status}`, { stripeObject });
-  } else if (stripeEvent.type === "charge.succeeded") {
-    const charge = stripeEvent.data.object as Stripe.Charge;
-    LOGGER.info(`💵 Charge id: ${charge.id}`, { charge });
-  } else {
-    LOGGER.warn(
-      `🤷‍♀️ Unhandled event type: ${stripeEvent.type}`,
-      { stripeEvent },
-      { depth: 5 },
-    );
+    case "customer.subscription.updated":
+      handleSubUpdated(stripeEvent);
+      break;
+    default:
+      LOGGER.warn(
+        `🤷‍♀️ Unhandled Stripe event type: ${stripeEvent.type}`,
+        { stripeEvent },
+        { depth: 5 },
+      );
   }
 
   return {

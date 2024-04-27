@@ -35,6 +35,9 @@ type UpdateSubscriptionArgs =
     }
   | {
       status: string;
+    }
+  | {
+      orgId: number;
     };
 
 export const updateSubscription = async ({
@@ -45,5 +48,5 @@ export const updateSubscription = async ({
   return await Db.entities.subscription
     .patch({ subId, customerId })
     .set(stripeArgs)
-    .go();
+    .go({ response: "all_new" });
 };
