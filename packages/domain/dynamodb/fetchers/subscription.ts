@@ -50,3 +50,7 @@ export const updateSubscription = async ({
     .set(stripeArgs)
     .go({ response: "all_new" });
 };
+
+export const upsertSubscription = async (args: SubscriptionInsertArgs) => {
+  return await Db.entities.subscription.upsert(args).go({ response: "all_new" });
+};
