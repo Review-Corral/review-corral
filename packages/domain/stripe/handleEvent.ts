@@ -4,7 +4,6 @@ import {
   updateOrganizationStripeProps,
 } from "@domain/dynamodb/fetchers/organizations";
 import {
-  insertSubscription,
   updateSubscription,
   upsertSubscription,
 } from "@domain/dynamodb/fetchers/subscription";
@@ -12,62 +11,6 @@ import { Logger } from "@domain/logging";
 import Stripe from "stripe";
 
 const LOGGER = new Logger("stripe.handleEvent");
-
-export const handleSubCreated = async (
-  event: Stripe.CustomerSubscriptionCreatedEvent,
-) => {
-  LOGGER.info(`🚀 Subscription created: ${event.id}`, { event });
-
-  const actualEvent = event.data.object;
-  const items = actualEvent.items;
-
-  if (!items) {
-    LOGGER.warn("Recieved subCreated event without line_items", { actualEvent: event });
-    return;
-  }
-
-  if (items.data.length !== 1) {
-    LOGGER.warn("Unexpected number of items for subCreated event ", {
-      items,
-    });
-    return;
-  }
-
-  if (!actualEvent.status) {
-    LOGGER.warn("Recieved subCreated event without status", { actualEvent: event });
-    return;
-  }
-
-  const priceId = items.data[0].price?.id;
-
-  if (!priceId) {
-    LOGGER.warn("Recieved subCreated event without priceId", {
-      actualEvent: event,
-      priceId,
-    });
-    return;
-  }
-
-  if (typeof actualEvent.customer !== "string") {
-    LOGGER.error("Recieved subCreated event where customer is not a string", {
-      actualEvent: event,
-      typeofCustomer: typeof actualEvent.customer,
-    });
-    return;
-  }
-
-  const args = {
-    customerId: actualEvent.customer.toString(),
-    status: actualEvent.status,
-    subId: actualEvent.id,
-    priceId: priceId,
-  };
-
-  // Due to a race condition, it's possible that this is called after handleSubUpdated
-  await insertSubscription(args);
-
-  LOGGER.info(`Subscription created`, args);
-};
 
 export const handleSubUpdated = async (
   event: Stripe.CustomerSubscriptionUpdatedEvent,
