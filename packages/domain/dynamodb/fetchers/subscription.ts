@@ -1,4 +1,8 @@
-import { Subscription, SubscriptionInsertArgs } from "@core/dynamodb/entities/types";
+import {
+  Subscription,
+  SubscriptionInsertArgs,
+  SubscriptionUpdateArgs,
+} from "@core/dynamodb/entities/types";
 import { Db } from "../client";
 
 interface SubscriptionKeys {
@@ -25,26 +29,11 @@ export const insertSubscription = async (
     .then(({ data }) => data);
 };
 
-/**
- * Updates the Stripe billing attributes for an organization
- */
-type UpdateSubscriptionArgs =
-  | {
-      priceId: string;
-      status: string;
-    }
-  | {
-      status: string;
-    }
-  | {
-      orgId: number;
-    };
-
 export const updateSubscription = async ({
   subId,
   customerId,
   ...stripeArgs
-}: SubscriptionKeys & UpdateSubscriptionArgs) => {
+}: SubscriptionKeys & SubscriptionUpdateArgs) => {
   return await Db.entities.subscription
     .patch({ subId, customerId })
     .set(stripeArgs)

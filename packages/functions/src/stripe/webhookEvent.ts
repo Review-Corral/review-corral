@@ -1,11 +1,7 @@
 import { assertVarExists } from "@core/utils/assert";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
-import {
-  handleSessionCompleted,
-  handleSubCreated,
-  handleSubUpdated,
-} from "@domain/stripe/handleEvent";
+import { handleSessionCompleted, handleSubUpdated } from "@domain/stripe/handleEvent";
 import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("stripe.webhook");
@@ -39,7 +35,12 @@ export const handler = ApiHandler(async (event, context) => {
 
   switch (stripeEvent.type) {
     case "customer.subscription.created":
-      handleSubCreated(stripeEvent);
+      // Don't do anything on this event, since the "subscription updated" event will
+      // soon fire if the subscription is successful (active) which means that there
+      // could be a race condition in inserting this into the database.
+      LOGGER.info("🚀 Subscription created; doing nothing", {
+        stripeEvent,
+      });
       break;
     case "customer.subscription.updated":
       handleSubUpdated(stripeEvent);

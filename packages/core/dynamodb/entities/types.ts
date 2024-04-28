@@ -25,5 +25,6 @@ export type SlackIntegrationInsertArgs = CreateEntityItem<typeof SlackEntity>;
 export type SlackUserInsertArgs = CreateEntityItem<typeof SlackUserEntity>;
 export type RepositoryInsertArgs = CreateEntityItem<typeof RepositoryEntity>;
 export type SubscriptionInsertArgs = CreateEntityItem<typeof SubscriptionEntity>;
+export type SubscriptionUpdateArgs = UpdateEntityItem<typeof SubscriptionEntity>;
 
 export type PullRequestUpdateArgs = UpdateEntityItem<typeof PullRequestEntity>;
