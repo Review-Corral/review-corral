@@ -6,6 +6,7 @@ import {
 import {
   insertSubscription,
   updateSubscription,
+  upsertSubscription,
 } from "@domain/dynamodb/fetchers/subscription";
 import { Logger } from "@domain/logging";
 import Stripe from "stripe";
@@ -16,20 +17,6 @@ export const handleSubCreated = async (
   event: Stripe.CustomerSubscriptionCreatedEvent,
 ) => {
   LOGGER.info(`🚀 Subscription created: ${event.id}`, { event });
-
-  // const metadata = stripeCheckoutCreatedMetadataSchema.safeParse(event.metadata);
-
-  // if (!metadata.success) {
-  //   LOGGER.error("Invalid metadata for subCreated event ", { metadata });
-  //   return;
-  // }
-
-  // const org = await fetchOrganizationByAccountId(metadata.data.orgId);
-
-  // if (!org) {
-  //   LOGGER.error("Organization not found for subCreated event", { metadata });
-  //   return;
-  // }
 
   const actualEvent = event.data.object;
   const items = actualEvent.items;
@@ -76,6 +63,7 @@ export const handleSubCreated = async (
     priceId: priceId,
   };
 
+  // Due to a race condition, it's possible that this is called after handleSubUpdated
   await insertSubscription(args);
 
   LOGGER.info(`Subscription created`, args);
@@ -84,12 +72,22 @@ export const handleSubCreated = async (
 export const handleSubUpdated = async (
   event: Stripe.CustomerSubscriptionUpdatedEvent,
 ) => {
-  LOGGER.info(`🚀 Subscription updated: ${event.id}`, { event });
+  LOGGER.info(`📝 Subscription updated: ${event.id}`, { event });
 
   const actualEvent = event.data.object;
 
   if (!actualEvent.status) {
     LOGGER.warn("Recieved subUpdated event without status", { actualEvent: event });
+    return;
+  }
+
+  const priceId = actualEvent.items.data[0].price?.id;
+
+  if (!priceId) {
+    LOGGER.warn("Recieved subCreated event without priceId", {
+      actualEvent: event,
+      priceId,
+    });
     return;
   }
 
@@ -102,12 +100,13 @@ export const handleSubUpdated = async (
   }
 
   const args = {
+    customerId: actualEvent.customer.toString(),
     status: actualEvent.status,
     subId: actualEvent.id,
-    customerId: actualEvent.customer,
+    priceId: priceId,
   };
 
-  const sub = await updateSubscription(args);
+  const sub = await upsertSubscription(args);
 
   if (sub.data.orgId) {
     // Update the organization with the new info for quicker access
