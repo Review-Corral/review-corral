@@ -10,8 +10,11 @@ export const createCheckoutSessionBodySchema = z.object({
 export type CreateCheckoutSessionBody = z.infer<typeof createCheckoutSessionBodySchema>;
 
 export const stripeCheckoutCreatedMetadataSchema = z.object({
-  userId: z.number().optional(),
-  orgId: z.number(),
+  userId: z
+    .string()
+    .optional()
+    .transform((v) => v ?? Number(v)),
+  orgId: z.string().transform(Number),
 });
 
 export type StripeCheckoutCreatedMetadata = z.infer<

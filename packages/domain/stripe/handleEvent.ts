@@ -75,10 +75,17 @@ export const handleSessionCompleted = async (
   LOGGER.info(`🚀 Session completed: ${event.id}`, { event });
 
   const actualEvent = event.data.object;
-  const metadata = stripeCheckoutCreatedMetadataSchema.safeParse(actualEvent);
+  const metadata = stripeCheckoutCreatedMetadataSchema.safeParse(actualEvent.metadata);
 
   if (!metadata.success) {
-    LOGGER.error("Invalid metadata for sessionCompleted event ", { metadata });
+    LOGGER.error(
+      "Invalid metadata for sessionCompleted event",
+      {
+        parseResult: metadata,
+        eventMetadata: actualEvent.metadata,
+      },
+      { depth: 5 },
+    );
     return;
   }
 
