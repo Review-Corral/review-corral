@@ -21,8 +21,7 @@ export const BillingTab: FC<BillingTabProps> = ({ orgId }) => {
           },
           body: JSON.stringify({
             orgId: orgId,
-            // TODO: get dynamically
-            priceId: "price_1P9FpDBqa9UplzHeeJ57VHoc",
+            priceId: import.meta.env.VITE_STRIPE_PRICE_ID,
           }),
         })
         .json<{ url: string }>();

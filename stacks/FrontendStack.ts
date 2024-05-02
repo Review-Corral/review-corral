@@ -38,6 +38,10 @@ export function FrontendStack({ stack, app }: StackContext) {
       VITE_API_URL: api.customDomainUrl ?? api.url,
       VITE_REGION: app.region,
       VITE_AUTH_URL: authUrl,
+      VITE_STRIPE_PRICE_ID:
+        stack.stackName === "prod"
+          ? "price_1P8CmKBqa9UplzHebShipTnE"
+          : "price_1P9FpDBqa9UplzHeeJ57VHoc",
       ...slackEnvVars,
       ...(app.local ? { VITE_LOCAL: "true" } : {}),
     },
