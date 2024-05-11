@@ -15,7 +15,7 @@ export function MainStack({ stack, app }: StackContext) {
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
     environment: {
-      BASE_FE_URL: getFrontendUrl(app),
+      BASE_FE_URL: app.local ? getFrontendUrl(app) : `https://${getFrontendUrl(app)}`,
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",

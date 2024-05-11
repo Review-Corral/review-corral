@@ -10,7 +10,7 @@ export const getFrontendUrl = ({ local, stage }: App) => {
 
   if (stage === "prod") return HOSTED_ZONE;
 
-  return `https://${stage}.${HOSTED_ZONE}`;
+  return `${stage}.${HOSTED_ZONE}`;
 };
 
 export function FrontendStack({ stack, app }: StackContext) {
