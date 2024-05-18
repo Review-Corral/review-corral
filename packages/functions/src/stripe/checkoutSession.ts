@@ -3,7 +3,7 @@ import {
   createCheckoutSessionBodySchema,
 } from "@core/stripe/types";
 import { assertVarExists } from "@core/utils/assert";
-import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
+import { fetchOrganizationById, updateOrganization } from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { useUser } from "src/utils/useUser";
@@ -46,6 +46,28 @@ export const handler = ApiHandler(async (event, context) => {
     };
   }
 
+  let customerId: string;
+
+  if (!organization.customerId) {
+    const customer = await StripeClient.customers.create({
+      email: organization.billingEmail,
+      name: organization.name,
+      metadata: {
+        userId: user.userId,
+        orgId: body.data.orgId,
+      },
+    });
+
+    await updateOrganization({
+      orgId: body.data.orgId,
+      customerId: customer.id,
+    });
+
+    customerId = customer.id;
+  } else {
+    customerId = organization.customerId;
+  }
+
   const metaData: StripeCheckoutCreatedMetadata = {
     userId: user.userId,
     orgId: body.data.orgId,
@@ -57,6 +79,7 @@ export const handler = ApiHandler(async (event, context) => {
 
   const session = await StripeClient.checkout.sessions.create({
     payment_method_types: ["card"],
+    customer: customerId,
     line_items: [
       {
         price: body.data.priceId,

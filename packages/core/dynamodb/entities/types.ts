@@ -28,3 +28,4 @@ export type SubscriptionInsertArgs = CreateEntityItem<typeof SubscriptionEntity>
 export type SubscriptionUpdateArgs = UpdateEntityItem<typeof SubscriptionEntity>;
 
 export type PullRequestUpdateArgs = UpdateEntityItem<typeof PullRequestEntity>;
+export type OrganizationUpdateArgs = UpdateEntityItem<typeof OrganizationEntity>;

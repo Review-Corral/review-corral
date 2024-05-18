@@ -1,7 +1,7 @@
 import { stripeCheckoutCreatedMetadataSchema } from "@core/stripe/types";
 import {
   fetchOrganizationByAccountId,
-  updateOrganizationStripeProps,
+  updateOrganization,
 } from "@domain/dynamodb/fetchers/organizations";
 import {
   updateSubscription,
@@ -61,7 +61,7 @@ export const handleSubUpdated = async (
   if (parsedMetadata.success) {
     // Update the organization with the new info for quicker access
     LOGGER.info(`Updating org stripe sub status...`);
-    await updateOrganizationStripeProps({
+    await updateOrganization({
       orgId: parsedMetadata.data.orgId,
       customerId: actualEvent.customer,
       stripeSubStatus: actualEvent.status,
@@ -135,7 +135,7 @@ export const handleSessionCompleted = async (
   });
 
   // Update the organization with the new info for quicker access
-  await updateOrganizationStripeProps({
+  await updateOrganization({
     orgId: org.orgId,
     customerId: actualEvent.customer,
     stripeSubStatus: newSub.data.status,
