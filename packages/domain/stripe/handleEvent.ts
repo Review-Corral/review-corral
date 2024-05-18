@@ -1,6 +1,6 @@
 import { stripeCheckoutCreatedMetadataSchema } from "@core/stripe/types";
 import {
-  fetchOrganizationByAccountId,
+  fetchOrganizationById,
   updateOrganization,
 } from "@domain/dynamodb/fetchers/organizations";
 import {
@@ -101,7 +101,7 @@ export const handleSessionCompleted = async (
     return;
   }
 
-  const org = await fetchOrganizationByAccountId(metadata.data.orgId);
+  const org = await fetchOrganizationById(metadata.data.orgId);
 
   if (!org) {
     LOGGER.error("Organization not found for sessionCompleted event", { metadata });

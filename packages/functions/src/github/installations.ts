@@ -1,7 +1,7 @@
 import { Organization, User } from "@core/dynamodb/entities/types";
 import { addOrganizationMemberFromUser } from "@domain/dynamodb/fetchers/members";
 import {
-  fetchOrganizationByAccountId,
+  fetchOrganizationById,
   fetchUsersOrganizations,
   insertOrganizationAndAssociateUser,
   updateOrganizationInstallationId,
@@ -56,7 +56,7 @@ async function getOrganizations(user: User, installations: InstallationsData) {
       continue;
     }
 
-    const organization = await fetchOrganizationByAccountId(installation.account.id);
+    const organization = await fetchOrganizationById(installation.account.id);
 
     if (organization) {
       LOGGER.debug("Found organization for installation", { organization });

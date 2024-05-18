@@ -1,6 +1,6 @@
 import * as z from "zod";
 
-import { fetchOrganizationByAccountId } from "@domain/dynamodb/fetchers/organizations";
+import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
 import { safeFetchRepository } from "@domain/dynamodb/fetchers/repositories";
 import { getSlackInstallationsForOrganization } from "@domain/dynamodb/fetchers/slack";
 import { takeFirst } from "@domain/dynamodb/fetchers/utils";
@@ -77,7 +77,7 @@ export const handleGithubWebhookEvent = async ({
       });
     }
 
-    const organization = await fetchOrganizationByAccountId(repository.orgId);
+    const organization = await fetchOrganizationById(repository.orgId);
 
     if (!organization) {
       LOGGER.warn("Couldn't load organization for repository from our database", {
