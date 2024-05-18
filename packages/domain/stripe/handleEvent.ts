@@ -9,13 +9,15 @@ import {
 } from "@domain/dynamodb/fetchers/subscription";
 import { Logger } from "@domain/logging";
 import Stripe from "stripe";
+import { z } from "zod";
 
 const LOGGER = new Logger("stripe.handleEvent");
+
 
 export const handleSubUpdated = async (
   event: Stripe.CustomerSubscriptionUpdatedEvent,
 ) => {
-  LOGGER.info(`📝 Subscription updated: ${event.id}`, { event });
+  LOGGER.info(`📝 Subscription updated: ${event.id}`, { event }, { depth: 5 });
 
   const actualEvent = event.data.object;
 
@@ -49,15 +51,24 @@ export const handleSubUpdated = async (
     priceId: priceId,
   };
 
-  const sub = await upsertSubscription(args);
+  LOGGER.info(`Going to upsert subscription with args:`, { args }, { depth: 3 });
+  await upsertSubscription(args);
+  LOGGER.info(`Finshed upserting subscription`, { depth: 3 });
 
-  if (sub.data.orgId) {
+  const parsedMetadata = stripeCheckoutCreatedMetadataSchema.safeParse(actualEvent.metadata);
+
+  if (parsedMetadata.success) {
     // Update the organization with the new info for quicker access
     LOGGER.info(`Updating org stripe sub status...`);
     await updateOrganizationStripeProps({
-      orgId: sub.data.orgId,
+      orgId: parsedMetadata.data.orgId,
       customerId: actualEvent.customer,
       stripeSubStatus: actualEvent.status,
+    });
+  } else {
+    LOGGER.warn(`Subscription does not have an orgId`, {
+      input: actualEvent.metadata,
+      zodParseError: parsedMetadata.error
     });
   }
 
@@ -72,7 +83,7 @@ export const handleSubUpdated = async (
 export const handleSessionCompleted = async (
   event: Stripe.CheckoutSessionCompletedEvent,
 ) => {
-  LOGGER.info(`🚀 Session completed: ${event.id}`, { event });
+  LOGGER.info(`🚀 Session completed: ${event.id}`, { event }, { depth: 5 });
 
   const actualEvent = event.data.object;
   const metadata = stripeCheckoutCreatedMetadataSchema.safeParse(actualEvent.metadata);

@@ -41,5 +41,5 @@ export const updateSubscription = async ({
 };
 
 export const upsertSubscription = async (args: SubscriptionInsertArgs) => {
-  return await Db.entities.subscription.upsert(args).go({ response: "all_new" });
+  await Db.entities.subscription.upsert(args).go();
 };
