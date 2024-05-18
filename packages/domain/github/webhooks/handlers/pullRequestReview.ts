@@ -29,10 +29,9 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
 
     await slackClient.postMessage({
       message: {
-        text: `${await getSlackUserName(
-          event.sender.login,
-          args,
-        )} ${getReviewText(event.review)}`,
+        text: `${await getSlackUserName(event.sender.login, args)} ${getReviewText(
+          event.review,
+        )}`,
         attachments: [
           {
             text: slackifyMarkdown(event.review.body ?? ""),

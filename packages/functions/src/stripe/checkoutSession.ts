@@ -3,7 +3,10 @@ import {
   createCheckoutSessionBodySchema,
 } from "@core/stripe/types";
 import { assertVarExists } from "@core/utils/assert";
-import { fetchOrganizationById, updateOrganization } from "@domain/dynamodb/fetchers/organizations";
+import {
+  fetchOrganizationById,
+  updateOrganization,
+} from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { useUser } from "src/utils/useUser";

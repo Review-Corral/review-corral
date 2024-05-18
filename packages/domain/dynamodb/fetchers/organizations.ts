@@ -95,8 +95,6 @@ export const fetchUsersOrganizations = async (
   return orgs;
 };
 
-
-
 export const insertOrganizationAndAssociateUser = async ({
   user,
   createOrgArgs,

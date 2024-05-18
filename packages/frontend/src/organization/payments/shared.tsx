@@ -11,17 +11,16 @@ const orgViewParamsSchema = z.object({
   orgId: z.string().transform(Number),
 });
 
-export const SharedPaymentsView: React.FC<
-  React.PropsWithChildren<SharedPayentsProps>
-> = ({ children }) => {
-  const loaderData = useLoaderData();
-  const { orgId } = orgViewParamsSchema.parse(loaderData);
+export const SharedPaymentsView: React.FC<React.PropsWithChildren<SharedPayentsProps>> =
+  ({ children }) => {
+    const loaderData = useLoaderData();
+    const { orgId } = orgViewParamsSchema.parse(loaderData);
 
-  const { data, isLoading } = useOrganization(orgId);
+    const { data, isLoading } = useOrganization(orgId);
 
-  return (
-    <DashboardLayout title="Organization" activeOrganizationAccountId={data?.orgId}>
-      {isLoading ? <Loading text={"Loading payment status"} /> : children}
-    </DashboardLayout>
-  );
-};
+    return (
+      <DashboardLayout title="Organization" activeOrganizationAccountId={data?.orgId}>
+        {isLoading ? <Loading text={"Loading payment status"} /> : children}
+      </DashboardLayout>
+    );
+  };
