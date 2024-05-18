@@ -3,6 +3,7 @@ import { Db } from "../client";
 import {
   Organization,
   OrganizationInsertArgs,
+  OrganizationUpdateArgs,
   User,
 } from "@core/dynamodb/entities/types";
 import { Logger } from "../../logging";
@@ -50,20 +51,15 @@ export const updateOrganizationInstallationId = async (args: {
     .go();
 };
 
-export const updateOrganizationStripeProps = async ({
+export const updateOrganization = async ({
   orgId,
-  customerId,
-  stripeSubStatus,
-}: {
-  orgId: number;
-  customerId: string;
-  stripeSubStatus: string;
-}): Promise<void> => {
+  ...updateArgs
+}: OrganizationUpdateArgs & { orgId: number }): Promise<void> => {
   await Db.entities.organization
     .patch({
       orgId: orgId,
     })
-    .set({ customerId, stripeSubStatus })
+    .set(updateArgs)
     .go();
 };
 
