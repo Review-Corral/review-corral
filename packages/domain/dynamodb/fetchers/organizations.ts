@@ -14,13 +14,11 @@ const LOGGER = new Logger("fetchers.organizations");
 /**
  * Fetches an organization by it's ID
  */
-export const fetchOrganizationByAccountId = async (
-  accountId: number,
-): Promise<Organization | null> =>
-  await Db.entities.organization.query
-    .primary({ orgId: accountId })
-    .go()
-    .then(({ data }) => (data.length > 0 ? data[0] : null));
+export const fetchOrganizationById = async (
+  id: number,
+): Promise<Organization | null> => {
+  return await fetchOrganizationById(id);
+};
 
 /**
  * Creates a user. Should only be used when logging in and the user doesn't exist
@@ -97,12 +95,7 @@ export const fetchUsersOrganizations = async (
   return orgs;
 };
 
-// TODO: this is a duplicated method, remove
-export const fetchOrganizationById = async (
-  id: number,
-): Promise<Organization | null> => {
-  return await fetchOrganizationByAccountId(id);
-};
+
 
 export const insertOrganizationAndAssociateUser = async ({
   user,
