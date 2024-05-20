@@ -10,6 +10,13 @@ interface SubscriptionKeys {
   subId: string;
 }
 
+export const fetchSubscriptionsByCustomerId = async (customerId: string) => {
+  return await Db.entities.subscription.query
+    .primary({ customerId })
+    .go()
+    .then(({ data }) => data);
+};
+
 export const fetchSubscription = async ({
   customerId,
   subId,

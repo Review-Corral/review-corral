@@ -56,6 +56,8 @@ export class Api extends Construct {
         }),
         ...buildPaths("/org/{organizationId}", {
           "GET /": "packages/functions/src/organization/getOrganization.handler",
+          "GET /billing":
+            "packages/functions/src/organization/getBillingDetails.handler",
           "GET /members": "packages/functions/src/organization/getMembers.handler",
           "PUT /member": "packages/functions/src/organization/updateMember.handler",
         }),
