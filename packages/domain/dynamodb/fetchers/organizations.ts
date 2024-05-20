@@ -17,7 +17,10 @@ const LOGGER = new Logger("fetchers.organizations");
 export const fetchOrganizationById = async (
   id: number,
 ): Promise<Organization | null> => {
-  return await fetchOrganizationById(id);
+  return await Db.entities.organization.query
+    .primary({ orgId: id })
+    .go()
+    .then(({ data }) => (data.length > 0 ? data[0] : null));
 };
 
 /**
