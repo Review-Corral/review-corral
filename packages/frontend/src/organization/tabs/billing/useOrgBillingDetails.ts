@@ -5,7 +5,7 @@ import { getSessionToken } from "src/auth/getSessionToken";
 
 const ORGANIZATION_BILLING_QUERY_KEY = "organizationBilling";
 
-export const useOrganizationBilling = (orgId: number) => {
+export const useOrgBillingDetails = (orgId: number) => {
   return useQuery({
     queryKey: [ORGANIZATION_BILLING_QUERY_KEY],
     queryFn: async () => {

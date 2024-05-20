@@ -10,7 +10,9 @@ interface SubscriptionKeys {
   subId: string;
 }
 
-export const fetchSubscriptionsByCustomerId = async (customerId: string) => {
+export const fetchSubscriptionsByCustomerId = async (
+  customerId: string,
+): Promise<Subscription[]> => {
   return await Db.entities.subscription.query
     .primary({ customerId })
     .go()

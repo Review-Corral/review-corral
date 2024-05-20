@@ -53,6 +53,8 @@ export class Api extends Construct {
           "POST /checkout-session":
             "packages/functions/src/stripe/checkoutSession.handler",
           "POST /webhook-event": "packages/functions/src/stripe/webhookEvent.handler",
+          "POST /billing-portal":
+            "packages/functions/src/stripe/billingPortalSession.handler",
         }),
         ...buildPaths("/org/{organizationId}", {
           "GET /": "packages/functions/src/organization/getOrganization.handler",
