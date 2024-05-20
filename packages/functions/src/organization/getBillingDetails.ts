@@ -1,9 +1,6 @@
-import { Organization, Subscription } from "@core/dynamodb/entities/types";
-import {} from "@domain/dynamodb/fetchers/members";
 import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
-import { fetchSubscriptionsByCustomerId } from "@domain/dynamodb/fetchers/subscription";
-import {} from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
+import { getBillingDetails } from "@domain/selectors/organization/getBillingDetails";
 import { useUser } from "src/utils/useUser";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
@@ -13,10 +10,6 @@ const LOGGER = new Logger("organization:getOrgBillingDetails");
 const getOrgBillingDetailsParamsSchema = z.object({
   organizationId: z.string(),
 });
-
-interface BillingDetailsResponse {
-  subscriptions: Subscription[];
-}
 
 export const handler = ApiHandler(async (event, _context) => {
   const { organizationId } = getOrgBillingDetailsParamsSchema.parse(
@@ -46,17 +39,3 @@ export const handler = ApiHandler(async (event, _context) => {
     body: JSON.stringify(getBillingDetails(organization)),
   };
 });
-
-const getBillingDetails = async (
-  organization: Organization,
-): Promise<BillingDetailsResponse> => {
-  if (!organization.customerId) {
-    return {
-      subscriptions: [],
-    };
-  }
-
-  return {
-    subscriptions: await fetchSubscriptionsByCustomerId(organization.customerId),
-  };
-};

@@ -2,12 +2,12 @@ import { FC, ReactNode, useState } from "react";
 import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";
 import * as z from "zod";
-import { BillingTab } from "./tabs/BillingTab";
 import { OverviewTab } from "./tabs/OverviewTab";
+import { BillingTab } from "./tabs/billing/BillingTab";
 import { UsersTab } from "./tabs/users/UsersTab";
 import { useOrganization } from "./useOrganization";
 
-interface OrgViewProps {}
+type OrgViewProps = {};
 
 const PageSchema = z.enum(["billing", "users", "overview"]);
 
