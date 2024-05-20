@@ -20,3 +20,12 @@ export const stripeCheckoutCreatedMetadataSchema = z.object({
 export type StripeCheckoutCreatedMetadata = z.infer<
   typeof stripeCheckoutCreatedMetadataSchema
 >;
+
+export const createBillingPortalSessionSchema = z.object({
+  customerId: z.string(),
+  orgId: z.number(),
+});
+
+export type CreateBillingPortalSession = z.infer<
+  typeof createBillingPortalSessionSchema
+>;
