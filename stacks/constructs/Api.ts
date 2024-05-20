@@ -83,6 +83,7 @@ const buildPaths = <T extends ApiRouteProps<string>>(
 
     if (splitKey.length !== 2) {
       throw Error(
+        // biome-ignore lint/style/useTemplate: <explanation>
         `Invalid route key of '${key}' found.` +
           `Should contain a method and then the path like so: 'GET /path'`,
       );
@@ -94,6 +95,7 @@ const buildPaths = <T extends ApiRouteProps<string>>(
     }`;
 
     return {
+      // biome-ignore lint/performance/noAccumulatingSpread: <explanation>
       ...acc,
       [newKey]: routes[key],
     };
