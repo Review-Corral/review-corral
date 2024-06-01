@@ -13,8 +13,10 @@ export const BetterButton: FC<React.PropsWithChildren<BetterButtonProps>> = ({
 }) => {
   return (
     <Button {...props} disabled={isLoading}>
-      {isLoading && <Loader2Icon className="animate-spin h-5 w-5 black" />}
-      {children}
+      <div className="flex flex-row gap-2">
+        {isLoading && <Loader2Icon className="animate-spin h-5 w-5 black" />}
+        {children}
+      </div>
     </Button>
   );
 };

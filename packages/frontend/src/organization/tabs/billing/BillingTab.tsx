@@ -85,6 +85,7 @@ const ActivePlanCard: FC<{ subscription: Subscription; orgId: number }> = ({
         <p className="mt-3 text-base leading-7 text-gray-600">$10/month</p>
         <div className="mt-6">
           <BetterButton
+            isLoading={getBillingPortalSession.isLoading}
             onClick={async () => {
               const checkout = await getBillingPortalSession.mutateAsync();
               window.open(checkout.url);
