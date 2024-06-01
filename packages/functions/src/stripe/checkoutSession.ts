@@ -55,6 +55,11 @@ export const handler = ApiHandler(async (event, context) => {
 
   LOGGER.info("frontendUrl", { frontendUrl });
 
+  const customer = await StripeClient.customers.create({
+    email: organization.billingEmail,
+    
+  })
+
   const session = await StripeClient.checkout.sessions.create({
     payment_method_types: ["card"],
     line_items: [

@@ -14,7 +14,7 @@ export const SubscriptionEntity = new Entity({
     customerId: {
       type: "string",
       readony: true,
-      required: false,
+      required: true,
     },
     subId: {
       type: "string",
