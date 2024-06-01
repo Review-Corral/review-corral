@@ -13,7 +13,6 @@ import { z } from "zod";
 
 const LOGGER = new Logger("stripe.handleEvent");
 
-
 export const handleSubUpdated = async (
   event: Stripe.CustomerSubscriptionUpdatedEvent,
 ) => {
@@ -55,7 +54,9 @@ export const handleSubUpdated = async (
   await upsertSubscription(args);
   LOGGER.info(`Finshed upserting subscription`, { depth: 3 });
 
-  const parsedMetadata = stripeCheckoutCreatedMetadataSchema.safeParse(actualEvent.metadata);
+  const parsedMetadata = stripeCheckoutCreatedMetadataSchema.safeParse(
+    actualEvent.metadata,
+  );
 
   if (parsedMetadata.success) {
     // Update the organization with the new info for quicker access
@@ -68,7 +69,7 @@ export const handleSubUpdated = async (
   } else {
     LOGGER.warn(`Subscription does not have an orgId`, {
       input: actualEvent.metadata,
-      zodParseError: parsedMetadata.error
+      zodParseError: parsedMetadata.error,
     });
   }
 

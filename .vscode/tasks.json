@@ -5,9 +5,7 @@
       "label": "Frontend",
       "type": "shell",
       "command": "pnpm",
-      "args": [
-        "dev"
-      ],
+      "args": ["dev"],
       "options": {
         "cwd": "${workspaceFolder}/packages/frontend"
       },
@@ -30,9 +28,7 @@
       "label": "Backend",
       "type": "shell",
       "command": "pnpm",
-      "args": [
-        "dev"
-      ],
+      "args": ["dev"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -59,9 +55,7 @@
         "id": "beaker",
         "color": "terminal.ansiGreen"
       },
-      "args": [
-        "test:watch"
-      ],
+      "args": ["test:watch"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -80,12 +74,7 @@
       "label": "Connect to Prod Database",
       "type": "shell",
       "command": "sh",
-      "args": [
-        "./scripts/connectDatabase.sh",
-        "staging",
-        "--profile",
-        "main"
-      ],
+      "args": ["./scripts/connectDatabase.sh", "staging", "--profile", "main"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -113,9 +102,7 @@
         "color": "terminal.ansiGreen"
       },
       "command": "sh",
-      "args": [
-        "./scripts/syncStagingResultsBucket.sh"
-      ],
+      "args": ["./scripts/syncStagingResultsBucket.sh"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -133,9 +120,7 @@
       "label": "Generate Migrations",
       "type": "shell",
       "command": "./scripts/nvmPnpm.sh",
-      "args": [
-        "migrate:gen"
-      ],
+      "args": ["migrate:gen"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -158,9 +143,7 @@
       "label": "Run Migrations",
       "type": "shell",
       "command": "./scripts/nvmPnpm.sh",
-      "args": [
-        "migrate"
-      ],
+      "args": ["migrate"],
       "options": {
         "cwd": "${workspaceFolder}"
       },
