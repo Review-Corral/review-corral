@@ -2,7 +2,7 @@ import { BetterButton } from "@components/ui/BetterButton";
 import { Loading } from "@components/ui/cards/loading";
 import { Subscription } from "@core/dynamodb/entities/types";
 import { CheckIcon } from "lucide-react";
-import { FC } from "react";
+import React, { FC } from "react";
 import { SharedLayout } from "../SharedLayout";
 import { useBillingPortalSession } from "./useBillingPortalSession";
 import { useCheckoutSession } from "./useCheckoutSession";
@@ -13,7 +13,7 @@ interface BillingTabProps {
 }
 
 export const BillingTab: FC<BillingTabProps> = ({ orgId }) => {
-  const getCheckoutSession = useCheckoutSession(orgId);
+
   const getBillingDetails = useOrgBillingDetails(orgId);
 
   if (getBillingDetails.isLoading) {
@@ -27,16 +27,9 @@ export const BillingTab: FC<BillingTabProps> = ({ orgId }) => {
       {subscriptions && subscriptions.length > 0 ? (
         <ActiveSubscriptionsSection subscriptions={subscriptions} orgId={orgId} />
       ) : (
-        <div>
-          You don't have any active subscriptions
-          <BetterButton
-            onClick={async () => {
-              const checkout = await getCheckoutSession.mutateAsync();
-              window.open(checkout.url);
-            }}
-          >
-            Subscribe
-          </BetterButton>
+        <div className="flex flex-col gap-4">
+          You don't have any active subscriptions.
+          <PlanCard orgId={orgId} />
         </div>
       )}
     </SharedLayout>
@@ -116,9 +109,11 @@ const ActivePlanCard: FC<{ subscription: Subscription; orgId: number }> = ({
   );
 };
 
-const PlanCard: FC<{ subscription: Subscription }> = ({ subscription }) => {
+const PlanCard: React.FC<{ orgId: number }> = ({ orgId }) => {
+  const getCheckoutSession = useCheckoutSession(orgId);
+
   return (
-    <div className="mx-auto mt-16 w-full rounded-3xl ring-1 ring-gray-200 sm:mt-20 lg:mx-0 lg:flex lg:max-w-none">
+    <div className="mx-auto w-full rounded-3xl ring-1 ring-gray-200 lg:mx-0 lg:flex lg:max-w-none">
       <div className="p-8 sm:p-10 lg:flex-auto">
         <h3 className="text-2xl font-bold tracking-tight text-gray-900">
           Startup Plan
@@ -160,12 +155,20 @@ const PlanCard: FC<{ subscription: Subscription }> = ({ subscription }) => {
                 USD/month
               </span>
             </p>
-            <a
-              href="#"
-              className="mt-10 block w-full rounded-md bg-indigo-600 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-            >
-              Subscribe
-            </a>
+            <div className="pt-6">
+              <BetterButton
+                size={"lg"}
+                color="indigo"
+                isLoading={getCheckoutSession.isLoading}
+                onClick={async () => {
+                  const checkout = await getCheckoutSession.mutateAsync()
+                  window.open(checkout.url);
+                }}
+              >
+                Subscribe
+              </BetterButton>
+            </div>
+
             <p className="mt-6 text-xs leading-5 text-gray-600">
               Invoices and receipts available for easy company reimbursement
             </p>
