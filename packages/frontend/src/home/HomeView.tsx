@@ -1,3 +1,4 @@
+import { Loading } from "@components/ui/cards/loading";
 import { Header } from "@components/ui/header";
 import { Button } from "@shadcn/components/ui/button";
 import { FC } from "react";
@@ -5,10 +6,10 @@ import { Link } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";
 import { useOrganizations } from "src/organization/useOrganizations";
 
-interface HomeViewProps {}
+interface HomeViewProps { }
 
 export const HomeView: FC<HomeViewProps> = () => {
-  const { data } = useOrganizations();
+  const { data, isLoading } = useOrganizations();
 
   return (
     <DashboardLayout title="Home">
@@ -45,6 +46,9 @@ export const HomeView: FC<HomeViewProps> = () => {
             Github
           </p>
           <div className="mt-8 inline-flex flex-col gap-2">
+            {
+              isLoading && <Loading />
+            }
             {data?.map((org) => (
               <Link key={org.orgId} to={`/org/${org.orgId}`}>
                 <div className="inline-flex items-center space-x-2 w-72 cursor-pointer rounded-md p-4 border border-gray-200 hover:shadow-sm">
