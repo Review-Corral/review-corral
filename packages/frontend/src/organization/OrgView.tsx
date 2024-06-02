@@ -6,6 +6,7 @@ import { OverviewTab } from "./tabs/OverviewTab";
 import { BillingTab } from "./tabs/billing/BillingTab";
 import { UsersTab } from "./tabs/users/UsersTab";
 import { useOrganization } from "./useOrganization";
+import { Loading } from "@components/ui/cards/loading";
 
 type OrgViewProps = {};
 
@@ -104,7 +105,7 @@ export const OrgView: FC<OrgViewProps> = () => {
         </>
       }
     >
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Loading />}
       {!isLoading &&
         organization &&
         ((): ReactNode => {

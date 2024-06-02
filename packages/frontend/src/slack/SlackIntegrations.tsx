@@ -1,6 +1,7 @@
 import { FC } from "react";
 import SlackButton from "./SetupSlackButton";
 import { useSlackIntegrations } from "./useSlackIntegrations";
+import { Loading } from "@components/ui/cards/loading";
 
 interface SlackIntegrationsProps {
   organizationId: number;
@@ -10,7 +11,7 @@ export const SlackIntegrations: FC<SlackIntegrationsProps> = ({ organizationId }
   const { isLoading, data } = useSlackIntegrations(organizationId);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return <Loading />;
   }
 
   if (!data || data.length < 1) {
