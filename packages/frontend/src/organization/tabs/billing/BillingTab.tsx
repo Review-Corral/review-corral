@@ -13,7 +13,6 @@ interface BillingTabProps {
 }
 
 export const BillingTab: FC<BillingTabProps> = ({ orgId }) => {
-
   const getBillingDetails = useOrgBillingDetails(orgId);
 
   if (getBillingDetails.isLoading) {
@@ -161,7 +160,7 @@ const PlanCard: React.FC<{ orgId: number }> = ({ orgId }) => {
                 color="indigo"
                 isLoading={getCheckoutSession.isLoading}
                 onClick={async () => {
-                  const checkout = await getCheckoutSession.mutateAsync()
+                  const checkout = await getCheckoutSession.mutateAsync();
                   window.open(checkout.url);
                 }}
               >

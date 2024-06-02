@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";
 import { useOrganizations } from "src/organization/useOrganizations";
 
-interface HomeViewProps { }
+interface HomeViewProps {}
 
 export const HomeView: FC<HomeViewProps> = () => {
   const { data, isLoading } = useOrganizations();
@@ -46,9 +46,7 @@ export const HomeView: FC<HomeViewProps> = () => {
             Github
           </p>
           <div className="mt-8 inline-flex flex-col gap-2">
-            {
-              isLoading && <Loading />
-            }
+            {isLoading && <Loading />}
             {data?.map((org) => (
               <Link key={org.orgId} to={`/org/${org.orgId}`}>
                 <div className="inline-flex items-center space-x-2 w-72 cursor-pointer rounded-md p-4 border border-gray-200 hover:shadow-sm">
