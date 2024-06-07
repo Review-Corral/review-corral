@@ -39,10 +39,14 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
 
   const user = await getOrCreateUser(userQuery, tokenSet.access_token);
 
+  const redirectUri = config.isLocal
+    ? `${assertVarExists("BASE_FE_URL")}/login/success`
+    : `https://${assertVarExists("BASE_FE_URL")}/login/success`;
+
+  LOGGER.debug("Set auth redirect URI ", { redirectUri, userId: user.userId });
+
   return Session.parameter({
-    redirect: config.isLocal
-      ? `${assertVarExists("BASE_FE_URL")}/login/success`
-      : `https://${assertVarExists("BASE_FE_URL")}/login/success`,
+    redirect: redirectUri,
     type: "user",
     properties: {
       userId: user.userId,
