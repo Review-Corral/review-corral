@@ -15,6 +15,8 @@ export function MainStack({ stack, app }: StackContext) {
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
     environment: {
+      // IMPORTANT: changes to this will impact auth redirects. Be careful and see
+      // `auth.ts` to ensure the changes here will work
       BASE_FE_URL: app.local ? getFrontendUrl(app) : `https://${getFrontendUrl(app)}`,
       IS_LOCAL: app.local ? "true" : "false",
       MIGRATIONS_PATH: "packages/core/src/database/migrations",
