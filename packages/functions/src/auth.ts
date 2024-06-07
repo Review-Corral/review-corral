@@ -1,7 +1,6 @@
 import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { UserResponse } from "@domain/github/endpointTypes";
 import { Logger } from "@domain/logging";
-import config from "@domain/utils/config";
 import ky from "ky";
 import { AuthHandler, GithubAdapter, OauthBasicConfig, Session } from "sst/node/auth";
 import { assertVarExists } from "../../core/utils/assert";
@@ -39,9 +38,7 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
 
   const user = await getOrCreateUser(userQuery, tokenSet.access_token);
 
-  const redirectUri = config.isLocal
-    ? `${assertVarExists("BASE_FE_URL")}/login/success`
-    : `https://${assertVarExists("BASE_FE_URL")}/login/success`;
+  const redirectUri = `${assertVarExists("BASE_FE_URL")}/login/success`;
 
   LOGGER.debug("Set auth redirect URI ", { redirectUri, userId: user.userId });
 
