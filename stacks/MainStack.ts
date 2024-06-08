@@ -1,4 +1,9 @@
-import { Function, FunctionProps, StackContext, use } from "sst/constructs";
+import {
+  FunctionProps,
+  Function as SstFunction,
+  StackContext,
+  use,
+} from "sst/constructs";
 import { getFrontendUrl } from "./FrontendStack";
 import { StorageStack } from "./StorageStack";
 import { Api } from "./constructs/Api";
@@ -37,7 +42,7 @@ export function MainStack({ stack, app }: StackContext) {
 
   stack.setDefaultFunctionProps(functionDefaults);
 
-  new Function(stack, "GetInstallationAccessToken", {
+  new SstFunction(stack, "GetInstallationAccessToken", {
     handler: "packages/functions/src/admin/installationAccessToken.handler",
   });
 

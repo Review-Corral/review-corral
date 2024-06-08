@@ -1,4 +1,4 @@
-import { App, StackContext, StaticSite, use } from "sst/constructs";
+import { App, NextjsSite, StackContext, StaticSite, use } from "sst/constructs";
 
 import { AuthStack } from "./AuthStack";
 import { MainStack } from "./MainStack";
@@ -27,6 +27,30 @@ export function FrontendStack({ stack, app }: StackContext) {
     path: "packages/frontend",
     buildCommand: "pnpm run build",
     buildOutput: "dist",
+    customDomain: app.local
+      ? undefined
+      : {
+          domainName: getFrontendUrl(app),
+          hostedZone: HOSTED_ZONE,
+        },
+    // Pass in our environment variables
+    environment: {
+      VITE_API_URL: api.customDomainUrl ?? api.url,
+      VITE_REGION: app.region,
+      VITE_AUTH_URL: authUrl,
+      VITE_STRIPE_PRICE_ID:
+        stack.stage === "prod"
+          ? "price_1P8CmKBqa9UplzHebShipTnE"
+          : "price_1P9FpDBqa9UplzHeeJ57VHoc",
+      ...slackEnvVars,
+      ...(app.local ? { VITE_LOCAL: "true" } : {}),
+    },
+  });
+
+  // Define our React app
+  const _reactSite = new NextjsSite(stack, "NextJsSite", {
+    path: "packages/web",
+    buildCommand: "pnpm run build",
     customDomain: app.local
       ? undefined
       : {
