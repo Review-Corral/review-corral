@@ -25,6 +25,29 @@
       "isBackground": true
     },
     {
+      "label": "Web",
+      "type": "shell",
+      "command": "pnpm",
+      "args": ["dev"],
+      "options": {
+        "cwd": "${workspaceFolder}/packages/web"
+      },
+      "icon": {
+        "id": "browser",
+        "color": "terminal.ansiBlue"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
       "label": "Backend",
       "type": "shell",
       "command": "pnpm",
