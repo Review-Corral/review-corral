@@ -5,10 +5,10 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
 import { FC, Fragment } from "react";
-import { useOrganizations } from "./useOrganizations";
+import { useOrganizations } from "./org/useOrganizations";
 
 export interface NavbarProps {
-  activeOrganizationAccountId?: number;
+  activeOrgId?: number;
 }
 
 const userNavigation = [
@@ -16,13 +16,13 @@ const userNavigation = [
   { name: "Sign out", href: "/logout" },
 ];
 
-export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
+export const Navbar: FC<NavbarProps> = ({ activeOrgId }) => {
   const organizations = useOrganizations();
 
   const activeOrg =
     organizations.data &&
-    activeOrganizationAccountId &&
-    organizations.data.find((org) => org.orgId === activeOrganizationAccountId);
+    activeOrgId &&
+    organizations.data.find((org) => org.orgId === activeOrgId);
 
   const user = useProfile();
 
@@ -53,6 +53,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                     <div className="rounded-md px-2 py- flex gap-2 items-center">
                       <div className="flex items-center space-x-2">
                         <div className="rounded-md overflow-hidden">
+                          {/* biome-ignore lint/a11y/useAltText: <explanation> */}
                           <img src={activeOrg.avatarUrl} width={32} height={32} />
                         </div>
                         <div>{activeOrg.name}</div>
