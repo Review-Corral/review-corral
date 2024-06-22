@@ -8,7 +8,7 @@ export const useProfile = () => {
     queryKey: ["profile"],
     queryFn: async () => {
       return await ky
-        .get(`${import.meta.env.VITE_API_URL}/profile`, {
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/profile`, {
           headers: {
             Authorization: `Bearer ${getSessionToken()}`,
           },

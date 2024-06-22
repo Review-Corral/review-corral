@@ -11,7 +11,7 @@ export const useOrganizationMembers = (orgId: number) => {
     queryKey: [ORGANIZATION_MEMBERS_QUERY_KEY],
     queryFn: async () => {
       return await ky
-        .get(`${import.meta.env.VITE_API_URL}/org/${orgId}/members`, {
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/org/${orgId}/members`, {
           headers: {
             Authorization: `Bearer ${getSessionToken()}`,
           },
@@ -28,7 +28,7 @@ export const useMutateOrganizationMembers = (orgId: number) => {
     mutationKey: ["repo", "setActive"],
     mutationFn: async (args: UpdateMemberArgs) => {
       return await ky
-        .put(`${import.meta.env.VITE_API_URL}/org/${orgId}/member`, {
+        .put(`${process.env.NEXT_PUBLIC_API_URL}/org/${orgId}/member`, {
           body: JSON.stringify(args),
           headers: {
             Authorization: `Bearer ${getSessionToken()}`,

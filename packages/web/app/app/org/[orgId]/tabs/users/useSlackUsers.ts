@@ -9,7 +9,7 @@ export const useSlackUsers = (orgId: number) =>
     queryKey: ["slackInstallMembers"],
     queryFn: async () => {
       return await ky
-        .get(`${import.meta.env.VITE_API_URL}/slack/${orgId}/users`, {
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/slack/${orgId}/users`, {
           headers: {
             Authorization: `Bearer ${getSessionToken()}`,
           },
