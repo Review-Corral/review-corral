@@ -7,17 +7,16 @@ import { Github } from "lucide-react";
 import { FC } from "react";
 import toast from "react-hot-toast";
 import Xarrow from "react-xarrows";
-import { useSetRepoActive } from "src/github/useRepos";
-import { useOrganizationRepositories } from "src/organization/useOrgRepos";
-import { useSlackIntegrations } from "src/slack/useSlackIntegrations";
 import { OrgViewProps } from "./shared";
+import { useOrganizationRepositories } from "../useOrgRepos";
+import { useSetRepoActive } from "@/app/app/github/useRepos";
 
 interface GithubCardProps extends OrgViewProps {
   organization: Organization;
   onEdit: () => void;
 }
 
-export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
+export const GithubCard: FC<GithubCardProps> = ({ organization }) => {
   return (
     <div id="github" className="w-96">
       <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center">
@@ -27,13 +26,16 @@ export const GithubCard: FC<GithubCardProps> = ({ organization, onEdit }) => {
         </div>
         <div
           className="cursor-pointer underline text-indigo-500 underline-offset-2"
-          onClick={() => onEdit()}
+          onClick={() => window.alert("Todo")}
         >
           Edit
         </div>
       </div>
       <div className="py-6">
-        <GithubCardData organization={organization} onEdit={onEdit} />
+        <GithubCardData
+          organization={organization}
+          onEdit={() => window.alert("todo")}
+        />
       </div>
     </div>
   );
@@ -125,7 +127,7 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
 
             {/* TODO: in the future the target should be found from a m2m table of Github <-> slack */}
             {/* Only show the Arrows if the slack data has loaded and there's at least one entry */}
-            {slackData != undefined && slackData.length > 0 && repo.isEnabled && (
+            {slackData != null && slackData.length > 0 && repo.isEnabled && (
               <Xarrow
                 start={repo.repoId.toString()}
                 end="slack-channel"
@@ -140,3 +142,6 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
     </div>
   );
 };
+function useSlackIntegrations(orgId: number): { data: any } {
+  throw new Error("Function not implemented.");
+}

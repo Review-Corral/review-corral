@@ -10,7 +10,7 @@ export const useOrgBillingDetails = (orgId: number) => {
     queryKey: [ORGANIZATION_BILLING_QUERY_KEY],
     queryFn: async () => {
       return await ky
-        .get(`${import.meta.env.VITE_API_URL}/org/${orgId}/billing`, {
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/org/${orgId}/billing`, {
           headers: {
             Authorization: `Bearer ${getSessionToken()}`,
           },

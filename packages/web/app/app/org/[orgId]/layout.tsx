@@ -4,7 +4,7 @@ import * as z from "zod";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { Navbar } from "../../Navbar";
-import Providers from "../../providers";
+import Providers from "../../../providers";
 
 const PageSchema = z.enum(["billing", "users", "overview"]);
 

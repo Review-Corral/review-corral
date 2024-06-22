@@ -1,16 +1,13 @@
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Slack } from "lucide-react";
 import { FC } from "react";
-import { SetupSlackCard } from "src/slack/SetupSlackCard";
-import { useSlackIntegrations } from "src/slack/useSlackIntegrations";
-import { OrgViewProps } from "./shared";
+import { OrgViewProps } from "../shared";
+import { useSlackIntegrations } from "./useSlackIntegrations";
+import { SetupSlackCard } from "./SetupSlackCard";
 
 interface SlackOverviewCardProps extends OrgViewProps {}
 
-export const SlackOverviewCard: FC<SlackOverviewCardProps> = ({
-  organization,
-  onEdit: setPage,
-}) => {
+export const SlackOverviewCard: FC<SlackOverviewCardProps> = ({ organization }) => {
   return (
     <div id="github" className="w-96">
       <div className="flex py-4 border-b border-gray-300 rounded-t-md justify-between items-center">
@@ -20,7 +17,7 @@ export const SlackOverviewCard: FC<SlackOverviewCardProps> = ({
         </div>
       </div>
       <div className="py-6">
-        <SlackCardData organization={organization} onEdit={setPage} />
+        <SlackCardData organization={organization} />
       </div>
     </div>
   );
