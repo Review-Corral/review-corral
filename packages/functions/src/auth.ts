@@ -38,7 +38,7 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
 
   const user = await getOrCreateUser(userQuery, tokenSet.access_token);
 
-  const redirectUri = `${assertVarExists("BASE_FE_URL")}/login/success`;
+  const redirectUri = `${assertVarExists("BASE_FE_URL")}/app/auth/login/success`;
 
   LOGGER.debug("Set auth redirect URI ", { redirectUri, userId: user.userId });
 

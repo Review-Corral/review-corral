@@ -7,16 +7,10 @@ import { FC, useEffect } from "react";
 
 export const auth_access_token_key = "sst_auth_access_token";
 
-const Page: FC<{ searchParams: { token?: string } }> = ({ searchParams }) => {
+const Page: FC = () => {
   useEffect(() => {
-    const token = searchParams.token;
-
-    if (token) {
-      cookies().set(auth_access_token_key, token);
-      redirect("/");
-    } else {
-      redirect("/error");
-    }
+    cookies().delete(auth_access_token_key);
+    redirect("/");
   }, []);
 
   // This part will never be reached due to the redirects
