@@ -1,19 +1,19 @@
 "use client";
 
 import { Loading } from "@/components/ui/cards/loading";
-import { cookies } from "next/headers";
+import Cookies from "js-cookie";
 import { redirect } from "next/navigation";
 import { FC, useEffect } from "react";
-
-export const auth_access_token_key = "sst_auth_access_token";
+import { auth_access_token_key } from "../../const";
 
 const Page: FC<{ searchParams: { token?: string } }> = ({ searchParams }) => {
+  console.log("On the auth success page");
   useEffect(() => {
     const token = searchParams.token;
 
     if (token) {
-      cookies().set(auth_access_token_key, token);
-      redirect("/");
+      Cookies.set(auth_access_token_key, token);
+      redirect("/app");
     } else {
       redirect("/error");
     }
