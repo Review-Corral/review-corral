@@ -1,7 +1,7 @@
 import { User } from "@core/dynamodb/entities/types";
 import ky from "ky";
-import { useQuery } from "react-query";
 import { getSessionToken } from "./getSessionToken";
+import { useQuery } from "@tanstack/react-query";
 
 export const useProfile = () => {
   return useQuery({
