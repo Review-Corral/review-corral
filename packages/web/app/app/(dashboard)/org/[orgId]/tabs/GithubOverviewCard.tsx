@@ -10,6 +10,7 @@ import Xarrow from "react-xarrows";
 import { OrgViewProps } from "./shared";
 import { useOrganizationRepositories } from "../useOrgRepos";
 import { useSetRepoActive } from "@/app/app/(dashboard)/github/useRepos";
+import { useSlackIntegrations } from "./slack/useSlackIntegrations";
 
 interface GithubCardProps extends OrgViewProps {
   organization: Organization;
@@ -142,6 +143,3 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
     </div>
   );
 };
-function useSlackIntegrations(orgId: number): { data: any } {
-  throw new Error("Function not implemented.");
-}
