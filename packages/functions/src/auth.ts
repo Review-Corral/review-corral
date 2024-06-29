@@ -5,6 +5,7 @@ import ky from "ky";
 import { AuthHandler, GithubAdapter, OauthBasicConfig, Session } from "sst/node/auth";
 import { assertVarExists } from "../../core/utils/assert";
 import { HttpError } from "../../core/utils/errors/Errors";
+import { Db } from "@domain/dynamodb/client";
 
 declare module "sst/node/auth" {
   export interface SessionTypes {
@@ -56,6 +57,18 @@ const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
 
   if (existingUser) {
     LOGGER.info("Found existing user", { id: user.id });
+
+    // Update the GH access token if different
+    if (existingUser.ghAccessToken !== accessToken) {
+      LOGGER.info("Updating user access token", { id: user.id });
+
+      await Db.entities.user.patch({
+        userId: user.id,
+      }).set({
+        ghAccessToken: accessToken,
+      }).go();
+    }
+
     return existingUser;
   }
 
