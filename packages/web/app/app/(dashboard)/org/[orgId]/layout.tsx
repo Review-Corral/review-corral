@@ -4,6 +4,7 @@ import * as z from "zod";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import Providers from "../../../providers";
+import { DashboardPaddedBody } from "../../layout";
 
 const PageSchema = z.enum(["billing", "users", "overview"]);
 
@@ -61,37 +62,35 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
   };
 
   return (
-    <div className="min-h-full min-w-[900px] overflow-x-auto">
-      <header className="bg-white border-b border-gray-200">
+    <div className="min-h-full min-w-[900px] overflow-x-auto ">
+      <header className="bg-white border-b border-gray-200 ">
         {
-          <>
-            <div className="max-w-7xl mx-auto px-6 pt-4 pb-3 font-medium ">
-              <ul>
-                {routes.map((route) => (
-                  <li
-                    key={route.text}
-                    className={`
+          <div className="max-w-7xl mx-auto px-6 pt-4 pb-3 font-medium ">
+            <ul>
+              {routes.map((route) => (
+                <li
+                  key={route.text}
+                  className={`
                     inline px-2 py-1 cursor-pointer text-base hover:bg-gray-100 rounded-md
                     `}
-                    onClick={() => setPageWrapper(route.page)}
-                  >
-                    <span
-                      className={`
+                  onClick={() => setPageWrapper(route.page)}
+                >
+                  <span
+                    className={`
                       pb-[0.9rem]
                       px-1
                       ${_page === route.page ? "border-b-2 border-indigo-500" : ""}
                     `}
-                    >
-                      {route.text}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </>
+                  >
+                    {route.text}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
         }
       </header>
-      {children}
+      <DashboardPaddedBody>{children}</DashboardPaddedBody>
     </div>
   );
 }
