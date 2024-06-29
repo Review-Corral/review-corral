@@ -6,6 +6,7 @@ import { Header } from "@/components/ui/header";
 import Link from "next/link";
 import { Button } from "@/components/shadcn/button";
 import { Loading } from "@/components/ui/cards/loading";
+import { DashboardPaddedBody } from "./layout";
 
 const HomeView: FC = () => {
   const { data, isLoading } = useOrganizations();
@@ -42,7 +43,7 @@ const HomeView: FC = () => {
   }
 
   return (
-    <>
+    <DashboardPaddedBody>
       <Header>Your Organizations</Header>
       <p className="mt-1">
         Here are the organizations you&apos;ve installed the Review Corral bot on in
@@ -61,7 +62,7 @@ const HomeView: FC = () => {
           </Link>
         ))}
       </div>
-    </>
+    </DashboardPaddedBody>
   );
 };
 
