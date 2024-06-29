@@ -10,6 +10,8 @@ import { Loading } from "@/components/ui/cards/loading";
 const HomeView: FC = () => {
   const { data, isLoading } = useOrganizations();
 
+  console.log("on dashboard main page");
+
   if (data && data.length <= 0) {
     return (
       <>
@@ -49,7 +51,7 @@ const HomeView: FC = () => {
       <div className="mt-8 inline-flex flex-col gap-2">
         {isLoading && <Loading />}
         {data?.map((org) => (
-          <Link key={org.orgId} href={`/org/${org.orgId}`}>
+          <Link key={org.orgId} href={`/app/org/${org.orgId}`}>
             <div className="inline-flex items-center space-x-2 w-72 cursor-pointer rounded-md p-4 border border-gray-200 hover:shadow-sm">
               <div className="rounded-md overflow-hidden">
                 <img alt={"Avatar url"} src={org.avatarUrl} width={32} height={32} />

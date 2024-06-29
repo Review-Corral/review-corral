@@ -1,7 +1,7 @@
+import { getSessionToken } from "@/app/app/auth/getSessionToken";
 import { BillingDetailsResponse } from "@core/selectorTypes/organization";
+import { useQuery } from "@tanstack/react-query";
 import ky from "ky";
-import { useQuery } from "react-query";
-import { getSessionToken } from "src/auth/getSessionToken";
 
 const ORGANIZATION_BILLING_QUERY_KEY = "organizationBilling";
 

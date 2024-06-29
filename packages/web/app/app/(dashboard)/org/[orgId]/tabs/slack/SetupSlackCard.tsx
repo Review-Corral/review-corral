@@ -1,6 +1,6 @@
 import { Organization } from "@core/dynamodb/entities/types";
 import { FC } from "react";
-import SlackButton from "src/slack/SetupSlackButton";
+import SlackButton from "./SetupSlackButton";
 
 interface SetupSlackCardProps {
   organization: Organization;

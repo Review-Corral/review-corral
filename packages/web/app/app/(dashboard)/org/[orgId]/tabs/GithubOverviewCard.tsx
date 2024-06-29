@@ -9,7 +9,7 @@ import toast from "react-hot-toast";
 import Xarrow from "react-xarrows";
 import { OrgViewProps } from "./shared";
 import { useOrganizationRepositories } from "../useOrgRepos";
-import { useSetRepoActive } from "@/app/app/github/useRepos";
+import { useSetRepoActive } from "@/app/app/(dashboard)/github/useRepos";
 
 interface GithubCardProps extends OrgViewProps {
   organization: Organization;

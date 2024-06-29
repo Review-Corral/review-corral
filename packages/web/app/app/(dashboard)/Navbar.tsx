@@ -12,8 +12,8 @@ export interface NavbarProps {
 }
 
 const userNavigation = [
-  { name: "Your Profile", href: "/profile" },
-  { name: "Sign out", href: "/logout" },
+  { name: "Your Profile", href: "/app/profile" },
+  { name: "Sign out", href: "/app/auth/logout" },
 ];
 
 export const Navbar: FC<NavbarProps> = ({ activeOrgId }) => {
