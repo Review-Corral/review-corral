@@ -3,7 +3,6 @@
 import * as z from "zod";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import { Navbar } from "../../Navbar";
 import Providers from "../../../providers";
 
 const PageSchema = z.enum(["billing", "users", "overview"]);
@@ -52,9 +51,9 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
         setPage(page);
         let route = "";
         if (page) {
-          route = `/org/${orgId}?page=${page}`;
+          route = `/app/org/${orgId}?page=${page}`;
         } else {
-          route = `/org/${orgId}`;
+          route = `/app/org/${orgId}`;
         }
         router.push(route);
       }
@@ -63,7 +62,6 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
 
   return (
     <div className="min-h-full min-w-[900px] overflow-x-auto">
-      <Navbar activeOrgId={orgId} />
       <header className="bg-white border-b border-gray-200">
         {
           <>
@@ -93,11 +91,7 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
           </>
         }
       </header>
-      <main className="">
-        <Providers>{children}</Providers>
-
-        <div className="max-w-7xl mx-auto py-6 px-7">{children}</div>
-      </main>
+      {children}
     </div>
   );
 }

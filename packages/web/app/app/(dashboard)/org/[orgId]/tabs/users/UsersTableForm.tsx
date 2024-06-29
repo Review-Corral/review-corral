@@ -19,9 +19,9 @@ import {
   useFieldArray,
   useForm,
 } from "react-hook-form";
-import { cn } from "src/lib/utils";
-import { useMutateOrganizationMembers } from "src/organization/useOrganizationMembers";
 import { UsersTable } from "./UsersTable";
+import { cn } from "@/components/lib/utils";
+import { useMutateOrganizationMembers } from "../../useOrganizationMembers";
 
 interface UsersTableFormProps {
   orgId: number;
@@ -104,11 +104,12 @@ const getColumns = (
           <span className={cn("max-w-[500px] truncate font-semiBold")}>
             {row.original.avatarUrl && (
               <img
+                alt={`Avatar for ${row.original.name}`}
                 className="rounded-full"
                 src={row.original.avatarUrl}
                 height={42}
                 width={42}
-              ></img>
+              />
             )}
           </span>
         </div>
@@ -153,6 +154,7 @@ const getColumns = (
                         <SelectItem key={user.slackUserId} value={user.slackUserId}>
                           <div className="flex gap-2">
                             <img
+                              alt={`Avatar for ${user.realNameNormalized}`}
                               src={user.image48}
                               height={8}
                               width={20}
