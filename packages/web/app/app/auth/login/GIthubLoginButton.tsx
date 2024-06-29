@@ -2,8 +2,8 @@
 
 import ky from "ky";
 import React, { useState } from "react";
-import githubLogo from "../../../../public/github-mark/github-mark-white.svg";
 import { BetterButton } from "@components/ui/BetterButton";
+import Image from "next/image";
 import { useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { cn } from "@/components/lib/utils";
@@ -34,7 +34,13 @@ const GithubLoginButton: React.FC = () => {
           className={cn("flex items-center justify-left gap-8", isLoading && "pl-6")}
         >
           {!isLoading && (
-            <img src={githubLogo} height={8} width={20} alt="Github login" />
+            <Image
+              src="/github-mark/github-mark-white.svg"
+              alt="Github Login"
+              height={8}
+              width={20}
+              priority
+            />
           )}
           {!isLoading ? "Sign in with Github" : "Signing into Github"}
         </div>
