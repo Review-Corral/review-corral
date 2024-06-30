@@ -4,8 +4,7 @@ import { Loading } from "@/components/ui/cards/loading";
 import Cookies from "js-cookie";
 import { redirect } from "next/navigation";
 import { FC, useEffect } from "react";
-
-export const auth_access_token_key = "sst_auth_access_token";
+import { auth_access_token_key } from "../const";
 
 const Page: FC = () => {
   useEffect(() => {

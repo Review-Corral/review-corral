@@ -77,7 +77,7 @@ const ActivePlanCard: FC<{ subscription: Subscription; orgId: number }> = ({
         <p className="mt-3 text-base leading-7 text-gray-600">$10/month</p>
         <div className="mt-6">
           <BetterButton
-            isLoading={getBillingPortalSession.isLoading}
+            isLoading={getBillingPortalSession.isPending}
             onClick={async () => {
               const checkout = await getBillingPortalSession.mutateAsync();
               window.open(checkout.url);
@@ -158,7 +158,7 @@ const PlanCard: React.FC<{ orgId: number }> = ({ orgId }) => {
               <BetterButton
                 size={"lg"}
                 color="indigo"
-                isLoading={getCheckoutSession.isLoading}
+                isLoading={getCheckoutSession.isPending}
                 onClick={async () => {
                   const checkout = await getCheckoutSession.mutateAsync();
                   window.open(checkout.url);
