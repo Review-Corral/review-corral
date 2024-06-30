@@ -1,3 +1,5 @@
+"use client"
+
 import Cookies from "js-cookie";
 import { auth_access_token_key } from "./const";
 
