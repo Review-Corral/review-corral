@@ -24,7 +24,6 @@ export function FrontendStack({ stack, app }: StackContext) {
 
   const site = new NextjsSite(stack, "NextJsSite", {
     path: "packages/web",
-    buildCommand: "pnpm run build",
     customDomain: app.local
       ? undefined
       : {
