@@ -62,11 +62,14 @@ const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
     if (existingUser.ghAccessToken !== accessToken) {
       LOGGER.info("Updating user access token", { id: user.id });
 
-      await Db.entities.user.patch({
-        userId: user.id,
-      }).set({
-        ghAccessToken: accessToken,
-      }).go();
+      await Db.entities.user
+        .patch({
+          userId: user.id,
+        })
+        .set({
+          ghAccessToken: accessToken,
+        })
+        .go();
     }
 
     return existingUser;
