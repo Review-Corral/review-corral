@@ -7,8 +7,11 @@ import Link from "next/link";
 import { Button } from "@/components/shadcn/button";
 import { Loading } from "@/components/ui/cards/loading";
 import { DashboardPaddedBody } from "../../../components/ui/layout/DashboardPaddedBody";
+import { useProtectedRoute } from "../auth/useProtectedRoute";
 
 const HomeView: FC = () => {
+  useProtectedRoute();
+
   const { data, isLoading } = useOrganizations();
 
   console.log("on dashboard main page");
