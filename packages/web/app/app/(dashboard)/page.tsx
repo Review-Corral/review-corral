@@ -6,7 +6,7 @@ import { Header } from "@/components/ui/header";
 import Link from "next/link";
 import { Button } from "@/components/shadcn/button";
 import { Loading } from "@/components/ui/cards/loading";
-import { DashboardPaddedBody } from "./layout";
+import { DashboardPaddedBody } from "../../../components/ui/layout/DashboardPaddedBody";
 
 const HomeView: FC = () => {
   const { data, isLoading } = useOrganizations();
