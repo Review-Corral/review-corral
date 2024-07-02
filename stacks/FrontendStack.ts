@@ -1,4 +1,4 @@
-import { App, NextjsSite, StackContext, StaticSite, use } from "sst/constructs";
+import { App, NextjsSite, StackContext, use } from "sst/constructs";
 
 import { AuthStack } from "./AuthStack";
 import { MainStack } from "./MainStack";
