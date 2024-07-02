@@ -7,7 +7,7 @@ import {
   Stack,
 } from "sst/constructs";
 
-export const HOSTED_ZONE = "review-corral.com";
+export const HOSTED_ZONE = "reviewcorral.com";
 export const PROD_STAGE = "prod";
 
 export class Api extends Construct {
