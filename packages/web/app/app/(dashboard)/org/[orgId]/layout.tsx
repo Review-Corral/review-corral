@@ -1,9 +1,8 @@
 "use client";
 
-import * as z from "zod";
 import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
-import Providers from "../../../providers";
+import * as z from "zod";
 import { DashboardPaddedBody } from "../../../../../components/ui/layout/DashboardPaddedBody";
 
 const PageSchema = z.enum(["billing", "users", "overview"]);
