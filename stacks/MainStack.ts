@@ -13,9 +13,10 @@ export function MainStack({ stack, app }: StackContext) {
   const { table } = use(StorageStack);
 
   const slackEnvVars = {
-    VITE_SLACK_BOT_ID: assertVarExists("SLACK_BOT_ID"),
-    VITE_SLACK_CLIENT_SECRET: assertVarExists("SLACK_CLIENT_SECRET"),
-    VITE_SLACK_AUTH_URL: `https://${Api.getDomain(app)}/slack/oauth`,
+    NEXT_PUBLIC_SLACK_BOT_ID: assertVarExists("SLACK_BOT_ID"),
+    // Don't expose on the frontend
+    SLACK_CLIENT_SECRET: assertVarExists("SLACK_CLIENT_SECRET"),
+    NEXT_PUBLIC_SLACK_AUTH_URL: `https://${Api.getDomain(app)}/slack/oauth`,
   };
 
   const baseFeUrl = app.local ? getFrontendUrl(app) : `https://${getFrontendUrl(app)}`;

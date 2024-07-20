@@ -40,7 +40,7 @@ export function FrontendStack({ stack, app }: StackContext) {
           ? "price_1P8CmKBqa9UplzHebShipTnE"
           : "price_1P9FpDBqa9UplzHeeJ57VHoc",
       ...slackEnvVars,
-      ...(app.local ? { VITE_LOCAL: "true" } : {}),
+      ...(app.local ? { NEXT_PUBLIC_LOCAL: "true" } : {}),
     },
   });
 

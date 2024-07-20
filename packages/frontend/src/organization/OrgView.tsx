@@ -91,7 +91,10 @@ export const OrgView: FC = () => {
                     className={`
                       pb-[0.9rem]
                       px-1
-                      ${_page == route.page ? "border-b-2 border-indigo-500" : ""}
+                      ${
+                        // biome-ignore lint/suspicious/noDoubleEquals: <explanation>
+                        _page == route.page ? "border-b-2 border-indigo-500" : ""
+                      }
                     `}
                   >
                     {route.text}

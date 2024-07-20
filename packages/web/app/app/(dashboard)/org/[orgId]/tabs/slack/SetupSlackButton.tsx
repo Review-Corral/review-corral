@@ -11,13 +11,13 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
   // biome-ignore lint/correctness/noUnusedVariables: <explanation>
   const queryClient = useQueryClient();
 
-  const slackBotId = process.env.VITE_SLACK_BOT_ID;
-  const slackAuthUrl = process.env.VITE_SLACK_AUTH_URL;
+  const slackBotId = process.env.NEXT_PUBLIC_SLACK_BOT_ID;
+  const slackAuthUrl = process.env.NEXT_PUBLIC_SLACK_AUTH_URL;
   if (!slackBotId) {
-    throw Error("VITE_SLACK_BOT_ID not set");
+    throw Error("NEXT_PUBLIC_SLACK_BOT_ID not set");
   }
   if (!slackAuthUrl) {
-    throw Error("VITE_SLACK_AUTH_URL not set");
+    throw Error("NEXT_PUBLIC_SLACK_AUTH_URL not set");
   }
 
   const searchParams = new URLSearchParams({
