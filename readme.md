@@ -1,8 +1,11 @@
-## Migrations
+# Review Corral
 
-1. Create migration scripts by using the "Generate Migrations" task in the VSCode actions.
-1. To run the migrations locally, open the SST Console and invoke the `migrateToLatest`
-   function.
+Review Corral is a lightweight Slack & Github bot designed to handle Github pull request notifications
+in a more elegant manner to minimize noise for your Engineering team.
+
+## Self Hosting
+
+Coming soon... Reach out to @mclean25 if you're interested in setting this up
 
 ## The differences between Organizations and Installations
 
@@ -24,6 +27,7 @@ base64 -i /path/to/your/private-key.pem | pbcopy
 ```
 
 Example
+
 ```bash
 base64 -i /Users/alex/ssh/review-corral/test-review-corral.2023-12-30.private-key.pem | pbcopy
 ```

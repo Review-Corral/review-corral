@@ -1,4 +1,4 @@
-import { App, StackContext, StaticSite, use } from "sst/constructs";
+import { App, NextjsSite, StackContext, use } from "sst/constructs";
 
 import { AuthStack } from "./AuthStack";
 import { MainStack } from "./MainStack";
@@ -6,7 +6,7 @@ import { StorageStack } from "./StorageStack";
 import { HOSTED_ZONE } from "./constructs/Api";
 
 export const getFrontendUrl = ({ local, stage }: App) => {
-  if (local) return "http://localhost:5173";
+  if (local) return "http://localhost:3000";
 
   if (stage === "prod") return HOSTED_ZONE;
 
@@ -22,11 +22,8 @@ export function FrontendStack({ stack, app }: StackContext) {
   use(StorageStack);
   const { authUrl } = use(AuthStack);
 
-  // Define our React app
-  const site = new StaticSite(stack, "ReactSite", {
-    path: "packages/frontend",
-    buildCommand: "pnpm run build",
-    buildOutput: "dist",
+  const site = new NextjsSite(stack, "NextJsSite", {
+    path: "packages/web",
     customDomain: app.local
       ? undefined
       : {
@@ -35,11 +32,15 @@ export function FrontendStack({ stack, app }: StackContext) {
         },
     // Pass in our environment variables
     environment: {
-      VITE_API_URL: api.customDomainUrl ?? api.url,
-      VITE_REGION: app.region,
-      VITE_AUTH_URL: authUrl,
+      NEXT_PUBLIC_API_URL: api.customDomainUrl ?? api.url,
+      NEXT_PUBLIC_REGION: app.region,
+      NEXT_PUBLIC_AUTH_URL: authUrl,
+      NEXT_PUBLIC_STRIPE_PRICE_ID:
+        stack.stage === "prod"
+          ? "price_1P8CmKBqa9UplzHebShipTnE"
+          : "price_1P9FpDBqa9UplzHeeJ57VHoc",
       ...slackEnvVars,
-      ...(app.local ? { VITE_LOCAL: "true" } : {}),
+      ...(app.local ? { NEXT_PUBLIC_LOCAL: "true" } : {}),
     },
   });
 

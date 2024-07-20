@@ -1,4 +1,4 @@
-import { Button } from "@components/ui/button";
+import { Button } from "@shadcn/components/ui/button";
 import React from "react";
 import { useQueryClient } from "react-query";
 import { Link } from "react-router-dom";

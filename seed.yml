@@ -1,25 +1,7 @@
+before_compile:
+  - n 18.20.3
+
 compile:
+  - npm install -g pnpm@9.2.0
+  - pnpm --version
   - pnpm install --frozen-lockfile --prefer-offline
-
-# after_deploy:
-#   # Migrate to latest
-#   - echo 'export STACK_NAME="${SEED_STAGE_NAME}-review-corral-MainStack"' >> $BASH_ENV
-#   - echo $STACK_NAME
-#   - echo "export FUNC_NAME=$(aws cloudformation describe-stacks --stack-name $STACK_NAME --query 'Stacks[0].Outputs[?OutputKey==`MigrationFunction`].OutputValue | [0]' --output text)" >> $BASH_ENV
-#   - echo $FUNC_NAME
-#   # Same timeout as in MigrationFunction
-#   - >
-#     aws lambda invoke
-#     --cli-read-timeout 600
-#     --cli-connect-timeout 90
-#     --function-name ${FUNC_NAME}
-#     --payload '{}'
-#     response.json
-#   - cat response.json
-#   - >
-#     grep -q '"statusCode":200' response.json ||
-#     (echo "Error: Lambda function did not return a 200 status code." && exit 1)
-
-  # # Finalize the Sentry release
-  # - curl -sL https://sentry.io/get-cli/ | SENTRY_CLI_VERSION="2.14.4" bash
-  # - sentry-cli releases finalize $(VAR=$SEED_BUILD_SERVICE_SHA bash -c 'echo ${VAR:0:7}')

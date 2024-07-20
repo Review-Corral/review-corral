@@ -10,13 +10,14 @@ import {
   createBrowserRouter,
   redirect,
 } from "react-router-dom";
-import App from "./App.tsx";
-import { auth_access_token_key } from "./auth/const.ts";
-import { userIsLoggedIn } from "./auth/utils.ts";
-import { HomeView } from "./home/HomeView.tsx";
+import { auth_access_token_key } from "./auth/const";
+import { userIsLoggedIn } from "./auth/utils";
+import { HomeView } from "./home/HomeView";
 import "./index.css";
-import { OrgsView } from "./org/OrgsView.tsx";
-import { OrgView } from "./organization/OrgView.tsx";
+import LoginPage from "./login";
+import { OrgView } from "./organization/OrgView";
+import { PaymentFailure } from "./organization/payments/failure";
+import { PaymentsSuccess } from "./organization/payments/success";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {
@@ -27,12 +28,27 @@ const protectedLoader: LoaderFunction = async (_args: LoaderFunctionArgs) => {
   return null;
 };
 
+const orgViewLoader: LoaderFunction = async (args) => {
+  const protectedResult = await protectedLoader(args);
+  if (protectedResult) return protectedResult;
+
+  const { orgId } = args.params;
+
+  console.log("Got orgId in params:", orgId);
+
+  if (!orgId) {
+    throw new Response("Not Found", { status: 404 });
+  }
+
+  return { orgId };
+};
+
 // Route components must be wrapped with the ModalContext here, so the modal components
 // have access to the context from RouterProvider (to navigate around etc.)
 const router = createBrowserRouter([
   {
     path: "/login",
-    element: <App />,
+    element: <LoginPage />,
     loader: async () => {
       if (userIsLoggedIn()) {
         return redirect("/");
@@ -62,31 +78,28 @@ const router = createBrowserRouter([
     },
   },
   {
-    path: "/org",
-    element: <OrgsView />,
-    loader: protectedLoader,
-  },
-  {
     path: "/org/:orgId",
     element: <OrgView />,
-    loader: async (args) => {
-      const protectedResult = await protectedLoader(args);
-      if (protectedResult) return protectedResult;
-
-      const { orgId } = args.params;
-
-      console.log("Got orgId in params:", orgId);
-
-      if (!orgId) {
-        throw new Response("Not Found", { status: 404 });
-      }
-
-      return { orgId };
-    },
+    loader: orgViewLoader,
+  },
+  {
+    path: "/org/:orgId/payment/success",
+    element: <PaymentsSuccess />,
+    loader: orgViewLoader,
+  },
+  {
+    path: "/org/:orgId/payment/failure",
+    element: <PaymentFailure />,
+    loader: orgViewLoader,
   },
   {
     path: "/",
     element: <HomeView />,
+    loader: protectedLoader,
+  },
+  {
+    path: "/404",
+    element: <div>404</div>,
     loader: protectedLoader,
   },
   {
@@ -111,5 +124,5 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
       <Toaster position="top-right" reverseOrder={false} />
       <RouterProvider router={router} />
     </QueryClientProvider>
-  </React.StrictMode>
+  </React.StrictMode>,
 );

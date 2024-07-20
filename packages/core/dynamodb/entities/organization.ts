@@ -22,6 +22,10 @@ export const OrganizationEntity = new Entity({
       type: "string",
       required: true,
     },
+    billingEmail: {
+      type: "string",
+      required: false,
+    },
     installationId: {
       type: "number",
       required: true,
@@ -31,6 +35,20 @@ export const OrganizationEntity = new Entity({
       required: true,
       readOnly: true,
     },
+    // =============
+    // Stripe Stuff
+    // =============
+    customerId: {
+      type: "string",
+      required: false,
+    },
+    stripeSubStatus: {
+      type: "string",
+      required: false,
+    },
+    // =============
+    // END Stripe Stuff
+    // =============
     createdAt: {
       type: "string",
       readOnly: true,

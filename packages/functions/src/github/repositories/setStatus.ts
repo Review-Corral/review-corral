@@ -1,11 +1,11 @@
-import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
-import * as z from "zod";
 import {
   fetchRepository,
   setRespositoryActiveStatus,
-} from "../../../../core/dynamodb/fetchers/repositories";
-import { Logger } from "../../../../core/logging";
+} from "@domain/dynamodb/fetchers/repositories";
+import { Logger } from "@domain/logging";
+import { useUser } from "src/utils/useUser";
+import { ApiHandler } from "sst/node/api";
+import * as z from "zod";
 
 const LOGGER = new Logger("github:repositories:setStatus");
 
@@ -15,8 +15,9 @@ const setRepositoryActiveStatusSchema = z.object({
 });
 
 export const handler = ApiHandler(async (event, context) => {
-  const { repositoryId, organizationId } =
-    setRepositoryActiveStatusSchema.parse(event.pathParameters);
+  const { repositoryId, organizationId } = setRepositoryActiveStatusSchema.parse(
+    event.pathParameters,
+  );
   const { user, error } = await useUser();
 
   if (!user) {

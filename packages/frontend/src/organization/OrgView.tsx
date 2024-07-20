@@ -1,19 +1,14 @@
-import { Organization } from "@core/dynamodb/entities/types";
-import { FC, ReactNode, useEffect, useState } from "react";
-import {
-  redirect,
-  useLoaderData,
-  useNavigate,
-  useSearchParams,
-} from "react-router-dom";
+import { Loading } from "@components/ui/cards/loading";
+import { FC, ReactNode, useState } from "react";
+import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";
-import { useOrganizations } from "src/org/useOrganizations";
 import * as z from "zod";
 import { OverviewTab } from "./tabs/OverviewTab";
+import { BillingTab } from "./tabs/billing/BillingTab";
+import { UsersTab } from "./tabs/users/UsersTab";
+import { useOrganization } from "./useOrganization";
 
-interface OrgViewProps {}
-
-const PageSchema = z.enum(["github", "slack", "usernames", "overview"]);
+const PageSchema = z.enum(["billing", "users", "overview"]);
 
 export type Page = z.infer<typeof PageSchema>;
 
@@ -28,47 +23,38 @@ const routes: SubNav[] = [
     page: "overview",
   },
   {
-    text: "Github",
-    page: "github",
+    text: "Users",
+    page: "users",
   },
   {
-    text: "Slack",
-    page: "slack",
-  },
-  {
-    text: "Usernames",
-    page: "usernames",
+    text: "Billing",
+    page: "billing",
   },
 ];
 
 const orgViewParamsSchema = z.object({
-  orgId: z.string(),
+  orgId: z.string().transform(Number),
 });
 
-const orgViewSearchParamsSchema = z
-  .object({
-    page: PageSchema.optional().default("overview"),
-  })
-  .optional()
-  .default({ page: "overview" });
+const orgViewSearchParamsSchema = PageSchema.optional().default("overview");
 
-export const OrgView: FC<OrgViewProps> = () => {
+export const OrgView: FC = () => {
   const loaderData = useLoaderData();
   console.log(loaderData);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [searchParams, _] = useSearchParams();
 
-  const { page } = orgViewSearchParamsSchema.parse(searchParams);
+  const pageParse = orgViewSearchParamsSchema.safeParse(searchParams.get("page"));
   const { orgId } = orgViewParamsSchema.parse(loaderData);
 
-  const { data, isLoading } = useOrganizations();
-
-  const [organization, setOrganization] = useState<Organization | undefined>(
-    undefined
-  );
+  const { data, isLoading } = useOrganization(orgId);
 
   const navigate = useNavigate();
-  const [_page, setPage] = useState<Page>(page);
+  const [_page, setPage] = useState<Page>(
+    pageParse.success ? pageParse.data : "overview",
+  );
+
+  const organization = data;
 
   const setPageWrapper = (page: Page): void => {
     if (organization) {
@@ -84,22 +70,6 @@ export const OrgView: FC<OrgViewProps> = () => {
       }
     }
   };
-
-  // Gets the correct organization from the list of organizations fetched from
-  // the database
-  useEffect(() => {
-    if (data) {
-      const org = data.find((org) => org.orgId === Number(orgId));
-      if (org) {
-        setOrganization(org);
-        return;
-      } else {
-        // TODO: I think rendering a 404 would be better
-        redirect("/404");
-      }
-    }
-    setOrganization(undefined);
-  }, [data]);
 
   return (
     <DashboardLayout
@@ -122,9 +92,8 @@ export const OrgView: FC<OrgViewProps> = () => {
                       pb-[0.9rem]
                       px-1
                       ${
-                        _page == route.page
-                          ? "border-b-2 border-indigo-500"
-                          : ""
+                        // biome-ignore lint/suspicious/noDoubleEquals: <explanation>
+                        _page == route.page ? "border-b-2 border-indigo-500" : ""
                       }
                     `}
                   >
@@ -137,22 +106,17 @@ export const OrgView: FC<OrgViewProps> = () => {
         </>
       }
     >
-      {isLoading && <div>Loading...</div>}
+      {isLoading && <Loading />}
       {!isLoading &&
         organization &&
         ((): ReactNode => {
           const tabProps = { organization, onEdit: setPageWrapper };
 
           switch (_page) {
-            case "github":
-              return <div>Github</div>;
-            // return <GithubTab {...tabProps} />;
-            case "slack":
-              return <div>Slack</div>;
-            // return <SlackTab {...tabProps} />;
-            case "usernames":
-              return <div>Usernames</div>;
-            // return <UsernamesTab {...tabProps} />;
+            case "users":
+              return <UsersTab orgId={orgId} />;
+            case "billing":
+              return <BillingTab orgId={orgId} />;
             default:
               return <OverviewTab {...tabProps} />;
           }

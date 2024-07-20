@@ -1,14 +1,14 @@
+import { assertVarExists } from "@core/utils/assert";
+import {
+  githubWebhookBodySchema,
+  handleGithubWebhookEvent,
+} from "@domain/github/webhooks";
+import { verifyGithubWebhookSecret } from "@domain/github/webhooks/verifyEvent";
+import { Logger } from "@domain/logging";
 import { WebhookEvent } from "@octokit/webhooks-types";
 import { APIGatewayProxyEventV2 } from "aws-lambda";
 import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
-import {
-  githubWebhookBodySchema,
-  handleGithubWebhookEvent,
-} from "../../../core/github/webhooks";
-import { verifyGithubWebhookSecret } from "../../../core/github/webhooks/verifyEvent";
-import { Logger } from "../../../core/logging";
-import { assertVarExists } from "../../../core/utils/assert";
 
 const LOGGER = new Logger("functions.github.events");
 
@@ -22,9 +22,7 @@ const githubWebhookEventSchema = z
   })
   .passthrough();
 
-export type GithubWebhookEventPayload = z.infer<
-  typeof githubWebhookEventSchema
->;
+export type GithubWebhookEventPayload = z.infer<typeof githubWebhookEventSchema>;
 
 export const handler = ApiHandler(async (event, context) => {
   LOGGER.debug(
@@ -32,7 +30,7 @@ export const handler = ApiHandler(async (event, context) => {
     {
       event,
     },
-    { depth: 3 }
+    { depth: 3 },
   );
   if (!(await checkEventWrapper(event))) {
     LOGGER.debug("Event didn't pass check", { event });
@@ -66,7 +64,7 @@ export const handler = ApiHandler(async (event, context) => {
         },
         {
           depth: 4,
-        }
+        },
       );
       return {
         statusCode: 400,

@@ -5,7 +5,9 @@
     "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
-      "@review-corral/core/*": ["../core/src/*"]
+      "@review-corral/core/*": ["../core/src/*"],
+      "@core/*": ["../core/*"],
+      "@domain/*": ["../domain/*"]
     }
   }
 }

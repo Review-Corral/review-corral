@@ -1,18 +1,15 @@
-import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
-import * as z from "zod";
-import {
-  Organization,
-  Repository,
-} from "../../../../core/dynamodb/entities/types";
-import { fetchOrganizationById } from "../../../../core/dynamodb/fetchers/organizations";
+import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
 import {
   fetchRepositoriesForOrganization,
   insertRepository,
   removeRepository,
-} from "../../../../core/dynamodb/fetchers/repositories";
-import { getInstallationRepositories } from "../../../../core/github/fetchers";
-import { Logger } from "../../../../core/logging";
+} from "@domain/dynamodb/fetchers/repositories";
+import { getInstallationRepositories } from "@domain/github/fetchers";
+import { Logger } from "@domain/logging";
+import { useUser } from "src/utils/useUser";
+import { ApiHandler } from "sst/node/api";
+import * as z from "zod";
+import { Organization, Repository } from "../../../../core/dynamodb/entities/types";
 
 const LOGGER = new Logger("github:repositories");
 
@@ -22,7 +19,7 @@ const getRepositoriesForOrganizationSchena = z.object({
 
 export const handler = ApiHandler(async (event, context) => {
   const { organizationId } = getRepositoriesForOrganizationSchena.parse(
-    event.pathParameters
+    event.pathParameters,
   );
   const { user, error } = await useUser();
 
@@ -51,30 +48,26 @@ export const handler = ApiHandler(async (event, context) => {
   };
 });
 
-const getRepositories = async (
-  organization: Organization
-): Promise<Repository[]> => {
+const getRepositories = async (organization: Organization): Promise<Repository[]> => {
   const repositories = await getInstallationRepositories({
     installationId: organization.installationId,
   });
 
-  const allInstallRepos = await fetchRepositoriesForOrganization(
-    organization.orgId
-  );
+  const allInstallRepos = await fetchRepositoriesForOrganization(organization.orgId);
 
   const allInstalledRepoIds = allInstallRepos.map((repo) => repo.repoId);
 
   const allOriginRepoIds = repositories.repositories.map((repo) => repo.id);
 
   const reposToInsert = repositories.repositories.filter(
-    (repo) => !allInstalledRepoIds.includes(repo.id)
+    (repo) => !allInstalledRepoIds.includes(repo.id),
   );
   const reposToRemove = allInstalledRepoIds.filter(
-    (id) => !allOriginRepoIds.includes(id)
+    (id) => !allOriginRepoIds.includes(id),
   );
 
   const reposToReturn = allInstallRepos.filter((repo) =>
-    allOriginRepoIds.includes(repo.repoId)
+    allOriginRepoIds.includes(repo.repoId),
   );
 
   LOGGER.debug("Repos to insert/delete: ", {
@@ -94,7 +87,7 @@ const getRepositories = async (
         name: repoToInsert.name,
         orgId: organization.orgId,
         isEnabled: false,
-      })
+      }),
     );
   }
 

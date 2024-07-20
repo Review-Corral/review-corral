@@ -1,33 +1,32 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "useDefineForClassFields": true,
-    "lib": ["ES2020", "DOM", "DOM.Iterable"],
+    "target": "ESNext",
     "module": "ESNext",
+    "useDefineForClassFields": true,
+    "lib": ["DOM", "DOM.Iterable", "ESNext"],
+    "preserveSymlinks": false,
+    "allowJs": false,
     "skipLibCheck": true,
-
-    /* Bundler mode */
-    "moduleResolution": "Bundler",
-    "allowImportingTsExtensions": true,
+    "esModuleInterop": false,
+    "allowSyntheticDefaultImports": true,
+    "strict": true,
+    "forceConsistentCasingInFileNames": true,
+    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
     "jsx": "react-jsx",
-    "allowJs": true,
-    "incremental": true,
-
-    /* Linting */
-    "strict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
-      "@core/*": ["../core/*"],
-      "@components/*": ["./src/components/*"], 
-      "@lib/*": ["./src/lib/*"]
-    }
+      "@auth/*": ["src/auth/*"],
+      "@components/*": ["src/components/*"],
+      "@shadcn/components/ui/*": ["src/components/shadcn/*"],
+      "@core/*": ["../core/*"]
+    },
+    "sourceMap": true
   },
   "include": ["src"],
-  "references": [{ "path": "./tsconfig.node.json" }],
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  }
 }

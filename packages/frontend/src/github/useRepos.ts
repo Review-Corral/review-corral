@@ -13,16 +13,11 @@ export const useOrganizationRepositories = (orgId: number) => {
     queryKey: [reposKey, orgId],
     queryFn: async () => {
       return await ky
-        .get(
-          `${
-            import.meta.env.VITE_API_URL
-          }/gh/installations/${orgId}/repositories`,
-          {
-            headers: {
-              Authorization: `Bearer ${getSessionToken()}`,
-            },
-          }
-        )
+        .get(`${import.meta.env.VITE_API_URL}/gh/installations/${orgId}/repositories`, {
+          headers: {
+            Authorization: `Bearer ${getSessionToken()}`,
+          },
+        })
         .json<Repository[]>();
     },
   });
@@ -31,12 +26,7 @@ export const useOrganizationRepositories = (orgId: number) => {
 export const useSetRepoActive = () => {
   const queryClient = useQueryClient();
 
-  return useMutation<
-    Repository,
-    unknown,
-    setRepoActiveStatusArgs,
-    Repository[]
-  >(
+  return useMutation<Repository, unknown, setRepoActiveStatusArgs, Repository[]>(
     ["repo", "setActive"],
     async (args) => {
       return await ky
@@ -49,7 +39,7 @@ export const useSetRepoActive = () => {
             headers: {
               Authorization: `Bearer ${getSessionToken()}`,
             },
-          }
+          },
         )
         .json<Repository>();
     },
@@ -57,6 +47,6 @@ export const useSetRepoActive = () => {
       onSettled: () => {
         queryClient.refetchQueries([reposKey]);
       },
-    }
+    },
   );
 };

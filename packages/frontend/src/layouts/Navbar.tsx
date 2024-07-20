@@ -1,8 +1,9 @@
+import { useProfile } from "@auth/useProfile";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { FC, Fragment } from "react";
 import { Link } from "react-router-dom";
-import { useOrganizations } from "src/org/useOrganizations";
+import { useOrganizations } from "src/organization/useOrganizations";
 
 export interface NavbarProps {
   activeOrganizationAccountId?: number;
@@ -21,11 +22,9 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
     activeOrganizationAccountId &&
     organizations.data.find((org) => org.orgId === activeOrganizationAccountId);
 
-  // const user = useUser();
+  const user = useProfile();
 
-  const avatarUrl: string | undefined = undefined;
-  // TODO:
-  // session?.user.user_metadata["avatar_url"];
+  const avatarUrl: string | undefined = user.data?.avatarUrl;
 
   return (
     <Disclosure as="nav" className="bg-[#f4f4f4]">
@@ -52,11 +51,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                     <div className="rounded-md px-2 py- flex gap-2 items-center">
                       <div className="flex items-center space-x-2">
                         <div className="rounded-md overflow-hidden">
-                          <img
-                            src={activeOrg.avatarUrl}
-                            width={32}
-                            height={32}
-                          />
+                          <img src={activeOrg.avatarUrl} width={32} height={32} />
                         </div>
                         <div>{activeOrg.name}</div>
                       </div>
@@ -102,7 +97,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrganizationAccountId }) => {
                                 to={item.href}
                                 className={classNames(
                                   active ? "bg-gray-100" : "",
-                                  "block px-4 py-2 text-sm text-gray-700"
+                                  "block px-4 py-2 text-sm text-gray-700",
                                 )}
                               >
                                 {item.name}

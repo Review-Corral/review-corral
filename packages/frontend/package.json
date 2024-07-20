@@ -7,13 +7,16 @@
     "dev": "sst bind vite",
     "build": "tsc && vite build",
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "sst bind vite preview"
+    "preview": "sst bind vite preview",
+    "typecheck": "tsc -noEmit"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.1.1",
+    "@radix-ui/react-select": "^2.0.0",
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-switch": "^1.0.3",
+    "@tanstack/react-table": "^8.16.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "js-cookie": "^3.0.5",
@@ -21,6 +24,7 @@
     "lucide-react": "^0.303.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.3",
     "react-hot-toast": "^2.4.1",
     "react-query": "^3.39.3",
     "react-router-dom": "^6.21.1",

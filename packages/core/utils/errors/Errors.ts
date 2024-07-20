@@ -8,7 +8,7 @@ export class HttpError extends Error {
   constructor(
     public readonly statusCode: StatusCode,
     message: string,
-    public readonly expose = false
+    public readonly expose = false,
   ) {
     super(message);
   }

@@ -100,9 +100,7 @@ export const SlackTab: FC<OrgViewProps> = ({ organization }) => {
     <div className="space-y-12">
       <Header>Slack</Header>
       {slackIntegration.error ? (
-        <ErrorCard
-          message={"There was an unexpected error fetching your Slack data"}
-        />
+        <ErrorCard message={"There was an unexpected error fetching your Slack data"} />
       ) : !slackIntegration.isLoading &&
         (!slackIntegration.data || slackIntegration.data?.length < 1) ? (
         <SetupSlackCard organization={organization} />

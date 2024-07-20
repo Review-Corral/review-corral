@@ -1,0 +1,61 @@
+name: CI
+
+on: push
+
+env:
+  AWS_REGION: "region"
+  AWS_S3_BUCKET: "bucket"
+  AWS_S3_ACCESS_KEY: "key"
+  AWS_S3_KEY_SECRET: "secret"
+
+jobs:
+  lint-format:
+    name: Lint and Format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Pnpm
+        uses: pnpm/action-setup@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install Pnpm Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - run: pnpm format:check
+
+  typecheck:
+    name: Typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Pnpm
+        uses: pnpm/action-setup@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install Pnpm Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - run: cp .env.example .env.local
+      - name: Build types
+        run: pnpm build:types
+      - run: pnpm typecheck
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Pnpm
+        uses: pnpm/action-setup@v2
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install Pnpm Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - run: pnpm test:ci

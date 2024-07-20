@@ -7,30 +7,39 @@
     "dev": "sst dev",
     "build": "sst build",
     "build:core": "tsc -p ./packages/core/tsconfig.json",
+    "build:types": "sst types --profile test --stage test",
     "build:core:watch": "p build:core --watch",
     "deploy": "sst deploy",
     "remove": "sst remove",
     "console": "sst console",
-    "typecheck": "tsc --noEmit && tsc --noEmit --project ./packages/core/tsconfig.json && tsc --noEmit --project ./packages/functions/tsconfig.json && tsc --noEmit --project ./packages/frontend/tsconfig.json",
+    "typecheck": "tsc -p ./tsconfig.json -noEmit && pnpm run -r typecheck",
+    "lint": "biome lint --apply .",
+    "lint:fix": "biome lint --apply-unsafe .",
+    "check": "biome check --apply .",
+    "check:ci": "biome check --error-on-warnings .",
+    "format": "biome format --write .",
+    "format:check": "biome format .",
     "test": "vitest run .spec.ts",
-    "test:ci": "vitest run --silent .spec.ts",
-    "test:watch": "vitest watch .spec.ts",
+    "test:ci": "sst bind vitest run --silent .spec.ts",
+    "test:watch": "sst bind vitest watch .spec.ts",
     "migrate:gen": "pnpm drizzle-kit generate:pg --out ./packages/core/db/migrations/ --schema ./packages/core/db/schema.ts"
   },
   "devDependencies": {
+    "@biomejs/biome": "^1.7.3",
     "@octokit/webhooks-types": "^7.3.1",
     "@tsconfig/node18": "^18.2.2",
-    "aws-cdk-lib": "2.110.1",
+    "aws-cdk-lib": "2.142.1",
     "constructs": "10.3.0",
     "drizzle-kit": "^0.20.7",
     "node-fetch": "^3.3.2",
-    "sst": "2.39.5",
+    "prettier": "^3.1.1",
+    "sst": "2.43.3",
     "typescript": "^5.3.3",
     "vite-node": "^1.1.3",
-    "vitest": "^1.1.0"
+    "vitest": "^1.1.3"
   },
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "pnpm@8.11.0"
+  "packageManager": "pnpm@9.2.0"
 }

@@ -1,16 +1,11 @@
+import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
+import { UserResponse } from "@domain/github/endpointTypes";
+import { Logger } from "@domain/logging";
 import ky from "ky";
-import {
-  AuthHandler,
-  GithubAdapter,
-  OauthBasicConfig,
-  Session,
-} from "sst/node/auth";
-import { fetchUserById, insertUser } from "../../core/dynamodb/fetchers/users";
-import { UserResponse } from "../../core/github/endpointTypes";
-import { Logger } from "../../core/logging";
+import { AuthHandler, GithubAdapter, OauthBasicConfig, Session } from "sst/node/auth";
 import { assertVarExists } from "../../core/utils/assert";
-import config from "../../core/utils/config";
 import { HttpError } from "../../core/utils/errors/Errors";
+import { Db } from "@domain/dynamodb/client";
 
 declare module "sst/node/auth" {
   export interface SessionTypes {
@@ -44,10 +39,12 @@ const onSuccess: OauthBasicConfig["onSuccess"] = async (tokenSet) => {
 
   const user = await getOrCreateUser(userQuery, tokenSet.access_token);
 
+  const redirectUri = `${assertVarExists("BASE_FE_URL")}/app/auth/login/success`;
+
+  LOGGER.debug("Set auth redirect URI ", { redirectUri, userId: user.userId });
+
   return Session.parameter({
-    redirect: config.isLocal
-      ? `${assertVarExists("BASE_FE_URL")}/login/success`
-      : `https://${assertVarExists("BASE_FE_URL")}/login/success`,
+    redirect: redirectUri,
     type: "user",
     properties: {
       userId: user.userId,
@@ -60,6 +57,21 @@ const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
 
   if (existingUser) {
     LOGGER.info("Found existing user", { id: user.id });
+
+    // Update the GH access token if different
+    if (existingUser.ghAccessToken !== accessToken) {
+      LOGGER.info("Updating user access token", { id: user.id });
+
+      await Db.entities.user
+        .patch({
+          userId: user.id,
+        })
+        .set({
+          ghAccessToken: accessToken,
+        })
+        .go();
+    }
+
     return existingUser;
   }
 
