@@ -17,12 +17,15 @@ export function MainStack({ stack, app }: StackContext) {
     VITE_SLACK_CLIENT_SECRET: assertVarExists("SLACK_CLIENT_SECRET"),
     VITE_SLACK_AUTH_URL: `https://${Api.getDomain(app)}/slack/oauth`,
   };
+
+  const baseFeUrl = app.local ? getFrontendUrl(app) : `https://${getFrontendUrl(app)}`;
+
   const functionDefaults: FunctionProps = {
     architecture: "x86_64",
     environment: {
       // IMPORTANT: changes to this will impact auth redirects. Be careful and see
       // `auth.ts` to ensure the changes here will work
-      BASE_FE_URL: app.local ? getFrontendUrl(app) : `https://${getFrontendUrl(app)}`,
+      BASE_FE_URL: baseFeUrl,
       IS_LOCAL: app.local ? "true" : "false",
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
       GH_APP_ID: assertVarExists("GH_APP_ID"),
