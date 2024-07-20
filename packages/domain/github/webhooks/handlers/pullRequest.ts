@@ -18,72 +18,73 @@ import { getSlackUserName, getThreadTs } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
-export const handlePullRequestEvent: GithubWebhookEventHander<PullRequestEvent> =
-  async ({ event, ...props }) => {
-    const payload = event;
+export const handlePullRequestEvent: GithubWebhookEventHander<
+  PullRequestEvent
+> = async ({ event, ...props }) => {
+  const payload = event;
 
-    LOGGER.debug("Hanlding PR event with action: ", event.action);
-    if (event.action === "opened" || payload.action === "ready_for_review") {
-      return await handleNewPr(
-        // TODO: can we avoid this dangerous cast?
-        payload as PullRequestEventOpenedOrReadyForReview,
-        props,
-      );
-    } else {
-      const threadTs = await getThreadTs({
+  LOGGER.debug("Hanlding PR event with action: ", event.action);
+  if (event.action === "opened" || payload.action === "ready_for_review") {
+    return await handleNewPr(
+      // TODO: can we avoid this dangerous cast?
+      payload as PullRequestEventOpenedOrReadyForReview,
+      props,
+    );
+  } else {
+    const threadTs = await getThreadTs({
+      prId: payload.pull_request.id,
+      repoId: payload.repository.id,
+    });
+
+    if (!threadTs) {
+      // No thread found, so log and return
+      LOGGER.debug(`Got non-created event and didn't find a threadTS`, {
+        action: payload.action,
         prId: payload.pull_request.id,
-        repoId: payload.repository.id,
       });
+      return;
+    }
 
-      if (!threadTs) {
-        // No thread found, so log and return
-        LOGGER.debug(`Got non-created event and didn't find a threadTS`, {
+    switch (payload.action) {
+      case "converted_to_draft":
+        return await handleConvertedToDraft(threadTs, payload, props);
+      case "closed":
+        if (payload.pull_request.merged) {
+          await props.slackClient.postPrMerged(
+            payload,
+            threadTs,
+            await getSlackUserName(payload.sender.login, props),
+          );
+          return;
+        } else {
+          await props.slackClient.postPrClosed(
+            payload,
+            threadTs,
+            await getSlackUserName(payload.sender.login, props),
+          );
+          return;
+        }
+      case "review_requested":
+        if ("requested_reviewer" in payload) {
+          await props.slackClient.postMessage({
+            message: {
+              text: `Review request for ${await getSlackUserName(
+                payload.requested_reviewer.login,
+                props,
+              )}`,
+            },
+            threadTs: threadTs,
+          });
+        }
+        return;
+      default:
+        LOGGER.debug(`Got unhandled pull_request event`, {
           action: payload.action,
           prId: payload.pull_request.id,
         });
-        return;
-      }
-
-      switch (payload.action) {
-        case "converted_to_draft":
-          return await handleConvertedToDraft(threadTs, payload, props);
-        case "closed":
-          if (payload.pull_request.merged) {
-            await props.slackClient.postPrMerged(
-              payload,
-              threadTs,
-              await getSlackUserName(payload.sender.login, props),
-            );
-            return;
-          } else {
-            await props.slackClient.postPrClosed(
-              payload,
-              threadTs,
-              await getSlackUserName(payload.sender.login, props),
-            );
-            return;
-          }
-        case "review_requested":
-          if ("requested_reviewer" in payload) {
-            await props.slackClient.postMessage({
-              message: {
-                text: `Review request for ${await getSlackUserName(
-                  payload.requested_reviewer.login,
-                  props,
-                )}`,
-              },
-              threadTs: threadTs,
-            });
-          }
-          return;
-        default:
-          LOGGER.debug(`Got unhandled pull_request event`, {
-            action: payload.action,
-            prId: payload.pull_request.id,
-          });
-      }
     }
-  };
+  }
+};
 
 const handleConvertedToDraft = async (
   threadTs: string,

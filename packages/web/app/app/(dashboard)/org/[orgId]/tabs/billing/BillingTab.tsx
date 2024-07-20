@@ -35,27 +35,29 @@ export const BillingTab: FC<BillingTabProps> = ({ orgId }) => {
   );
 };
 
-const ActiveSubscriptionsSection: FC<{ subscriptions: Subscription[]; orgId: number }> =
-  ({ subscriptions, orgId }) => {
-    return (
-      <div>
-        <h3 className="text-xl font-bold tracking-tight text-gray-900">
-          Active Subscriptions
-        </h3>
-        <div className="flex mt-8 gap-4">
-          {subscriptions.map((subscription) => {
-            return (
-              <ActivePlanCard
-                key={subscription.subId}
-                subscription={subscription}
-                orgId={orgId}
-              />
-            );
-          })}
-        </div>
+const ActiveSubscriptionsSection: FC<{
+  subscriptions: Subscription[];
+  orgId: number;
+}> = ({ subscriptions, orgId }) => {
+  return (
+    <div>
+      <h3 className="text-xl font-bold tracking-tight text-gray-900">
+        Active Subscriptions
+      </h3>
+      <div className="flex mt-8 gap-4">
+        {subscriptions.map((subscription) => {
+          return (
+            <ActivePlanCard
+              key={subscription.subId}
+              subscription={subscription}
+              orgId={orgId}
+            />
+          );
+        })}
       </div>
-    );
-  };
+    </div>
+  );
+};
 
 const includedFeatures = ["10 team members (measured by Github users)"];
 
