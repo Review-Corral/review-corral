@@ -1,3 +1,4 @@
+import { Loading } from "@components/ui/cards/loading";
 import { FC, ReactNode, useState } from "react";
 import { useLoaderData, useNavigate, useSearchParams } from "react-router-dom";
 import { DashboardLayout } from "src/layouts/DashboardLayout";
@@ -6,9 +7,6 @@ import { OverviewTab } from "./tabs/OverviewTab";
 import { BillingTab } from "./tabs/billing/BillingTab";
 import { UsersTab } from "./tabs/users/UsersTab";
 import { useOrganization } from "./useOrganization";
-import { Loading } from "@components/ui/cards/loading";
-
-type OrgViewProps = {};
 
 const PageSchema = z.enum(["billing", "users", "overview"]);
 
@@ -40,7 +38,7 @@ const orgViewParamsSchema = z.object({
 
 const orgViewSearchParamsSchema = PageSchema.optional().default("overview");
 
-export const OrgView: FC<OrgViewProps> = () => {
+export const OrgView: FC = () => {
   const loaderData = useLoaderData();
   console.log(loaderData);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
