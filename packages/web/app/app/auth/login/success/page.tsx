@@ -14,8 +14,6 @@ const Page: FC<{ searchParams: { token?: string } }> = ({ searchParams }) => {
     if (token) {
       Cookies.set(auth_access_token_key, token);
       redirect("/app");
-    } else {
-      redirect("/error");
     }
   }, []);
 

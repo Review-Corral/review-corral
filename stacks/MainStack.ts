@@ -24,7 +24,6 @@ export function MainStack({ stack, app }: StackContext) {
       // `auth.ts` to ensure the changes here will work
       BASE_FE_URL: app.local ? getFrontendUrl(app) : `https://${getFrontendUrl(app)}`,
       IS_LOCAL: app.local ? "true" : "false",
-      MIGRATIONS_PATH: "packages/core/src/database/migrations",
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
       GH_APP_ID: assertVarExists("GH_APP_ID"),
       GH_CLIENT_ID: assertVarExists("GH_CLIENT_ID"),
