@@ -1,14 +1,9 @@
-import {
-  PullRequestReviewCommentCreatedEvent,
-  WebhookEvent,
-} from "@octokit/webhooks-types";
+import { PullRequestReviewCommentCreatedEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
 import { getSlackUserName, getThreadTs } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
-
-type t = WebhookEvent;
 
 export const handlePullRequestCommentEvent: GithubWebhookEventHander<
   PullRequestReviewCommentCreatedEvent
