@@ -1,12 +1,12 @@
 "use client";
 
-import { FC } from "react";
-import { useOrganizations } from "./org/useOrganizations";
-import { Header } from "@/components/ui/header";
-import Link from "next/link";
 import { Button } from "@/components/shadcn/button";
 import { Loading } from "@/components/ui/cards/loading";
+import { Header } from "@/components/ui/header";
+import Link from "next/link";
+import { FC } from "react";
 import { DashboardPaddedBody } from "../../../components/ui/layout/DashboardPaddedBody";
+import { useOrganizations } from "./org/useOrganizations";
 
 const HomeView: FC = () => {
   const { data, isLoading } = useOrganizations();

@@ -1,12 +1,12 @@
 "use client";
 
-import ky from "ky";
-import React, { useState } from "react";
-import { BetterButton } from "@components/ui/BetterButton";
-import Image from "next/image";
-import { useEffect } from "react";
-import { useMutation } from "@tanstack/react-query";
 import { cn } from "@/components/lib/utils";
+import { BetterButton } from "@components/ui/BetterButton";
+import { useMutation } from "@tanstack/react-query";
+import ky from "ky";
+import Image from "next/image";
+import React, { useState } from "react";
+import { useEffect } from "react";
 
 const GithubLoginButton: React.FC = () => {
   const [isRedirecting, setIsRedirecting] = useState<boolean>(false);

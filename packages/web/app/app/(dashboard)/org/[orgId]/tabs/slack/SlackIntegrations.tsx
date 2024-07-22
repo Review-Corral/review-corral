@@ -1,7 +1,7 @@
+import { Loading } from "@components/ui/cards/loading";
 import { FC } from "react";
 import SlackButton from "./SetupSlackButton";
 import { useSlackIntegrations } from "./useSlackIntegrations";
-import { Loading } from "@components/ui/cards/loading";
 
 interface SlackIntegrationsProps {
   organizationId: number;

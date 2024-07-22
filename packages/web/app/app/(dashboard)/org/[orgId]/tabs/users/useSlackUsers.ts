@@ -1,8 +1,8 @@
 import ky from "ky";
 
+import { getSessionToken } from "@/app/app/auth/getSessionToken";
 // THis is super hacky, but gets the job done for now
 import { SlackUser } from "@core/dynamodb/entities/types";
-import { getSessionToken } from "@/app/app/auth/getSessionToken";
 import { useQuery } from "@tanstack/react-query";
 
 export const useSlackUsers = (orgId: number) =>

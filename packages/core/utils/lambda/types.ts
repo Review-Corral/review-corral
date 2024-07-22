@@ -1,3 +1,4 @@
+import { gzipSync } from "node:zlib";
 import middy from "@middy/core";
 import {
   APIGatewayProxyEvent,
@@ -6,7 +7,6 @@ import {
   Context,
   SQSEvent,
 } from "aws-lambda";
-import { gzipSync } from "node:zlib";
 import { User } from "../../dynamodb/entities/types";
 import { MessageData, StatusCode2XX, StatusCode4XX, StatusCode5XX } from "./responses";
 
