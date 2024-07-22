@@ -127,7 +127,7 @@ const checkEventWrapper = async (event: APIGatewayProxyEventV2) => {
       secret: webhookSecret,
     });
   } catch (error) {
-    console.error("Error checking event signature", { error });
+    LOGGER.error("Error checking event signature", { error });
     return false;
   }
 };
