@@ -2,8 +2,8 @@ import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Slack } from "lucide-react";
 import { FC } from "react";
 import { OrgViewProps } from "../shared";
-import { useSlackIntegrations } from "./useSlackIntegrations";
 import { SetupSlackCard } from "./SetupSlackCard";
+import { useSlackIntegrations } from "./useSlackIntegrations";
 
 interface SlackOverviewCardProps extends OrgViewProps {}
 

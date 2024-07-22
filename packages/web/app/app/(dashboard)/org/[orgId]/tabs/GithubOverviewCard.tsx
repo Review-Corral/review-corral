@@ -1,15 +1,15 @@
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Organization } from "@core/dynamodb/entities/types";
 
+import { useSetRepoActive } from "@/app/app/(dashboard)/github/useRepos";
 import { Button } from "@components/shadcn/button";
 import { Switch } from "@components/shadcn/switch";
 import { Github } from "lucide-react";
 import { FC } from "react";
 import toast from "react-hot-toast";
 import Xarrow from "react-xarrows";
-import { OrgViewProps } from "./shared";
 import { useOrganizationRepositories } from "../useOrgRepos";
-import { useSetRepoActive } from "@/app/app/(dashboard)/github/useRepos";
+import { OrgViewProps } from "./shared";
 import { useSlackIntegrations } from "./slack/useSlackIntegrations";
 
 interface GithubCardProps extends OrgViewProps {

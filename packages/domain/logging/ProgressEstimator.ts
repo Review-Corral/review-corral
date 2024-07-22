@@ -31,9 +31,7 @@ class ProgressEstimator {
 
   public getAverageTimePerItemString() {
     const averageTimePerItem = this.getAverageTimePerItem();
-    return (
-      `${formatDistance(averageTimePerItem, 0, { includeSeconds: true })} per item`
-    );
+    return `${formatDistance(averageTimePerItem, 0, { includeSeconds: true })} per item`;
   }
 
   public getElapsed() {

@@ -1,8 +1,8 @@
 import { FC } from "react";
 import { GithubCard as GithubOverviewCard } from "./GithubOverviewCard";
 import { SharedLayout } from "./SharedLayout";
-import { SlackOverviewCard } from "./slack/SlackOverviewCard";
 import { OrgViewProps } from "./shared";
+import { SlackOverviewCard } from "./slack/SlackOverviewCard";
 
 interface OverviewProps extends OrgViewProps {}
 

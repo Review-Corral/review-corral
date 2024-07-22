@@ -3,9 +3,9 @@ import { FC } from "react";
 import { ActiveLight } from "@components/ui/activeLight";
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Header } from "@components/ui/header";
+import { OrgViewProps } from "../shared";
 import { SetupSlackCard } from "./SetupSlackCard";
 import { useSlackIntegrations } from "./useSlackIntegrations";
-import { OrgViewProps } from "../shared";
 
 export const SlackTab: FC<OrgViewProps> = ({ organization }) => {
   const slackIntegration = useSlackIntegrations(organization.orgId);

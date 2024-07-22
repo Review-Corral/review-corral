@@ -1,3 +1,4 @@
+import { cn } from "@/components/lib/utils";
 import { Button } from "@components/shadcn/button";
 import {
   Select,
@@ -19,9 +20,8 @@ import {
   useFieldArray,
   useForm,
 } from "react-hook-form";
-import { UsersTable } from "./UsersTable";
-import { cn } from "@/components/lib/utils";
 import { useMutateOrganizationMembers } from "../../useOrganizationMembers";
+import { UsersTable } from "./UsersTable";
 
 interface UsersTableFormProps {
   orgId: number;

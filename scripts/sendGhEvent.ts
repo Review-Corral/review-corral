@@ -1,5 +1,5 @@
-import { PullRequestEvent } from "@octokit/webhooks-types";
 import * as crypto from "node:crypto";
+import { PullRequestEvent } from "@octokit/webhooks-types";
 import fetch from "node-fetch";
 require("dotenv").config({ path: ".env.local" });
 

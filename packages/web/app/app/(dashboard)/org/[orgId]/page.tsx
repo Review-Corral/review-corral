@@ -1,12 +1,12 @@
 "use client";
 
-import { useParams, useSearchParams } from "next/navigation";
 import { Loading } from "@/components/ui/cards/loading";
+import { useParams, useSearchParams } from "next/navigation";
+import { z } from "zod";
 import { OverviewTab } from "./tabs/OverviewTab";
 import { BillingTab } from "./tabs/billing/BillingTab";
 import { UsersTab } from "./tabs/users/UsersTab";
 import { useOrganization } from "./useOrganization";
-import { z } from "zod";
 
 const orgIdSchema = z.string().transform(Number);
 

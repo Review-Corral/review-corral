@@ -1,6 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { handlePullRequestEvent } from "./pullRequest";
 import { SlackClient } from "@domain/slack/SlackClient";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { handlePullRequestEvent } from "./pullRequest";
 import { getSlackUserName, getThreadTs } from "./shared";
 
 vi.mock("sst/node/table", () => ({

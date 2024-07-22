@@ -1,3 +1,4 @@
+import { Db } from "@domain/dynamodb/client";
 import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { UserResponse } from "@domain/github/endpointTypes";
 import { Logger } from "@domain/logging";
@@ -5,7 +6,6 @@ import ky from "ky";
 import { AuthHandler, GithubAdapter, OauthBasicConfig, Session } from "sst/node/auth";
 import { assertVarExists } from "../../core/utils/assert";
 import { HttpError } from "../../core/utils/errors/Errors";
-import { Db } from "@domain/dynamodb/client";
 
 declare module "sst/node/auth" {
   export interface SessionTypes {
