@@ -39,8 +39,8 @@ describe("handlePullRequestEvent", () => {
       },
     };
 
-    (getSlackUserName as vi.Mock).mockResolvedValue("@testuser");
-    (getThreadTs as vi.Mock).mockResolvedValue("thread-ts-123");
+    vi.mocked(getSlackUserName).mockResolvedValue("@testuser");
+    vi.mocked(getThreadTs).mockResolvedValue("thread-ts-123");
   });
 
   it("should call slackClient.postMessage when review_request_removed", async () => {
