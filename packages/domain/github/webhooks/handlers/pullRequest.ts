@@ -73,7 +73,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
                 props,
               )}`,
             },
-            threadTs: threadTs,  
+            threadTs: threadTs,
           });
         }
         return;

@@ -1,24 +1,23 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { handlePullRequestEvent } from './pullRequest';
-import { SlackClient } from '@domain/slack/SlackClient';
-import { getSlackUserName, getThreadTs } from './shared';
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { handlePullRequestEvent } from "./pullRequest";
+import { SlackClient } from "@domain/slack/SlackClient";
+import { getSlackUserName, getThreadTs } from "./shared";
 
-vi.mock('sst/node/table', () => ({
+vi.mock("sst/node/table", () => ({
   Table: {
     main: {
-      tableName: 'mock-table-name',
+      tableName: "mock-table-name",
     },
   },
 }));
 
-
 // Mock dependencies
-vi.mock('./shared', () => ({
+vi.mock("./shared", () => ({
   getSlackUserName: vi.fn(),
   getThreadTs: vi.fn(),
 }));
 
-describe('handlePullRequestEvent', () => {
+describe("handlePullRequestEvent", () => {
   let mockSlackClient: SlackClient;
   let mockEvent: any;
 
@@ -28,7 +27,7 @@ describe('handlePullRequestEvent', () => {
     } as unknown as SlackClient;
 
     mockEvent = {
-      action: 'review_request_removed',
+      action: "review_request_removed",
       pull_request: {
         id: 123,
       },
@@ -36,15 +35,15 @@ describe('handlePullRequestEvent', () => {
         id: 456,
       },
       requested_reviewer: {
-        login: 'testuser',
+        login: "testuser",
       },
     };
 
-    (getSlackUserName as vi.Mock).mockResolvedValue('@testuser');
-    (getThreadTs as vi.Mock).mockResolvedValue('thread-ts-123');
+    (getSlackUserName as vi.Mock).mockResolvedValue("@testuser");
+    (getThreadTs as vi.Mock).mockResolvedValue("thread-ts-123");
   });
 
-  it('should call slackClient.postMessage when review_request_removed', async () => {
+  it("should call slackClient.postMessage when review_request_removed", async () => {
     await handlePullRequestEvent({
       event: mockEvent,
       slackClient: mockSlackClient,
@@ -57,13 +56,13 @@ describe('handlePullRequestEvent', () => {
       repoId: 456,
     });
 
-    expect(getSlackUserName).toHaveBeenCalledWith('testuser', expect.any(Object));
+    expect(getSlackUserName).toHaveBeenCalledWith("testuser", expect.any(Object));
 
     expect(mockSlackClient.postMessage).toHaveBeenCalledWith({
       message: {
-        text: 'Review request for @testuser removed',
+        text: "Review request for @testuser removed",
       },
-      threadTs: 'thread-ts-123',
+      threadTs: "thread-ts-123",
     });
   });
 });

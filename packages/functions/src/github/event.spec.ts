@@ -4,7 +4,6 @@ import { beforeEach } from "node:test";
 import { describe, expect, it, vi } from "vitest";
 import { handler } from "./events";
 
-
 describe("event.spec", () => {
   beforeEach(() => {
     const mocks = vi.hoisted(() => {
@@ -42,7 +41,8 @@ describe("event.spec", () => {
         headers: {
           "x-github-delivery": "123",
           "x-github-event": "pull_request",
-          "x-hub-signature-256": "sha256=b68844bb46a27548f37cede3c726a13bf677a081a4a10ff37cc6acbe89e7d6f3",
+          "x-hub-signature-256":
+            "sha256=b68844bb46a27548f37cede3c726a13bf677a081a4a10ff37cc6acbe89e7d6f3",
         },
         body: JSON.stringify(eventBody),
       } as any as APIGatewayProxyEventV2,
