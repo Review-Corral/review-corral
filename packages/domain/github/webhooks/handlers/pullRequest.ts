@@ -78,7 +78,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
         }
         return;
       default:
-        LOGGER.debug(`Got unhandled pull_request event`, {
+        LOGGER.debug("Got unhandled pull_request event", {
           action: payload.action,
           prId: payload.pull_request.id,
         });
