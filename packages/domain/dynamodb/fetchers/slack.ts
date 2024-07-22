@@ -39,7 +39,7 @@ export const fetchSlackUsers = async (
 };
 
 export const insertSlackUsers = async (args: SlackUserInsertArgs[]): Promise<void> => {
-  const { unprocessed } = await Db.entities.slackUsers.put(args).go();
+  await Db.entities.slackUsers.put(args).go();
 };
 
 // TODO: this should probably be moved somewhere more appropriate

@@ -1,6 +1,6 @@
 import { StackContext, Table } from "sst/constructs";
 
-export function StorageStack({ stack, app }: StackContext) {
+export function StorageStack({ stack }: StackContext) {
   const table = new Table(stack, "main", {
     fields: {
       pk: "string",

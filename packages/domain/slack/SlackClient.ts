@@ -201,7 +201,6 @@ export class SlackClient {
   });
 
   async postComment({
-    prId,
     commentBody,
     commentUrl,
     threadTs,
