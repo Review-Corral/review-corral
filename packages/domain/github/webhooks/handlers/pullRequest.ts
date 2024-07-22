@@ -68,10 +68,23 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
         if ("requested_reviewer" in payload) {
           await props.slackClient.postMessage({
             message: {
-              text: `Review request for ${await getSlackUserName(
+              text: `🔍 Review request for ${await getSlackUserName(
                 payload.requested_reviewer.login,
                 props,
               )}`,
+            },
+            threadTs: threadTs,  
+          });
+        }
+        return;
+      case "review_request_removed":
+        if ("requested_reviewer" in payload) {
+          await props.slackClient.postMessage({
+            message: {
+              text: `Review request for ${await getSlackUserName(
+                payload.requested_reviewer.login,
+                props,
+              )} removed`,
             },
             threadTs: threadTs,
           });
@@ -237,7 +250,7 @@ const handleNewPr = async (
         await getSlackUserName(body.sender.login, baseProps),
       );
 
-      if (response && response.ts) {
+      if (response?.ts) {
         LOGGER.debug("Succesfully created new threadTs. About to update database", {
           prId: body.pull_request.id,
           organizationId: baseProps.organizationId,
@@ -255,7 +268,7 @@ const handleNewPr = async (
             threadTs: response.ts,
           });
         } else {
-          LOGGER.debug(`Creating new PR record`);
+          LOGGER.debug("Creating new PR record");
           await insertPullRequest({
             prId: body.pull_request.id,
             repoId: body.repository.id,
@@ -272,7 +285,7 @@ const handleNewPr = async (
         );
       }
     } catch (error) {
-      throw new Error("Error creating new thread for PR: " + error);
+      throw new Error(`Error creating new thread for PR: ${error}`);
     }
   }
 
