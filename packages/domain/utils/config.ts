@@ -19,10 +19,10 @@ const config = {
   frontendBaseUrl: getFrontendUrl(),
   environment,
   functionName,
-  releaseVersion: !!isLocal ? getReleaseVersion() : "UNKNOWN",
-  branchName: !!isLocal ? getCurrentBranchName() : "N/A",
+  releaseVersion: isLocal ? getReleaseVersion() : "UNKNOWN",
+  branchName: isLocal ? getCurrentBranchName() : "N/A",
   verboseLogging: {
-    rowMatching: !!process.env["VERBOSE_LOGGING_ROW_MATCHING"],
+    rowMatching: !!process.env.VERBOSE_LOGGING_ROW_MATCHING,
   },
 };
 

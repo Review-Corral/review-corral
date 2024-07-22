@@ -14,7 +14,7 @@ const setRepositoryActiveStatusSchema = z.object({
   organizationId: z.string().transform((val) => Number(val)),
 });
 
-export const handler = ApiHandler(async (event, context) => {
+export const handler = ApiHandler(async (event, _context) => {
   const { repositoryId, organizationId } = setRepositoryActiveStatusSchema.parse(
     event.pathParameters,
   );

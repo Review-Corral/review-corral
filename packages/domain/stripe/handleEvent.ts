@@ -9,7 +9,6 @@ import {
 } from "@domain/dynamodb/fetchers/subscription";
 import { Logger } from "@domain/logging";
 import Stripe from "stripe";
-import { z } from "zod";
 
 const LOGGER = new Logger("stripe.handleEvent");
 
@@ -50,9 +49,9 @@ export const handleSubUpdated = async (
     priceId: priceId,
   };
 
-  LOGGER.info(`Going to upsert subscription with args:`, { args }, { depth: 3 });
+  LOGGER.info("Going to upsert subscription with args:", { args }, { depth: 3 });
   await upsertSubscription(args);
-  LOGGER.info(`Finshed upserting subscription`, { depth: 3 });
+  LOGGER.info("Finshed upserting subscription", { depth: 3 });
 
   const parsedMetadata = stripeCheckoutCreatedMetadataSchema.safeParse(
     actualEvent.metadata,
@@ -60,20 +59,20 @@ export const handleSubUpdated = async (
 
   if (parsedMetadata.success) {
     // Update the organization with the new info for quicker access
-    LOGGER.info(`Updating org stripe sub status...`);
+    LOGGER.info("Updating org stripe sub status...");
     await updateOrganization({
       orgId: parsedMetadata.data.orgId,
       customerId: actualEvent.customer,
       stripeSubStatus: actualEvent.status,
     });
   } else {
-    LOGGER.warn(`Subscription does not have an orgId`, {
+    LOGGER.warn("Subscription does not have an orgId", {
       input: actualEvent.metadata,
       zodParseError: parsedMetadata.error,
     });
   }
 
-  LOGGER.info(`Subscription updated`, args);
+  LOGGER.info("Subscription updated", args);
 };
 
 /**

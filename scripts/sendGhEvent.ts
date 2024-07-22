@@ -1,7 +1,7 @@
 import { PullRequestEvent } from "@octokit/webhooks-types";
-import * as crypto from "crypto";
+import * as crypto from "node:crypto";
 import fetch from "node-fetch";
-require("dotenv").config({ path: `.env.local` });
+require("dotenv").config({ path: ".env.local" });
 
 /**
  * Sends a simulated GitHub webhook event to an API.

@@ -4,7 +4,7 @@ export const userIsLoggedIn = () => {
   try {
     getSessionToken();
     return true;
-  } catch (error) {
+  } catch (_error) {
     return false;
   }
 };

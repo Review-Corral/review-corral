@@ -14,7 +14,7 @@ import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("github:installations");
 
-export const getInstallations = ApiHandler(async (event, context) => {
+export const getInstallations = ApiHandler(async (_event, _context) => {
   const { user, error } = await useUser();
 
   if (!user) {

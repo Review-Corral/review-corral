@@ -24,7 +24,7 @@ const githubWebhookEventSchema = z
 
 export type GithubWebhookEventPayload = z.infer<typeof githubWebhookEventSchema>;
 
-export const handler = ApiHandler(async (event, context) => {
+export const handler = ApiHandler(async (event, _context) => {
   LOGGER.debug(
     "Recieved Github event",
     {

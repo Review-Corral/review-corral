@@ -11,7 +11,7 @@ const schema = z.object({
   organizationId: z.string().transform(Number),
 });
 
-export const getSlackInstallations = ApiHandler(async (event, context) => {
+export const getSlackInstallations = ApiHandler(async (event, _context) => {
   const { user, error } = await useUser();
 
   const { organizationId } = schema.parse(event.pathParameters);

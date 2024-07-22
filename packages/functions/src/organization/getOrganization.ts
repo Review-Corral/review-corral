@@ -17,7 +17,7 @@ const getRepositoriesForOrganizationSchena = z.object({
   organizationId: z.string(),
 });
 
-export const handler = ApiHandler(async (event, context) => {
+export const handler = ApiHandler(async (event, _context) => {
   const { organizationId } = getRepositoriesForOrganizationSchena.parse(
     event.pathParameters,
   );

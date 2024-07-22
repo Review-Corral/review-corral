@@ -50,7 +50,7 @@ const slackAuthResponseBodySchema = z.union([
   slackAuthResponseFailedSchema,
 ]);
 
-export const handler = ApiHandler(async (event, context) => {
+export const handler = ApiHandler(async (event, _context) => {
   LOGGER.debug("Recieved query params", {
     queryParams: event.queryStringParameters,
   });

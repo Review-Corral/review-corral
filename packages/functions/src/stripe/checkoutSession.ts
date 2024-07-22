@@ -14,7 +14,7 @@ import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("stripe.checkoutSession");
 
-export const handler = ApiHandler(async (event, context) => {
+export const handler = ApiHandler(async (event, _context) => {
   const { user, error } = await useUser();
 
   if (!user) {
