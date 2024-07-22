@@ -4,32 +4,24 @@ import { beforeEach } from "node:test";
 import { describe, expect, it, vi } from "vitest";
 import { handler } from "./events";
 
-vi.mock('sst/node/table', () => ({
-  Table: {
-    main: {
-      tableName: 'mock-table-name',
-    },
-  },
-}));
 
 describe("event.spec", () => {
   beforeEach(() => {
-    vi.stubEnv('GH_WEBHOOK_SECRET', 'test-secret');
     const mocks = vi.hoisted(() => {
       return {
         handleGithubWebhookEvent: vi.fn(),
       };
     });
 
-    vi.mock("@core/github/webhooks", async () => {
-      const actual = await vi.importActual("@core/github/webhooks");
+    vi.mock("@domain/github/webhooks", async () => {
+      const actual = await vi.importActual("@domain/github/webhooks");
       return {
         ...actual,
         handleGithubWebhookEvent: mocks.handleGithubWebhookEvent,
       };
     });
 
-    vi.mock("@core/github/webhooks/verifyEvent", () => ({
+    vi.mock("@domain/github/webhooks/verifyEvent", () => ({
       verifyGithubWebhookSecret: vi.fn(() => true),
     }));
   });
