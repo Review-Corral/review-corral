@@ -3,7 +3,7 @@ import { UserResponse } from "../../github/endpointTypes";
 import { Logger } from "../../logging";
 import { Db } from "../client";
 
-const LOGGER = new Logger("fetchers.users");
+const _LOGGER = new Logger("fetchers.users");
 
 /**
  * Fetches a user by their id

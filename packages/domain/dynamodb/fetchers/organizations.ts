@@ -9,7 +9,7 @@ import {
 import { Logger } from "../../logging";
 import { addOrganizationMemberFromUser } from "./members";
 
-const LOGGER = new Logger("fetchers.organizations");
+const _LOGGER = new Logger("fetchers.organizations");
 
 /**
  * Fetches an organization by it's ID

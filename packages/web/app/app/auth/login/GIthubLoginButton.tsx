@@ -57,7 +57,7 @@ export default GithubLoginButton;
  */
 const useDetectRedirect = (onRedirect: () => void) => {
   useEffect(() => {
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+    const handleBeforeUnload = (_event: BeforeUnloadEvent) => {
       onRedirect();
     };
 

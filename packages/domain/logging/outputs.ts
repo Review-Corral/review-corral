@@ -1,6 +1,6 @@
-import * as fs from "fs";
-import { WriteStream } from "fs";
-import * as path from "path";
+import * as fs from "node:fs";
+import { WriteStream } from "node:fs";
+import * as path from "node:path";
 import { colorize, inspect } from "./helpers";
 import { Color, LogLevel, LogOutput, LogOutputOptions } from "./types";
 
@@ -43,7 +43,7 @@ export class FileOutput implements LogOutput {
   }
 
   log(
-    level: LogLevel,
+    _level: LogLevel,
     text: string,
     data: any,
     options: LogOutputOptions = { depth: 2 },

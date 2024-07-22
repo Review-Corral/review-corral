@@ -103,7 +103,7 @@ export class SlackClient {
   ) {
     await this.postMessage({
       message: {
-        text: `Pull request converted to draft`,
+        text: "Pull request converted to draft",
         attachments: [this.getConvertedToDraftAttachment()],
       },
       threadTs,
@@ -147,7 +147,7 @@ export class SlackClient {
   }) {
     await this.postMessage({
       message: {
-        text: `Draft status removed`,
+        text: "Draft status removed",
         attachments: [
           {
             color: "#02A101",
@@ -156,7 +156,7 @@ export class SlackClient {
                 type: "section",
                 text: {
                   type: "mrkdwn",
-                  text: `:large_green_circle: Pull request is now ready for review`,
+                  text: ":large_green_circle: Pull request is now ready for review",
                 },
               },
             ],
@@ -261,7 +261,7 @@ export class SlackClient {
   }
 
   async postReviewRequested(
-    body: PullRequestClosedEvent,
+    _body: PullRequestClosedEvent,
     threadTs: string,
     slackUsername: string,
   ) {
@@ -287,9 +287,9 @@ export class SlackClient {
   }
 
   async postReview(
-    prId: number,
+    _prId: number,
     review: PullRequestReview,
-    login: string,
+    _login: string,
     threadTs: string,
     slackUsername: string,
   ) {
@@ -328,7 +328,7 @@ export class SlackClient {
   }
 
   private async getPrOpenedMessage(
-    body: PullRequestEvent,
+    _body: PullRequestEvent,
     slackUsername: string,
   ): Promise<string> {
     return `Pull request opened by ${slackUsername}`;
@@ -361,7 +361,7 @@ export class SlackClient {
             },
           ],
         },
-        ...(!!body.pull_request?.body
+        ...(body.pull_request?.body
           ? [
               {
                 type: "divider",
@@ -401,7 +401,7 @@ export class SlackClient {
               // image_url: `${assertVarExists(
               //   "BASE_FE_URL"
               // )}/plus-minus-diff-icon-alt.png`,
-              image_url: `https://www.review-corral.com/plus-minus-diff-icon-alt.png`,
+              image_url: "https://www.review-corral.com/plus-minus-diff-icon-alt.png",
               alt_text: "plus-minus-icon",
             },
             {
@@ -443,7 +443,7 @@ export class SlackClient {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `:large_purple_circle: Pull request merged`,
+            text: ":large_purple_circle: Pull request merged",
           },
         },
       ],
@@ -451,7 +451,7 @@ export class SlackClient {
   }
 
   private getConvertedToDraftAttachment(
-    text: string = "Pull request converted back to draft",
+    text = "Pull request converted back to draft",
   ): MessageAttachment {
     return {
       color: "#D9CD27",

@@ -6,7 +6,7 @@ import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("stripe.webhook");
 
-export const handler = ApiHandler(async (event, context) => {
+export const handler = ApiHandler(async (event, _context) => {
   if (!event.body) {
     return {
       statusCode: 400,

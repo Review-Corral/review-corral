@@ -1,4 +1,4 @@
-import { execSync } from "child_process";
+import { execSync } from "node:child_process";
 import { z } from "zod";
 import { LambdaEvent, isApiGatewayProxyEvent } from "./types";
 
@@ -20,7 +20,7 @@ export const getAuthClaims = (event: LambdaEvent): AuthClaims | undefined => {
   try {
     const claims = event.requestContext.authorizer?.jwt?.claims || {};
     return authClaimsSchema.parse(claims);
-  } catch (err) {
+  } catch (_err) {
     return undefined;
   }
 };
@@ -48,7 +48,7 @@ export const getFrontendUrl = (): string | undefined => {
 
 export const getReleaseVersion = (): string => {
   return (
-    process.env.SENTRY_RELEASE ?? (!!getIsLocal() ? getCurrentCommitSha() : "UNKNOWN")
+    process.env.SENTRY_RELEASE ?? (getIsLocal() ? getCurrentCommitSha() : "UNKNOWN")
   );
 };
 

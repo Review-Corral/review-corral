@@ -14,7 +14,7 @@ const schema = z.object({
   organizationId: z.string().transform(Number),
 });
 
-export const handler = ApiHandler(async (event, context) => {
+export const handler = ApiHandler(async (event, _context) => {
   const { user, error } = await useUser();
 
   const { organizationId } = schema.parse(event.pathParameters);

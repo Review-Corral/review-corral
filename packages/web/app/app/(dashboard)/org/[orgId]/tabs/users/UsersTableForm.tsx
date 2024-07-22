@@ -92,7 +92,7 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({
 
 const getColumns = (
   slackUsers: SlackUser[],
-  register: UseFormRegister<FormValues>,
+  _register: UseFormRegister<FormValues>,
   control: Control<FormValues, unknown>,
 ): ColumnDef<FieldArrayWithId<FormValues, "members", "id">>[] => [
   {
