@@ -253,7 +253,7 @@ export class SlackClient {
           this.getPrClosedAttatchment(slackUsername),
         ],
       });
-      console.debug("Succesfully updated message with closed pr status");c
+      console.debug("Succesfully updated message with closed pr status");
     } catch (error) {
       console.error("Got error updating thread with closed pr status: ", error);
     }
