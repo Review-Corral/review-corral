@@ -1,8 +1,0 @@
-.sst
-_templates
-cache
-packages/frontend/dist
-packages/frontend/src/sst-env.d.ts
-packages/**/dist
-**/migrations/meta
-stacks/layers

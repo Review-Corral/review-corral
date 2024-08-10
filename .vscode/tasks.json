@@ -50,7 +50,7 @@
     {
       "label": "Backend",
       "type": "shell",
-      "command": "pnpm",
+      "command": "./scripts/nvmPnpm.sh",
       "args": ["dev"],
       "options": {
         "cwd": "${workspaceFolder}"
