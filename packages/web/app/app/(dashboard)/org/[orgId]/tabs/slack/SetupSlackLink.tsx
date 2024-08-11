@@ -1,14 +1,16 @@
-import { Button } from "@/components/shadcn/button";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
-import React from "react";
+import React, { PropsWithChildren } from "react";
+import { SLACK_INTEGRATIONS_QUERY_KEY } from "./useSlackIntegrations";
 
 interface SlackButtonProps {
   organizationId: number;
 }
 
-const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
-  // biome-ignore lint/correctness/noUnusedVariables: <explanation>
+const SetupSlackLink: React.FC<PropsWithChildren<SlackButtonProps>> = ({
+  organizationId,
+  children,
+}) => {
   const queryClient = useQueryClient();
 
   const slackBotId = process.env.NEXT_PUBLIC_SLACK_BOT_ID;
@@ -34,14 +36,15 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
       <Link
         href={`https://slack.com/oauth/v2/authorize?${searchParams.toString()}`}
         onClick={() => {
-          // TODO:
-          // queryClient.invalidateQueries([]);
+          queryClient.invalidateQueries({
+            queryKey: [SLACK_INTEGRATIONS_QUERY_KEY],
+          });
         }}
       >
-        <Button>Connect to Slack</Button>
+        {children}
       </Link>
     </div>
   );
 };
 
-export default SlackButton;
+export default SetupSlackLink;

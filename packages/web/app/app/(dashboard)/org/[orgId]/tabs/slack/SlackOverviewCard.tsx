@@ -4,6 +4,7 @@ import { FC } from "react";
 import { OrgViewProps } from "../shared";
 import { SetupSlackCard } from "./SetupSlackCard";
 import { useSlackIntegrations } from "./useSlackIntegrations";
+import SetupSlackLink from "./SetupSlackLink";
 
 interface SlackOverviewCardProps extends OrgViewProps {}
 
@@ -64,6 +65,11 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
             {channel.channelName}
           </div>
         ))}
+      </div>
+      <div className="flex pt-4 text-gray-600">
+        <SetupSlackLink organizationId={organization.orgId}>
+          Add another channel
+        </SetupSlackLink>
       </div>
     </div>
   );

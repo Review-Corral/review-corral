@@ -1,6 +1,7 @@
 import { Organization } from "@core/dynamodb/entities/types";
 import { FC } from "react";
-import SlackButton from "./SetupSlackButton";
+import SetupSlackLink from "./SetupSlackLink";
+import { Button } from "@/components/shadcn/button";
 
 interface SetupSlackCardProps {
   organization: Organization;
@@ -16,7 +17,9 @@ export const SetupSlackCard: FC<SetupSlackCardProps> = ({
         of your choosing.
       </span>
       <div>
-        <SlackButton organizationId={organizationId} />
+        <SetupSlackLink organizationId={organizationId}>
+          <Button>Connect to Slack</Button>
+        </SetupSlackLink>
       </div>
     </div>
   );

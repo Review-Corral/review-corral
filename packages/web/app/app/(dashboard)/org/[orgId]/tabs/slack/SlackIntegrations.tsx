@@ -1,6 +1,6 @@
 import { Loading } from "@components/ui/cards/loading";
 import { FC } from "react";
-import SlackButton from "./SetupSlackButton";
+import SetupSlackLink from "./SetupSlackLink";
 import { useSlackIntegrations } from "./useSlackIntegrations";
 
 interface SlackIntegrationsProps {
@@ -17,7 +17,7 @@ export const SlackIntegrations: FC<SlackIntegrationsProps> = ({ organizationId }
   if (!data || data.length < 1) {
     return (
       <div>
-        <SlackButton organizationId={organizationId} />
+        <SetupSlackLink organizationId={organizationId} />
       </div>
     );
   }
