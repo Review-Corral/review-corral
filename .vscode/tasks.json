@@ -2,32 +2,9 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Frontend",
-      "type": "shell",
-      "command": "pnpm",
-      "args": ["dev"],
-      "options": {
-        "cwd": "${workspaceFolder}/packages/frontend"
-      },
-      "icon": {
-        "id": "browser",
-        "color": "terminal.ansiCyan"
-      },
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      },
-      "presentation": {
-        "reveal": "always",
-        "panel": "dedicated"
-      },
-      "problemMatcher": [],
-      "isBackground": true
-    },
-    {
       "label": "Web",
       "type": "shell",
-      "command": "pnpm",
+      "command": "./scripts/nvmPnpm.sh",
       "args": ["dev"],
       "options": {
         "cwd": "${workspaceFolder}/packages/web"

@@ -111,7 +111,7 @@ export const handler = ApiHandler(async (event, _context) => {
     return {
       statusCode: 302,
       headers: {
-        Location: `${assertVarExists("BASE_FE_URL")}`,
+        Location: `${assertVarExists("BASE_FE_URL")}/app`,
       },
     };
   }
