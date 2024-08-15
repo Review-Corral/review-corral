@@ -8,7 +8,7 @@ import { HOSTED_ZONE } from "./constructs/Api";
 export const getFrontendUrl = ({ local, stage }: App) => {
   if (local) return "http://localhost:3000";
 
-  if (stage === "prod") return HOSTED_ZONE;
+  if (stage === "prod") return `www.${HOSTED_ZONE}`;
 
   return `${stage}.${HOSTED_ZONE}`;
 };
