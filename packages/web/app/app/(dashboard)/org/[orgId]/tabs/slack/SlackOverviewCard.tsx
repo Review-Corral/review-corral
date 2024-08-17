@@ -4,6 +4,7 @@ import { FC } from "react";
 import { OrgViewProps } from "../shared";
 import { SetupSlackCard } from "./SetupSlackCard";
 import { useSlackIntegrations } from "./useSlackIntegrations";
+import { SlackIntegration } from "./SlackIntegration";
 
 interface SlackOverviewCardProps extends OrgViewProps {}
 
@@ -55,14 +56,14 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
     <div>
       <div className="space-y-2">
         {slackChannels.data.map((channel) => (
-          <div
-            className="border border-gray-200 rounded-md p-4 truncate"
-            id="slack-channel"
+          <SlackIntegration
             key={`${channel.slackTeamId}-${channel.channelId}`}
-          >
-            <span className="text-gray-400 mr-2">{channel.slackTeamName}</span>
-            {channel.channelName}
-          </div>
+            organizationId={organization.orgId}
+            slackTeamName={channel.slackTeamName}
+            slackTeamId={channel.slackTeamId}
+            channelId={channel.channelId}
+            channelName={channel.channelName}
+          />
         ))}
       </div>
     </div>
