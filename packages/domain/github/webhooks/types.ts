@@ -11,7 +11,7 @@ export type handledEventNames = keyof Pick<
 
 export interface GithubWebhookEventHanderArgs<EventT> {
   event: EventT;
-  slackClient: SlackClient;
+  slackClients: SlackClient[];
   organizationId: number;
   installationId: number;
 }

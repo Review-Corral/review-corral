@@ -87,13 +87,11 @@ export const handleGithubWebhookEvent = async ({
       return;
     }
 
-    // TODO: if we want to support multiple slack channels per organization, we'll
-    // need to change this.
-    const slackIntegration = await getSlackInstallationsForOrganization(
+    const slackIntegrations = await getSlackInstallationsForOrganization(
       repository.orgId,
-    ).then(takeFirst);
+    );
 
-    if (!slackIntegration) {
+    if (!slackIntegrations) {
       LOGGER.info(
         "Recieved event for active repository in organization with no enabled slack app",
         {
@@ -104,9 +102,8 @@ export const handleGithubWebhookEvent = async ({
       return;
     }
 
-    const slackClient = new SlackClient(
-      slackIntegration.channelId,
-      slackIntegration.accessToken,
+    const slackClients = slackIntegrations.map(
+      (integration) => new SlackClient(integration.channelId, integration.accessToken),
     );
 
     LOGGER.debug("Loaded handler props, now running event handler", {
@@ -115,7 +112,7 @@ export const handleGithubWebhookEvent = async ({
 
     await eventHandlers[eventName as handledEventNames].handler({
       event,
-      slackClient,
+      slackClients,
       installationId: organization.installationId,
       organizationId: organization.orgId,
     });

@@ -19,16 +19,33 @@ export type PullRequestEventOpenedOrReadyForReview =
   | PullRequestOpenedEvent
   | PullRequestReadyForReviewEvent;
 
+interface IntegrationProps {
+  channelId: string;
+  accessToken: string;
+}
+
 const LOGGER = new Logger("core.SlackClient");
 
 export class SlackClient {
-  readonly client: WebClient;
+  readonly clients: WebClient[];
 
-  constructor(
-    readonly channelId: string,
-    readonly slackToken: string,
-  ) {
-    this.client = new WebClient(this.slackToken);
+  constructor(integrations: IntegrationProps[]) {
+    this.clients = integrations.map(
+      (integration) => new WebClient(integration.accessToken),
+    );
+  }
+
+  private async safeIvokeClient<T>(fn: (client: WebClient) => Promise<T>): Promise<T> {
+    if (this.clients.length === 0) {
+      throw new Error("No Slack clients found");
+    }
+
+    for (const client of this.clients) {
+      const result = await fn(client);
+      if (result) {
+        return result;
+      }
+    }
   }
 
   async postMessage({
