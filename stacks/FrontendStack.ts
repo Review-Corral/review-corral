@@ -8,7 +8,7 @@ import { HOSTED_ZONE } from "./constructs/Api";
 export const getFrontendUrl = ({ local, stage }: App) => {
   if (local) return "http://localhost:3000";
 
-  if (stage === "prod") return `www.${HOSTED_ZONE}`;
+  if (stage === "prod") return `${HOSTED_ZONE}`;
 
   return `${stage}.${HOSTED_ZONE}`;
 };
@@ -22,12 +22,15 @@ export function FrontendStack({ stack, app }: StackContext) {
   use(StorageStack);
   const { authUrl } = use(AuthStack);
 
+  const frontendUrl = getFrontendUrl(app);
+
   const site = new NextjsSite(stack, "NextJsSite", {
     path: "packages/web",
     customDomain: app.local
       ? undefined
       : {
-          domainName: getFrontendUrl(app),
+          domainName: frontendUrl,
+          domainAlias: `www.${frontendUrl}`,
           hostedZone: HOSTED_ZONE,
         },
     // Pass in our environment variables
