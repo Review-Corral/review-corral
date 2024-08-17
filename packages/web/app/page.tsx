@@ -1,14 +1,15 @@
 import Link from "next/link";
-
+import Image from "next/image";
 export default function Home() {
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
       <header className="px-4 lg:px-6 h-14 flex items-center">
         <Link href="/">
           <div className="flex-shrink-0 hover:cursor-pointer">
-            <img
-              className="h-12 w-12"
-              src="https://avatars.githubusercontent.com/in/203068?s=120&u=4f27b80d54a1405e10756a1dc0175d1ef3866422&v=4"
+            <Image
+              height={48}
+              width={48}
+              src="/review_corral_logo.png"
               alt="Review Corral logo"
             />
           </div>
@@ -50,8 +51,9 @@ export default function Home() {
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
               <div className="flex flex-col justify-center space-y-4">
                 <div className="space-y-2">
-                  <h1 className="text-3xl font-bold tracking-tighter sm:text-5xl xl:text-6xl/none">
-                    Streamline Your Review Process with Review Corral
+                  <h1 className="text-3xl font-semibold tracking-tighter sm:text-5xl xl:text-6xl/none">
+                    Streamline Your Review Process with <br />{" "}
+                    <span className="font-extrabold">Review Corral</span>
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
                     Our Slack bot automatically posts updates on your GitHub pull
