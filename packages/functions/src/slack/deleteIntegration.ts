@@ -7,10 +7,13 @@ import * as z from "zod";
 
 const LOGGER = new Logger("slack:deleteIntegration");
 
-const schema = z.object({
-  orgId: z.string().transform(Number),
+const bodySchema = z.object({
   slackTeamId: z.string(),
   channelId: z.string(),
+});
+
+const pathSchema = z.object({
+  organizationId: z.string().transform(Number),
 });
 
 export const handler = ApiHandler(async (event, _context) => {
@@ -21,7 +24,15 @@ export const handler = ApiHandler(async (event, _context) => {
     user,
   });
 
-  const { orgId, slackTeamId, channelId } = schema.parse(event.pathParameters);
+  if (!event.body) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ message: "Missing body" }),
+    };
+  }
+
+  const { organizationId: orgId } = pathSchema.parse(event.pathParameters);
+  const { slackTeamId, channelId } = bodySchema.parse(JSON.parse(event.body));
 
   if (!user) {
     LOGGER.error("No user found in session", { error });

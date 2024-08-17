@@ -254,6 +254,9 @@ importers:
       '@heroicons/react':
         specifier: ^2.1.5
         version: 2.1.5(react@18.3.1)
+      '@radix-ui/react-dialog':
+        specifier: ^1.1.1
+        version: 1.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-select':
         specifier: ^2.1.1
         version: 2.1.1(@types/react-dom@18.3.0)(@types/react@18.3.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -6627,7 +6630,7 @@ snapshots:
   '@aws-sdk/endpoint-cache@3.572.0':
     dependencies:
       mnemonist: 0.38.3
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@aws-sdk/lib-dynamodb@3.395.0(@aws-sdk/client-dynamodb@3.616.0(aws-crt@1.21.3))':
     dependencies:
@@ -6803,7 +6806,7 @@ snapshots:
   '@aws-sdk/types@3.577.0':
     dependencies:
       '@smithy/types': 3.0.0
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@aws-sdk/types@3.609.0':
     dependencies:
@@ -6827,7 +6830,7 @@ snapshots:
 
   '@aws-sdk/util-locate-window@3.568.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@aws-sdk/util-user-agent-browser@3.609.0':
     dependencies:
@@ -6847,7 +6850,7 @@ snapshots:
 
   '@aws-sdk/util-utf8-browser@3.259.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@aws-sdk/xml-builder@3.609.0':
     dependencies:
@@ -8411,7 +8414,7 @@ snapshots:
 
   '@smithy/is-array-buffer@3.0.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@smithy/md5-js@3.0.3':
     dependencies:
@@ -8583,7 +8586,7 @@ snapshots:
 
   '@smithy/types@3.0.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@smithy/types@3.3.0':
     dependencies:
@@ -8627,7 +8630,7 @@ snapshots:
   '@smithy/util-buffer-from@3.0.0':
     dependencies:
       '@smithy/is-array-buffer': 3.0.0
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@smithy/util-config-provider@1.1.0':
     dependencies:
@@ -8635,7 +8638,7 @@ snapshots:
 
   '@smithy/util-config-provider@3.0.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@smithy/util-defaults-mode-browser@3.0.11':
     dependencies:
@@ -8671,7 +8674,7 @@ snapshots:
 
   '@smithy/util-hex-encoding@3.0.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@smithy/util-middleware@1.1.0':
     dependencies:
@@ -8730,7 +8733,7 @@ snapshots:
 
   '@smithy/util-uri-escape@3.0.0':
     dependencies:
-      tslib: 2.6.2
+      tslib: 2.6.3
 
   '@smithy/util-utf8@1.1.0':
     dependencies:
