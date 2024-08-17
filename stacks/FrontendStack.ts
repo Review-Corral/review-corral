@@ -19,7 +19,7 @@ export function FrontendStack({ stack, app }: StackContext) {
     api: { api },
   } = use(MainStack);
   // Just here to try and fix typing
-  use(StorageStack);
+  const { table } = use(StorageStack);
   const { authUrl } = use(AuthStack);
 
   const frontendUrl = getFrontendUrl(app);
@@ -33,6 +33,7 @@ export function FrontendStack({ stack, app }: StackContext) {
           domainAlias: `www.${frontendUrl}`,
           hostedZone: HOSTED_ZONE,
         },
+    bind: [table],
     // Pass in our environment variables
     environment: {
       NEXT_PUBLIC_API_URL: api.customDomainUrl ?? api.url,
