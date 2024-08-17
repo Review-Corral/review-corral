@@ -26,6 +26,8 @@ export class Api extends Construct {
   ) {
     super(stack, id);
 
+    const basePath = "packages/functions/src";
+
     this.api = new SstApi(stack, "api", {
       customDomain: {
         domainName: Api.getDomain(app),
@@ -35,41 +37,37 @@ export class Api extends Construct {
         function: functionDefaults,
       },
       routes: {
-        "GET /": "packages/functions/src/lambda.handler",
-        "GET /profile": "packages/functions/src/getProfile.handler",
+        "GET /": `${basePath}/lambda.handler`,
+        "GET /profile": `${basePath}/getProfile.handler`,
         ...buildPaths("/gh", {
           // Handles incoming webhooks from Github
-          "POST /webhook-event": "packages/functions/src/github/events.handler",
+          "POST /webhook-event": `${basePath}/github/events.handler`,
           ...buildPaths("/installations", {
-            "GET /": "packages/functions/src/github/installations.getInstallations",
+            "GET /": `${basePath}/github/installations.getInstallations`,
           }),
           ...buildPaths("/{organizationId}/repositories", {
-            "GET /": "packages/functions/src/github/repositories/getAll.handler",
-            "PUT /{repositoryId}":
-              "packages/functions/src/github/repositories/setStatus.handler",
+            "GET /": `${basePath}/github/repositories/getAll.handler`,
+            "PUT /{repositoryId}": `${basePath}/github/repositories/setStatus.handler`,
           }),
         }),
         ...buildPaths("/stripe", {
-          "POST /checkout-session":
-            "packages/functions/src/stripe/checkoutSession.handler",
-          "POST /webhook-event": "packages/functions/src/stripe/webhookEvent.handler",
-          "POST /billing-portal":
-            "packages/functions/src/stripe/billingPortalSession.handler",
+          "POST /checkout-session": `${basePath}/stripe/checkoutSession.handler`,
+          "POST /webhook-event": `${basePath}/stripe/webhookEvent.handler`,
+          "POST /billing-portal": `${basePath}/stripe/billingPortalSession.handler`,
         }),
         ...buildPaths("/org/{organizationId}", {
-          "GET /": "packages/functions/src/organization/getOrganization.handler",
-          "GET /billing":
-            "packages/functions/src/organization/getBillingDetails.handler",
-          "GET /members": "packages/functions/src/organization/getMembers.handler",
-          "PUT /member": "packages/functions/src/organization/updateMember.handler",
+          "GET /": `${basePath}/organization/getOrganization.handler`,
+          "GET /billing": `${basePath}/organization/getBillingDetails.handler`,
+          "GET /members": `${basePath}/organization/getMembers.handler`,
+          "PUT /member": `${basePath}/organization/updateMember.handler`,
         }),
         ...buildPaths("/slack", {
-          "GET /oauth": "packages/functions/src/slack/oauth.handler",
+          "GET /oauth": `${basePath}/slack/oauth.handler`,
           ...buildPaths("/{organizationId}", {
-            "GET /users": "packages/functions/src/slack/getUsers.handler",
+            "GET /users": `${basePath}/slack/getUsers.handler`,
             ...buildPaths("/installations", {
-              "GET /": "packages/functions/src/slack/getSlackInstallation.handler",
-              "DELETE /": "packages/functions/src/slack/deleteIntegration.handler",
+              "GET /": `${basePath}/slack/installations.getSlackInstallations`,
+              "DELETE /": `${basePath}/slack/deleteIntegration.handler`,
             }),
           }),
         }),
