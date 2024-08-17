@@ -1,8 +1,6 @@
-import { Loading } from "@components/ui/cards/loading";
 import { FC } from "react";
-import SlackButton from "./SetupSlackButton";
-import { useSlackIntegrations } from "./useSlackIntegrations";
 import { DeleteIcon } from "lucide-react";
+import { useDeleteSlackIntegration } from "./useDeleteSlackIntegration";
 
 interface SlackIntegration {
   organizationId: number;
@@ -19,6 +17,12 @@ export const SlackIntegration: FC<SlackIntegration> = ({
   channelId,
   channelName,
 }) => {
+  const deleteSlackIntegration = useDeleteSlackIntegration({
+    orgId: organizationId,
+    slackTeamId,
+    channelId,
+  });
+
   return (
     <div
       className="border border-gray-200 rounded-md p-4 truncate"

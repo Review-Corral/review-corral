@@ -63,13 +63,16 @@ export class Api extends Construct {
           "GET /members": "packages/functions/src/organization/getMembers.handler",
           "PUT /member": "packages/functions/src/organization/updateMember.handler",
         }),
-
         ...buildPaths("/slack", {
           "GET /oauth": "packages/functions/src/slack/oauth.handler",
-          "GET /{organizationId}/installations":
-            "packages/functions/src/slack/installations.getSlackInstallations",
-          "GET /{organizationId}/users":
-            "packages/functions/src/slack/getUsers.handler",
+          ...buildPaths("/{organizationId}", {
+            "GET /users": "packages/functions/src/slack/getUsers.handler",
+            ...buildPaths("/instalations/", {
+              "GET /": "packages/functions/src/slack/getSlackInstallation.handler",
+              "DELETE /{installationId}":
+                "packages/functions/src/slack/deleteIntegration.handler",
+            }),
+          }),
         }),
       },
     });
