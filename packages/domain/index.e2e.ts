@@ -5,13 +5,11 @@ import { GithubWebhookBody, handleGithubWebhookEvent } from "./github/webhooks";
 import { safeFetchRepository } from "./dynamodb/fetchers/repositories";
 import {
   Organization,
-  PullRequest,
   Repository,
   SlackIntegration,
 } from "@core/dynamodb/entities/types";
 import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
 import { getSlackInstallationsForOrganization } from "./dynamodb/fetchers/slack";
-import { PullRequestEventOpenedOrReadyForReview } from "./slack/SlackClient";
 import { PullRequestOpenedEvent } from "@octokit/webhooks-types";
 import { getSlackUserName } from "./github/webhooks/handlers/shared";
 
@@ -117,7 +115,7 @@ describe("end-to-end tests", () => {
     });
 
     await handleGithubWebhookEvent({
-      event: prOpenedMessage,
+      event: prOpenedMessage as any,
       eventName: "pull_request",
     });
   });
