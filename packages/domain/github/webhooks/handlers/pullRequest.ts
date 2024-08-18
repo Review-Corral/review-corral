@@ -24,7 +24,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
   const payload = event;
 
   LOGGER.debug("Hanlding PR event with action: ", event.action);
-  if (event.action === "opened" || payload.action === "ready_for_review") {
+  if (event.action === "opened" || event.action === "ready_for_review") {
     return await handleNewPr(
       // TODO: can we avoid this dangerous cast?
       payload as PullRequestEventOpenedOrReadyForReview,
