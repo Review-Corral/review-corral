@@ -32,7 +32,7 @@ export const githubWebhookBodySchema = z
   })
   .passthrough();
 
-export type githubWebhookBody = z.infer<typeof githubWebhookBodySchema>;
+export type GithubWebhookBody = z.infer<typeof githubWebhookBodySchema>;
 
 const eventHandlers: Record<
   handledEventNames,
@@ -50,7 +50,7 @@ export const handleGithubWebhookEvent = async ({
   event,
   eventName,
 }: {
-  event: githubWebhookBody;
+  event: GithubWebhookBody;
   eventName: string;
 }) => {
   LOGGER.debug("Handling event body", { event, eventName });
