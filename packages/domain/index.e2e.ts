@@ -1,4 +1,4 @@
-require("dotenv").config({ path: "../../.env.e2e" });
+require("dotenv").config({ path: ".env.e2e" });
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
 import { GithubWebhookBody } from "./github/webhooks";
