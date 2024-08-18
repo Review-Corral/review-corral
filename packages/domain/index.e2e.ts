@@ -1,15 +1,19 @@
 require("dotenv").config({ path: ".env.e2e" });
 import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
-import { GithubWebhookBody } from "./github/webhooks";
+import { GithubWebhookBody, handleGithubWebhookEvent } from "./github/webhooks";
 import { safeFetchRepository } from "./dynamodb/fetchers/repositories";
 import {
   Organization,
+  PullRequest,
   Repository,
   SlackIntegration,
 } from "@core/dynamodb/entities/types";
 import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
 import { getSlackInstallationsForOrganization } from "./dynamodb/fetchers/slack";
+import { PullRequestEventOpenedOrReadyForReview } from "./slack/SlackClient";
+import { PullRequestOpenedEvent } from "@octokit/webhooks-types";
+import { getSlackUserName } from "./github/webhooks/handlers/shared";
 
 const mockedOrg = mock<Organization>({
   orgId: 123,
@@ -38,6 +42,20 @@ const mockedSlackIntegration = mock<SlackIntegration>({
 
 describe("end-to-end tests", () => {
   beforeEach(() => {
+    vi.mock("@domain/github/webhooks/handlers/shared", () => {
+      return {
+        getSlackUserName: vi.fn(),
+        getThreadTs: vi.fn(),
+      };
+    });
+
+    vi.mocked(getSlackUserName).mockResolvedValue("<@U07GB8TBX53>");
+
+    vi.mock("@domain/dynamodb/client", () => {
+      return {
+        Db: vi.fn(),
+      };
+    });
     vi.mock("@domain/dynamodb/fetchers/repositories", () => {
       return {
         safeFetchRepository: vi.fn(),
@@ -67,9 +85,40 @@ describe("end-to-end tests", () => {
     ]);
   });
 
-  it("should post messages to slack", () => {
-    const prOpenedMessage = mock<GithubWebhookBody>({
+  it("should post messages to slack", async () => {
+    const prOpenedMessage = mock<PullRequestOpenedEvent>({
       action: "opened",
+      pull_request: mock<PullRequestOpenedEvent["pull_request"]>({
+        id: 123,
+        draft: false,
+        number: 1,
+        title: "Test PR",
+        body: "Test PR body",
+        html_url: "https://github.com/test/test/pull/1",
+        additions: 432,
+        deletions: 123,
+        user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
+          login: "jim",
+          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
+        }),
+        base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+          ref: "abc123",
+        }),
+      }),
+      repository: mock<PullRequestOpenedEvent["repository"]>({
+        id: mockRepo.repoId,
+        full_name: "Dunder Mifflin",
+        owner: {
+          id: mockedOrg.orgId,
+          avatar_url:
+            "https://logos-world.net/wp-content/uploads/2022/02/Dunder-Mifflin-Logo.png",
+        },
+      }),
+    });
+
+    await handleGithubWebhookEvent({
+      event: prOpenedMessage,
+      eventName: "pull_request",
     });
   });
 });
