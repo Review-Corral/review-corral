@@ -9,7 +9,10 @@ import {
   ChatPostMessageArguments,
   ChatPostMessageResponse,
   ChatUpdateArguments,
+  ContextBlock,
+  ImageElement,
   MessageAttachment,
+  SectionBlock,
   WebClient,
 } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
@@ -336,7 +339,7 @@ export class SlackClient {
   private async getPrOpenedBaseAttachment(
     body: PullRequestEvent,
     slackUsername: string,
-  ) {
+  ): Promise<MessageAttachment> {
     return {
       blocks: [
         {
@@ -371,7 +374,7 @@ export class SlackClient {
                   type: "mrkdwn",
                   text: slackifyMarkdown(body.pull_request.body),
                 },
-              },
+              } as SectionBlock,
             ]
           : []),
         {
@@ -397,9 +400,13 @@ export class SlackClient {
             },
             {
               type: "image",
-              image_url: "https://www.reviewcorral.com/plus-minus-diff-icon-alt.png",
+              // For whatever reason, Slack won't use the image at
+              // https://reviewcorral.com/plus-minus-diff-icon-alt.png
+              // it seems likely it's due to the domain not being whitelisted by Slack.
+              // Using this as a fallback for now.
+              image_url: "https://cdn-icons-png.flaticon.com/512/9296/9296948.png",
               alt_text: "plus-minus-icon",
-            },
+            } as ImageElement,
             {
               type: "mrkdwn",
               text: `+${body.pull_request.additions}-${body.pull_request.deletions}`,
@@ -409,7 +416,7 @@ export class SlackClient {
               text: `:dart: ${body.pull_request.base.ref}`,
             },
           ],
-        },
+        } as ContextBlock,
       ],
     };
   }
