@@ -1,6 +1,9 @@
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
-import { getInstallationAccessToken, getPullRequestInfo } from "../../fetchers";
+import {
+  getInstallationAccessToken,
+  getPullRequestInfo,
+} from "@domain/github/fetchers";
 import { GithubWebhookEventHander } from "../types";
 import { getSlackUserName, getThreadTs } from "./shared";
 
