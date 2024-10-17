@@ -291,4 +291,29 @@ describe("end-to-end tests", () => {
       eventName: "pull_request",
     });
   });
+
+  it("should post pull request closed", async () => {
+    const prOpenedMessage = mock<PullRequestClosedEvent>({
+      action: "closed",
+      pull_request: mock<PullRequestClosedEvent["pull_request"]>({
+        ...basePrData,
+        additions: 432,
+        deletions: 123,
+        user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
+          login: "jim",
+          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
+        }),
+        base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+          ref: "main",
+        }),
+        merged: false,
+      }),
+      repository: repositoryMock,
+    });
+
+    await handleGithubWebhookEvent({
+      event: prOpenedMessage as any,
+      eventName: "pull_request",
+    });
+  });
 });
