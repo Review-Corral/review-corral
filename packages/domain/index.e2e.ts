@@ -10,7 +10,14 @@ import {
 } from "@core/dynamodb/entities/types";
 import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
 import { getSlackInstallationsForOrganization } from "./dynamodb/fetchers/slack";
-import { IssueCommentEvent, PullRequestOpenedEvent } from "@octokit/webhooks-types";
+import {
+  IssueCommentEvent,
+  PullRequestClosedEvent,
+  PullRequestOpenedEvent,
+  PullRequestReviewCommentCreatedEvent,
+  PullRequestReviewCommentEvent,
+  PullRequestReviewSubmittedEvent,
+} from "@octokit/webhooks-types";
 import { getSlackUserName, getThreadTs } from "./github/webhooks/handlers/shared";
 import { getInstallationAccessToken, getPullRequestInfo } from "./github/fetchers";
 import {
@@ -123,13 +130,17 @@ describe("end-to-end tests", () => {
     },
   });
 
-  const pullRequestMock = mock<PullRequestOpenedEvent["pull_request"]>({
+  const basePrData = {
     id: 123,
     draft: false,
     number: 1,
     title: "Test PR",
     body: "Test PR body",
     html_url: "https://github.com/test/test/pull/1",
+  };
+
+  const pullRequestMock = mock<PullRequestOpenedEvent["pull_request"]>({
+    ...basePrData,
     additions: 432,
     deletions: 123,
     user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
@@ -166,13 +177,7 @@ describe("end-to-end tests", () => {
         }),
       }),
       issue: mock<IssueCommentEvent["issue"]>({
-        pull_request: pullRequestMock,
-        id: 123,
-        draft: false,
-        number: 1,
-        title: "Test PR",
-        body: "Test PR body",
-        html_url: "https://github.com/test/test/pull/1",
+        ...basePrData,
         user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
           login: "jim",
           avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
@@ -184,6 +189,106 @@ describe("end-to-end tests", () => {
     await handleGithubWebhookEvent({
       event: prOpenedMessage as any,
       eventName: "issue_comment",
+    });
+  });
+
+  it("should post a review comment", async () => {
+    const prOpenedMessage = mock<PullRequestReviewCommentCreatedEvent>({
+      action: "created",
+      comment: mock<PullRequestReviewCommentCreatedEvent["comment"]>({
+        html_url: "https://github.com/test/test/pull/1",
+        id: 123,
+        body: "This looks interesting!",
+        user: mock<PullRequestReviewCommentCreatedEvent["comment"]["user"]>({
+          type: "User",
+          login: "jim",
+          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
+        }),
+      }),
+      pull_request: mock<PullRequestReviewCommentCreatedEvent["pull_request"]>({
+        id: 123,
+      }),
+      repository: repositoryMock,
+    });
+
+    await handleGithubWebhookEvent({
+      event: prOpenedMessage as any,
+      eventName: "pull_request_review_comment",
+    });
+  });
+
+  it("should post requested changes", async () => {
+    const prOpenedMessage = mock<PullRequestReviewSubmittedEvent>({
+      action: "submitted",
+      review: mock<PullRequestReviewSubmittedEvent["review"]>({
+        id: 123,
+        body: "Looks good overall, but a couple of things need to be changed",
+        user: mock<PullRequestReviewSubmittedEvent["review"]["user"]>({
+          type: "User",
+          login: "jim",
+          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
+        }),
+        state: "changes_requested",
+      }),
+      pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
+        id: 123,
+      }),
+      repository: repositoryMock,
+    });
+
+    await handleGithubWebhookEvent({
+      event: prOpenedMessage as any,
+      eventName: "pull_request_review",
+    });
+  });
+
+  it("should post pull request approved", async () => {
+    const prOpenedMessage = mock<PullRequestReviewSubmittedEvent>({
+      action: "submitted",
+      review: mock<PullRequestReviewSubmittedEvent["review"]>({
+        id: 123,
+        body: "Looks good to me!",
+        user: mock<PullRequestReviewSubmittedEvent["review"]["user"]>({
+          type: "User",
+          login: "jim",
+          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
+        }),
+        state: "approved",
+      }),
+      pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
+        id: 123,
+      }),
+      repository: repositoryMock,
+    });
+
+    await handleGithubWebhookEvent({
+      event: prOpenedMessage as any,
+      eventName: "pull_request_review",
+    });
+  });
+
+  it("should post pull request merged", async () => {
+    const prOpenedMessage = mock<PullRequestClosedEvent>({
+      action: "closed",
+      pull_request: mock<PullRequestClosedEvent["pull_request"]>({
+        ...basePrData,
+        additions: 432,
+        deletions: 123,
+        user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
+          login: "jim",
+          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
+        }),
+        base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+          ref: "main",
+        }),
+        merged: true,
+      }),
+      repository: repositoryMock,
+    });
+
+    await handleGithubWebhookEvent({
+      event: prOpenedMessage as any,
+      eventName: "pull_request",
     });
   });
 });

@@ -90,6 +90,8 @@ export class SlackClient {
         ],
       };
 
+      console.debug("Payload: ", payload);
+
       try {
         await this.client.chat.update(payload);
         console.debug("Succesfully updated message with merged status");
@@ -183,7 +185,7 @@ export class SlackClient {
       await this.client.chat.update(defaultPayload);
       console.debug("Succesfully updated message with ready for review status");
     } catch (error) {
-      console.error("Got error updating thread with merged status: ", error);
+      console.error("Got error updating thread with ready for review status: ", error);
     }
   }
 
