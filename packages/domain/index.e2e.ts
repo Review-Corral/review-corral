@@ -11,6 +11,7 @@ import {
 import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
 import { getSlackInstallationsForOrganization } from "./dynamodb/fetchers/slack";
 import {
+  IssueCommentCreatedEvent,
   IssueCommentEvent,
   PullRequestClosedEvent,
   PullRequestOpenedEvent,
@@ -24,6 +25,7 @@ import {
   InstallationAccessTokenResponse,
   PullRequestInfoResponse,
 } from "./github/endpointTypes";
+import { BaseGithubWebhookEventHanderArgs } from "./github/webhooks/types";
 
 // To get this, run the test bellow to open a new PR and then look in the logs for the
 // posted TS
@@ -61,7 +63,22 @@ vi.mock("@domain/github/webhooks/handlers/shared", () => {
   };
 });
 
-vi.mocked(getSlackUserName).mockResolvedValue("<@U07GB8TBX53>");
+async function getSlackUserNameMocked(
+  githubLogin: string,
+  _props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">,
+): Promise<string> {
+  if (githubLogin === "jim") {
+    return "<@U07GB8TBX53>";
+  } else if (githubLogin === "dwight") {
+    return "<@U07J1FWJUQ0>";
+  } else {
+    console.error(`getSlackUserNameMocked not implemented for ${githubLogin}`);
+  }
+
+  return githubLogin;
+}
+
+vi.mocked(getSlackUserName).mockImplementation(getSlackUserNameMocked);
 vi.mocked(getThreadTs).mockResolvedValue(THREAD_TS);
 
 vi.mock("@domain/dynamodb/client", () => {
@@ -119,7 +136,6 @@ vi.mocked(getSlackInstallationsForOrganization).mockResolvedValue([
  */
 describe("end-to-end tests", () => {
   beforeEach(() => {});
-
   const repositoryMock = mock<PullRequestOpenedEvent["repository"]>({
     id: mockRepo.repoId,
     full_name: "Dunder Mifflin",
@@ -129,6 +145,18 @@ describe("end-to-end tests", () => {
         "https://logos-world.net/wp-content/uploads/2022/02/Dunder-Mifflin-Logo.png",
     },
   });
+
+  const users = {
+    jim: mock<IssueCommentEvent["comment"]["user"]>({
+      login: "jim",
+      avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
+    }),
+    dwight: mock<IssueCommentEvent["comment"]["user"]>({
+      login: "dwight",
+      avatar_url:
+        "https://www.myany.city/sites/default/files/styles/scaled_cropped_medium__260x260/public/field/image/node-related-images/sample-dwight-k-schrute.jpg",
+    }),
+  } as const;
 
   const basePrData = {
     id: 123,
@@ -143,10 +171,7 @@ describe("end-to-end tests", () => {
     ...basePrData,
     additions: 432,
     deletions: 123,
-    user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
-      login: "jim",
-      avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-    }),
+    user: users.jim,
     base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
       ref: "main",
     }),
@@ -166,21 +191,16 @@ describe("end-to-end tests", () => {
   });
 
   it("should post a message when the PR has been replied to", async () => {
-    const prOpenedMessage = mock<IssueCommentEvent>({
+    const prOpenedMessage = mock<IssueCommentCreatedEvent>({
       action: "created",
-      comment: mock<IssueCommentEvent["comment"]>({
+      sender: users.dwight,
+      comment: mock<IssueCommentCreatedEvent["comment"]>({
         id: 123,
-        body: "Test PR body",
-        user: mock<IssueCommentEvent["comment"]["user"]>({
-          login: "jim",
-          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-        }),
+        body: "Hey, this is a reply!",
       }),
-      issue: mock<IssueCommentEvent["issue"]>({
-        ...basePrData,
-        user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
-          login: "jim",
-          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
+      issue: mock<IssueCommentCreatedEvent["issue"]>({
+        pull_request: mock<IssueCommentCreatedEvent["issue"]["pull_request"]>({
+          ...basePrData,
         }),
       }),
       repository: repositoryMock,
@@ -199,11 +219,7 @@ describe("end-to-end tests", () => {
         html_url: "https://github.com/test/test/pull/1",
         id: 123,
         body: "This looks interesting!",
-        user: mock<PullRequestReviewCommentCreatedEvent["comment"]["user"]>({
-          type: "User",
-          login: "jim",
-          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-        }),
+        user: users.jim,
       }),
       pull_request: mock<PullRequestReviewCommentCreatedEvent["pull_request"]>({
         id: 123,
