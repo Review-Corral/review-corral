@@ -480,7 +480,7 @@ export class SlackClient {
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `Pull request closed by ${slackUsername}`,
+            text: `:red_circle: Pull request closed by ${slackUsername}`,
           },
         },
       ],
