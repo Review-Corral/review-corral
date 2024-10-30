@@ -189,6 +189,33 @@ export class SlackClient {
     }
   }
 
+  async postUpdatedPullRequest({
+    body,
+    threadTs,
+    slackUsername,
+  }: {
+    body: PullRequestEvent;
+    threadTs: string;
+    slackUsername: string;
+  }) {
+    console.debug(
+      `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
+    );
+
+    const defaultPayload = await this.getBaseChatUpdateArguments({
+      body,
+      threadTs,
+      slackUsername,
+    });
+
+    try {
+      await this.client.chat.update(defaultPayload);
+      console.debug("Succesfully updated message with ready for review status");
+    } catch (error) {
+      console.error("Got error updating thread with ready for review status: ", error);
+    }
+  }
+
   getBaseChatUpdateArguments = async ({
     body,
     threadTs,

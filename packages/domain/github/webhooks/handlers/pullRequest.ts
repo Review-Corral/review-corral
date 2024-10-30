@@ -1,6 +1,7 @@
 import { PullRequest } from "@core/dynamodb/entities/types";
 import {
   PullRequestConvertedToDraftEvent,
+  PullRequestEditedEvent,
   PullRequestEvent,
 } from "@octokit/webhooks-types";
 import ky from "ky";
@@ -90,6 +91,8 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           });
         }
         return;
+      case "edited":
+        return await handleEdited(threadTs, payload, props);
       default:
         LOGGER.debug("Got unhandled pull_request event", {
           action: payload.action,
@@ -109,6 +112,31 @@ const handleConvertedToDraft = async (
     threadTs,
     await getSlackUserName(event.sender.login, props),
   );
+};
+
+const handleEdited = async (
+  threadTs: string,
+  event: PullRequestEditedEvent,
+  props: BaseGithubWebhookEventHanderArgs,
+) => {
+  LOGGER.info("Handling edited PR event", {
+    changes: event.changes,
+    prId: event.pull_request.id,
+  });
+
+  if (!event.changes.base || !event.changes.title || !event.changes.body) {
+    LOGGER.info("No changes to base, title, or body, skipping update", {
+      changes: event.changes,
+      prId: event.pull_request.id,
+    });
+    return;
+  }
+
+  await props.slackClient.postUpdatedPullRequest({
+    body: event,
+    threadTs,
+    slackUsername: await getSlackUserName(event.sender.login, props),
+  });
 };
 
 const handleNewPr = async (
