@@ -124,7 +124,7 @@ const handleEdited = async (
     prId: event.pull_request.id,
   });
 
-  if (!event.changes.base || !event.changes.title || !event.changes.body) {
+  if (!event.changes.base && !event.changes.title && !event.changes.body) {
     LOGGER.info("No changes to base, title, or body, skipping update", {
       changes: event.changes,
       prId: event.pull_request.id,
