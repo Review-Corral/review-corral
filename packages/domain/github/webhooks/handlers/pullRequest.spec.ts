@@ -24,12 +24,14 @@ describe("handlePullRequestEvent", () => {
   beforeEach(() => {
     mockSlackClient = {
       postMessage: vi.fn(),
+      postUpdatedPullRequest: vi.fn(),
     } as unknown as SlackClient;
 
     mockEvent = {
       action: "review_request_removed",
       pull_request: {
         id: 123,
+        title: "I'm a PR title",
       },
       repository: {
         id: 456,
@@ -64,5 +66,63 @@ describe("handlePullRequestEvent", () => {
       },
       threadTs: "thread-ts-123",
     });
+  });
+
+  it("should call slackClient.postUpdatedPullRequest when edited", async () => {
+    const newMockEvent = {
+      ...mockEvent,
+      action: "edited",
+      changes: {
+        title: {
+          from: "old-title",
+        },
+      },
+      sender: {
+        login: "testuser",
+      },
+    };
+    await handlePullRequestEvent({
+      event: newMockEvent,
+      slackClient: mockSlackClient,
+      organizationId: 789,
+      installationId: 101112,
+    });
+
+    expect(getThreadTs).toHaveBeenCalledWith({
+      prId: 123,
+      repoId: 456,
+    });
+
+    expect(mockSlackClient.postUpdatedPullRequest).toHaveBeenCalledWith({
+      body: newMockEvent,
+      threadTs: "thread-ts-123",
+      slackUsername: "@testuser",
+    });
+  });
+
+  it("should not call slackClient.postUpdatedPullRequest when no changes", async () => {
+    const newMockEvent = {
+      ...mockEvent,
+      action: "edited",
+      changes: {
+        title: undefined,
+      },
+      sender: {
+        login: "testuser",
+      },
+    };
+    await handlePullRequestEvent({
+      event: newMockEvent,
+      slackClient: mockSlackClient,
+      organizationId: 789,
+      installationId: 101112,
+    });
+
+    expect(getThreadTs).toHaveBeenCalledWith({
+      prId: 123,
+      repoId: 456,
+    });
+
+    expect(mockSlackClient.postUpdatedPullRequest).not.toHaveBeenCalled();
   });
 });
