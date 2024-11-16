@@ -17,12 +17,37 @@ import {
 } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
 import { Logger } from "../logging";
+import { PullRequestItem } from "@core/dynamodb/entities/types";
 
 export type PullRequestEventOpenedOrReadyForReview =
   | PullRequestOpenedEvent
   | PullRequestReadyForReviewEvent;
 
 const LOGGER = new Logger("core.SlackClient");
+
+export type BasePullRequestProperties = {
+  pull_request: {
+    title: string;
+    number: number;
+    html_url: string;
+    body: string | null;
+    user: {
+      avatar_url: string;
+      login: string;
+    };
+    additions: number;
+    deletions: number;
+    base: {
+      ref: string;
+    };
+  };
+  repository: {
+    full_name: string;
+    owner: {
+      avatar_url: string;
+    };
+  };
+};
 
 export class SlackClient {
   readonly client: WebClient;
@@ -83,20 +108,20 @@ export class SlackClient {
         channel: this.channelId,
         ts: threadTs,
         token: this.slackToken,
-        text: await this.getPrOpenedMessage(body, slackUsername),
+        text: await this.getPrOpenedMessage(slackUsername),
         attachments: [
           await this.getPrOpenedBaseAttachment(body, slackUsername),
           this.getMergedAttachment(),
         ],
       };
 
-      console.debug("Payload: ", payload);
+      LOGGER.debug("Payload: ", payload);
 
       try {
         await this.client.chat.update(payload);
-        console.debug("Succesfully updated message with merged status");
+        LOGGER.debug("Succesfully updated message with merged status");
       } catch (error) {
-        console.error("Got error updating thread with merged status: ", error);
+        LOGGER.error("Got error updating thread with merged status: ", error);
       }
     }
   }
@@ -105,6 +130,7 @@ export class SlackClient {
     body: PullRequestEvent,
     threadTs: string,
     slackUsername: string,
+    pullRequestItem: PullRequestItem,
   ) {
     await this.postMessage({
       message: {
@@ -114,7 +140,7 @@ export class SlackClient {
       threadTs,
     });
 
-    console.debug(
+    LOGGER.debug(
       `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
     );
 
@@ -122,6 +148,7 @@ export class SlackClient {
       body,
       threadTs,
       slackUsername,
+      pullRequestItem,
     });
 
     try {
@@ -132,12 +159,9 @@ export class SlackClient {
           this.getConvertedToDraftAttachment("Pull request marked as draft"),
         ],
       });
-      console.debug("Succesfully updated message with converted to draft status");
+      LOGGER.debug("Succesfully updated message with converted to draft status");
     } catch (error) {
-      console.error(
-        "Got error updating thread with converted to draft status: ",
-        error,
-      );
+      LOGGER.error("Got error updating thread with converted to draft status: ", error);
     }
   }
 
@@ -145,10 +169,12 @@ export class SlackClient {
     body,
     threadTs,
     slackUsername,
+    pullRequestItem,
   }: {
     body: PullRequestEvent;
     threadTs: string;
     slackUsername: string;
+    pullRequestItem: PullRequestItem | null;
   }) {
     await this.postMessage({
       message: {
@@ -171,7 +197,7 @@ export class SlackClient {
       threadTs,
     });
 
-    console.debug(
+    LOGGER.debug(
       `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
     );
 
@@ -179,26 +205,29 @@ export class SlackClient {
       body,
       threadTs,
       slackUsername,
+      pullRequestItem,
     });
 
     try {
       await this.client.chat.update(defaultPayload);
-      console.debug("Succesfully updated message with ready for review status");
+      LOGGER.debug("Succesfully updated message with ready for review status");
     } catch (error) {
-      console.error("Got error updating thread with ready for review status: ", error);
+      LOGGER.error("Got error updating thread with ready for review status: ", error);
     }
   }
 
-  async postUpdatedPullRequest({
+  async updateMainPrMessage({
     body,
     threadTs,
     slackUsername,
+    pullRequestItem,
   }: {
-    body: PullRequestEvent;
+    body: BasePullRequestProperties;
     threadTs: string;
     slackUsername: string;
+    pullRequestItem: PullRequestItem;
   }) {
-    console.debug(
+    LOGGER.info(
       `Going to update message ts: ${threadTs} for channel ${this.channelId}`,
     );
 
@@ -206,13 +235,14 @@ export class SlackClient {
       body,
       threadTs,
       slackUsername,
+      pullRequestItem,
     });
 
     try {
       await this.client.chat.update(defaultPayload);
-      console.debug("Succesfully updated message with ready for review status");
+      LOGGER.info("Succesfully updated message");
     } catch (error) {
-      console.error("Got error updating thread with ready for review status: ", error);
+      LOGGER.error("Got error updating message", { error });
     }
   }
 
@@ -220,16 +250,28 @@ export class SlackClient {
     body,
     threadTs,
     slackUsername,
+    pullRequestItem,
   }: {
-    body: PullRequestEvent;
+    body: BasePullRequestProperties;
     threadTs: string;
     slackUsername: string;
+    pullRequestItem: PullRequestItem | null;
   }): Promise<ChatUpdateArguments> => ({
     channel: this.channelId,
     ts: threadTs,
     token: this.slackToken,
-    text: await this.getPrOpenedMessage(body, slackUsername),
-    attachments: [await this.getPrOpenedBaseAttachment(body, slackUsername)],
+    text: await this.getPrOpenedMessage(slackUsername),
+    attachments: [
+      this.getPrOpenedBaseAttachment(body, slackUsername),
+      ...(pullRequestItem?.requiredApprovals && pullRequestItem.approvalCount
+        ? [
+            this.getRequiredApprovalsAttatchment({
+              requiredApprovals: pullRequestItem.requiredApprovals,
+              approvalCount: pullRequestItem.approvalCount,
+            }),
+          ]
+        : []),
+    ],
   });
 
   async postComment({
@@ -263,6 +305,7 @@ export class SlackClient {
     body: PullRequestClosedEvent,
     threadTs: string,
     slackUsername: string,
+    pullRequestItem: PullRequestItem,
   ) {
     await this.postMessage({
       message: {
@@ -275,6 +318,7 @@ export class SlackClient {
       body,
       threadTs,
       slackUsername,
+      pullRequestItem,
     });
 
     try {
@@ -358,17 +402,50 @@ export class SlackClient {
     });
   }
 
-  private async getPrOpenedMessage(
-    _body: PullRequestEvent,
-    slackUsername: string,
-  ): Promise<string> {
+  private async getPrOpenedMessage(slackUsername: string): Promise<string> {
     return `Pull request opened by ${slackUsername}`;
   }
 
-  private async getPrOpenedBaseAttachment(
-    body: PullRequestEvent,
+  private getRequiredApprovalsAttatchment({
+    requiredApprovals,
+    approvalCount,
+  }: {
+    requiredApprovals: number;
+    approvalCount: number;
+  }): MessageAttachment {
+    if (approvalCount >= requiredApprovals) {
+      return {
+        color: "#03BB00",
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: `:bust_in_silhouette: ${approvalCount}/${requiredApprovals} approvals required`,
+            },
+          },
+        ],
+      };
+    }
+
+    return {
+      color: "#D9CD27",
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `:bust_in_silhouette: ${approvalCount}/${requiredApprovals} approvals required`,
+          },
+        },
+      ],
+    };
+  }
+
+  private getPrOpenedBaseAttachment(
+    body: BasePullRequestProperties,
     slackUsername: string,
-  ): Promise<MessageAttachment> {
+  ): MessageAttachment {
     return {
       blocks: [
         {
@@ -457,7 +534,7 @@ export class SlackClient {
     try {
       return this.postMessage({
         message: {
-          text: await this.getPrOpenedMessage(body, slackUsername),
+          text: await this.getPrOpenedMessage(slackUsername),
           attachments: [await this.getPrOpenedBaseAttachment(body, slackUsername)],
         },
         threadTs: undefined,

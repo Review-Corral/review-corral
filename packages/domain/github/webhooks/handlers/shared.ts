@@ -1,5 +1,5 @@
 import { getOrgMember } from "../../../dynamodb/fetchers/members";
-import { fetchPullRequestById } from "../../../dynamodb/fetchers/pullRequests";
+import { forceFetchPullRequestById } from "../../../dynamodb/fetchers/pullRequests";
 import { BaseGithubWebhookEventHanderArgs } from "../types";
 
 export async function getSlackUserName(
@@ -25,7 +25,7 @@ export async function getThreadTs({
   prId: number;
   repoId: number;
 }): Promise<string | undefined> {
-  const pullRequest = await fetchPullRequestById({
+  const pullRequest = await forceFetchPullRequestById({
     pullRequestId: prId,
     repoId,
   });

@@ -1,5 +1,5 @@
 import {
-  PullRequest,
+  PullRequestItem,
   PullRequestInsertArgs,
   PullRequestUpdateArgs,
 } from "@core/dynamodb/entities/types";
@@ -11,7 +11,25 @@ export const fetchPullRequestById = async ({
 }: {
   pullRequestId: number;
   repoId: number;
-}): Promise<PullRequest> => {
+}): Promise<PullRequestItem | null> => {
+  return await Db.entities.pullRequest
+    .get({ prId: pullRequestId, repoId })
+    .go()
+    .then(({ data }) => {
+      if (!data) {
+        return null;
+      }
+      return data;
+    });
+};
+
+export const forceFetchPullRequestById = async ({
+  pullRequestId,
+  repoId,
+}: {
+  pullRequestId: number;
+  repoId: number;
+}): Promise<PullRequestItem> => {
   return await Db.entities.pullRequest
     .get({ prId: pullRequestId, repoId })
     .go()
@@ -27,7 +45,7 @@ export const fetchPullRequestById = async ({
 
 export const insertPullRequest = async (
   args: PullRequestInsertArgs,
-): Promise<PullRequest> =>
+): Promise<PullRequestItem> =>
   await Db.entities.pullRequest
     .create(args)
     .go()

@@ -23,6 +23,16 @@ export const PullRequestEntity = new Entity({
       default: false,
       required: true,
     },
+    requiredApprovals: {
+      type: "number",
+      default: 0,
+      required: false,
+    },
+    approvalCount: {
+      type: "number",
+      default: 0,
+      required: false,
+    },
     createdAt: {
       type: "string",
       readOnly: true,

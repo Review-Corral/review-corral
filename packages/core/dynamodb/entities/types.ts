@@ -11,7 +11,7 @@ import { UserEntity } from "./user";
 export type Organization = EntityItem<typeof OrganizationEntity>;
 export type User = EntityItem<typeof UserEntity>;
 export type Member = EntityItem<typeof MemberEntity>;
-export type PullRequest = EntityItem<typeof PullRequestEntity>;
+export type PullRequestItem = EntityItem<typeof PullRequestEntity>;
 export type Repository = EntityItem<typeof RepositoryEntity>;
 export type SlackIntegration = EntityItem<typeof SlackEntity>;
 export type SlackUser = EntityItem<typeof SlackUserEntity>;

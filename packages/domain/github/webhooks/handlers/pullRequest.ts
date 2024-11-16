@@ -1,4 +1,4 @@
-import { PullRequest } from "@core/dynamodb/entities/types";
+import { PullRequestItem } from "@core/dynamodb/entities/types";
 import {
   PullRequestConvertedToDraftEvent,
   PullRequestEditedEvent,
@@ -7,6 +7,7 @@ import {
 import ky from "ky";
 import {
   fetchPullRequestById,
+  forceFetchPullRequestById,
   insertPullRequest,
   updatePullRequest,
 } from "../../../dynamodb/fetchers/pullRequests";
@@ -15,29 +16,29 @@ import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClie
 import { PullRequestReviewCommentsResponse } from "../../endpointTypes";
 import { getInstallationAccessToken } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
-import { getSlackUserName, getThreadTs } from "./shared";
+import { getSlackUserName } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
 export const handlePullRequestEvent: GithubWebhookEventHander<
   PullRequestEvent
-> = async ({ event, ...props }) => {
-  const payload = event;
+> = async ({ event: payload, ...props }) => {
+  LOGGER.debug("Hanlding PR event with action: ", payload.action);
 
-  LOGGER.debug("Hanlding PR event with action: ", event.action);
-  if (event.action === "opened" || event.action === "ready_for_review") {
+  const pullRequestItem = await fetchPullRequestById({
+    pullRequestId: payload.pull_request.id,
+    repoId: payload.repository.id,
+  });
+
+  if (payload.action === "opened" || payload.action === "ready_for_review") {
     return await handleNewPr(
       // TODO: can we avoid this dangerous cast?
       payload as PullRequestEventOpenedOrReadyForReview,
       props,
+      pullRequestItem,
     );
   } else {
-    const threadTs = await getThreadTs({
-      prId: payload.pull_request.id,
-      repoId: payload.repository.id,
-    });
-
-    if (!threadTs) {
+    if (!pullRequestItem?.threadTs) {
       // No thread found, so log and return
       LOGGER.debug(`Got non-created event and didn't find a threadTS`, {
         action: payload.action,
@@ -48,20 +49,26 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
 
     switch (payload.action) {
       case "converted_to_draft":
-        return await handleConvertedToDraft(threadTs, payload, props);
+        return await handleConvertedToDraft(
+          pullRequestItem.threadTs,
+          payload,
+          props,
+          pullRequestItem,
+        );
       case "closed":
         if (payload.pull_request.merged) {
           await props.slackClient.postPrMerged(
             payload,
-            threadTs,
+            pullRequestItem.threadTs,
             await getSlackUserName(payload.sender.login, props),
           );
           return;
         } else {
           await props.slackClient.postPrClosed(
             payload,
-            threadTs,
+            pullRequestItem.threadTs,
             await getSlackUserName(payload.sender.login, props),
+            pullRequestItem,
           );
           return;
         }
@@ -74,7 +81,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
                 props,
               )}`,
             },
-            threadTs: threadTs,
+            threadTs: pullRequestItem.threadTs,
           });
         }
         return;
@@ -87,12 +94,17 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
                 props,
               )} removed`,
             },
-            threadTs: threadTs,
+            threadTs: pullRequestItem.threadTs,
           });
         }
         return;
       case "edited":
-        return await handleEdited(threadTs, payload, props);
+        return await handleEdited(
+          pullRequestItem.threadTs,
+          payload,
+          props,
+          pullRequestItem,
+        );
       default:
         LOGGER.debug("Got unhandled pull_request event", {
           action: payload.action,
@@ -106,11 +118,13 @@ const handleConvertedToDraft = async (
   threadTs: string,
   event: PullRequestConvertedToDraftEvent,
   props: BaseGithubWebhookEventHanderArgs,
+  pullRequestItem: PullRequestItem,
 ) => {
   await props.slackClient.postConvertedToDraft(
     event,
     threadTs,
     await getSlackUserName(event.sender.login, props),
+    pullRequestItem,
   );
 };
 
@@ -118,6 +132,7 @@ const handleEdited = async (
   threadTs: string,
   event: PullRequestEditedEvent,
   props: BaseGithubWebhookEventHanderArgs,
+  pullRequestItem: PullRequestItem,
 ) => {
   LOGGER.info("Handling edited PR event", {
     changes: event.changes,
@@ -132,16 +147,18 @@ const handleEdited = async (
     return;
   }
 
-  await props.slackClient.postUpdatedPullRequest({
+  await props.slackClient.updateMainPrMessage({
     body: event,
     threadTs,
     slackUsername: await getSlackUserName(event.pull_request.user.login, props),
+    pullRequestItem,
   });
 };
 
 const handleNewPr = async (
   payload: PullRequestEventOpenedOrReadyForReview,
   props: BaseGithubWebhookEventHanderArgs,
+  pullRequestItem: PullRequestItem | null,
 ) => {
   LOGGER.debug("Handling new PR");
   // If the PR is opened or ready for review but in draft, save the PR in the database
@@ -173,6 +190,7 @@ const handleNewPr = async (
           body: payload,
           threadTs,
           slackUsername: await getSlackUserName(payload.pull_request.user.login, props),
+          pullRequestItem,
         });
       }
     } else {
@@ -238,7 +256,7 @@ const handleNewPr = async (
     } else {
       LOGGER.debug("PR was not opened, trying to find existing thread...");
       // This should trigger for 'ready_for_review' events
-      const existingPullRequest = await fetchPullRequestById({
+      const existingPullRequest = await forceFetchPullRequestById({
         pullRequestId: body.pull_request.id,
         repoId: body.repository.id,
       });
@@ -269,7 +287,7 @@ const handleNewPr = async (
     body,
     baseProps,
   }: {
-    existingPullRequest: PullRequest | undefined;
+    existingPullRequest: PullRequestItem | undefined;
     body: PullRequestEventOpenedOrReadyForReview;
     baseProps: BaseGithubWebhookEventHanderArgs;
   }): Promise<string> {
