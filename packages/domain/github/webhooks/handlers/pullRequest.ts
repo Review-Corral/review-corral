@@ -294,7 +294,7 @@ const handleNewPr = async (
     try {
       const response = await baseProps.slackClient.postPrReady(
         body,
-        await getSlackUserName(body.sender.login, baseProps),
+        await getSlackUserName(body.pull_request.user.login, baseProps),
       );
 
       if (response?.ts) {
