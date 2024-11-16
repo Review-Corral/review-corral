@@ -1,14 +1,15 @@
+import { BranchEntity } from "@core/dynamodb/entities/branch";
 import { Branch } from "@core/dynamodb/entities/types";
 import { Db } from "../client";
-import { BranchEntity } from "@core/dynamodb/entities/branch";
 
-export const getBranch = async (
-  args: Parameters<typeof BranchEntity.get>[0],
-): Promise<Branch | null> => {
+export const fetchBranch = async (args: {
+  repoId: number;
+  branchName: string;
+}): Promise<Branch | null> => {
   return await Db.entities.branch
     .get(args)
     .go()
-    .then(({ data }) => (data.length > 0 ? data[0] : null));
+    .then(({ data }) => data);
 };
 
 export const insertBranch = async (args: Parameters<typeof BranchEntity.create>[0]) => {
@@ -19,8 +20,7 @@ export const insertBranch = async (args: Parameters<typeof BranchEntity.create>[
 };
 
 export const updateBranch = async (args: {
-  branchName: number;
-  orgId: number;
+  branchName: string;
   repoId: number;
   requiredApprovals: number;
 }) => {
