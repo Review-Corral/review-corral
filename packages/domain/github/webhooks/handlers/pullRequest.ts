@@ -154,13 +154,16 @@ const handleEdited = async (
     return;
   }
 
-  await props.slackClient.updateMainPrMessage({
-    body: convertPrEventToBaseProps(event),
-    threadTs,
-    slackUsername: await getSlackUserName(event.pull_request.user.login, props),
-    pullRequestItem,
-    requiredApprovals: null,
-  });
+  await props.slackClient.updateMainMessage(
+    {
+      body: convertPrEventToBaseProps(event),
+      threadTs,
+      slackUsername: await getSlackUserName(event.pull_request.user.login, props),
+      pullRequestItem,
+      requiredApprovals: null,
+    },
+    "pr-edited",
+  );
 };
 
 const handleNewPr = async (

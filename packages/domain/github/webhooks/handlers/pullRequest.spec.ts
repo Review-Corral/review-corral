@@ -1,10 +1,11 @@
+import { PullRequestItem } from "@core/dynamodb/entities/types";
+import { fetchPrItem } from "@domain/dynamodb/fetchers/pullRequests";
 import { SlackClient } from "@domain/slack/SlackClient";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { mock } from "vitest-mock-extended";
 import { handlePullRequestEvent } from "./pullRequest";
 import { getSlackUserName } from "./shared";
-import { mock } from "vitest-mock-extended";
-import { fetchPrItem } from "@domain/dynamodb/fetchers/pullRequests";
-import { PullRequestItem } from "@core/dynamodb/entities/types";
+import { convertPrEventToBaseProps } from "./utils";
 
 vi.mock("sst/node/table", () => ({
   Table: {
@@ -31,7 +32,7 @@ describe("handlePullRequestEvent", () => {
   beforeEach(() => {
     mockSlackClient = {
       postMessage: vi.fn(),
-      updateMainPrMessage: vi.fn(),
+      updateMainMessage: vi.fn(),
     } as unknown as SlackClient;
 
     mockEvent = {
@@ -82,7 +83,7 @@ describe("handlePullRequestEvent", () => {
     });
   });
 
-  it("should call slackClient.updateMainPrMessage when edited", async () => {
+  it("should call slackClient.updateMainMessage when edited", async () => {
     const newMockEvent = {
       ...mockEvent,
       action: "edited",
@@ -107,12 +108,16 @@ describe("handlePullRequestEvent", () => {
       repoId: 456,
     });
 
-    expect(mockSlackClient.updateMainPrMessage).toHaveBeenCalledWith({
-      body: newMockEvent,
-      threadTs: "thread-ts-123",
-      slackUsername: "@testuser",
-      pullRequestItem: prItem,
-    });
+    expect(mockSlackClient.updateMainMessage).toHaveBeenCalledWith(
+      {
+        body: convertPrEventToBaseProps(newMockEvent),
+        threadTs: "thread-ts-123",
+        slackUsername: "@testuser",
+        pullRequestItem: prItem,
+        requiredApprovals: null,
+      },
+      "pr-edited",
+    );
   });
 
   it("should not call slackClient.postUpdatedPullRequest when no changes", async () => {
@@ -138,6 +143,6 @@ describe("handlePullRequestEvent", () => {
       repoId: 456,
     });
 
-    expect(mockSlackClient.updateMainPrMessage).not.toHaveBeenCalled();
+    expect(mockSlackClient.updateMainMessage).not.toHaveBeenCalled();
   });
 });
