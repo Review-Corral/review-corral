@@ -123,31 +123,6 @@ export class SlackClient {
     await this.updateMainMessage(args, "pr-converted-to-draft");
   }
 
-  async postReadyForReview(args: MainMessageArgs<BasePullRequestProperties>) {
-    await this.postMessage({
-      message: {
-        text: "Draft status removed",
-        attachments: [
-          {
-            color: "#02A101",
-            blocks: [
-              {
-                type: "section",
-                text: {
-                  type: "mrkdwn",
-                  text: ":large_green_circle: Pull request is now ready for review",
-                },
-              },
-            ],
-          },
-        ],
-      },
-      threadTs: args.threadTs,
-    });
-
-    await this.updateMainMessage(args, "pr-ready");
-  }
-
   async postComment({
     commentBody,
     commentUrl,
@@ -280,6 +255,9 @@ export class SlackClient {
     return `Pull request opened by ${slackUsername}`;
   }
 
+  /**
+   * Called when are first writing the main message for a PR to the channel
+   */
   async postPrReady({
     body,
     pullRequestItem,
@@ -307,5 +285,30 @@ export class SlackClient {
     } catch (error) {
       console.error("Got error posting to channel: ", error);
     }
+  }
+
+  async postReadyForReview(args: MainMessageArgs<BasePullRequestProperties>) {
+    await this.postMessage({
+      message: {
+        text: "Draft status removed",
+        attachments: [
+          {
+            color: "#02A101",
+            blocks: [
+              {
+                type: "section",
+                text: {
+                  type: "mrkdwn",
+                  text: ":large_green_circle: Pull request is now ready for review",
+                },
+              },
+            ],
+          },
+        ],
+      },
+      threadTs: args.threadTs,
+    });
+
+    await this.updateMainMessage(args, "pr-ready");
   }
 }

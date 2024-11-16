@@ -141,9 +141,7 @@ const buildRequiredApprovalsAttachment = ({
         approvalCount: pullRequestItem.approvalCount ?? 0,
       }),
     ];
-  }
-
-  if (!pullRequestItem && requiredApprovals) {
+  } else if (requiredApprovals) {
     return [
       getRequiredApprovalsAttatchment({
         requiredApprovals: requiredApprovals.count,

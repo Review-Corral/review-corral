@@ -201,6 +201,7 @@ const handleNewPr = async (
       } else {
         // This then means that it was posted before and we just need to post
         // that it's now ready for review
+
         await props.slackClient.postReadyForReview({
           body: convertPrEventToBaseProps(payload),
           threadTs,
@@ -265,12 +266,6 @@ const handleNewPr = async (
     if (body.action === "opened") {
       LOGGER.debug("PR was opened, creating new thread...");
 
-      const requiredApprovals = await tryGetPrRequiredApprovalsCount({
-        repository: body.repository,
-        pullRequest: body.pull_request,
-        baseProps,
-      });
-
       return {
         threadTs: await createNewThread({
           existingPullRequest: null,
@@ -285,6 +280,8 @@ const handleNewPr = async (
       LOGGER.debug("PR was not opened, trying to find existing thread...");
 
       // If we still couldn't find a thread, then post a new one.
+      // This will happen when a PR was started as a draft but this event is it being
+      // opened
       if (!pullRequestItem?.threadTs) {
         LOGGER.debug("Couldn't find existing thread, creating new thread...");
         return {
@@ -319,6 +316,10 @@ const handleNewPr = async (
         repository: body.repository,
         pullRequest: body.pull_request,
         baseProps,
+      });
+
+      LOGGER.debug("Got required approvals count", {
+        requiredApprovals,
       });
 
       const response = await baseProps.slackClient.postPrReady({
