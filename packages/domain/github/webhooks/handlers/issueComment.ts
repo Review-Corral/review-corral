@@ -1,11 +1,12 @@
-import { IssueCommentEvent } from "@octokit/webhooks-types";
-import { Logger } from "../../../logging";
+import { fetchPrItem } from "@domain/dynamodb/fetchers/pullRequests";
 import {
   getInstallationAccessToken,
   getPullRequestInfo,
 } from "@domain/github/fetchers";
+import { IssueCommentEvent } from "@octokit/webhooks-types";
+import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
-import { getSlackUserName, getThreadTs } from "./shared";
+import { getSlackUserName } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
@@ -38,12 +39,12 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
       accessToken: accessToken.token,
     });
 
-    const threadTs = await getThreadTs({
-      prId,
+    const pullRequestItem = await fetchPrItem({
+      pullRequestId: prId,
       repoId: event.repository.id,
     });
 
-    if (!threadTs) {
+    if (!pullRequestItem?.threadTs) {
       // write error log
       LOGGER.warn("Got a comment event but couldn't find the thread", {
         action: event.action,
@@ -57,7 +58,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
       prId,
       commentBody: event.comment.body,
       commentUrl: undefined,
-      threadTs: threadTs,
+      threadTs: pullRequestItem.threadTs,
       slackUsername: await getSlackUserName(event.sender.login, props),
     });
     return;
