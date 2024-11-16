@@ -1,5 +1,4 @@
 import { Entity } from "electrodb";
-import { OrgIdAttr } from "./organization";
 import { RepoIdAttr } from "./repository";
 
 export const BranchEntity = new Entity({
@@ -10,11 +9,10 @@ export const BranchEntity = new Entity({
   },
   attributes: {
     branchName: {
-      type: "number",
+      type: "string",
       required: true,
       readOnly: true,
     },
-    orgId: OrgIdAttr,
     repoId: RepoIdAttr,
     name: {
       type: "string",
@@ -43,11 +41,11 @@ export const BranchEntity = new Entity({
     primary: {
       pk: {
         field: "pk",
-        composite: ["orgId"],
+        composite: ["repoId"],
       },
       sk: {
         field: "sk",
-        composite: ["repoId", "branchName"],
+        composite: ["branchName"],
       },
     },
   },

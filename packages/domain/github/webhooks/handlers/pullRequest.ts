@@ -1,4 +1,5 @@
 import { PullRequestItem } from "@core/dynamodb/entities/types";
+import { fetchBranch, insertBranch } from "@domain/dynamodb/fetchers/branches";
 import {
   PullRequestConvertedToDraftEvent,
   PullRequestEditedEvent,
@@ -7,14 +8,16 @@ import {
 import ky from "ky";
 import {
   fetchPrItem,
-  forceFetchPrItem,
   insertPullRequest,
   updatePullRequest,
 } from "../../../dynamodb/fetchers/pullRequests";
 import { Logger } from "../../../logging";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
 import { PullRequestReviewCommentsResponse } from "../../endpointTypes";
-import { getInstallationAccessToken } from "../../fetchers";
+import {
+  getInstallationAccessToken,
+  getPrRequiredApprovalsCount,
+} from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
 import { getSlackUserName } from "./shared";
 
@@ -160,11 +163,12 @@ const handleNewPr = async (
   // but don't post it
   if (payload.pull_request.draft) {
     LOGGER.debug("Handling draft PR");
-    await insertPullRequest({
-      prId: payload.pull_request.id,
+    await insertPullRequestWrapper({
+      repository: payload.repository,
+      pullRequest: payload.pull_request,
       isDraft: true,
       threadTs: undefined,
-      repoId: payload.repository.id,
+      baseProps: props,
     });
   } else {
     const { threadTs, wasCreated } = await getThreadTsForNewPr(
@@ -313,11 +317,12 @@ const handleNewPr = async (
           });
         } else {
           LOGGER.debug("Creating new PR record");
-          await insertPullRequest({
-            prId: body.pull_request.id,
-            repoId: body.repository.id,
+          await insertPullRequestWrapper({
+            repository: body.repository,
+            pullRequest: body.pull_request,
             isDraft: body.pull_request.draft,
             threadTs: response.ts,
+            baseProps,
           });
         }
 
@@ -369,3 +374,54 @@ const handleNewPr = async (
     }
   }
 };
+
+/**
+ * Inserts a pull request while handling getting the required approvals count
+ */
+async function insertPullRequestWrapper(args: {
+  repository: {
+    id: number;
+    url: string;
+  };
+  pullRequest: {
+    id: number;
+    url: string;
+    base: {
+      ref: string;
+    };
+  };
+  isDraft: boolean;
+  threadTs: string | undefined;
+  baseProps: BaseGithubWebhookEventHanderArgs;
+}) {
+  const branch = await fetchBranch({
+    repoId: args.repository.id,
+    branchName: args.pullRequest.base.ref,
+  });
+
+  let requiredApprovals = branch?.requiredApprovals ?? null;
+
+  if (!branch) {
+    // Fetch from GH directly and then save
+    requiredApprovals = await getPrRequiredApprovalsCount({
+      repository: args.repository,
+      pullRequest: args.pullRequest,
+      accessToken: (await getInstallationAccessToken(args.baseProps.installationId))
+        .token,
+    });
+
+    await insertBranch({
+      repoId: args.repository.id,
+      branchName: args.pullRequest.base.ref,
+      name: args.pullRequest.base.ref,
+      requiredApprovals,
+    });
+  }
+  // First, get the branch protection rules
+  return await insertPullRequest({
+    repoId: args.repository.id,
+    prId: args.pullRequest.id,
+    requiredApprovals: requiredApprovals ?? undefined,
+    ...args,
+  });
+}
