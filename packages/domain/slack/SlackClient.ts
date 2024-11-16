@@ -148,11 +148,6 @@ export class SlackClient {
     await this.updateMainMessage(args, "pr-ready");
   }
 
-  // TODO: where this used?
-  async updateMainPrMessage(args: MainMessageArgs<BasePullRequestProperties>) {
-    await this.updateMainMessage(args, "update");
-  }
-
   async postComment({
     commentBody,
     commentUrl,

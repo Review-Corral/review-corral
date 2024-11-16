@@ -82,19 +82,22 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
           accessToken: accessToken.token,
         });
 
-        await slackClient.updateMainPrMessage({
-          body: convertPullRequestInfoToBaseProps(pullRequestInfo),
-          threadTs: pullRequestItem.threadTs,
-          slackUsername: await getSlackUserName(event.sender.login, args),
-          pullRequestItem: {
-            ...pullRequestItem,
-            // It's vital we pass this in so it updates the number of approvals
-            // on the main message
-            approvalCount: numberOfApprovals,
+        await slackClient.updateMainMessage(
+          {
+            body: convertPullRequestInfoToBaseProps(pullRequestInfo),
+            threadTs: pullRequestItem.threadTs,
+            slackUsername: await getSlackUserName(event.sender.login, args),
+            pullRequestItem: {
+              ...pullRequestItem,
+              // It's vital we pass this in so it updates the number of approvals
+              // on the main message
+              approvalCount: numberOfApprovals,
+            },
+            // Default to getting this from the PR item
+            requiredApprovals: null,
           },
-          // Default to getting this from the PR item
-          requiredApprovals: null,
-        });
+          "pr-approved",
+        );
       } catch (error) {
         LOGGER.error("Error updating main PR message with number of approvals", {
           error,
