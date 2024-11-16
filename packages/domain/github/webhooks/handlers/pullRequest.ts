@@ -5,7 +5,7 @@ import {
   PullRequestEditedEvent,
   PullRequestEvent,
 } from "@octokit/webhooks-types";
-import ky from "ky";
+import ky, { HTTPError } from "ky";
 import {
   fetchPrItem,
   insertPullRequest,
@@ -403,19 +403,16 @@ async function insertPullRequestWrapper(args: {
 
   if (!branch) {
     // Fetch from GH directly and then save
-    requiredApprovals = await getPrRequiredApprovalsCount({
-      repository: args.repository,
-      pullRequest: args.pullRequest,
-      accessToken: (await getInstallationAccessToken(args.baseProps.installationId))
-        .token,
-    });
+    requiredApprovals = await tryGetPrRequiredApprovalsCount(args);
 
-    await insertBranch({
-      repoId: args.repository.id,
-      branchName: args.pullRequest.base.ref,
-      name: args.pullRequest.base.ref,
-      requiredApprovals,
-    });
+    if (requiredApprovals !== null) {
+      await insertBranch({
+        repoId: args.repository.id,
+        branchName: args.pullRequest.base.ref,
+        name: args.pullRequest.base.ref,
+        requiredApprovals,
+      });
+    }
   }
   // First, get the branch protection rules
   return await insertPullRequest({
@@ -424,4 +421,41 @@ async function insertPullRequestWrapper(args: {
     requiredApprovals: requiredApprovals ?? undefined,
     ...args,
   });
+}
+
+/**
+ * Getting the required approvals requires a new permission which the installed GH app
+ * may not have accepted yet. Handle this case gracefully by returning null.
+ */
+async function tryGetPrRequiredApprovalsCount(
+  args: Parameters<typeof insertPullRequestWrapper>[0],
+): Promise<number | null> {
+  const accessToken = await getInstallationAccessToken(args.baseProps.installationId);
+
+  try {
+    return await getPrRequiredApprovalsCount({
+      repository: args.repository,
+      pullRequest: args.pullRequest,
+      accessToken: accessToken.token,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "HTTPError") {
+      if ((error as HTTPError).response.status === 403) {
+        LOGGER.warn(
+          "Got 403 when trying to get required approvals count. This probably means the new permissions haven't been accepted yet",
+          {
+            repoId: args.repository.id,
+            prId: args.pullRequest.id,
+          },
+        );
+        return null;
+      } else {
+        LOGGER.warn("Got HTTP error when trying to get required approvals count", {
+          repoId: args.repository.id,
+          prId: args.pullRequest.id,
+        });
+      }
+    }
+    throw error;
+  }
 }
