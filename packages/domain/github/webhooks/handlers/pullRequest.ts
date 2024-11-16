@@ -1,5 +1,6 @@
 import { PullRequestItem } from "@core/dynamodb/entities/types";
 import { fetchBranch, insertBranch } from "@domain/dynamodb/fetchers/branches";
+import { RequiredApprovalsQueryPayloadArg } from "@domain/slack/mainMessage";
 import {
   PullRequestConvertedToDraftEvent,
   PullRequestEditedEvent,
@@ -20,6 +21,7 @@ import {
 } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
 import { getSlackUserName } from "./shared";
+import { convertPrEventToBaseProps } from "./utils";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
@@ -55,19 +57,24 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
         );
       case "closed":
         if (payload.pull_request.merged) {
-          await props.slackClient.postPrMerged(
-            payload,
-            pullRequestItem.threadTs,
-            await getSlackUserName(payload.sender.login, props),
-          );
+          await props.slackClient.postPrMerged({
+            body: payload,
+            threadTs: pullRequestItem.threadTs,
+            slackUsername: await getSlackUserName(payload.sender.login, props),
+            pullRequestItem,
+            // Default to getting this from the PR item
+            requiredApprovals: null,
+          });
           return;
         } else {
-          await props.slackClient.postPrClosed(
-            payload,
-            pullRequestItem.threadTs,
-            await getSlackUserName(payload.sender.login, props),
+          await props.slackClient.postPrClosed({
+            body: payload,
+            threadTs: pullRequestItem.threadTs,
+            slackUsername: await getSlackUserName(payload.sender.login, props),
             pullRequestItem,
-          );
+            // Default to getting this from the PR item
+            requiredApprovals: null,
+          });
           return;
         }
       case "review_requested":
@@ -118,12 +125,14 @@ const handleConvertedToDraft = async (
   props: BaseGithubWebhookEventHanderArgs,
   pullRequestItem: PullRequestItem,
 ) => {
-  await props.slackClient.postConvertedToDraft(
-    event,
+  await props.slackClient.postConvertedToDraft({
+    body: event,
     threadTs,
-    await getSlackUserName(event.sender.login, props),
+    slackUsername: await getSlackUserName(event.sender.login, props),
     pullRequestItem,
-  );
+    // Default to getting this from the PR item
+    requiredApprovals: null,
+  });
 };
 
 const handleEdited = async (
@@ -146,10 +155,11 @@ const handleEdited = async (
   }
 
   await props.slackClient.updateMainPrMessage({
-    body: event,
+    body: convertPrEventToBaseProps(event),
     threadTs,
     slackUsername: await getSlackUserName(event.pull_request.user.login, props),
     pullRequestItem,
+    requiredApprovals: null,
   });
 };
 
@@ -163,12 +173,11 @@ const handleNewPr = async (
   // but don't post it
   if (payload.pull_request.draft) {
     LOGGER.debug("Handling draft PR");
-    await insertPullRequestWrapper({
-      repository: payload.repository,
-      pullRequest: payload.pull_request,
+    await insertPullRequest({
+      repoId: payload.repository.id,
+      prId: payload.pull_request.id,
       isDraft: true,
       threadTs: undefined,
-      baseProps: props,
     });
   } else {
     const { threadTs, wasCreated } = await getThreadTsForNewPr(
@@ -190,10 +199,13 @@ const handleNewPr = async (
         // This then means that it was posted before and we just need to post
         // that it's now ready for review
         await props.slackClient.postReadyForReview({
-          body: payload,
+          body: convertPrEventToBaseProps(payload),
           threadTs,
           slackUsername: await getSlackUserName(payload.pull_request.user.login, props),
           pullRequestItem,
+          // enforce using the one from the PR item since this should have already been
+          // set
+          requiredApprovals: null,
         });
       }
     } else {
@@ -249,6 +261,13 @@ const handleNewPr = async (
     // If the PR was opened
     if (body.action === "opened") {
       LOGGER.debug("PR was opened, creating new thread...");
+
+      const requiredApprovals = await tryGetPrRequiredApprovalsCount({
+        repository: body.repository,
+        pullRequest: body.pull_request,
+        baseProps,
+      });
+
       return {
         threadTs: await createNewThread({
           existingPullRequest: null,
@@ -293,10 +312,18 @@ const handleNewPr = async (
     baseProps: BaseGithubWebhookEventHanderArgs;
   }): Promise<string> {
     try {
-      const response = await baseProps.slackClient.postPrReady(
+      const requiredApprovals = await tryGetPrRequiredApprovalsCount({
+        repository: body.repository,
+        pullRequest: body.pull_request,
+        baseProps,
+      });
+
+      const response = await baseProps.slackClient.postPrReady({
         body,
-        await getSlackUserName(body.pull_request.user.login, baseProps),
-      );
+        pullRequestItem: existingPullRequest,
+        slackUsername: await getSlackUserName(body.pull_request.user.login, baseProps),
+        requiredApprovals,
+      });
 
       if (response?.ts) {
         LOGGER.debug("Succesfully created new threadTs. About to update database", {
@@ -313,16 +340,17 @@ const handleNewPr = async (
             pullRequestId: existingPullRequest.prId,
             repoId: body.repository.id,
             isDraft: body.pull_request.draft,
+            requiredApprovals:
+              requiredApprovals?.count ?? existingPullRequest.requiredApprovals,
             threadTs: response.ts,
           });
         } else {
           LOGGER.debug("Creating new PR record");
-          await insertPullRequestWrapper({
-            repository: body.repository,
-            pullRequest: body.pull_request,
-            isDraft: body.pull_request.draft,
+          await insertPullRequest({
+            repoId: body.repository.id,
+            prId: body.pull_request.id,
+            requiredApprovals: requiredApprovals?.count ?? undefined,
             threadTs: response.ts,
-            baseProps,
           });
         }
 
@@ -376,9 +404,9 @@ const handleNewPr = async (
 };
 
 /**
- * Inserts a pull request while handling getting the required approvals count
+ * Tries to get the required approvals count our cache, or from GH if not in cache
  */
-async function insertPullRequestWrapper(args: {
+async function tryGetPrRequiredApprovalsCount(args: {
   repository: {
     id: number;
     url: string;
@@ -390,20 +418,20 @@ async function insertPullRequestWrapper(args: {
       ref: string;
     };
   };
-  isDraft: boolean;
-  threadTs: string | undefined;
   baseProps: BaseGithubWebhookEventHanderArgs;
-}) {
+}): Promise<RequiredApprovalsQueryPayloadArg> {
   const branch = await fetchBranch({
     repoId: args.repository.id,
     branchName: args.pullRequest.base.ref,
   });
 
-  let requiredApprovals = branch?.requiredApprovals ?? null;
+  if (branch?.requiredApprovals) {
+    return { count: branch.requiredApprovals };
+  }
 
   if (!branch) {
     // Fetch from GH directly and then save
-    requiredApprovals = await tryGetPrRequiredApprovalsCount(args);
+    const requiredApprovals = await tryFetchPrRequiredApprovalsCountFromGh(args);
 
     if (requiredApprovals !== null) {
       await insertBranch({
@@ -412,23 +440,22 @@ async function insertPullRequestWrapper(args: {
         name: args.pullRequest.base.ref,
         requiredApprovals,
       });
+
+      return { count: requiredApprovals };
     }
+
+    return null;
   }
-  // First, get the branch protection rules
-  return await insertPullRequest({
-    repoId: args.repository.id,
-    prId: args.pullRequest.id,
-    requiredApprovals: requiredApprovals ?? undefined,
-    ...args,
-  });
+
+  return null;
 }
 
 /**
  * Getting the required approvals requires a new permission which the installed GH app
  * may not have accepted yet. Handle this case gracefully by returning null.
  */
-async function tryGetPrRequiredApprovalsCount(
-  args: Parameters<typeof insertPullRequestWrapper>[0],
+async function tryFetchPrRequiredApprovalsCountFromGh(
+  args: Parameters<typeof tryGetPrRequiredApprovalsCount>[0],
 ): Promise<number | null> {
   const accessToken = await getInstallationAccessToken(args.baseProps.installationId);
 

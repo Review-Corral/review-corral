@@ -1,7 +1,7 @@
-import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-types";
-import slackifyMarkdown from "slackify-markdown";
-import { GithubWebhookEventHander } from "../types";
-import { getSlackUserName } from "./shared";
+import {
+  forceFetchPrItem,
+  updatePullRequest,
+} from "@domain/dynamodb/fetchers/pullRequests";
 import {
   getInstallationAccessToken,
   getNumberOfApprovals,
@@ -9,11 +9,11 @@ import {
 } from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
 import {} from "@domain/slack/SlackClient";
+import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-types";
+import slackifyMarkdown from "slackify-markdown";
+import { GithubWebhookEventHander } from "../types";
+import { getSlackUserName } from "./shared";
 import { convertPullRequestInfoToBaseProps } from "./utils";
-import {
-  forceFetchPrItem,
-  updatePullRequest,
-} from "@domain/dynamodb/fetchers/pullRequests";
 
 const LOGGER = new Logger("github.handlers.pullRequestReview");
 
@@ -88,8 +88,12 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
           slackUsername: await getSlackUserName(event.sender.login, args),
           pullRequestItem: {
             ...pullRequestItem,
+            // It's vital we pass this in so it updates the number of approvals
+            // on the main message
             approvalCount: numberOfApprovals,
           },
+          // Default to getting this from the PR item
+          requiredApprovals: null,
         });
       } catch (error) {
         LOGGER.error("Error updating main PR message with number of approvals", {
