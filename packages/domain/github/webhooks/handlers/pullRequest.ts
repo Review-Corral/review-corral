@@ -6,8 +6,8 @@ import {
 } from "@octokit/webhooks-types";
 import ky from "ky";
 import {
-  fetchPullRequestById,
-  forceFetchPullRequestById,
+  fetchPrItem,
+  forceFetchPrItem,
   insertPullRequest,
   updatePullRequest,
 } from "../../../dynamodb/fetchers/pullRequests";
@@ -25,7 +25,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
 > = async ({ event: payload, ...props }) => {
   LOGGER.debug("Hanlding PR event with action: ", payload.action);
 
-  const pullRequestItem = await fetchPullRequestById({
+  const pullRequestItem = await fetchPrItem({
     pullRequestId: payload.pull_request.id,
     repoId: payload.repository.id,
   });
@@ -256,7 +256,7 @@ const handleNewPr = async (
     } else {
       LOGGER.debug("PR was not opened, trying to find existing thread...");
       // This should trigger for 'ready_for_review' events
-      const existingPullRequest = await forceFetchPullRequestById({
+      const existingPullRequest = await forceFetchPrItem({
         pullRequestId: body.pull_request.id,
         repoId: body.repository.id,
       });
