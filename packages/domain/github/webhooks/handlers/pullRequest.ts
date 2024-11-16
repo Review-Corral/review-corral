@@ -135,7 +135,7 @@ const handleEdited = async (
   await props.slackClient.postUpdatedPullRequest({
     body: event,
     threadTs,
-    slackUsername: await getSlackUserName(event.sender.login, props),
+    slackUsername: await getSlackUserName(event.pull_request.user.login, props),
   });
 };
 
@@ -192,6 +192,7 @@ const handleNewPr = async (
     const accessToken = await getInstallationAccessToken(baseProps.installationId);
 
     await postCommentsForNewPR(body, accessToken, threadTs, baseProps);
+
     // Get all requested Reviews and post
     if (body.pull_request.requested_reviewers) {
       body.pull_request.requested_reviewers.map(async (requested_reviewer) => {
