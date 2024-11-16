@@ -7,6 +7,7 @@ import { SlackEntity } from "./slack";
 import { SlackUserEntity } from "./slackUser";
 import { SubscriptionEntity } from "./subscription";
 import { UserEntity } from "./user";
+import { BranchEntity } from "./branch";
 
 export type Organization = EntityItem<typeof OrganizationEntity>;
 export type User = EntityItem<typeof UserEntity>;
@@ -16,6 +17,7 @@ export type Repository = EntityItem<typeof RepositoryEntity>;
 export type SlackIntegration = EntityItem<typeof SlackEntity>;
 export type SlackUser = EntityItem<typeof SlackUserEntity>;
 export type Subscription = EntityItem<typeof SubscriptionEntity>;
+export type Branch = EntityItem<typeof BranchEntity>;
 
 export type OrganizationInsertArgs = CreateEntityItem<typeof OrganizationEntity>;
 export type UserInsertArgs = CreateEntityItem<typeof UserEntity>;
