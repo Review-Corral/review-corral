@@ -4,14 +4,9 @@ import { GithubWebhookEventHander } from "../types";
 import { getSlackUserName } from "./shared";
 import {
   getInstallationAccessToken,
+  getNumberOfApprovals,
   getPullRequestInfo,
 } from "@domain/github/fetchers";
-import ky from "ky";
-import {
-  BranchProtectionResponse,
-  InstallationAccessTokenResponse,
-  PullRequestReviewsResponse,
-} from "@domain/github/endpointTypes";
 import { Logger } from "@domain/logging";
 import {} from "@domain/slack/SlackClient";
 import { convertPullRequestInfoToBaseProps } from "./utils";
@@ -38,7 +33,7 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
 
     if (!pullRequestItem?.threadTs) {
       // write error log
-      console.warn("Got a comment event but couldn't find the thread", {
+      LOGGER.warn("Got a comment event but couldn't find the thread", {
         action: event.action,
         prId: event.pull_request.id,
       });
@@ -69,33 +64,31 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
       try {
         const accessToken = await getInstallationAccessToken(args.installationId);
 
-        const { requiredApprovals, numberOfApprovals } = await getNumberOfApprovals(
-          event,
-          accessToken,
-        );
+        const numberOfApprovals = await getNumberOfApprovals({
+          pullRequest: event.pull_request,
+          accessToken: accessToken.token,
+        });
 
         await updatePullRequest({
           pullRequestId: event.pull_request.id,
           repoId: event.repository.id,
-          requiredApprovals,
           approvalCount: numberOfApprovals,
         });
 
+        // We have to fetch PR info because there's no enough in this payload to reconstruct
+        // the original message
         const pullRequestInfo = await getPullRequestInfo({
           url: event.pull_request.url,
           accessToken: accessToken.token,
         });
 
-        const converted = convertPullRequestInfoToBaseProps(pullRequestInfo);
-
         await slackClient.updateMainPrMessage({
-          body: converted,
+          body: convertPullRequestInfoToBaseProps(pullRequestInfo),
           threadTs: pullRequestItem.threadTs,
           slackUsername: await getSlackUserName(event.sender.login, args),
           pullRequestItem: {
             ...pullRequestItem,
             approvalCount: numberOfApprovals,
-            requiredApprovals,
           },
         });
       } catch (error) {
@@ -127,50 +120,6 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
     });
     return;
   }
-};
-
-const getNumberOfApprovals = async (
-  event: PullRequestReviewEvent,
-  accessToken: InstallationAccessTokenResponse,
-) => {
-  const response = await ky
-    .get(`${event.pull_request.url}/reviews`, {
-      headers: {
-        Authorization: `bearer ${accessToken.token}`,
-      },
-    })
-    .json<PullRequestReviewsResponse>();
-
-  LOGGER.debug("Got reviews for PR", {
-    reviews: response,
-  });
-
-  const branchProtectionResponse = await ky
-    .get(`${event.repository.url}/branches/${event.pull_request.base.ref}/protection`, {
-      headers: {
-        Authorization: `bearer ${accessToken.token}`,
-        Accept: "application/vnd.github.luke-cage-preview+json", // Required for branch protection API
-      },
-    })
-    .json<BranchProtectionResponse>();
-
-  LOGGER.debug("Got branch protection for PR", {
-    branchProtection: branchProtectionResponse,
-  });
-
-  const requiredApprovals =
-    branchProtectionResponse.required_pull_request_reviews
-      ?.required_approving_review_count ?? 0;
-
-  // Count approved reviews
-  const approvedReviews = response.filter(
-    (review: PullRequestReviewsResponse[number]) => review.state === "APPROVED",
-  ).length;
-
-  return {
-    requiredApprovals,
-    numberOfApprovals: approvedReviews,
-  };
 };
 
 const getReviewText = (review: PullRequestReview) => {
