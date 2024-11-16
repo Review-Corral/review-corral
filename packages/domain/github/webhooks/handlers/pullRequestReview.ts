@@ -16,7 +16,7 @@ import { Logger } from "@domain/logging";
 import {} from "@domain/slack/SlackClient";
 import { convertPullRequestInfoToBaseProps } from "./utils";
 import {
-  forceFetchPullRequestById,
+  forceFetchPrItem,
   updatePullRequest,
 } from "@domain/dynamodb/fetchers/pullRequests";
 
@@ -31,7 +31,7 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
       return;
     }
 
-    const pullRequestItem = await forceFetchPullRequestById({
+    const pullRequestItem = await forceFetchPrItem({
       pullRequestId: event.pull_request.id,
       repoId: event.repository.id,
     });

@@ -1,7 +1,10 @@
 import { SlackClient } from "@domain/slack/SlackClient";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handlePullRequestEvent } from "./pullRequest";
-import { getSlackUserName, getThreadTs } from "./shared";
+import { getSlackUserName } from "./shared";
+import { mock } from "vitest-mock-extended";
+import { fetchPrItem } from "@domain/dynamodb/fetchers/pullRequests";
+import { PullRequestItem } from "@core/dynamodb/entities/types";
 
 vi.mock("sst/node/table", () => ({
   Table: {
@@ -14,17 +17,21 @@ vi.mock("sst/node/table", () => ({
 // Mock dependencies
 vi.mock("./shared", () => ({
   getSlackUserName: vi.fn(),
-  getThreadTs: vi.fn(),
+}));
+
+vi.mock("../../../dynamodb/fetchers/pullRequests", () => ({
+  fetchPrItem: vi.fn(),
 }));
 
 describe("handlePullRequestEvent", () => {
   let mockSlackClient: SlackClient;
   let mockEvent: any;
+  let prItem: PullRequestItem;
 
   beforeEach(() => {
     mockSlackClient = {
       postMessage: vi.fn(),
-      postUpdatedPullRequest: vi.fn(),
+      updateMainPrMessage: vi.fn(),
     } as unknown as SlackClient;
 
     mockEvent = {
@@ -32,6 +39,9 @@ describe("handlePullRequestEvent", () => {
       pull_request: {
         id: 123,
         title: "I'm a PR title",
+        user: {
+          login: "testuser",
+        },
       },
       repository: {
         id: 456,
@@ -41,8 +51,12 @@ describe("handlePullRequestEvent", () => {
       },
     };
 
+    prItem = mock<PullRequestItem>({
+      threadTs: "thread-ts-123",
+    });
+
     vi.mocked(getSlackUserName).mockResolvedValue("@testuser");
-    vi.mocked(getThreadTs).mockResolvedValue("thread-ts-123");
+    vi.mocked(fetchPrItem).mockResolvedValue(prItem);
   });
 
   it("should call slackClient.postMessage when review_request_removed", async () => {
@@ -53,8 +67,8 @@ describe("handlePullRequestEvent", () => {
       installationId: 101112,
     });
 
-    expect(getThreadTs).toHaveBeenCalledWith({
-      prId: 123,
+    expect(fetchPrItem).toHaveBeenCalledWith({
+      pullRequestId: 123,
       repoId: 456,
     });
 
@@ -68,7 +82,7 @@ describe("handlePullRequestEvent", () => {
     });
   });
 
-  it("should call slackClient.postUpdatedPullRequest when edited", async () => {
+  it("should call slackClient.updateMainPrMessage when edited", async () => {
     const newMockEvent = {
       ...mockEvent,
       action: "edited",
@@ -88,8 +102,8 @@ describe("handlePullRequestEvent", () => {
       installationId: 101112,
     });
 
-    expect(getThreadTs).toHaveBeenCalledWith({
-      prId: 123,
+    expect(fetchPrItem).toHaveBeenCalledWith({
+      pullRequestId: 123,
       repoId: 456,
     });
 
@@ -97,6 +111,7 @@ describe("handlePullRequestEvent", () => {
       body: newMockEvent,
       threadTs: "thread-ts-123",
       slackUsername: "@testuser",
+      pullRequestItem: prItem,
     });
   });
 
@@ -118,8 +133,8 @@ describe("handlePullRequestEvent", () => {
       installationId: 101112,
     });
 
-    expect(getThreadTs).toHaveBeenCalledWith({
-      prId: 123,
+    expect(fetchPrItem).toHaveBeenCalledWith({
+      pullRequestId: 123,
       repoId: 456,
     });
 

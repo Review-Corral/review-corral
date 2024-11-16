@@ -5,7 +5,7 @@ import {
 } from "@core/dynamodb/entities/types";
 import { Db } from "../client";
 
-export const fetchPullRequestById = async ({
+export const fetchPrItem = async ({
   pullRequestId,
   repoId,
 }: {
@@ -23,7 +23,7 @@ export const fetchPullRequestById = async ({
     });
 };
 
-export const forceFetchPullRequestById = async ({
+export const forceFetchPrItem = async ({
   pullRequestId,
   repoId,
 }: {
