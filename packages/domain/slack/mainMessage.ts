@@ -170,7 +170,7 @@ const getRequiredApprovalsAttatchment = ({
           type: "section",
           text: {
             type: "mrkdwn",
-            text: `:bust_in_silhouette: ${approvalCount}/${requiredApprovals} approvals required`,
+            text: `:white_check_mark: ${approvalCount}/${requiredApprovals} approvals met`,
           },
         },
       ],
@@ -178,13 +178,13 @@ const getRequiredApprovalsAttatchment = ({
   }
 
   return {
-    color: "#D9CD27",
+    color: "#35373B",
     blocks: [
       {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `:bust_in_silhouette: ${approvalCount}/${requiredApprovals} approvals required`,
+          text: `:ballot_box_with_check: ${approvalCount}/${requiredApprovals} approvals met`,
         },
       },
     ],
