@@ -19,7 +19,7 @@ vi.mock("./shared", () => ({
   getSlackUserName: vi.fn(),
 }));
 
-vi.mock("../../../dynamodb/fetchers/pullRequests", () => ({
+vi.mock("@domain/dynamodb/fetchers/pullRequests", () => ({
   fetchPrItem: vi.fn(),
 }));
 

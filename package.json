@@ -19,7 +19,7 @@
     "check:ci": "biome check --error-on-warnings .",
     "format": "biome format --write .",
     "format:check": "biome format .",
-    "test": "vitest run .spec.ts",
+    "test": "vitest run --exclude 'e2e.ts'",
     "test:e2e": "vitest run .e2e.ts",
     "test:ci": "vitest run --silent .spec.ts",
     "test:watch": "sst bind vitest watch .spec.ts",

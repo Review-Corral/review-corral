@@ -1,10 +1,11 @@
 require("dotenv").config({ path: ".env.e2e" });
-import { beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
-import { GithubWebhookBody, handleGithubWebhookEvent } from "./github/webhooks";
+import { handleGithubWebhookEvent } from "./github/webhooks";
 import { safeFetchRepository } from "./dynamodb/fetchers/repositories";
 import {
   Organization,
+  PullRequestItem,
   Repository,
   SlackIntegration,
 } from "@core/dynamodb/entities/types";
@@ -16,20 +17,24 @@ import {
   PullRequestClosedEvent,
   PullRequestOpenedEvent,
   PullRequestReviewCommentCreatedEvent,
-  PullRequestReviewCommentEvent,
   PullRequestReviewSubmittedEvent,
 } from "@octokit/webhooks-types";
-import { getSlackUserName, getThreadTs } from "./github/webhooks/handlers/shared";
+import { getSlackUserName } from "./github/webhooks/handlers/shared";
 import { getInstallationAccessToken, getPullRequestInfo } from "./github/fetchers";
 import {
   InstallationAccessTokenResponse,
   PullRequestInfoResponse,
 } from "./github/endpointTypes";
 import { BaseGithubWebhookEventHanderArgs } from "./github/webhooks/types";
+import { fetchPrItem } from "./dynamodb/fetchers/pullRequests";
 
 // To get this, run the test bellow to open a new PR and then look in the logs for the
 // posted TS
 const THREAD_TS = "1729134112.776569";
+
+const prItem: PullRequestItem = mock<PullRequestItem>({
+  threadTs: THREAD_TS,
+});
 
 const mockedOrg = mock<Organization>({
   orgId: 123,
@@ -59,7 +64,12 @@ const mockedSlackIntegration = mock<SlackIntegration>({
 vi.mock("@domain/github/webhooks/handlers/shared", () => {
   return {
     getSlackUserName: vi.fn(),
-    getThreadTs: vi.fn(),
+  };
+});
+
+vi.mock("@domain/dynamodb/fetchers/pullRequests", () => {
+  return {
+    fetchPrItem: vi.fn(),
   };
 });
 
@@ -79,7 +89,7 @@ async function getSlackUserNameMocked(
 }
 
 vi.mocked(getSlackUserName).mockImplementation(getSlackUserNameMocked);
-vi.mocked(getThreadTs).mockResolvedValue(THREAD_TS);
+vi.mocked(fetchPrItem).mockResolvedValue(prItem);
 
 vi.mock("@domain/dynamodb/client", () => {
   return {
