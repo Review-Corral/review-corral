@@ -1,6 +1,7 @@
 export * as Dynamo from "./client";
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { BranchEntity } from "@core/dynamodb/entities/branch";
 import { MemberEntity } from "@core/dynamodb/entities/member";
 import { OrganizationEntity } from "@core/dynamodb/entities/organization";
 import { PullRequestEntity } from "@core/dynamodb/entities/pullRequest";
@@ -29,6 +30,7 @@ export const Db = new Service(
     user: UserEntity,
     slack: SlackEntity,
     slackUsers: SlackUserEntity,
+    branch: BranchEntity,
   },
   Configuration,
 );
