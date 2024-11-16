@@ -1,16 +1,10 @@
 require("dotenv").config({ path: ".env.e2e" });
-import { beforeEach, describe, it, vi } from "vitest";
-import { mock } from "vitest-mock-extended";
-import { handleGithubWebhookEvent } from "./github/webhooks";
-import { safeFetchRepository } from "./dynamodb/fetchers/repositories";
 import {
   Organization,
   PullRequestItem,
   Repository,
   SlackIntegration,
 } from "@core/dynamodb/entities/types";
-import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
-import { getSlackInstallationsForOrganization } from "./dynamodb/fetchers/slack";
 import {
   IssueCommentCreatedEvent,
   IssueCommentEvent,
@@ -19,14 +13,20 @@ import {
   PullRequestReviewCommentCreatedEvent,
   PullRequestReviewSubmittedEvent,
 } from "@octokit/webhooks-types";
-import { getSlackUserName } from "./github/webhooks/handlers/shared";
-import { getInstallationAccessToken, getPullRequestInfo } from "./github/fetchers";
+import { beforeEach, describe, it, vi } from "vitest";
+import { mock } from "vitest-mock-extended";
+import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
+import { fetchPrItem } from "./dynamodb/fetchers/pullRequests";
+import { safeFetchRepository } from "./dynamodb/fetchers/repositories";
+import { getSlackInstallationsForOrganization } from "./dynamodb/fetchers/slack";
 import {
   InstallationAccessTokenResponse,
   PullRequestInfoResponse,
 } from "./github/endpointTypes";
+import { getInstallationAccessToken, getPullRequestInfo } from "./github/fetchers";
+import { handleGithubWebhookEvent } from "./github/webhooks";
+import { getSlackUserName } from "./github/webhooks/handlers/shared";
 import { BaseGithubWebhookEventHanderArgs } from "./github/webhooks/types";
-import { fetchPrItem } from "./dynamodb/fetchers/pullRequests";
 
 // To get this, run the test bellow to open a new PR and then look in the logs for the
 // posted TS
@@ -70,6 +70,7 @@ vi.mock("@domain/github/webhooks/handlers/shared", () => {
 vi.mock("@domain/dynamodb/fetchers/pullRequests", () => {
   return {
     fetchPrItem: vi.fn(),
+    insertPullRequest: vi.fn(),
   };
 });
 
@@ -175,6 +176,7 @@ describe("end-to-end tests", () => {
     title: "Test PR",
     body: "Test PR body",
     html_url: "https://github.com/test/test/pull/1",
+    requested_reviewers: [],
   };
 
   const pullRequestMock = mock<PullRequestOpenedEvent["pull_request"]>({

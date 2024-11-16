@@ -535,7 +535,7 @@ export class SlackClient {
       return this.postMessage({
         message: {
           text: await this.getPrOpenedMessage(slackUsername),
-          attachments: [await this.getPrOpenedBaseAttachment(body, slackUsername)],
+          attachments: [this.getPrOpenedBaseAttachment(body, slackUsername)],
         },
         threadTs: undefined,
       });
