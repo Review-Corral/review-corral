@@ -19,6 +19,12 @@ export type OrgMembers = Endpoints["GET /orgs/{org}/members"]["response"]["data"
 export type PullRequestReviewCommentsResponse =
   Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}/comments"]["response"]["data"];
 
+export type PullRequestReviewsResponse =
+  Endpoints["GET /repos/{owner}/{repo}/pulls/{pull_number}/reviews"]["response"]["data"];
+
+export type BranchProtectionResponse =
+  Endpoints["GET /repos/{owner}/{repo}/branches/{branch}/protection"]["response"]["data"];
+
 // For some of these types, I'm manually creating the types instead of using Octokit
 // because it's currently giving me the wrong result even though it was just installed
 // at the day of writing.

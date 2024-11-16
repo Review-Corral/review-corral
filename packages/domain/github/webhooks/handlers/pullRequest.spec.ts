@@ -93,7 +93,7 @@ describe("handlePullRequestEvent", () => {
       repoId: 456,
     });
 
-    expect(mockSlackClient.postUpdatedPullRequest).toHaveBeenCalledWith({
+    expect(mockSlackClient.updateMainPrMessage).toHaveBeenCalledWith({
       body: newMockEvent,
       threadTs: "thread-ts-123",
       slackUsername: "@testuser",
@@ -123,6 +123,6 @@ describe("handlePullRequestEvent", () => {
       repoId: 456,
     });
 
-    expect(mockSlackClient.postUpdatedPullRequest).not.toHaveBeenCalled();
+    expect(mockSlackClient.updateMainPrMessage).not.toHaveBeenCalled();
   });
 });
