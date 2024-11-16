@@ -31,12 +31,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
   });
 
   if (payload.action === "opened" || payload.action === "ready_for_review") {
-    return await handleNewPr(
-      // TODO: can we avoid this dangerous cast?
-      payload as PullRequestEventOpenedOrReadyForReview,
-      props,
-      pullRequestItem,
-    );
+    return await handleNewPr(payload, props, pullRequestItem);
   } else {
     if (!pullRequestItem?.threadTs) {
       // No thread found, so log and return
@@ -172,7 +167,11 @@ const handleNewPr = async (
       repoId: payload.repository.id,
     });
   } else {
-    const { threadTs, wasCreated } = await getThreadTsForNewPr(payload, props);
+    const { threadTs, wasCreated } = await getThreadTsForNewPr(
+      payload,
+      props,
+      pullRequestItem,
+    );
 
     LOGGER.debug("Pull request is not draft", {
       threadTs,
@@ -238,6 +237,7 @@ const handleNewPr = async (
   async function getThreadTsForNewPr(
     body: PullRequestEventOpenedOrReadyForReview,
     baseProps: BaseGithubWebhookEventHanderArgs,
+    pullRequestItem: PullRequestItem | null,
   ): Promise<{
     threadTs?: string;
     wasCreated: boolean;
@@ -247,26 +247,23 @@ const handleNewPr = async (
       LOGGER.debug("PR was opened, creating new thread...");
       return {
         threadTs: await createNewThread({
-          existingPullRequest: undefined,
+          existingPullRequest: null,
           body,
           baseProps,
         }),
         wasCreated: true,
       };
     } else {
-      LOGGER.debug("PR was not opened, trying to find existing thread...");
       // This should trigger for 'ready_for_review' events
-      const existingPullRequest = await forceFetchPrItem({
-        pullRequestId: body.pull_request.id,
-        repoId: body.repository.id,
-      });
+
+      LOGGER.debug("PR was not opened, trying to find existing thread...");
 
       // If we still couldn't find a thread, then post a new one.
-      if (!existingPullRequest?.threadTs) {
+      if (!pullRequestItem?.threadTs) {
         LOGGER.debug("Couldn't find existing thread, creating new thread...");
         return {
           threadTs: await createNewThread({
-            existingPullRequest,
+            existingPullRequest: pullRequestItem,
             body,
             baseProps,
           }),
@@ -275,7 +272,7 @@ const handleNewPr = async (
       } else {
         LOGGER.debug("Found existing thread");
         return {
-          threadTs: existingPullRequest.threadTs,
+          threadTs: pullRequestItem.threadTs,
           wasCreated: false,
         };
       }
@@ -287,7 +284,7 @@ const handleNewPr = async (
     body,
     baseProps,
   }: {
-    existingPullRequest: PullRequestItem | undefined;
+    existingPullRequest: PullRequestItem | null;
     body: PullRequestEventOpenedOrReadyForReview;
     baseProps: BaseGithubWebhookEventHanderArgs;
   }): Promise<string> {

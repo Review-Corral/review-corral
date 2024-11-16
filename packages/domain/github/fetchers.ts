@@ -3,13 +3,16 @@ import { getJwt } from "@core/utils/jwt/createGithubJwt";
 import ky from "ky";
 import { Logger } from "../logging";
 import {
+  BranchProtectionResponse,
   InstallationAccessTokenResponse,
   InstallationRespositoriesResponse,
   InstallationsData,
   OrgMembers,
   PullRequestInfoResponse,
+  PullRequestReviewsResponse,
   RepositoryPullRequestsResponse,
 } from "./endpointTypes";
+import { SimplePullRequest } from "@octokit/webhooks-types";
 
 const LOGGER = new Logger("github.fetchers.ts");
 
@@ -127,4 +130,77 @@ export const getOrgMembers = async ({
     .json<OrgMembers>();
 
   return members;
+};
+
+export const getPrReviews = async ({
+  pullRequest,
+  accessToken,
+}: {
+  pullRequest: {
+    url: string;
+  };
+  accessToken: string;
+}): Promise<PullRequestReviewsResponse> => {
+  const response = await ky
+    .get(`${pullRequest.url}/reviews`, {
+      headers: {
+        Authorization: `bearer ${accessToken}`,
+      },
+    })
+    .json<PullRequestReviewsResponse>();
+
+  return response;
+};
+
+/**
+ * Gets the number of approvals for a pull request
+ */
+export const getNumberOfApprovals = async ({
+  pullRequest,
+  accessToken,
+}: {
+  pullRequest: {
+    url: string;
+  };
+  accessToken: string;
+}): Promise<number> => {
+  const reviews = await getPrReviews({ pullRequest, accessToken });
+  return reviews.filter((review) => review.state === "APPROVED").length;
+};
+
+export const getBranchProtection = async ({
+  repository,
+  pullRequest,
+  accessToken,
+}: {
+  repository: {
+    url: string;
+  };
+  pullRequest: {
+    base: {
+      ref: string;
+    };
+  };
+  accessToken: string;
+}): Promise<BranchProtectionResponse> => {
+  return await ky
+    .get(`${repository.url}/branches/${pullRequest.base.ref}/protection`, {
+      headers: {
+        ...defaultHeaders,
+        Authorization: `Bearer ${accessToken}`,
+      },
+    })
+    .json<BranchProtectionResponse>();
+};
+
+/**
+ * Gets the number of required approvals for a pull request
+ */
+export const getPrRequiredApprovalsCount = async (
+  args: Parameters<typeof getBranchProtection>[0],
+): Promise<number> => {
+  const branchProtection = await getBranchProtection(args);
+  return (
+    branchProtection.required_pull_request_reviews?.required_approving_review_count ?? 0
+  );
 };
