@@ -27,6 +27,7 @@ import { getInstallationAccessToken, getPullRequestInfo } from "./github/fetcher
 import { handleGithubWebhookEvent } from "./github/webhooks";
 import { getSlackUserName } from "./github/webhooks/handlers/shared";
 import { BaseGithubWebhookEventHanderArgs } from "./github/webhooks/types";
+import { tryGetPrRequiredApprovalsCount } from "./selectors/pullRequests/getRequiredApprovals";
 
 // To get this, run the test bellow to open a new PR and then look in the logs for the
 // posted TS
@@ -136,10 +137,16 @@ vi.mock("@domain/dynamodb/fetchers/slack", () => {
     getSlackInstallationsForOrganization: vi.fn(),
   };
 });
-
 vi.mocked(getSlackInstallationsForOrganization).mockResolvedValue([
   mockedSlackIntegration,
 ]);
+
+vi.mock("@domain/selectors/pullRequests/getRequiredApprovals", () => {
+  return {
+    tryGetPrRequiredApprovalsCount: vi.fn(),
+  };
+});
+vi.mocked(tryGetPrRequiredApprovalsCount).mockResolvedValue({ count: 2 });
 
 /**
  * These 'tests' aren't actually meant to pass. They're just used to invoke the code
@@ -172,6 +179,8 @@ describe("end-to-end tests", () => {
   const basePrData = {
     id: 123,
     draft: false,
+    merged: false,
+    closed_at: null,
     number: 1,
     title: "Test PR",
     body: "Test PR body",
