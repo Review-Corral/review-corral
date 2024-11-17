@@ -79,12 +79,15 @@ async function getSlackUserNameMocked(
   githubLogin: string,
   _props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">,
 ): Promise<string> {
-  if (githubLogin === "jim") {
-    return "<@U07GB8TBX53>";
-  } else if (githubLogin === "dwight") {
-    return "<@U07J1FWJUQ0>";
-  } else {
-    console.error(`getSlackUserNameMocked not implemented for ${githubLogin}`);
+  switch (githubLogin) {
+    case "michael":
+      return "<@U081WKT1AUQ>";
+    case "jim":
+      return "<@U07GB8TBX53>";
+    case "dwight":
+      return "<@U07J1FWJUQ0>";
+    default:
+      console.error(`getSlackUserNameMocked not implemented for ${githubLogin}`);
   }
 
   return githubLogin;
@@ -165,6 +168,11 @@ describe("end-to-end tests", () => {
   });
 
   const users = {
+    michael: mock<IssueCommentEvent["comment"]["user"]>({
+      login: "michael",
+      avatar_url:
+        "https://static1.srcdn.com/wordpress/wp-content/uploads/2023/01/steve-carell-as-michael-scott-with-the-cast-of-the-office.jpg?q=50&fit=crop&w=1140&h=&dpr=1.5",
+    }),
     jim: mock<IssueCommentEvent["comment"]["user"]>({
       login: "jim",
       avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
@@ -181,18 +189,18 @@ describe("end-to-end tests", () => {
     draft: false,
     merged: false,
     closed_at: null,
-    number: 1,
-    title: "Test PR",
-    body: "Test PR body",
-    html_url: "https://github.com/test/test/pull/1",
+    number: 340,
+    title: "Add 'Dundie Awards' recepients to marketing site",
+    body: "Adds a new page to the marketing site showcasing the 2024 Dundie Award winners, at `/about/dundie-awards`",
+    html_url: "https://github.com/test/test/pull/340",
     requested_reviewers: [],
   };
 
   const pullRequestMock = mock<PullRequestOpenedEvent["pull_request"]>({
     ...basePrData,
     additions: 432,
-    deletions: 123,
-    user: users.jim,
+    deletions: 12,
+    user: users.michael,
     base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
       ref: "main",
     }),
@@ -319,6 +327,7 @@ describe("end-to-end tests", () => {
           ref: "main",
         }),
         merged: true,
+        closed_at: "2024-11-17T15:00:00Z",
       }),
       repository: repositoryMock,
     });
@@ -344,6 +353,7 @@ describe("end-to-end tests", () => {
           ref: "main",
         }),
         merged: false,
+        closed_at: "2024-11-17T15:00:00Z",
       }),
       repository: repositoryMock,
     });
