@@ -1,11 +1,11 @@
 import { PullRequestItem } from "@core/dynamodb/entities/types";
+import { postCommentsForNewPR } from "@domain/selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "@domain/selectors/pullRequests/getRequiredApprovals";
 import {
   PullRequestConvertedToDraftEvent,
   PullRequestEditedEvent,
   PullRequestEvent,
 } from "@octokit/webhooks-types";
-import ky from "ky";
 import {
   fetchPrItem,
   insertPullRequest,
@@ -13,7 +13,6 @@ import {
 } from "../../../dynamodb/fetchers/pullRequests";
 import { Logger } from "../../../logging";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
-import { PullRequestReviewCommentsResponse } from "../../endpointTypes";
 import { getInstallationAccessToken } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
 import { getSlackUserName } from "./shared";
@@ -363,42 +362,6 @@ const handleNewPr = async (
       }
     } catch (error) {
       throw new Error(`Error creating new thread for PR: ${error}`);
-    }
-  }
-
-  async function postCommentsForNewPR(
-    body: PullRequestEventOpenedOrReadyForReview,
-    accessToken: Awaited<ReturnType<typeof getInstallationAccessToken>>,
-    threadTs: string,
-    baseProps: BaseGithubWebhookEventHanderArgs,
-  ) {
-    try {
-      const response = await ky
-        .get(body.pull_request.comments_url, {
-          headers: {
-            Authorization: `bearer ${accessToken.token}`,
-          },
-        })
-        .json<PullRequestReviewCommentsResponse>();
-
-      for (const comment of response) {
-        if (comment.user.type === "User") {
-          await baseProps.slackClient.postComment({
-            prId: body.pull_request.id,
-            commentBody: comment.body,
-            commentUrl: comment.url,
-            threadTs: threadTs,
-            slackUsername: await getSlackUserName(comment.user.login, baseProps),
-          });
-        }
-      }
-    } catch (error) {
-      LOGGER.error("Error getting comments", {
-        error,
-        prId: body.pull_request.id,
-        installationId: baseProps.installationId,
-        organizationId: baseProps.organizationId,
-      });
     }
   }
 };

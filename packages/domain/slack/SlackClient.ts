@@ -4,7 +4,6 @@ import {
   PullRequestClosedEvent,
   PullRequestOpenedEvent,
   PullRequestReadyForReviewEvent,
-  PullRequestReview,
 } from "@octokit/webhooks-types";
 import {
   ChatPostMessageArguments,
@@ -202,49 +201,6 @@ export class SlackClient {
               },
             ],
           },
-        ],
-      },
-      threadTs,
-    });
-  }
-
-  async postReview({
-    review,
-    threadTs,
-    slackUsername,
-  }: {
-    review: PullRequestReview;
-    threadTs: string;
-    slackUsername: string;
-  }) {
-    const getReviewText = (review: PullRequestReview) => {
-      switch (review.state) {
-        case "approved": {
-          return "approved the pull request";
-        }
-        case "changes_requested": {
-          return "requested changes to the pull request";
-        }
-        case "commented": {
-          return "left a review comment on the pull request";
-        }
-      }
-    };
-
-    return await this.postMessage({
-      message: {
-        text: `${slackUsername} ${getReviewText(review)}`,
-        attachments: [
-          {
-            text: slackifyMarkdown(review.body ?? ""),
-            color: "#fff",
-          },
-          ...[
-            review.state === "approved" && {
-              text: ":white_check_mark:",
-              color: "#00BB00",
-            },
-          ],
         ],
       },
       threadTs,
