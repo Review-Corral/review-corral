@@ -14,7 +14,7 @@ import {
   PullRequestReviewRequestedEvent,
   PullRequestReviewSubmittedEvent,
 } from "@octokit/webhooks-types";
-import { beforeEach, describe, it, vi } from "vitest";
+import { describe, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
 import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
 import { fetchPrItem, insertPullRequest } from "./dynamodb/fetchers/pullRequests";
@@ -169,72 +169,73 @@ async function getSlackUserNameMocked(
   return githubLogin;
 }
 
-/**
- * These 'tests' aren't actually meant to pass. They're just used to invoke the code
- * with some minimal data and see it in Slack.
- */
-describe("end-to-end tests", () => {
-  beforeEach(() => {});
-  const repositoryMock = mock<PullRequestOpenedEvent["repository"]>({
-    id: mockRepo.repoId,
-    full_name: "Dunder Mifflin",
-    owner: {
-      id: mockedOrg.orgId,
-      avatar_url:
-        "https://logos-world.net/wp-content/uploads/2022/02/Dunder-Mifflin-Logo.png",
-    },
-  });
+const repositoryMock = mock<PullRequestOpenedEvent["repository"]>({
+  id: mockRepo.repoId,
+  full_name: "Dunder Mifflin",
+  owner: {
+    id: mockedOrg.orgId,
+    avatar_url:
+      "https://logos-world.net/wp-content/uploads/2022/02/Dunder-Mifflin-Logo.png",
+  },
+});
 
-  const users = {
-    michael: mock<IssueCommentEvent["comment"]["user"]>({
-      login: "michael",
-      avatar_url:
-        "https://static1.srcdn.com/wordpress/wp-content/uploads/2023/01/steve-carell-as-michael-scott-with-the-cast-of-the-office.jpg?q=50&fit=crop&w=1140&h=&dpr=1.5",
-    }),
-    jim: mock<IssueCommentEvent["comment"]["user"]>({
-      login: "jim",
-      avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-    }),
-    dwight: mock<IssueCommentEvent["comment"]["user"]>({
-      login: "dwight",
-      avatar_url:
-        "https://www.myany.city/sites/default/files/styles/scaled_cropped_medium__260x260/public/field/image/node-related-images/sample-dwight-k-schrute.jpg",
-    }),
-  } as const;
+const users = {
+  michael: mock<IssueCommentEvent["comment"]["user"]>({
+    login: "michael",
+    avatar_url:
+      "https://static1.srcdn.com/wordpress/wp-content/uploads/2023/01/steve-carell-as-michael-scott-with-the-cast-of-the-office.jpg?q=50&fit=crop&w=1140&h=&dpr=1.5",
+  }),
+  jim: mock<IssueCommentEvent["comment"]["user"]>({
+    login: "jim",
+    avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
+  }),
+  dwight: mock<IssueCommentEvent["comment"]["user"]>({
+    login: "dwight",
+    avatar_url:
+      "https://www.myany.city/sites/default/files/styles/scaled_cropped_medium__260x260/public/field/image/node-related-images/sample-dwight-k-schrute.jpg",
+  }),
+} as const;
 
-  const basePrData = {
-    id: 123,
-    draft: false,
-    merged: false,
-    closed_at: null,
-    number: 340,
-    additions: 432,
-    deletions: 12,
-    user: users.michael,
-    title: "Add 'Dundie Awards' recepients to marketing site",
-    body: "Adds a new page to the marketing site showcasing the 2024 Dundie Award winners, at `/about/dundie-awards`",
-    html_url: "https://github.com/test/test/pull/340",
-    requested_reviewers: [],
-  };
+const basePrData = {
+  id: 123,
+  draft: false,
+  merged: false,
+  closed_at: null,
+  number: 340,
+  additions: 432,
+  deletions: 12,
+  user: users.michael,
+  title: "Add 'Dundie Awards' recepients to marketing site",
+  body: "Adds a new page to the marketing site showcasing the 2024 Dundie Award winners, at `/about/dundie-awards`",
+  html_url: "https://github.com/test/test/pull/340",
+  requested_reviewers: [],
+};
 
-  const pullRequestMock = mock<PullRequestOpenedEvent["pull_request"]>({
+const pullRequestMock = mock<PullRequestOpenedEvent["pull_request"]>({
+  ...basePrData,
+  base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+    ref: "main",
+  }),
+});
+
+vi.mocked(getPullRequestInfo).mockResolvedValue(
+  mock<PullRequestInfoResponse>({
     ...basePrData,
-    base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
-      ref: "main",
-    }),
-  });
-
-  vi.mocked(getPullRequestInfo).mockResolvedValue(
-    mock<PullRequestInfoResponse>({
-      ...basePrData,
-      base: {
-        repo: mockRepo,
-        ref: "main",
+    base: {
+      repo: {
+        full_name: "Dunder Mifflin",
+        owner: {
+          avatar_url:
+            "https://logos-world.net/wp-content/uploads/2022/02/Dunder-Mifflin-Logo.png",
+        },
       },
-    }),
-  );
+      ref: "main",
+    },
+  }),
+);
 
-  it("message chain", { timeout: 10000 }, async () => {
+describe("chained e2e events", () => {
+  it("message chain", { timeout: 1000 * 60 * 5 }, async () => {
     const events = [
       {
         event: mock<PullRequestOpenedEvent>({
@@ -248,8 +249,24 @@ describe("end-to-end tests", () => {
         vi.mocked(fetchPrItem).mockResolvedValue(
           mock<PullRequestItem>({
             threadTs: THREAD_TS,
+            requiredApprovals: 2,
           }),
         );
+      },
+      {
+        event: mock<PullRequestReviewRequestedEvent>({
+          action: "review_requested",
+          requested_reviewer: users.jim,
+          repository: repositoryMock,
+          pull_request: pullRequestMock,
+        }),
+        eventName: "pull_request",
+      },
+      () => {
+        vi.mocked(getNumberOfApprovals).mockResolvedValue(1);
+      },
+      async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
       },
       {
         event: mock<PullRequestReviewSubmittedEvent>({
@@ -257,9 +274,9 @@ describe("end-to-end tests", () => {
           sender: users.jim,
           review: mock<PullRequestReviewSubmittedEvent["review"]>({
             id: 123,
-            body: "Can I be removed from this list please?",
-            user: users.jim,
-            state: "changes_requested",
+            body: "I don't think we should do this...",
+            user: users.michael,
+            state: "commented",
           }),
           pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
             id: pullRequestMock.id,
@@ -267,6 +284,9 @@ describe("end-to-end tests", () => {
           repository: repositoryMock,
         }),
         eventName: "pull_request_review",
+      },
+      async () => {
+        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
       },
       {
         event: mock<PullRequestReviewSubmittedEvent>({
@@ -280,26 +300,17 @@ describe("end-to-end tests", () => {
           }),
           pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
             id: 123,
+            user: users.michael,
           }),
           repository: repositoryMock,
         }),
         eventName: "pull_request_review",
       },
-
-      {
-        event: mock<PullRequestReviewRequestedEvent>({
-          action: "review_requested",
-          requested_reviewer: users.jim,
-          repository: repositoryMock,
-          pull_request: pullRequestMock,
-        }),
-        eventName: "pull_request",
-      },
     ];
 
     for (const event of events) {
       if (typeof event === "function") {
-        event();
+        await event();
       } else {
         console.log("threadTs", THREAD_TS);
         await handleGithubWebhookEvent({
@@ -307,10 +318,15 @@ describe("end-to-end tests", () => {
           eventName: event.eventName,
         });
       }
-      await new Promise((resolve) => setTimeout(resolve, 1000));
     }
   });
+});
 
+/**
+ * These 'tests' aren't actually meant to pass. They're just used to invoke the code
+ * with some minimal data and see it in Slack.
+ */
+describe("end-to-end tests", () => {
   it("should post messages to slack", async () => {
     const prOpenedMessage = mock<PullRequestOpenedEvent>({
       action: "opened",

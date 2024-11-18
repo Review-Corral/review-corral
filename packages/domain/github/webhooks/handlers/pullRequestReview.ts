@@ -83,7 +83,7 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
           {
             body: convertPullRequestInfoToBaseProps(pullRequestInfo),
             threadTs: pullRequestItem.threadTs,
-            slackUsername: await getSlackUserName(event.sender.login, args),
+            slackUsername: await getSlackUserName(event.pull_request.user.login, args),
             pullRequestItem: {
               ...pullRequestItem,
               // It's vital we pass this in so it updates the number of approvals

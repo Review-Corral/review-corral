@@ -27,7 +27,7 @@ export const convertPullRequestInfoToBaseProps = (
     repository: {
       full_name: response.base.repo.full_name,
       owner: {
-        avatar_url: response.user.avatar_url,
+        avatar_url: response.base.repo.owner.avatar_url,
       },
     },
   };
