@@ -11,31 +11,33 @@ import {
   PullRequestClosedEvent,
   PullRequestOpenedEvent,
   PullRequestReviewCommentCreatedEvent,
+  PullRequestReviewRequestedEvent,
   PullRequestReviewSubmittedEvent,
 } from "@octokit/webhooks-types";
 import { beforeEach, describe, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
 import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
-import { fetchPrItem } from "./dynamodb/fetchers/pullRequests";
+import { fetchPrItem, insertPullRequest } from "./dynamodb/fetchers/pullRequests";
 import { safeFetchRepository } from "./dynamodb/fetchers/repositories";
 import { getSlackInstallationsForOrganization } from "./dynamodb/fetchers/slack";
 import {
   InstallationAccessTokenResponse,
   PullRequestInfoResponse,
 } from "./github/endpointTypes";
-import { getInstallationAccessToken, getPullRequestInfo } from "./github/fetchers";
+import {
+  getInstallationAccessToken,
+  getNumberOfApprovals,
+  getPullRequestInfo,
+} from "./github/fetchers";
 import { handleGithubWebhookEvent } from "./github/webhooks";
 import { getSlackUserName } from "./github/webhooks/handlers/shared";
 import { BaseGithubWebhookEventHanderArgs } from "./github/webhooks/types";
+import { postCommentsForNewPR } from "./selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "./selectors/pullRequests/getRequiredApprovals";
 
 // To get this, run the test bellow to open a new PR and then look in the logs for the
 // posted TS
-const THREAD_TS = "1729134112.776569";
-
-const prItem: PullRequestItem = mock<PullRequestItem>({
-  threadTs: THREAD_TS,
-});
+let THREAD_TS = "1731871427.369019";
 
 const mockedOrg = mock<Organization>({
   orgId: 123,
@@ -72,29 +74,32 @@ vi.mock("@domain/dynamodb/fetchers/pullRequests", () => {
   return {
     fetchPrItem: vi.fn(),
     insertPullRequest: vi.fn(),
+    updatePullRequest: vi.fn(),
   };
 });
-
-async function getSlackUserNameMocked(
-  githubLogin: string,
-  _props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">,
-): Promise<string> {
-  switch (githubLogin) {
-    case "michael":
-      return "<@U081WKT1AUQ>";
-    case "jim":
-      return "<@U07GB8TBX53>";
-    case "dwight":
-      return "<@U07J1FWJUQ0>";
-    default:
-      console.error(`getSlackUserNameMocked not implemented for ${githubLogin}`);
+vi.mocked(insertPullRequest).mockImplementation((args) => {
+  // Save the threadTs so it will be used by other calls
+  if (args.threadTs) {
+    THREAD_TS = args.threadTs;
   }
 
-  return githubLogin;
-}
+  // Typing is weird here
+  return Promise.resolve(args as any);
+});
 
 vi.mocked(getSlackUserName).mockImplementation(getSlackUserNameMocked);
-vi.mocked(fetchPrItem).mockResolvedValue(prItem);
+vi.mocked(fetchPrItem).mockResolvedValue(
+  mock<PullRequestItem>({
+    threadTs: THREAD_TS,
+  }),
+);
+
+vi.mock("@domain/selectors/pullRequests/getCommentsForPr", () => {
+  return {
+    postCommentsForNewPR: vi.fn(),
+  };
+});
+vi.mocked(postCommentsForNewPR).mockResolvedValue();
 
 vi.mock("@domain/dynamodb/client", () => {
   return {
@@ -105,6 +110,7 @@ vi.mock("@domain/github/fetchers", () => {
   return {
     getInstallationAccessToken: vi.fn(),
     getPullRequestInfo: vi.fn(),
+    getNumberOfApprovals: vi.fn(),
   };
 });
 const mockedInstallationAccessToken = mock<InstallationAccessTokenResponse>({
@@ -112,12 +118,6 @@ const mockedInstallationAccessToken = mock<InstallationAccessTokenResponse>({
   expires_at: "test",
 });
 vi.mocked(getInstallationAccessToken).mockResolvedValue(mockedInstallationAccessToken);
-
-vi.mocked(getPullRequestInfo).mockResolvedValue(
-  mock<PullRequestInfoResponse>({
-    id: 123,
-  }),
-);
 
 vi.mock("@domain/dynamodb/fetchers/repositories", () => {
   return {
@@ -150,6 +150,24 @@ vi.mock("@domain/selectors/pullRequests/getRequiredApprovals", () => {
   };
 });
 vi.mocked(tryGetPrRequiredApprovalsCount).mockResolvedValue({ count: 2 });
+
+async function getSlackUserNameMocked(
+  githubLogin: string,
+  _props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">,
+): Promise<string> {
+  switch (githubLogin) {
+    case "michael":
+      return "<@U081WKT1AUQ>";
+    case "jim":
+      return "<@U07GB8TBX53>";
+    case "dwight":
+      return "<@U07J1FWJUQ0>";
+    default:
+      console.error(`getSlackUserNameMocked not implemented for ${githubLogin}`);
+  }
+
+  return githubLogin;
+}
 
 /**
  * These 'tests' aren't actually meant to pass. They're just used to invoke the code
@@ -190,6 +208,9 @@ describe("end-to-end tests", () => {
     merged: false,
     closed_at: null,
     number: 340,
+    additions: 432,
+    deletions: 12,
+    user: users.michael,
     title: "Add 'Dundie Awards' recepients to marketing site",
     body: "Adds a new page to the marketing site showcasing the 2024 Dundie Award winners, at `/about/dundie-awards`",
     html_url: "https://github.com/test/test/pull/340",
@@ -198,12 +219,96 @@ describe("end-to-end tests", () => {
 
   const pullRequestMock = mock<PullRequestOpenedEvent["pull_request"]>({
     ...basePrData,
-    additions: 432,
-    deletions: 12,
-    user: users.michael,
     base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
       ref: "main",
     }),
+  });
+
+  vi.mocked(getPullRequestInfo).mockResolvedValue(
+    mock<PullRequestInfoResponse>({
+      ...basePrData,
+      base: {
+        repo: mockRepo,
+        ref: "main",
+      },
+    }),
+  );
+
+  it("message chain", { timeout: 10000 }, async () => {
+    const events = [
+      {
+        event: mock<PullRequestOpenedEvent>({
+          action: "opened",
+          pull_request: pullRequestMock,
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request",
+      },
+      () => {
+        vi.mocked(fetchPrItem).mockResolvedValue(
+          mock<PullRequestItem>({
+            threadTs: THREAD_TS,
+          }),
+        );
+      },
+      {
+        event: mock<PullRequestReviewSubmittedEvent>({
+          action: "submitted",
+          sender: users.jim,
+          review: mock<PullRequestReviewSubmittedEvent["review"]>({
+            id: 123,
+            body: "Can I be removed from this list please?",
+            user: users.jim,
+            state: "changes_requested",
+          }),
+          pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
+            id: pullRequestMock.id,
+          }),
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request_review",
+      },
+      {
+        event: mock<PullRequestReviewSubmittedEvent>({
+          action: "submitted",
+          sender: users.dwight,
+          review: mock<PullRequestReviewSubmittedEvent["review"]>({
+            id: 123,
+            body: "Yes!",
+            user: users.dwight,
+            state: "approved",
+          }),
+          pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
+            id: 123,
+          }),
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request_review",
+      },
+
+      {
+        event: mock<PullRequestReviewRequestedEvent>({
+          action: "review_requested",
+          requested_reviewer: users.jim,
+          repository: repositoryMock,
+          pull_request: pullRequestMock,
+        }),
+        eventName: "pull_request",
+      },
+    ];
+
+    for (const event of events) {
+      if (typeof event === "function") {
+        event();
+      } else {
+        console.log("threadTs", THREAD_TS);
+        await handleGithubWebhookEvent({
+          event: event.event as any,
+          eventName: event.eventName,
+        });
+      }
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
   });
 
   it("should post messages to slack", async () => {
@@ -224,7 +329,7 @@ describe("end-to-end tests", () => {
       action: "created",
       sender: users.dwight,
       comment: mock<IssueCommentCreatedEvent["comment"]>({
-        id: 123,
+        id: 1,
         body: "Hey, this is a reply!",
       }),
       issue: mock<IssueCommentCreatedEvent["issue"]>({
@@ -242,22 +347,25 @@ describe("end-to-end tests", () => {
   });
 
   it("should post a review comment", async () => {
-    const prOpenedMessage = mock<PullRequestReviewCommentCreatedEvent>({
+    vi.mocked(getNumberOfApprovals).mockResolvedValue(1);
+
+    const reviewCommentMessage = mock<PullRequestReviewCommentCreatedEvent>({
       action: "created",
+      sender: users.jim,
       comment: mock<PullRequestReviewCommentCreatedEvent["comment"]>({
         html_url: "https://github.com/test/test/pull/1",
-        id: 123,
-        body: "This looks interesting!",
+        id: 2,
+        body: "Can I be removed from this list?",
         user: users.jim,
       }),
       pull_request: mock<PullRequestReviewCommentCreatedEvent["pull_request"]>({
-        id: 123,
+        id: 2,
       }),
       repository: repositoryMock,
     });
 
     await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
+      event: reviewCommentMessage as any,
       eventName: "pull_request_review_comment",
     });
   });
@@ -265,14 +373,11 @@ describe("end-to-end tests", () => {
   it("should post requested changes", async () => {
     const prOpenedMessage = mock<PullRequestReviewSubmittedEvent>({
       action: "submitted",
+      sender: users.jim,
       review: mock<PullRequestReviewSubmittedEvent["review"]>({
         id: 123,
-        body: "Looks good overall, but a couple of things need to be changed",
-        user: mock<PullRequestReviewSubmittedEvent["review"]["user"]>({
-          type: "User",
-          login: "jim",
-          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-        }),
+        body: "Can I be removed from this list please?",
+        user: users.jim,
         state: "changes_requested",
       }),
       pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
@@ -292,12 +397,8 @@ describe("end-to-end tests", () => {
       action: "submitted",
       review: mock<PullRequestReviewSubmittedEvent["review"]>({
         id: 123,
-        body: "Looks good to me!",
-        user: mock<PullRequestReviewSubmittedEvent["review"]["user"]>({
-          type: "User",
-          login: "jim",
-          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-        }),
+        body: "Yes!",
+        user: users.dwight,
         state: "approved",
       }),
       pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({

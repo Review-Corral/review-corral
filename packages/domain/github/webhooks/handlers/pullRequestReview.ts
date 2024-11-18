@@ -1,7 +1,4 @@
-import {
-  forceFetchPrItem,
-  updatePullRequest,
-} from "@domain/dynamodb/fetchers/pullRequests";
+import { fetchPrItem, updatePullRequest } from "@domain/dynamodb/fetchers/pullRequests";
 import {
   getInstallationAccessToken,
   getNumberOfApprovals,
@@ -26,7 +23,7 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
       return;
     }
 
-    const pullRequestItem = await forceFetchPrItem({
+    const pullRequestItem = await fetchPrItem({
       pullRequestId: event.pull_request.id,
       repoId: event.repository.id,
     });
@@ -103,39 +100,32 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
           error,
         });
       }
-    }
-
-    await slackClient.postMessage({
-      message: {
-        text: `${await getSlackUserName(event.sender.login, args)} ${getReviewText(
-          event.review,
-        )}`,
-        attachments: [
-          {
-            text: slackifyMarkdown(event.review.body ?? ""),
-            color: "#fff",
-          },
-          ...[
-            event.review.state === "changes_requested" && {
-              text: ":building_construction:",
-              color: "#FFC828",
+    } else {
+      await slackClient.postMessage({
+        message: {
+          text: `${await getSlackUserName(event.sender.login, args)} ${getReviewText(
+            event.review,
+          )}`,
+          attachments: [
+            {
+              text: slackifyMarkdown(event.review.body ?? ""),
+              color: "#fff",
             },
           ],
-        ],
-      },
-      threadTs: pullRequestItem.threadTs,
-    });
-    return;
+        },
+        threadTs: pullRequestItem.threadTs,
+      });
+    }
   }
 };
 
 const getReviewText = (review: PullRequestReview) => {
   switch (review.state) {
     case "approved": {
-      return "approved the pull request";
+      return "*approved* the pull request";
     }
     case "changes_requested": {
-      return "requested changes to the pull request";
+      return "*requested changes* to the pull request";
     }
     case "commented": {
       return "left a review comment on the pull request";
