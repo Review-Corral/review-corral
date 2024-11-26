@@ -1,19 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
+import { Button } from "@/components/shadcn/button";
 export default function Home() {
   return (
     <div className="flex min-h-[100dvh] flex-col bg-background">
-      <header className="px-4 lg:px-6 h-14 flex items-center">
-        <Link href="/">
-          <div className="flex-shrink-0 hover:cursor-pointer">
-            <Image
-              height={48}
-              width={48}
-              src="/review_corral_logo.png"
-              alt="Review Corral logo"
-            />
-          </div>
-        </Link>
+      {/* <header className="px-4 lg:px-6 h-14 flex items-center">
+
         <nav className="ml-auto flex gap-4 sm:gap-6">
           <Link
             href="#"
@@ -44,20 +36,46 @@ export default function Home() {
             Contact
           </Link>
         </nav>
+      </header> */}
+      <header className="py-4 px-6 bg-white border-b">
+        <div className="container mx-auto flex justify-between items-center">
+          <Link href="/">
+            <div className="flex-shrink-0 flex items-center gap-1 hover:cursor-pointer">
+              <Image
+                height={58}
+                width={58}
+                src="/review_corral_logo.png"
+                alt="Review Corral logo"
+              />
+              <span className="text-2xl font-bold text-primary">ReviewCorral</span>
+            </div>
+          </Link>
+          <nav className="space-x-4">
+            <Link href="#features" className="text-gray-600 hover:text-primary">
+              Features
+            </Link>
+            <Link href="#pricing" className="text-gray-600 hover:text-primary">
+              Pricing
+            </Link>
+            <Button variant="outline">Sign In</Button>
+            <Button>Get Started</Button>
+          </nav>
+        </div>
       </header>
       <main className="flex-1">
-        <section className="w-full py-12 md:py-24 lg:py-32 xl:py-48">
+        <section className="w-full py-4 md:py-12 lg:py-12 xl:py-12">
           <div className="container px-4 md:px-6">
             <div className="grid gap-6 lg:grid-cols-[1fr_400px] lg:gap-12 xl:grid-cols-[1fr_600px]">
-              <div className="flex flex-col justify-center space-y-4">
-                <div className="space-y-2">
+              <div className="flex flex-col justify-center space-y-10">
+                <div className="space-y-10">
                   <h1 className="text-3xl font-semibold tracking-tighter sm:text-5xl xl:text-6xl/none">
                     Streamline Your Review Process with <br />{" "}
                     <span className="font-extrabold">Review Corral</span>
                   </h1>
                   <p className="max-w-[600px] text-muted-foreground md:text-xl">
-                    Our Slack bot automatically posts updates on your GitHub pull
-                    requests, keeping your team informed and collaborative.
+                    ReviewCorral prevents noisy Slack notifications by threading
+                    messages from the same pull request together and only notifying the
+                    partipating participants.
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
@@ -66,23 +84,23 @@ export default function Home() {
                     className="inline-flex h-10 items-center justify-center rounded-md bg-primary px-8 text-sm font-medium text-primary-foreground shadow transition-colors hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
                     prefetch={false}
                   >
-                    Install the Bot
+                    Get Started for Free
                   </Link>
-                  <Link
+                  {/* <Link
                     href="#"
                     className="inline-flex h-10 items-center justify-center rounded-md border border-input bg-background px-8 text-sm font-medium shadow-sm transition-colors hover:bg-accent hover:text-accent-foreground focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
                     prefetch={false}
                   >
                     Learn More
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
               <img
-                src="/placeholder.svg"
-                width="550"
-                height="310"
-                alt="Hero"
-                className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
+                src="/main-hero-2.png"
+                width="600"
+                height="600"
+                alt="main-example"
+                className="mx-auto overflow-hidden rounded-xl object-cover sm:w-full lg:order-last"
               />
             </div>
           </div>
@@ -108,7 +126,7 @@ export default function Home() {
                 src="/placeholder.svg"
                 width="550"
                 height="310"
-                alt="Image"
+                alt="placeholder"
                 className="mx-auto aspect-video overflow-hidden rounded-xl object-cover object-center sm:w-full lg:order-last"
               />
               <div className="flex flex-col justify-center space-y-4">
