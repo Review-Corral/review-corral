@@ -72,7 +72,17 @@ async function tryFetchPrRequiredApprovalsCountFromGh(
     });
   } catch (error) {
     if (error instanceof Error && error.name === "HTTPError") {
-      if ((error as HTTPError).response.status === 403) {
+      const httpError = error as HTTPError;
+      if (httpError.response.status === 404) {
+        LOGGER.info(
+          "Got 404 trying to get branch protection, likely meaning the branch has no protection rules",
+          {
+            repoId: args.repository.id,
+            prId: args.pullRequest.id,
+          },
+        );
+        return null;
+      } else if (httpError.response.status === 403) {
         LOGGER.warn(
           "Got 403 when trying to get required approvals count. This probably means the new permissions haven't been accepted yet",
           {
@@ -86,6 +96,8 @@ async function tryFetchPrRequiredApprovalsCountFromGh(
           repoId: args.repository.id,
           prId: args.pullRequest.id,
         });
+
+        return null;
       }
     }
     throw error;
