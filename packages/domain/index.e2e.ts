@@ -6,11 +6,10 @@ import {
   SlackIntegration,
 } from "@core/dynamodb/entities/types";
 import {
-  IssueCommentCreatedEvent,
   IssueCommentEvent,
   PullRequestClosedEvent,
+  PullRequestConvertedToDraftEvent,
   PullRequestOpenedEvent,
-  PullRequestReviewCommentCreatedEvent,
   PullRequestReviewRequestedEvent,
   PullRequestReviewSubmittedEvent,
 } from "@octokit/webhooks-types";
@@ -196,46 +195,287 @@ const users = {
   }),
 } as const;
 
-const basePrData = {
-  id: 123,
-  draft: false,
-  merged: false,
-  closed_at: null,
-  number: 340,
-  additions: 432,
-  deletions: 12,
-  user: users.michael,
-  title: "Add 'Dundie Awards' recepients to marketing site",
-  body: "Adds a new page to the marketing site showcasing the 2024 Dundie Award winners, at `/about/dundie-awards`",
-  html_url: "https://github.com/test/test/pull/340",
-  requested_reviewers: [],
+type TestPullRequestData = {
+  id: number;
+  draft: boolean;
+  merged: boolean;
+  number: number;
+  additions: number;
+  deletions: number;
+  user: {
+    login: string;
+    avatar_url: string;
+  };
+  closed_at: undefined | null;
+  title: string;
+  body: string;
+  html_url: string;
+  requested_reviewers: any[];
+  base?: {
+    ref: string;
+  };
 };
 
-const pullRequestMock = mock<PullRequestOpenedEvent["pull_request"]>({
-  ...basePrData,
-  base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
-    ref: "main",
-  }),
-});
-
-vi.mocked(getPullRequestInfo).mockResolvedValue(
-  mock<PullRequestInfoResponse>({
-    ...basePrData,
-    base: {
-      repo: {
-        full_name: "Dunder Mifflin",
-        owner: {
-          avatar_url:
-            "https://logos-world.net/wp-content/uploads/2022/02/Dunder-Mifflin-Logo.png",
-        },
-      },
-      ref: "main",
+const baseInfo = {
+  repo: {
+    full_name: "Dunder Mifflin",
+    owner: {
+      avatar_url:
+        "https://logos-world.net/wp-content/uploads/2022/02/Dunder-Mifflin-Logo.png",
     },
-  }),
-);
+  },
+  ref: "main",
+};
 
 describe("chained e2e events", () => {
-  it("message chain", { timeout: 1000 * 60 * 5 }, async () => {
+  it("message chain in progress", { timeout: 1000 * 60 * 5 }, async () => {
+    const basePrData: TestPullRequestData = {
+      id: 123,
+      draft: false,
+      merged: false,
+      closed_at: null,
+      number: 340,
+      additions: 432,
+      deletions: 12,
+      user: users.michael,
+      title: "Add 'Dundie Awards' recepients to marketing site",
+      body: "Adds a new page to the marketing site showcasing the 2024 Dundie Award winners, at `/about/dundie-awards`",
+      html_url: "https://github.com/test/test/pull/340",
+      requested_reviewers: [],
+      base: {
+        ref: "main",
+      },
+    };
+
+    const events = [
+      {
+        event: mock<PullRequestOpenedEvent>({
+          action: "opened",
+          pull_request: basePrData,
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request",
+      },
+      () => {
+        vi.mocked(fetchPrItem).mockResolvedValue(
+          mock<PullRequestItem>({
+            threadTs: THREAD_TS,
+            requiredApprovals: 2,
+          }),
+        );
+      },
+      () => {
+        vi.mocked(getPullRequestInfo).mockResolvedValue(
+          mock<PullRequestInfoResponse>({
+            ...basePrData,
+            ...baseInfo,
+          }),
+        );
+      },
+      {
+        event: mock<PullRequestReviewRequestedEvent>({
+          action: "review_requested",
+          requested_reviewer: users.jim,
+          repository: repositoryMock,
+          pull_request: basePrData,
+        }),
+        eventName: "pull_request",
+      },
+      () => {
+        vi.mocked(getNumberOfApprovals).mockResolvedValue(1);
+      },
+      // async () => {
+      //   await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
+      // },
+      {
+        event: mock<PullRequestReviewSubmittedEvent>({
+          action: "submitted",
+          sender: users.jim,
+          review: mock<PullRequestReviewSubmittedEvent["review"]>({
+            id: 123,
+            body: "I don't think we should do this...",
+            user: users.michael,
+            state: "commented",
+          }),
+          pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
+            ...basePrData,
+          }),
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request_review",
+      },
+      // async () => {
+      //   await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
+      // },
+      {
+        event: mock<PullRequestReviewSubmittedEvent>({
+          action: "submitted",
+          sender: users.dwight,
+          review: mock<PullRequestReviewSubmittedEvent["review"]>({
+            id: 123,
+            body: "Yes!",
+            user: users.dwight,
+            state: "approved",
+          }),
+          pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
+            ...basePrData,
+          }),
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request_review",
+      },
+    ];
+
+    await runEvents(events);
+  });
+
+  it("message chain merged", { timeout: 1000 * 60 * 5 }, async () => {
+    const prData: TestPullRequestData = {
+      id: 339,
+      draft: false,
+      merged: false,
+      number: 339,
+      additions: 1233,
+      deletions: 33,
+      user: users.jim,
+      closed_at: undefined,
+      title: "Updating dependencies",
+      body: "Updates all the dependencies to the latest and greatest",
+      html_url: "https://github.com/test/test/pull/2",
+      requested_reviewers: [],
+      base: {
+        ref: "main",
+      },
+    };
+
+    const events = [
+      {
+        event: mock<PullRequestOpenedEvent>({
+          action: "opened",
+          pull_request: prData,
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request",
+      },
+      () => {
+        vi.mocked(fetchPrItem).mockResolvedValue(
+          mock<PullRequestItem>({
+            threadTs: THREAD_TS,
+            requiredApprovals: 2,
+          }),
+        );
+      },
+      () => {
+        vi.mocked(getPullRequestInfo).mockResolvedValue(
+          mock<PullRequestInfoResponse>({
+            ...prData,
+            ...baseInfo,
+          }),
+        );
+      },
+      {
+        event: mock<PullRequestReviewRequestedEvent>({
+          action: "review_requested",
+          requested_reviewer: users.michael,
+          repository: repositoryMock,
+          pull_request: prData,
+        }),
+        eventName: "pull_request",
+      },
+      {
+        event: mock<PullRequestReviewRequestedEvent>({
+          action: "review_requested",
+          requested_reviewer: users.dwight,
+          repository: repositoryMock,
+          pull_request: prData,
+        }),
+        eventName: "pull_request",
+      },
+      {
+        event: mock<PullRequestReviewSubmittedEvent>({
+          action: "submitted",
+          sender: users.dwight,
+          review: mock<PullRequestReviewSubmittedEvent["review"]>({
+            id: 123,
+            body: "",
+            user: users.dwight,
+            state: "approved",
+          }),
+          pull_request: prData,
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request_review",
+      },
+      {
+        event: mock<PullRequestReviewSubmittedEvent>({
+          action: "submitted",
+          sender: users.dwight,
+          review: mock<PullRequestReviewSubmittedEvent["review"]>({
+            id: 123,
+            body: "",
+            state: "approved",
+          }),
+          pull_request: prData,
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request_review",
+      },
+      () => {
+        vi.mocked(getNumberOfApprovals).mockResolvedValue(2);
+      },
+      () => {
+        vi.mocked(fetchPrItem).mockResolvedValue(
+          mock<PullRequestItem>({
+            threadTs: THREAD_TS,
+            requiredApprovals: 2,
+            approvalCount: 2,
+          }),
+        );
+      },
+      {
+        event: mock<PullRequestClosedEvent>({
+          action: "closed",
+          sender: users.jim,
+          pull_request: mock<PullRequestClosedEvent["pull_request"]>({
+            ...prData,
+            closed_at: undefined,
+            state: "closed",
+            merged: true,
+          }),
+          repository: repositoryMock,
+        }),
+        eventName: "pull_request",
+      },
+    ];
+
+    await runEvents(events);
+  });
+
+  it("message chain DRAFT", { timeout: 1000 * 60 * 5 }, async () => {
+    const prData = {
+      id: 338,
+      draft: false,
+      merged: false,
+      number: 338,
+      additions: 892,
+      deletions: 8,
+      user: users.dwight,
+      closed_at: undefined,
+      title: "Adding productivity tracker",
+      body: "In order to make sure each employee is being productive, adding a productivity tracker within our app",
+      html_url: "https://github.com/test/test/pull/2",
+      requested_reviewers: [],
+      base: {
+        ref: "internal-preview",
+      },
+    };
+    const pullRequestMock = mock<PullRequestOpenedEvent["pull_request"]>({
+      ...prData,
+      base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+        ref: "main",
+      }),
+    });
+
     const events = [
       {
         event: mock<PullRequestOpenedEvent>({
@@ -250,234 +490,48 @@ describe("chained e2e events", () => {
           mock<PullRequestItem>({
             threadTs: THREAD_TS,
             requiredApprovals: 2,
+            approvalCount: 0,
+          }),
+        );
+      },
+      () => {
+        vi.mocked(getPullRequestInfo).mockResolvedValue(
+          mock<PullRequestInfoResponse>({
+            ...prData,
+            ...baseInfo,
           }),
         );
       },
       {
-        event: mock<PullRequestReviewRequestedEvent>({
-          action: "review_requested",
-          requested_reviewer: users.jim,
+        event: mock<PullRequestConvertedToDraftEvent>({
+          action: "converted_to_draft",
+          sender: users.dwight,
+          pull_request: mock<PullRequestConvertedToDraftEvent["pull_request"]>({
+            ...prData,
+            draft: true,
+            merged: false,
+            user: users.dwight,
+          }),
           repository: repositoryMock,
-          pull_request: pullRequestMock,
         }),
         eventName: "pull_request",
       },
-      () => {
-        vi.mocked(getNumberOfApprovals).mockResolvedValue(1);
-      },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
-      },
-      {
-        event: mock<PullRequestReviewSubmittedEvent>({
-          action: "submitted",
-          sender: users.jim,
-          review: mock<PullRequestReviewSubmittedEvent["review"]>({
-            id: 123,
-            body: "I don't think we should do this...",
-            user: users.michael,
-            state: "commented",
-          }),
-          pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
-            id: pullRequestMock.id,
-          }),
-          repository: repositoryMock,
-        }),
-        eventName: "pull_request_review",
-      },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
-      },
-      {
-        event: mock<PullRequestReviewSubmittedEvent>({
-          action: "submitted",
-          sender: users.dwight,
-          review: mock<PullRequestReviewSubmittedEvent["review"]>({
-            id: 123,
-            body: "Yes!",
-            user: users.dwight,
-            state: "approved",
-          }),
-          pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
-            id: 123,
-            user: users.michael,
-          }),
-          repository: repositoryMock,
-        }),
-        eventName: "pull_request_review",
-      },
     ];
 
-    for (const event of events) {
-      if (typeof event === "function") {
-        await event();
-      } else {
-        console.log("threadTs", THREAD_TS);
-        await handleGithubWebhookEvent({
-          event: event.event as any,
-          eventName: event.eventName,
-        });
-      }
+    await runEvents(events);
+  });
+});
+
+const runEvents = async (events: any[]) => {
+  for (const event of events) {
+    if (typeof event === "function") {
+      await event();
+    } else {
+      console.log("threadTs", THREAD_TS);
+      await handleGithubWebhookEvent({
+        event: event.event as any,
+        eventName: event.eventName,
+      });
     }
-  });
-});
-
-/**
- * These 'tests' aren't actually meant to pass. They're just used to invoke the code
- * with some minimal data and see it in Slack.
- */
-describe("end-to-end tests", () => {
-  it("should post messages to slack", async () => {
-    const prOpenedMessage = mock<PullRequestOpenedEvent>({
-      action: "opened",
-      pull_request: pullRequestMock,
-      repository: repositoryMock,
-    });
-
-    await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
-      eventName: "pull_request",
-    });
-  });
-
-  it("should post a message when the PR has been replied to", async () => {
-    const prOpenedMessage = mock<IssueCommentCreatedEvent>({
-      action: "created",
-      sender: users.dwight,
-      comment: mock<IssueCommentCreatedEvent["comment"]>({
-        id: 1,
-        body: "Hey, this is a reply!",
-      }),
-      issue: mock<IssueCommentCreatedEvent["issue"]>({
-        pull_request: mock<IssueCommentCreatedEvent["issue"]["pull_request"]>({
-          ...basePrData,
-        }),
-      }),
-      repository: repositoryMock,
-    });
-
-    await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
-      eventName: "issue_comment",
-    });
-  });
-
-  it("should post a review comment", async () => {
-    vi.mocked(getNumberOfApprovals).mockResolvedValue(1);
-
-    const reviewCommentMessage = mock<PullRequestReviewCommentCreatedEvent>({
-      action: "created",
-      sender: users.jim,
-      comment: mock<PullRequestReviewCommentCreatedEvent["comment"]>({
-        html_url: "https://github.com/test/test/pull/1",
-        id: 2,
-        body: "Can I be removed from this list?",
-        user: users.jim,
-      }),
-      pull_request: mock<PullRequestReviewCommentCreatedEvent["pull_request"]>({
-        id: 2,
-      }),
-      repository: repositoryMock,
-    });
-
-    await handleGithubWebhookEvent({
-      event: reviewCommentMessage as any,
-      eventName: "pull_request_review_comment",
-    });
-  });
-
-  it("should post requested changes", async () => {
-    const prOpenedMessage = mock<PullRequestReviewSubmittedEvent>({
-      action: "submitted",
-      sender: users.jim,
-      review: mock<PullRequestReviewSubmittedEvent["review"]>({
-        id: 123,
-        body: "Can I be removed from this list please?",
-        user: users.jim,
-        state: "changes_requested",
-      }),
-      pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
-        id: 123,
-      }),
-      repository: repositoryMock,
-    });
-
-    await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
-      eventName: "pull_request_review",
-    });
-  });
-
-  it("should post pull request approved", async () => {
-    const prOpenedMessage = mock<PullRequestReviewSubmittedEvent>({
-      action: "submitted",
-      review: mock<PullRequestReviewSubmittedEvent["review"]>({
-        id: 123,
-        body: "Yes!",
-        user: users.dwight,
-        state: "approved",
-      }),
-      pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
-        id: 123,
-      }),
-      repository: repositoryMock,
-    });
-
-    await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
-      eventName: "pull_request_review",
-    });
-  });
-
-  it("should post pull request merged", async () => {
-    const prOpenedMessage = mock<PullRequestClosedEvent>({
-      action: "closed",
-      pull_request: mock<PullRequestClosedEvent["pull_request"]>({
-        ...basePrData,
-        additions: 432,
-        deletions: 123,
-        user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
-          login: "jim",
-          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-        }),
-        base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
-          ref: "main",
-        }),
-        merged: true,
-        closed_at: "2024-11-17T15:00:00Z",
-      }),
-      repository: repositoryMock,
-    });
-
-    await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
-      eventName: "pull_request",
-    });
-  });
-
-  it("should post pull request closed", async () => {
-    const prOpenedMessage = mock<PullRequestClosedEvent>({
-      action: "closed",
-      pull_request: mock<PullRequestClosedEvent["pull_request"]>({
-        ...basePrData,
-        additions: 432,
-        deletions: 123,
-        user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
-          login: "jim",
-          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-        }),
-        base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
-          ref: "main",
-        }),
-        merged: false,
-        closed_at: "2024-11-17T15:00:00Z",
-      }),
-      repository: repositoryMock,
-    });
-
-    await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
-      eventName: "pull_request",
-    });
-  });
-});
+  }
+};
