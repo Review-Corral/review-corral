@@ -4,6 +4,7 @@ import { AuthStack } from "./AuthStack";
 import { MainStack } from "./MainStack";
 import { StorageStack } from "./StorageStack";
 import { HOSTED_ZONE } from "./constructs/Api";
+import { HostedZone } from "aws-cdk-lib/aws-route53";
 
 export const getFrontendUrl = ({ local, stage }: App) => {
   if (local) return "http://localhost:3000";
@@ -14,10 +15,7 @@ export const getFrontendUrl = ({ local, stage }: App) => {
 };
 
 export function FrontendStack({ stack, app }: StackContext) {
-  const {
-    slackEnvVars,
-    api: { api },
-  } = use(MainStack);
+  const { slackEnvVars, api } = use(MainStack);
   // Just here to try and fix typing
   const { table } = use(StorageStack);
   const { authUrl } = use(AuthStack);
@@ -31,12 +29,17 @@ export function FrontendStack({ stack, app }: StackContext) {
       : {
           domainName: frontendUrl,
           domainAlias: `www.${frontendUrl}`,
-          hostedZone: HOSTED_ZONE,
+          cdk: {
+            hostedZone: HostedZone.fromHostedZoneAttributes(stack, "MyZone", {
+              hostedZoneId: "Z0854557GLD532VHXK6N",
+              zoneName: "reviewcorral.com",
+            }),
+          },
         },
     bind: [table],
     // Pass in our environment variables
     environment: {
-      NEXT_PUBLIC_API_URL: api.customDomainUrl ?? api.url,
+      NEXT_PUBLIC_API_URL: api.api.customDomainUrl ?? api.api.url,
       NEXT_PUBLIC_REGION: app.region,
       NEXT_PUBLIC_AUTH_URL: authUrl,
       NEXT_PUBLIC_STRIPE_PRICE_ID:
