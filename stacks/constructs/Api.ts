@@ -6,6 +6,7 @@ import {
   Api as SstApi,
   Stack,
 } from "sst/constructs";
+import { HostedZone } from "aws-cdk-lib/aws-route53";
 
 export const HOSTED_ZONE = "reviewcorral.com";
 export const PROD_STAGE = "prod";
@@ -31,7 +32,12 @@ export class Api extends Construct {
     this.api = new SstApi(stack, "api", {
       customDomain: {
         domainName: Api.getDomain(app),
-        hostedZone: HOSTED_ZONE,
+        cdk: {
+          hostedZone: HostedZone.fromHostedZoneAttributes(stack, "MyZone", {
+            hostedZoneId: "Z0854557GLD532VHXK6N",
+            zoneName: "reviewcorral.com",
+          }),
+        },
       },
       defaults: {
         function: functionDefaults,
