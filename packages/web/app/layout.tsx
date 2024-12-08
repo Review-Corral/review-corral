@@ -17,9 +17,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <div className="min-h-full min-w-[900px] overflow-x-auto">
-          <main className="">{children}</main>
-        </div>
+        {/* <div className="min-h-full min-w-[900px] overflow-x-auto"> */}
+        <main className="">{children}</main>
+        {/* </div> */}
       </body>
     </html>
   );
