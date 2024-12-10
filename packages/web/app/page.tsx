@@ -1,7 +1,5 @@
 import Image from "next/image";
-import { ArrowRight, Slack, Github, Bell, Zap, Users } from "lucide-react";
 import { Button } from "@/components/shadcn/button";
-import { redirect } from "next/navigation";
 import Link from "next/link";
 
 export default function LandingPage() {
@@ -13,7 +11,7 @@ export default function LandingPage() {
             <Image
               height={48}
               width={48}
-              src="/review_corral_logo.png"
+              src="/review_corral_logo-min.png"
               alt="Review Corral logo"
             />
             <span className="text-2xl font-bold text-gray-900">Review Corral</span>
@@ -52,7 +50,7 @@ export default function LandingPage() {
               <Image
                 height={400}
                 width={600}
-                src="/review_corral_example_1.png"
+                src="/review_corral_example_1-min.png"
                 alt="Review Corral Example 1"
               />
             </div>
