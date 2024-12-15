@@ -8,7 +8,7 @@ export default function LandingPage() {
       <header className="container mx-auto px-4 py-8">
         <nav className="flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <Image
+            <img
               height={48}
               width={48}
               src="/review_corral_logo-min.png"
@@ -47,7 +47,7 @@ export default function LandingPage() {
           </div>
           <div className="md:w-1/2 flex justify-center">
             <div className="max-w-md md:max-w-fit bg-gray-200 rounded-lg flex items-center justify-center">
-              <Image
+              <img
                 height={400}
                 width={600}
                 src="/review_corral_example_1-min.png"
@@ -59,7 +59,7 @@ export default function LandingPage() {
       </main>
 
       <footer className="container mx-auto px-4 py-8 text-center text-gray-600">
-        <p>&copy; 2024 Review Corral. All rights reserved.</p>
+        <p>&copy; {new Date().getFullYear()} Review Corral. All rights reserved.</p>
       </footer>
     </div>
   );
