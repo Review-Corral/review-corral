@@ -1,32 +1,9 @@
-import Image from "next/image";
 import { Button } from "@/components/shadcn/button";
 import Link from "next/link";
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50 text-gray-900">
-      <header className="container mx-auto px-4 py-8">
-        <nav className="flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <img
-              height={48}
-              width={48}
-              src="/review_corral_logo-min.png"
-              alt="Review Corral logo"
-            />
-            <span className="text-2xl font-bold text-gray-900">Review Corral</span>
-          </div>
-          <Link href="/app">
-            <Button
-              variant="outline"
-              className="text-gray-900 border-gray-300 hover:bg-gray-100"
-            >
-              Get Started
-            </Button>
-          </Link>
-        </nav>
-      </header>
-
       <main className="container mx-auto px-4 py-16">
         <div className="flex flex-col md:flex-row items-center justify-between mb-10">
           <div className="md:w-1/2 mb-8 md:mb-0 pr-8">
@@ -59,7 +36,14 @@ export default function LandingPage() {
       </main>
 
       <footer className="container mx-auto px-4 py-8 text-center text-gray-600">
-        <p>&copy; {new Date().getFullYear()} Review Corral. All rights reserved.</p>
+        <div className="flex justify-center items-center gap-4">
+          {" "}
+          <p>&copy; {new Date().getFullYear()} Review Corral. All rights reserved.</p>
+          <p className="text-gray-300"> | </p>
+          <p>
+            <Link href="/privacy">Privacy Policy</Link>
+          </p>
+        </div>
       </footer>
     </div>
   );
