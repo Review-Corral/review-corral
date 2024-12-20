@@ -3,7 +3,7 @@ import Link from "next/link";
 
 export default function LandingPage() {
   return (
-    <div className="min-h-screen bg-gray-50 text-gray-900">
+    <div className="text-gray-900">
       <main className="container mx-auto px-4 py-16">
         <div className="flex flex-col md:flex-row items-center justify-between mb-10">
           <div className="md:w-1/2 mb-8 md:mb-0 pr-8">
@@ -34,17 +34,6 @@ export default function LandingPage() {
           </div>
         </div>
       </main>
-
-      <footer className="container mx-auto px-4 py-8 text-center text-gray-600">
-        <div className="flex justify-center items-center gap-4">
-          {" "}
-          <p>&copy; {new Date().getFullYear()} Review Corral. All rights reserved.</p>
-          <p className="text-gray-300"> | </p>
-          <p>
-            <Link href="/privacy">Privacy Policy</Link>
-          </p>
-        </div>
-      </footer>
     </div>
   );
 }
