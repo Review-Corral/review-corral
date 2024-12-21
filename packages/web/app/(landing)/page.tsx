@@ -1,12 +1,5 @@
 import { Button } from "@/components/shadcn/button";
-import {
-  DialogHeader,
-  DialogContent,
-  DialogDescription,
-  DialogTitle,
-  DialogTrigger,
-  Dialog,
-} from "@/components/shadcn/dialog";
+import { DialogContent, DialogTrigger, Dialog } from "@/components/shadcn/dialog";
 import Link from "next/link";
 
 export default function LandingPage() {
