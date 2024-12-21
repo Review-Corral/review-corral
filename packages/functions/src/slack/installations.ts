@@ -1,8 +1,8 @@
 import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
 import { getSlackInstallationsForOrganization } from "@domain/dynamodb/fetchers/slack";
 import { Logger } from "@domain/logging";
+import ApiHandler from "src/handler";
 import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
 
 const LOGGER = new Logger("slack:installations");

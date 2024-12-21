@@ -1,6 +1,6 @@
 import { beforeEach } from "node:test";
 import { handleGithubWebhookEvent } from "@domain/github/webhooks";
-import { APIGatewayProxyEventV2, Context } from "aws-lambda";
+import { APIGatewayProxyEvent, APIGatewayProxyEventV2, Context } from "aws-lambda";
 import { describe, expect, it, vi } from "vitest";
 import { handler } from "./events";
 
@@ -54,7 +54,7 @@ describe("event.spec", () => {
             "sha256=b68844bb46a27548f37cede3c726a13bf677a081a4a10ff37cc6acbe89e7d6f3",
         },
         body: JSON.stringify(eventBody),
-      } as any as APIGatewayProxyEventV2,
+      } as any as APIGatewayProxyEvent,
       {} as any as Context,
     );
 

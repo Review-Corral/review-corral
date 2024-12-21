@@ -9,8 +9,8 @@ import {
 import { InstallationsData } from "@domain/github/endpointTypes";
 import { getUserInstallations } from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
+import ApiHandler from "src/handler";
 import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("github:installations");
 

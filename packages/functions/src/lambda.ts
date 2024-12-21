@@ -1,6 +1,6 @@
-import { ApiHandler } from "sst/node/api";
+import ApiHandler from "./handler";
 
-export const handler = ApiHandler(async (_evt) => {
+export const main = ApiHandler(async (_event) => {
   return {
     statusCode: 200,
     body: `Hello world. The time is ${new Date().toISOString()}`,

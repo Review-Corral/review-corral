@@ -6,6 +6,10 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
+    "api": {
+      "type": "sst.aws.ApiGatewayV2"
+      "url": string
+    }
     "main": {
       "name": string
       "type": "sst.aws.Dynamo"

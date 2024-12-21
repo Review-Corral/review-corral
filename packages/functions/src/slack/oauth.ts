@@ -2,7 +2,7 @@ import { assertVarExists } from "@core/utils/assert";
 import { insertSlackIntegration } from "@domain/dynamodb/fetchers/slack";
 import { Logger } from "@domain/logging";
 import ky from "ky";
-import { ApiHandler } from "sst/node/api";
+import ApiHandler from "src/handler";
 import * as z from "zod";
 
 const LOGGER = new Logger("slack:oauth");
@@ -110,6 +110,7 @@ export const handler = ApiHandler(async (event, _context) => {
 
     return {
       statusCode: 302,
+      body: "",
       headers: {
         Location: `${assertVarExists("BASE_FE_URL")}`,
       },
