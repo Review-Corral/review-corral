@@ -1,8 +1,11 @@
+import { getStageLookups } from "./lookups";
+
 export const table = new sst.aws.Dynamo("main", {
   transform: {
     table: (args, opts) => {
-      args.name = "alex-review-corral-main";
-      opts.import = "alex-review-corral-main";
+      const tableLookup = getStageLookups($app.stage).table;
+      args.name = tableLookup.name;
+      opts.import = tableLookup.import;
     },
   },
   fields: {
