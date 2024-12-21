@@ -44,7 +44,7 @@ export default function LandingPage() {
               </DialogTrigger>
             </div>
           </div>
-          <DialogContent className="max-w-screen-lg bg-gray-200 w-[80vw]">
+          <DialogContent className="max-w-screen-md md:max-w-screen-lg bg-gray-200">
             <div className="p-2">
               <img src="/rc_example_1_full.png" alt="Review Corral Example 1 Full" />
             </div>
