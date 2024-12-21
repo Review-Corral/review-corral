@@ -17,7 +17,9 @@
       "./packages/core/db/migrations",
       "./packages/domain/integration/**/__snapshot.json",
       "./packages/domain/integration/**/data",
-      "./packages/frontend/src/sst-env.d.ts"
+      "./packages/frontend/src/sst-env.d.ts",
+      "./packages/web/.next/**",
+      "./packages/web/.open-next/**"
     ]
   },
   "formatter": {
