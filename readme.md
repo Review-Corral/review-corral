@@ -5,7 +5,7 @@ in a more elegant manner to minimize noise for your Engineering team.
 
 ## Self Hosting
 
-Coming soon... Reach out to @mclean25 if you're interested in setting this up
+Coming soon... email me at alex.mclean25@gmail.com if you're interested in setting this up
 
 ## The differences between Organizations and Installations
 
