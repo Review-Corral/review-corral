@@ -1,28 +1,30 @@
 import { User } from "@core/dynamodb/entities/types";
-import { fetchUserById } from "@domain/dynamodb/fetchers/users";
-import { useSession } from "sst/node/auth";
+// import { fetchUserById } from "@domain/dynamodb/fetchers/users";
+// import { useSession } from "sst/node/auth";
 
 export const useUser = async (): Promise<{
   user: User | null;
   error: string | null;
 }> => {
-  const session = useSession();
+  // const session = useSession();
 
-  console.log("Session2", { session });
+  // console.log("Session2", { session });
 
-  if (session.type !== "user") {
-    return { user: null, error: "User not set in session" };
-  }
+  // if (session.type !== "user") {
+  //   return { user: null, error: "User not set in session" };
+  // }
 
-  const userId = session.properties.userId;
+  // const userId = session.properties.userId;
 
-  console.log("Searching for user with UserId: ", userId);
+  // console.log("Searching for user with UserId: ", userId);
 
-  const user = await fetchUserById(userId);
+  // const user = await fetchUserById(userId);
 
-  console.log("Returned user", user);
+  // console.log("Returned user", user);
 
-  if (!user) return { user: null, error: "No user found in database" };
+  // if (!user) return { user: null, error: "No user found in database" };
 
-  return { user, error: null };
+  // return { user, error: null };
+
+  return { user: null, error: "TODO:" };
 };

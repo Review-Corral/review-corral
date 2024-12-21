@@ -1,6 +1,6 @@
 import { Logger } from "@domain/logging";
 import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
+import ApiHandler from "./handler";
 
 const LOGGER = new Logger("profile:getProfile");
 

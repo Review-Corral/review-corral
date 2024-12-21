@@ -11,12 +11,12 @@ import { SlackUserEntity } from "@core/dynamodb/entities/slackUser";
 import { SubscriptionEntity } from "@core/dynamodb/entities/subscription";
 import { UserEntity } from "@core/dynamodb/entities/user";
 import { EntityConfiguration, Service } from "electrodb";
-import { Table } from "sst/node/table";
+import { Resource } from "sst";
 
 export const Client = new DynamoDBClient({});
 
 export const Configuration: EntityConfiguration = {
-  table: Table.main.tableName,
+  table: Resource.main.name,
   client: Client,
 };
 
