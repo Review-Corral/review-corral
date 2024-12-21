@@ -1,30 +1,21 @@
-import { SSTConfig } from "sst";
-import { AuthStack } from "./stacks/AuthStack";
-import { FrontendStack } from "./stacks/FrontendStack";
-import { MainStack } from "./stacks/MainStack";
-import { StorageStack } from "./stacks/StorageStack";
+/// <reference path="./.sst/platform/config.d.ts" />
 
-enum Stages {
-  DEV = "dev",
-  PROD = "prod",
-}
-
-export default {
-  config(_input) {
+export default $config({
+  app(input) {
     return {
       name: "review-corral",
-      region: "us-east-1",
-      profile: "rc",
+      removal: input?.stage === "production" ? "retain" : "remove",
+      protect: ["production"].includes(input?.stage),
+      home: "aws",
+      providers: {
+        aws: {
+          region: "us-east-1",
+          profile: "rc",
+        },
+      },
     };
   },
-  stacks(app) {
-    app.stack(StorageStack).stack(MainStack).stack(AuthStack).stack(FrontendStack);
-
-    if (app.stage !== Stages.PROD) {
-      app.setDefaultRemovalPolicy("destroy");
-    }
-
-    // Done for SST v3 upgrade to prevent accidently deleting resources
-    app.setDefaultRemovalPolicy("retain");
+  async run() {
+    await import("./infra/storage");
   },
-} satisfies SSTConfig;
+});

@@ -4,31 +4,32 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "sst dev",
     "build": "sst build",
     "build:core": "tsc -p ./packages/core/tsconfig.json",
-    "build:types": "sst types --profile test --stage test",
     "build:core:watch": "p build:core --watch",
-    "deploy": "sst deploy",
-    "remove": "sst remove",
-    "console": "sst console",
-    "typecheck": "tsc -p ./tsconfig.json -noEmit && pnpm run -r typecheck",
-    "lint": "biome lint --apply .",
-    "lint:fix": "biome lint --apply-unsafe .",
+    "build:types": "sst types --profile test --stage test",
     "check": "biome check --apply .",
     "check:ci": "biome check --error-on-warnings .",
+    "console": "sst console",
+    "deploy": "sst deploy",
+    "dev": "sst dev",
     "format": "biome format --write .",
     "format:check": "biome format .",
+    "lint": "biome lint --apply .",
+    "lint:fix": "biome lint --apply-unsafe .",
+    "migrate:gen": "pnpm drizzle-kit generate:pg --out ./packages/core/db/migrations/ --schema ./packages/core/db/schema.ts",
+    "remove": "sst remove",
     "test": "vitest run --exclude 'e2e.ts'",
-    "test:e2e": "vitest run .e2e.ts",
     "test:ci": "vitest run --silent .spec.ts",
+    "test:e2e": "vitest run .e2e.ts",
     "test:watch": "sst bind vitest watch .spec.ts",
-    "migrate:gen": "pnpm drizzle-kit generate:pg --out ./packages/core/db/migrations/ --schema ./packages/core/db/schema.ts"
+    "typecheck": "tsc -p ./tsconfig.json -noEmit && pnpm run -r typecheck"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@octokit/webhooks-types": "^7.6.1",
     "@tsconfig/node18": "^18.2.4",
+    "@types/aws-lambda": "8.10.146",
     "aws-cdk-lib": "2.142.1",
     "constructs": "10.3.0",
     "drizzle-kit": "^0.20.18",
@@ -41,5 +42,8 @@
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "pnpm@9.14.2"
+  "packageManager": "pnpm@9.14.2",
+  "dependencies": {
+    "sst": "3.4.27"
+  }
 }
