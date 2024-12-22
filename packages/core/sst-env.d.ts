@@ -6,6 +6,10 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
+    "Auth": {
+      "type": "sst.aws.Auth"
+      "url": string
+    }
     "api": {
       "type": "sst.aws.ApiGatewayV2"
       "url": string

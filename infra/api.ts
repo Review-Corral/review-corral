@@ -1,3 +1,4 @@
+import { auth } from "./auth";
 import { table } from "./storage";
 
 export const HOSTED_ZONE = "reviewcorral.com";
@@ -12,7 +13,7 @@ export function getDomain(stage: string) {
 export const api = new sst.aws.ApiGatewayV2("api", {
   // domain: "api.reviewcorral.com", // TODO: add after deploying
   // dns: sst.aws.dns({ override: true })
-  link: [table],
+  link: [table, auth],
 });
 
 const basePath = "packages/functions/src";
