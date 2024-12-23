@@ -10,6 +10,14 @@ declare module "sst" {
       "type": "sst.aws.Auth"
       "url": string
     }
+    "GithubClientId": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "GithubClientSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "api": {
       "type": "sst.aws.ApiGatewayV2"
       "url": string

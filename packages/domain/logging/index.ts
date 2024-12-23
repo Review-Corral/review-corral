@@ -1,6 +1,4 @@
-import { z } from "zod";
-import config from "../utils/config";
-import { ConsoleOutput, FileOutput, serializeData } from "./outputs";
+import { ConsoleOutput, FileOutput } from "./outputs";
 import { LogLevel, LogOutput, LogOutputOptions, LoggerMethods } from "./types";
 
 const LOG_LEVEL_SEVERITY: Record<LogLevel, number> = {
@@ -16,7 +14,7 @@ const DEFAULT_LOG_OUTPUT_OPTIONS: LogOutputOptions = {
 };
 
 export class Logger implements LoggerMethods {
-  private static readonly level: LogLevel = Logger.getLevelFromEnv();
+  private static readonly level: LogLevel = LogLevel.DEBUG;
   public static readonly colorize: boolean = !!process.env.COLORIZE_LOGS;
   private static logOutput: LogOutput = new ConsoleOutput(Logger.colorize);
 
@@ -37,7 +35,7 @@ export class Logger implements LoggerMethods {
       forceEmitDebugLogs,
     }: { logOutputOverride?: LogOutput; forceEmitDebugLogs?: boolean } = {},
   ) {
-    this.names = [config.environment, config.functionName, name];
+    this.names = [name];
     this.logOutputOverride = logOutputOverride;
     this.forceEmitDebugLogs = forceEmitDebugLogs ?? false;
   }
@@ -50,18 +48,6 @@ export class Logger implements LoggerMethods {
 
   public static setLogOutput(logOutput: LogOutput): void {
     Logger.logOutput = logOutput;
-  }
-
-  private static getLevelFromEnv(): LogLevel {
-    try {
-      return z.nativeEnum(LogLevel).parse((process.env.LOG_LEVEL ?? "").toLowerCase());
-    } catch (error) {
-      console.warn(
-        `Invalid log level, defaulting to ${LogLevel.INFO.toUpperCase()}: ` +
-          `${serializeData({ error }, Logger.colorize)}`,
-      );
-      return LogLevel.INFO;
-    }
   }
 
   private log(

@@ -7,17 +7,17 @@ import { session } from "./session";
 import { Logger } from "@domain/logging";
 import { HttpError } from "@core/utils/errors/Errors";
 import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
-import { assertVarExists } from "@core/utils/assert";
 import { Db } from "@domain/dynamodb/client";
+import { Resource } from "sst";
 
 const LOGGER = new Logger("functions:auth");
 
-export const AuthHandler = auth.authorizer({
+export const handler = auth.authorizer({
   session,
   providers: {
     github: GithubAdapter({
-      clientID: assertVarExists("GH_CLIENT_ID"),
-      clientSecret: assertVarExists("GH_CLIENT_SECRET"),
+      clientID: Resource.GithubClientId.value,
+      clientSecret: Resource.GithubClientSecret.value,
       scope: "user",
     }),
   },
@@ -49,13 +49,16 @@ export const AuthHandler = auth.authorizer({
           LOGGER.debug("Users fetch response: ", userQuery);
 
           const user = await getOrCreateUser(userQuery, tokenSet.access_token);
-          const redirectUri = `${assertVarExists("BASE_FE_URL")}/app/auth/login/success`;
+
+          const FE_URL = "https://www.alexmclean.ca"; // TODO: get dyanmically
+
+          const redirectUri = `${FE_URL}/app/auth/login/success`;
 
           LOGGER.debug("Set auth redirect URI ", { redirectUri, userId: user.userId });
 
           return ctx.session({
             type: "user",
-            redirectUri: `${process.env.BASE_FE_URL}/app/auth/login/success`,
+            redirectUri,
             properties: {
               userId: userQuery.id,
             },
