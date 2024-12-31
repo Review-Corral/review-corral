@@ -9,6 +9,7 @@ import { authorizer, createSubjects } from "@openauthjs/openauth";
 import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
 import { object, string } from "valibot";
 import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
+import { handle } from "hono/aws-lambda";
 
 const LOGGER = new Logger("functions:auth");
 
@@ -18,7 +19,7 @@ export const subjects = createSubjects({
   }),
 });
 
-export const handler = authorizer({
+export const preHandler = authorizer({
   subjects,
   storage: DynamoStorage({
     table: Resource.main.name,
@@ -104,3 +105,5 @@ const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
 
   return newUser;
 };
+
+export const handler = handle(preHandler);

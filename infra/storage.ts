@@ -42,15 +42,3 @@ export const table = new sst.aws.Dynamo("main", {
   },
   ttl: "expireAt",
 });
-
-export const authTable = new sst.aws.Dynamo("AuthTable", {
-  fields: {
-    pk: "string",
-    sk: "string",
-  },
-  ttl: "expiry",
-  primaryIndex: {
-    hashKey: "pk",
-    rangeKey: "sk",
-  },
-});
