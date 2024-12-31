@@ -10,6 +10,11 @@ declare module "sst" {
       "type": "sst.aws.Auth"
       "url": string
     }
+    "AuthApi": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
     "GithubClientId": {
       "type": "sst.sst.Secret"
       "value": string
@@ -17,11 +22,6 @@ declare module "sst" {
     "GithubClientSecret": {
       "type": "sst.sst.Secret"
       "value": string
-    }
-    "LambdaApi": {
-      "name": string
-      "type": "sst.aws.Function"
-      "url": string
     }
     "api": {
       "type": "sst.aws.ApiGatewayV2"

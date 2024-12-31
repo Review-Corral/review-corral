@@ -10,7 +10,7 @@ export function getDomain(stage: string) {
   return `${stage}-api.${HOSTED_ZONE}`;
 }
 
-export const api = new sst.aws.ApiGatewayV2("api", {
+const api = new sst.aws.ApiGatewayV2("api", {
   // domain: "api.reviewcorral.com", // TODO: add after deploying
   // dns: sst.aws.dns({ override: true })
   link: [table, auth],
@@ -25,14 +25,13 @@ api.route("GET /profile", `${basePath}/getProfile.handler`);
 // Auth
 // ==============================
 // we're creating a lambda here because this is a Hono app
-const authApi = new sst.aws.Function("LambdaApi", {
+const authApi = new sst.aws.Function("AuthApi", {
   handler: "packages/functions/src/auth/client.handler",
   url: true,
   environment: {
     OPENAUTH_ISSUER: auth.url.apply((v) => v!.replace(/\/$/, "")),
   },
 });
-api.route("GET /auth", authApi.arn);
 
 // ==============================
 // Github
@@ -90,3 +89,5 @@ api.route(
   "DELETE /slack/{organizationId}/installations",
   `${basePath}/slack/deleteIntegration.handler`,
 );
+
+export { api, authApi };

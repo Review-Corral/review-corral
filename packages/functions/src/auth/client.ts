@@ -9,6 +9,9 @@ const client = createClient({
 });
 
 const app = new Hono()
+  .get("/test", async (c) => {
+    return c.json({ message: "Hello World!" });
+  })
   .get("/authorize", async (c) => {
     const origin = new URL(c.req.url).origin;
     const { url } = await client.authorize(`${origin}/callback`, "code");
