@@ -1,6 +1,5 @@
 import { UserResponse } from "@domain/github/endpointTypes.js";
 import ky from "ky";
-import { session } from "./session";
 import { Logger } from "@domain/logging";
 import { HttpError } from "@core/utils/errors/Errors";
 import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
