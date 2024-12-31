@@ -18,6 +18,11 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "LambdaApi": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
     "api": {
       "type": "sst.aws.ApiGatewayV2"
       "url": string

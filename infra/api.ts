@@ -22,6 +22,19 @@ api.route("GET /", `${basePath}/lambda.handler`);
 api.route("GET /profile", `${basePath}/getProfile.handler`);
 
 // ==============================
+// Auth
+// ==============================
+// we're creating a lambda here because this is a Hono app
+const authApi = new sst.aws.Function("LambdaApi", {
+  handler: "packages/functions/src/auth/client.handler",
+  url: true,
+  environment: {
+    OPENAUTH_ISSUER: auth.url.apply((v) => v!.replace(/\/$/, "")),
+  },
+});
+api.route("GET /auth", authApi.arn);
+
+// ==============================
 // Github
 // ==============================
 api.route("GET /gh/webhook-event", `${basePath}/github/events.handler`);

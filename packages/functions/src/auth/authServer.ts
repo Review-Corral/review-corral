@@ -5,19 +5,13 @@ import { HttpError } from "@core/utils/errors/Errors";
 import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { Db } from "@domain/dynamodb/client";
 import { Resource } from "sst";
-import { authorizer, createSubjects } from "@openauthjs/openauth";
+import { authorizer } from "@openauthjs/openauth";
 import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
-import { object, string } from "valibot";
 import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
 import { handle } from "hono/aws-lambda";
+import { subjects } from "./subjects";
 
 const LOGGER = new Logger("functions:auth");
-
-export const subjects = createSubjects({
-  user: object({
-    email: string(),
-  }),
-});
 
 export const preHandler = authorizer({
   subjects,
