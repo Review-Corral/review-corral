@@ -6,7 +6,7 @@ const ghClientSecret = new sst.Secret("GithubClientSecret");
 export const auth = new sst.aws.Auth("Auth", {
   authorizer: {
     link: [table, ghClientId, ghClientSecret],
-    handler: "./infra/src/authHandler.handler",
+    handler: "../packages/functions/src/auth/handler.handler",
     url: true,
   },
   forceUpgrade: "v2",

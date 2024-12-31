@@ -21,7 +21,7 @@ export const subjects = createSubjects({
 export const handler = authorizer({
   subjects,
   storage: DynamoStorage({
-    table: Resource.AuthTable.name,
+    table: Resource.main.name,
   }),
   providers: {
     github: GithubAdapter({
