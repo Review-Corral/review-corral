@@ -34,7 +34,7 @@
     "constructs": "10.3.0",
     "drizzle-kit": "^0.20.18",
     "node-fetch": "^3.3.2",
-    "sst": "3.4.27",
+    "sst": "3.4.30",
     "typescript": "^5.7.2",
     "vite-node": "^1.6.0",
     "vitest": "^1.6.0"
@@ -44,6 +44,6 @@
   ],
   "packageManager": "pnpm@9.14.2",
   "dependencies": {
-    "sst": "3.4.27"
+    "sst": "3.4.30"
   }
 }

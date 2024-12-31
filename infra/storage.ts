@@ -1,13 +1,11 @@
-import { getStageLookups } from "./lookups";
-
 export const table = new sst.aws.Dynamo("main", {
-  transform: {
-    table: (args, opts) => {
-      const tableLookup = getStageLookups($app.stage).table;
-      args.name = tableLookup.name;
-      opts.import = tableLookup.import;
-    },
-  },
+  // transform: {
+  //   table: (args, opts) => {
+  //     const tableLookup = getStageLookups($app.stage).table;
+  //     args.name = tableLookup.name;
+  //     opts.import = tableLookup.import;
+  //   },
+  // },
   fields: {
     pk: "string",
     sk: "string",
@@ -43,4 +41,16 @@ export const table = new sst.aws.Dynamo("main", {
     },
   },
   ttl: "expireAt",
+});
+
+export const authTable = new sst.aws.Dynamo("AuthTable", {
+  fields: {
+    pk: "string",
+    sk: "string",
+  },
+  ttl: "expiry",
+  primaryIndex: {
+    hashKey: "pk",
+    rangeKey: "sk",
+  },
 });
