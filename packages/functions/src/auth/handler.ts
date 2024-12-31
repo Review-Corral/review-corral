@@ -1,6 +1,3 @@
-import { GithubAdapter } from "sst/auth/adapter";
-
-import { auth } from "sst/auth";
 import { UserResponse } from "@domain/github/endpointTypes.js";
 import ky from "ky";
 import { session } from "./session";
@@ -9,65 +6,68 @@ import { HttpError } from "@core/utils/errors/Errors";
 import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { Db } from "@domain/dynamodb/client";
 import { Resource } from "sst";
+import { authorizer, createSubjects } from "@openauthjs/openauth";
+import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
+import { object, string } from "valibot";
+import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
 
 const LOGGER = new Logger("functions:auth");
 
-export const handler = auth.authorizer({
-  session,
+export const subjects = createSubjects({
+  user: object({
+    email: string(),
+  }),
+});
+
+export const handler = authorizer({
+  subjects,
+  storage: DynamoStorage({
+    table: Resource.AuthTable.name,
+  }),
   providers: {
     github: GithubAdapter({
       clientID: Resource.GithubClientId.value,
       clientSecret: Resource.GithubClientSecret.value,
-      scope: "user",
+      scopes: ["user"],
     }),
   },
-  callbacks: {
-    auth: {
-      async allowClient(_clientID: string, _redirect: string) {
-        return true;
-      },
-      async success(ctx, input) {
-        if (input.provider === "github") {
-          const tokenSet = input.tokenset;
-          LOGGER.info("Successfully authenticated with GitHub");
-          console.log({ tokenSet });
+  success: async (ctx, value, input) => {
+    if (value.provider === "github") {
+      const tokenSet = value.tokenset;
+      LOGGER.info("Successfully authenticated with GitHub");
+      console.log({ tokenSet });
 
-          LOGGER.info("Going to fetch user profile information");
+      LOGGER.info("Going to fetch user profile information");
 
-          if (!tokenSet.access_token) throw new HttpError(500, "No access token found");
+      if (!tokenSet.access) throw new HttpError(500, "No access token found");
 
-          // Once we get the user access token, we need to fetch information about the user
-          // from the API to know who the user is
-          const userQuery = await ky
-            .get("https://api.github.com/user", {
-              headers: {
-                Authorization: `token ${tokenSet.access_token}`,
-              },
-            })
-            .json<UserResponse>();
+      // Once we get the user access token, we need to fetch information about the user
+      // from the API to know who the user is
+      const userQuery = await ky
+        .get("https://api.github.com/user", {
+          headers: {
+            Authorization: `token ${tokenSet.access}`,
+          },
+        })
+        .json<UserResponse>();
 
-          LOGGER.debug("Users fetch response: ", userQuery);
+      LOGGER.debug("Users fetch response: ", userQuery);
 
-          const user = await getOrCreateUser(userQuery, tokenSet.access_token);
+      const user = await getOrCreateUser(userQuery, tokenSet.access);
 
-          const FE_URL = "https://www.alexmclean.ca"; // TODO: get dyanmically
+      if (!user.email) throw new HttpError(500, "Failed to create user");
 
-          const redirectUri = `${FE_URL}/app/auth/login/success`;
+      const FE_URL = "https://www.alexmclean.ca"; // TODO: get dyanmically
+      const redirectUri = `${FE_URL}/app/auth/login/success`;
 
-          LOGGER.debug("Set auth redirect URI ", { redirectUri, userId: user.userId });
+      LOGGER.debug("Set auth redirect URI ", { redirectUri, userId: user.userId });
 
-          return ctx.session({
-            type: "user",
-            redirectUri,
-            properties: {
-              userId: userQuery.id,
-            },
-          });
-        } else {
-          throw new HttpError(500, "Unknown provider");
-        }
-      },
-    },
+      return ctx.subject("user", {
+        email: user.email,
+      });
+    } else {
+      throw new HttpError(500, "Unknown provider");
+    }
   },
 });
 
@@ -96,5 +96,12 @@ const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
 
   LOGGER.info("User does not exist, creating a new user", { id: user.id });
   // create a user
-  return await insertUser(user, accessToken);
+  const newUser = await insertUser(user, accessToken);
+  if (!newUser.email)
+    throw new HttpError(
+      500,
+      "New created user doesn't have an email property. Failed?",
+    );
+
+  return newUser;
 };
