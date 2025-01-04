@@ -14,6 +14,7 @@ const app = new Hono()
   })
   .get("/authorize", async (c) => {
     const origin = new URL(c.req.url).origin;
+    console.log(`Got origin in /authorize: ${origin}`);
     const { url } = await client.authorize(`${origin}/callback`, "code");
     return c.redirect(url, 302);
   })

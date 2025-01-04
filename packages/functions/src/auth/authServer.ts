@@ -6,7 +6,7 @@ import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { Db } from "@domain/dynamodb/client";
 import { Resource } from "sst";
 import { authorizer } from "@openauthjs/openauth";
-import { GithubAdapter } from "@openauthjs/openauth/adapter/github";
+import { GithubProvider } from "@openauthjs/openauth/provider/github";
 import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
 import { handle } from "hono/aws-lambda";
 import { subjects } from "./subjects";
@@ -19,7 +19,7 @@ export const preHandler = authorizer({
     table: Resource.main.name,
   }),
   providers: {
-    github: GithubAdapter({
+    github: GithubProvider({
       clientID: Resource.GithubClientId.value,
       clientSecret: Resource.GithubClientSecret.value,
       scopes: ["user"],

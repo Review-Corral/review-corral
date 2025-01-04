@@ -27,7 +27,11 @@ api.route("GET /profile", `${basePath}/getProfile.handler`);
 // we're creating a lambda here because this is a Hono app
 const authApi = new sst.aws.Function("AuthApi", {
   handler: "packages/functions/src/auth/client.handler",
-  url: true,
+  url: {
+    cors: {
+      allowOrigins: ["http://localhost:3000"],
+    },
+  },
   environment: {
     OPENAUTH_ISSUER: auth.url.apply((v) => v!.replace(/\/$/, "")),
   },

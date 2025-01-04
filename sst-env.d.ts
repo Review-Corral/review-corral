@@ -27,6 +27,10 @@ declare module "sst" {
       "type": "sst.aws.ApiGatewayV2"
       "url": string
     }
+    "frontend": {
+      "type": "sst.aws.Nextjs"
+      "url": string
+    }
     "main": {
       "name": string
       "type": "sst.aws.Dynamo"

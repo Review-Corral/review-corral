@@ -20,5 +20,10 @@ export default $config({
     await import("./infra/storage");
     await import("./infra/api");
     await import("./infra/auth");
+    const { frontend } = await import("./infra/frontend");
+
+    return {
+      webUrl: frontend.url,
+    };
   },
 });
