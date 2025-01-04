@@ -10,6 +10,20 @@ const api = new sst.aws.ApiGatewayV2("api", {
   link: [table, auth],
 });
 
+// ==============================
+// Auth
+// ==============================
+// we're creating a lambda here because this is a Hono app
+// const authApi = new sst.aws.Function("AuthApi", {
+//   handler: "packages/functions/src/auth/client.handler",
+//   url: {
+//     cors: false,
+//   }
+//   environment: {
+//     OPENAUTH_ISSUER: auth.url.apply((v) => v!.replace(/\/$/, "")),
+//   },
+// });
+
 const basePath = "packages/functions/src";
 
 api.route("GET /", `${basePath}/lambda.handler`);

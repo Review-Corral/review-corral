@@ -1,8 +1,8 @@
-import { Context, Hono } from "hono";
-import { getCookie, setCookie } from "hono/cookie";
+import { subjects } from "@core/auth/subjects";
 import { createClient } from "@openauthjs/openauth/client";
+import { Context, Hono } from "hono";
 import { handle } from "hono/aws-lambda";
-import { subjects } from "./subjects";
+import { getCookie, setCookie } from "hono/cookie";
 
 const client = createClient({
   clientID: "lambda-api",

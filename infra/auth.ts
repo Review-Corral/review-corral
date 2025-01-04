@@ -13,20 +13,6 @@ export const auth = new sst.aws.Auth("Auth", {
   forceUpgrade: "v2",
 });
 
-// ==============================
-// Auth
-// ==============================
-// we're creating a lambda here because this is a Hono app
-// const authApi = new sst.aws.Function("AuthApi", {
-//   handler: "packages/functions/src/auth/client.handler",
-//   url: {
-//     cors: false,
-//   }
-//   environment: {
-//     OPENAUTH_ISSUER: auth.url.apply((v) => v!.replace(/\/$/, "")),
-//   },
-// });
-
 export const authRouter = new sst.aws.Router("AuthRouter", {
   routes: {
     "/*": auth.url,
