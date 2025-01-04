@@ -49,15 +49,11 @@ export const preHandler = authorizer({
 
       const user = await getOrCreateUser(userQuery, tokenSet.access);
 
-      if (!user.email) throw new HttpError(500, "Failed to create user");
-
-      const FE_URL = "https://www.alexmclean.ca"; // TODO: get dyanmically
-      const redirectUri = `${FE_URL}/app/auth/login/success`;
-
-      LOGGER.debug("Set auth redirect URI ", { redirectUri, userId: user.userId });
+      if (!user.userId)
+        throw new HttpError(500, "User does not have userId (possible null user)");
 
       return ctx.subject("user", {
-        email: user.email,
+        userId: user.userId,
       });
     } else {
       throw new HttpError(500, "Unknown provider");
@@ -99,5 +95,14 @@ const getOrCreateUser = async (user: UserResponse, accessToken: string) => {
 
   return newUser;
 };
+
+preHandler.use("*", async (c, next) => {
+  c.header("Access-Control-Allow-Origin", "http://localhost:3000"); // Replace with your frontend origin
+  c.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  c.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  c.header("Access-Control-Allow-Credentials", "true"); // If using cookies for authentication
+
+  await next();
+});
 
 export const handler = handle(preHandler);

@@ -30,6 +30,8 @@ const authApi = new sst.aws.Function("AuthApi", {
   url: {
     cors: {
       allowOrigins: ["http://localhost:3000"],
+      allowMethods: ["GET", "POST", "OPTIONS"],
+      allowHeaders: ["Content-Type", "Authorization"],
     },
   },
   environment: {

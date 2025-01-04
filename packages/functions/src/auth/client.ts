@@ -8,7 +8,17 @@ const client = createClient({
   clientID: "lambda-api",
 });
 
-const app = new Hono()
+const app = new Hono();
+app.use("*", async (c, next) => {
+  c.header("Access-Control-Allow-Origin", "http://localhost:3000"); // Replace with your frontend origin
+  c.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  c.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+  c.header("Access-Control-Allow-Credentials", "true"); // If using cookies for authentication
+
+  await next();
+});
+
+app
   .get("/test", async (c) => {
     return c.json({ message: "Hello World!" });
   })

@@ -9,10 +9,9 @@ export const auth = new sst.aws.Auth("Auth", {
     handler: "./packages/functions/src/auth/authServer.handler",
     url: {
       cors: {
-        allowOrigins: [
-          "http://localhost:3000",
-          "https://ozch2fbwx5q2g3grm7cnled74e0gxisu.lambda-url.us-east-1.on.aws",
-        ],
+        allowOrigins: ["http://localhost:3000"],
+        allowMethods: ["GET", "POST", "OPTIONS"],
+        allowHeaders: ["Content-Type", "Authorization"],
       },
     },
   },
