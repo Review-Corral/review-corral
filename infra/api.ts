@@ -22,24 +22,6 @@ api.route("GET /", `${basePath}/lambda.handler`);
 api.route("GET /profile", `${basePath}/getProfile.handler`);
 
 // ==============================
-// Auth
-// ==============================
-// we're creating a lambda here because this is a Hono app
-const authApi = new sst.aws.Function("AuthApi", {
-  handler: "packages/functions/src/auth/client.handler",
-  url: {
-    cors: {
-      allowOrigins: ["http://localhost:3000"],
-      allowMethods: ["GET", "POST", "OPTIONS"],
-      allowHeaders: ["Content-Type", "Authorization"],
-    },
-  },
-  environment: {
-    OPENAUTH_ISSUER: auth.url.apply((v) => v!.replace(/\/$/, "")),
-  },
-});
-
-// ==============================
 // Github
 // ==============================
 api.route("GET /gh/webhook-event", `${basePath}/github/events.handler`);
@@ -96,4 +78,4 @@ api.route(
   `${basePath}/slack/deleteIntegration.handler`,
 );
 
-export { api, authApi };
+export { api };
