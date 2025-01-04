@@ -9,6 +9,8 @@ export async function GET(_request: Request) {
   const accessToken = cookiesStore.get("access_token");
   const refreshToken = cookiesStore.get("refresh_token");
 
+  const response = NextResponse.redirect("/api/auth/authorize", 302);
+
   try {
     if (accessToken) {
       const verified = await client.verify(subjects, accessToken.value, {
@@ -18,11 +20,11 @@ export async function GET(_request: Request) {
       if (verified.err) throw new Error("Invalid access token");
 
       if (verified.tokens) {
-        setTokens(verified.tokens.access, verified.tokens.refresh);
+        setTokens(response, verified.tokens.access, verified.tokens.refresh);
       }
     }
   } catch (e) {
     console.error(e);
-    return NextResponse.redirect("/api/auth/authorize", 302);
+    return response;
   }
 }

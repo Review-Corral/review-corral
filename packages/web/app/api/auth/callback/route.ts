@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { client } from "../client";
+import { client, setTokens } from "../client";
 
 /**
  * Handles GET requests to the /api/callback endpoint.
@@ -25,18 +25,7 @@ export async function GET(request: Request) {
 
     // Set session cookies (access and refresh tokens)
     const response = NextResponse.redirect("/", 302);
-    response.cookies.set("access_token", exchanged.tokens.access, {
-      path: "/",
-      httpOnly: true, // Ensure tokens are secure
-      secure: process.env.NODE_ENV === "production", // Use secure cookies in production
-      sameSite: "lax",
-    });
-    response.cookies.set("refresh_token", exchanged.tokens.refresh, {
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-    });
+    setTokens(response, exchanged.tokens.access, exchanged.tokens.refresh);
 
     return response;
   } catch (error: any) {
