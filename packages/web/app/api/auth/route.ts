@@ -3,13 +3,14 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { client, setTokens } from "./client";
 
-export async function GET(_request: Request) {
+export async function GET(request: Request) {
   const cookiesStore = cookies();
 
   const accessToken = cookiesStore.get("access_token");
   const refreshToken = cookiesStore.get("refresh_token");
 
-  const response = NextResponse.redirect("/api/auth/authorize", 302);
+  const origin = new URL(request.url).origin;
+  const authorizeResponse = NextResponse.redirect(`${origin}/api/auth/authorize`, 302);
 
   try {
     if (accessToken) {
@@ -20,11 +21,15 @@ export async function GET(_request: Request) {
       if (verified.err) throw new Error("Invalid access token");
 
       if (verified.tokens) {
-        setTokens(response, verified.tokens.access, verified.tokens.refresh);
+        console.log("Already verified, setting tokens");
+        setTokens(authorizeResponse, verified.tokens.access, verified.tokens.refresh);
       }
+      return NextResponse.redirect("/", 302);
+    } else {
+      throw new Error("No access token found");
     }
   } catch (e) {
     console.error(e);
-    return response;
+    return authorizeResponse;
   }
 }

@@ -1,15 +1,15 @@
-import { UserResponse } from "@domain/github/endpointTypes.js";
-import ky from "ky";
-import { Logger } from "@domain/logging";
+import { subjects } from "@core/auth/subjects";
 import { HttpError } from "@core/utils/errors/Errors";
-import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { Db } from "@domain/dynamodb/client";
-import { Resource } from "sst";
+import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
+import { UserResponse } from "@domain/github/endpointTypes.js";
+import { Logger } from "@domain/logging";
 import { authorizer } from "@openauthjs/openauth";
 import { GithubProvider } from "@openauthjs/openauth/provider/github";
 import { DynamoStorage } from "@openauthjs/openauth/storage/dynamo";
 import { handle } from "hono/aws-lambda";
-import { subjects } from "./subjects";
+import ky from "ky";
+import { Resource } from "sst";
 
 const LOGGER = new Logger("functions:auth");
 
