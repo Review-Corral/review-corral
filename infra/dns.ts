@@ -3,7 +3,10 @@ const baseDomain = "reviewcorral.com";
 /**
  * Generates DNS information for a given service.
  */
-export const getDns = (service: "api" | "auth" | "frontend") => {
+export const getDns = (
+  service: "api" | "auth" | "frontend",
+  { override = false } = {},
+) => {
   const isProd = $app.stage === "prod";
 
   const serviceDomains = {
@@ -15,12 +18,10 @@ export const getDns = (service: "api" | "auth" | "frontend") => {
   const name = serviceDomains[service];
 
   return {
-    domain: {
-      name,
-      dns: sst.aws.dns({
-        override: true,
-        zone: "Z0854557GLD532VHXK6N",
-      }),
-    },
+    name,
+    dns: sst.aws.dns({
+      override,
+      zone: "Z0854557GLD532VHXK6N",
+    }),
   };
 };

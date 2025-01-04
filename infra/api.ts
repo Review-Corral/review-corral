@@ -4,12 +4,6 @@ import { table } from "./storage";
 export const HOSTED_ZONE = "reviewcorral.com";
 export const PROD_STAGE = "prod";
 
-export function getDomain(stage: string) {
-  if (stage.startsWith(PROD_STAGE)) return `api.${HOSTED_ZONE}`;
-
-  return `${stage}-api.${HOSTED_ZONE}`;
-}
-
 const api = new sst.aws.ApiGatewayV2("api", {
   // domain: "api.reviewcorral.com", // TODO: add after deploying
   // dns: sst.aws.dns({ override: true })

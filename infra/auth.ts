@@ -1,4 +1,4 @@
-import { getDomain } from "./api";
+import { getDns } from "./dns";
 import { table } from "./storage";
 
 const ghClientId = new sst.Secret("GithubClientId");
@@ -27,9 +27,9 @@ export const auth = new sst.aws.Auth("Auth", {
 //   },
 // });
 
-export const authRouter = new sst.aws.Router("MyAuthRouter", {
+export const authRouter = new sst.aws.Router("AuthRouter", {
   routes: {
     "/*": auth.url,
   },
-  domain: getDomain("auth"),
+  domain: getDns("auth"),
 });

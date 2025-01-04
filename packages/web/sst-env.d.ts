@@ -6,34 +6,5 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
-    "Auth": {
-      "type": "sst.aws.Auth"
-      "url": string
-    }
-    "AuthApi": {
-      "name": string
-      "type": "sst.aws.Function"
-      "url": string
-    }
-    "GithubClientId": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "GithubClientSecret": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "api": {
-      "type": "sst.aws.ApiGatewayV2"
-      "url": string
-    }
-    "frontend": {
-      "type": "sst.aws.Nextjs"
-      "url": string
-    }
-    "main": {
-      "name": string
-      "type": "sst.aws.Dynamo"
-    }
   }
 }
