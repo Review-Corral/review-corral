@@ -6,10 +6,6 @@ import "sst"
 export {}
 declare module "sst" {
   export interface Resource {
-    "Auth": {
-      "type": "sst.aws.Auth"
-      "url": string
-    }
     "AuthRouter": {
       "type": "sst.aws.Router"
       "url": string
@@ -21,6 +17,11 @@ declare module "sst" {
     "GithubClientSecret": {
       "type": "sst.sst.Secret"
       "value": string
+    }
+    "MyAuth": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
     }
     "api": {
       "type": "sst.aws.ApiGatewayV2"

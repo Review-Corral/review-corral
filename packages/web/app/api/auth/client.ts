@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 export const client = createClient({
   clientID: "nextjs",
-  issuer: "https://alex-auth.reviewcorral.com", // TODO: get dynamically
+  issuer: "https://w3yd2z6vpai6xz2cb7vvrinbve0ujbgs.lambda-url.us-east-1.on.aws/", // TODO: get dynamically
 });
 
 export function setTokens(response: NextResponse, access: string, refresh: string) {
