@@ -21,7 +21,6 @@ declare module "sst" {
     "MyAuth": {
       "name": string
       "type": "sst.aws.Function"
-      "url": string
     }
     "api": {
       "type": "sst.aws.ApiGatewayV2"

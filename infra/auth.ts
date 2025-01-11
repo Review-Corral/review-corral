@@ -17,9 +17,6 @@ const ghClientSecret = new sst.Secret("GithubClientSecret");
 
 export const auth = new sst.aws.Function("MyAuth", {
   handler: "./packages/functions/src/auth/authServer.handler",
-  url: {
-    cors: false,
-  },
   link: [table, ghClientId, ghClientSecret],
 });
 
