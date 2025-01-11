@@ -23,8 +23,5 @@ export default {
     if (app.stage !== Stages.PROD) {
       app.setDefaultRemovalPolicy("destroy");
     }
-
-    // Done for SST v3 upgrade to prevent accidently deleting resources
-    app.setDefaultRemovalPolicy("retain");
   },
 } satisfies SSTConfig;
