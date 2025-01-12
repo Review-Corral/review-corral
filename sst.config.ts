@@ -1,5 +1,4 @@
 import { SSTConfig } from "sst";
-import { AuthStack } from "./stacks/AuthStack";
 import { FrontendStack } from "./stacks/FrontendStack";
 import { MainStack } from "./stacks/MainStack";
 import { StorageStack } from "./stacks/StorageStack";
@@ -18,7 +17,7 @@ export default {
     };
   },
   stacks(app) {
-    app.stack(StorageStack).stack(MainStack).stack(AuthStack).stack(FrontendStack);
+    app.stack(StorageStack).stack(MainStack).stack(FrontendStack);
 
     if (app.stage !== Stages.PROD) {
       app.setDefaultRemovalPolicy("destroy");

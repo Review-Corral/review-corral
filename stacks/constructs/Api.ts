@@ -1,3 +1,4 @@
+import { HostedZone } from "aws-cdk-lib/aws-route53";
 import { Construct } from "constructs";
 import {
   ApiRouteProps,
@@ -6,7 +7,6 @@ import {
   Api as SstApi,
   Stack,
 } from "sst/constructs";
-import { HostedZone } from "aws-cdk-lib/aws-route53";
 
 export const HOSTED_ZONE = "reviewcorral.com";
 export const PROD_STAGE = "prod";
@@ -44,6 +44,7 @@ export class Api extends Construct {
       },
       routes: {
         "GET /": `${basePath}/lambda.handler`,
+        "GET /auth": `${basePath}/auth.handler`,
         "GET /profile": `${basePath}/getProfile.handler`,
         ...buildPaths("/gh", {
           // Handles incoming webhooks from Github

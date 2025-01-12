@@ -10,7 +10,7 @@ import { useEffect } from "react";
 
 const GithubLoginButton: React.FC = () => {
   const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
-  const authUri = process.env.NEXT_PUBLIC_AUTH_URL!;
+  const authUri = `${process.env.NEXT_PUBLIC_API_URL!}/auth`;
   console.log({ authUri });
   const mutation = useMutation({
     mutationFn: async () => {
