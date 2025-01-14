@@ -29,6 +29,7 @@ export function MainStack({ stack, app }: StackContext) {
       BASE_FE_URL: baseFeUrl,
       IS_LOCAL: app.local ? "true" : "false",
       LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
+      JWT_SECRET: assertVarExists("JWT_SECRET"),
       GH_APP_ID: assertVarExists("GH_APP_ID"),
       GH_CLIENT_ID: assertVarExists("GH_CLIENT_ID"),
       GH_CLIENT_SECRET: assertVarExists("GH_CLIENT_SECRET"),
