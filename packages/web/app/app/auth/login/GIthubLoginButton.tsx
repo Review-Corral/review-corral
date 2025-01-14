@@ -3,7 +3,6 @@
 import { cn } from "@/components/lib/utils";
 import { BetterButton } from "@components/ui/BetterButton";
 import { useMutation } from "@tanstack/react-query";
-import ky from "ky";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useEffect } from "react";
@@ -11,12 +10,17 @@ import { useEffect } from "react";
 const GithubLoginButton: React.FC = () => {
   const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
   const authUri = `${process.env.NEXT_PUBLIC_API_URL!}/auth`;
-  console.log({ authUri });
+
+  const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID!;
+
+  console.log({ authUri, GITHUB_CLIENT_ID });
   const mutation = useMutation({
     mutationFn: async () => {
       console.log("logging in");
-      const payload = await ky.get(authUri).json<{ github: string }>();
-      window.open(payload.github, "_self");
+      window.open(
+        `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email`,
+        "_self",
+      );
     },
   });
 

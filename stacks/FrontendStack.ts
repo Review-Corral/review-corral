@@ -3,6 +3,7 @@ import { App, NextjsSite, StackContext, use } from "sst/constructs";
 import { MainStack } from "./MainStack";
 import { StorageStack } from "./StorageStack";
 import { HOSTED_ZONE } from "./constructs/Api";
+import { assertVarExists } from "./utils/asserts";
 
 export const getFrontendUrl = ({ local, stage }: App) => {
   if (local) return "http://localhost:3000";
@@ -24,20 +25,21 @@ export function FrontendStack({ stack, app }: StackContext) {
     customDomain: app.local
       ? undefined
       : {
-          domainName: frontendUrl,
-          domainAlias: `www.${frontendUrl}`,
-          cdk: {
-            hostedZone: HostedZone.fromHostedZoneAttributes(stack, "MyZone", {
-              hostedZoneId: "Z0854557GLD532VHXK6N",
-              zoneName: "reviewcorral.com",
-            }),
-          },
+        domainName: frontendUrl,
+        domainAlias: `www.${frontendUrl}`,
+        cdk: {
+          hostedZone: HostedZone.fromHostedZoneAttributes(stack, "MyZone", {
+            hostedZoneId: "Z0854557GLD532VHXK6N",
+            zoneName: "reviewcorral.com",
+          }),
         },
+      },
     bind: [table],
     // Pass in our environment variables
     environment: {
       NEXT_PUBLIC_API_URL: api.api.customDomainUrl ?? api.api.url,
       NEXT_PUBLIC_REGION: app.region,
+      NEXT_PUBLIC_GITHUB_CLIENT_ID: process.env.GH_CLIENT_ID!,
       NEXT_PUBLIC_STRIPE_PRICE_ID:
         stack.stage === "prod"
           ? "price_1P8CmKBqa9UplzHebShipTnE"

@@ -2,22 +2,14 @@ import { assertVarExists } from "@core/utils/assert";
 import { Db } from "@domain/dynamodb/client";
 import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { UserResponse } from "@domain/github/endpointTypes";
-import { Logger } from "@domain/logging";
-import { Hono } from "hono";
-import { handle } from "hono/aws-lambda";
+import { LOGGER } from "@domain/github/webhooks/handlers/pullRequest";
 import { HTTPException } from "hono/http-exception";
 import { sign } from "jsonwebtoken";
 import ky from "ky";
-
-const LOGGER = new Logger("functions:auth");
-
-const app = new Hono();
+import { ApiHandler } from "sst/node/api";
 
 const JWT_SECRET = assertVarExists("JWT_SECRET");
 
-/**
- * Take the code and exchange it for tokens from GH
- */
 async function exchangeCodeForToken(code: string) {
   const response = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
@@ -73,9 +65,8 @@ const getOrCreateUser = async (accessToken: string) => {
   return await insertUser(ghUser, accessToken);
 };
 
-app.get("/", (c) => c.text("Hello Hono!"));
-app.get("/callback", async (c) => {
-  const code = c.req.query("code");
+export const handler = ApiHandler(async (event, _context) => {
+  const code = event.queryStringParameters?.code;
 
   if (!code) {
     throw new HTTPException(400, { message: "No code provided" });
@@ -84,6 +75,11 @@ app.get("/callback", async (c) => {
   try {
     // Exchange code for GitHub access token
     const tokenData = await exchangeCodeForToken(code);
+
+    if (!tokenData.access_token) {
+      console.log("Access tokens: ", tokenData);
+      throw new HTTPException(400, { message: "No access token" });
+    }
     const githubUser = await getOrCreateUser(tokenData.access_token);
 
     // Generate JWT access token
@@ -97,15 +93,18 @@ app.get("/callback", async (c) => {
     );
 
     // Set cookies and return response
-    return c.json({ success: true }, 200, {
-      "Set-Cookie": [
+    return {
+      statusCode: 200,
+      body: JSON.stringify({ success: true }),
+      cookies: [
         `accessToken=${accessToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`,
       ],
-    });
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
   } catch (error) {
     console.error("Auth error:", error);
     throw new HTTPException(500, { message: "Authentication failed" });
   }
 });
-
-export const handler = handle(app);
