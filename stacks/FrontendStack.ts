@@ -25,15 +25,15 @@ export function FrontendStack({ stack, app }: StackContext) {
     customDomain: app.local
       ? undefined
       : {
-        domainName: frontendUrl,
-        domainAlias: `www.${frontendUrl}`,
-        cdk: {
-          hostedZone: HostedZone.fromHostedZoneAttributes(stack, "MyZone", {
-            hostedZoneId: "Z0854557GLD532VHXK6N",
-            zoneName: "reviewcorral.com",
-          }),
+          domainName: frontendUrl,
+          domainAlias: `www.${frontendUrl}`,
+          cdk: {
+            hostedZone: HostedZone.fromHostedZoneAttributes(stack, "MyZone", {
+              hostedZoneId: "Z0854557GLD532VHXK6N",
+              zoneName: "reviewcorral.com",
+            }),
+          },
         },
-      },
     bind: [table],
     // Pass in our environment variables
     environment: {
