@@ -1,5 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { AuthAccessTokenKey } from "../../const";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -7,7 +8,7 @@ export async function GET(request: Request) {
   if (token) {
     // Set the cookie
     // By default, `cookies()` is available in the Route Handler
-    (await cookies()).set("accessToken", token, {
+    (await cookies()).set(AuthAccessTokenKey, token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
