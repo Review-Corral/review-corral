@@ -1,8 +1,6 @@
 "use client";
 
-import Providers from "./../providers";
-
-import { useProtectedRoute } from "../auth/useProtectedRoute";
+import { useProtectedRoute } from "@auth/useProtectedRoute";
 import { Navbar } from "./Navbar";
 
 export default function Layout({
@@ -13,9 +11,9 @@ export default function Layout({
   useProtectedRoute();
 
   return (
-    <Providers>
+    <>
       <Navbar />
       {children}
-    </Providers>
+    </>
   );
 }

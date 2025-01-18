@@ -99,7 +99,7 @@ export const handler = ApiHandler(async (event, _context) => {
       body: JSON.stringify({ success: true }),
       headers: {
         "Content-Type": "application/json",
-        Location: `${config.frontendBaseUrl}/app/login/set-token?token=${accessToken}`,
+        Location: `${config.frontendBaseUrl}/login/set-token?token=${accessToken}`,
       },
     };
   } catch (error) {

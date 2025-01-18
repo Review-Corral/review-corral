@@ -29,7 +29,7 @@
         "../core/*"
       ],
       "@auth/*": [
-        "app/app/auth/*"
+        "./app/(auth)/*"
       ],
       "@components/*": [
         "./components/*"
