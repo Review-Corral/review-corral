@@ -1,11 +1,7 @@
-"use client";
-
-import Providers from "./providers";
-
-export default function Layout({
+export default function BlogLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  return <Providers>{children}</Providers>;
+}) {
+  return <section>{children}</section>;
 }

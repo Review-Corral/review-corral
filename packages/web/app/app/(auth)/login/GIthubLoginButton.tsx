@@ -2,7 +2,6 @@
 
 import { cn } from "@/components/lib/utils";
 import { BetterButton } from "@components/ui/BetterButton";
-import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
 import React, { useState } from "react";
 import { useEffect } from "react";
@@ -14,17 +13,8 @@ const GithubLoginButton: React.FC = () => {
   const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID!;
 
   console.log({ authUri, GITHUB_CLIENT_ID });
-  const mutation = useMutation({
-    mutationFn: async () => {
-      console.log("logging in");
-      window.open(
-        `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email`,
-        "_self",
-      );
-    },
-  });
 
-  const isLoading = mutation.isPending || isRedirecting;
+  const isLoading = isRedirecting;
 
   useDetectRedirect(() => {
     console.log(`Is redirecting!: ${!isRedirecting}`);
@@ -33,7 +23,16 @@ const GithubLoginButton: React.FC = () => {
 
   return (
     <div>
-      <BetterButton isLoading={isLoading} onClick={() => mutation.mutate()}>
+      <BetterButton
+        isLoading={isLoading}
+        onClick={() => {
+          console.log("logging in");
+          window.open(
+            `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email`,
+            "_self",
+          );
+        }}
+      >
         <div
           className={cn("flex items-center justify-left gap-8", isLoading && "pl-6")}
         >
