@@ -30,7 +30,7 @@ const ParseToken: FC = () => {
       router.replace("/app");
     } else {
       console.error(`No token found in the URL, ${searchParams.toString()}`);
-      router.replace("/error");
+      router.replace("/app/auth/login/error");
     }
   }, [searchParams]);
 
