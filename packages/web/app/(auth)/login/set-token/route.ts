@@ -9,9 +9,9 @@ export async function GET(request: Request) {
     // Set the cookie
     // By default, `cookies()` is available in the Route Handler
     (await cookies()).set(AuthAccessTokenKey, token, {
-      httpOnly: true,
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "strict",
+      sameSite: "lax",
       path: "/",
     });
     return NextResponse.redirect(`${process.env.BASE_URL}/app`);
