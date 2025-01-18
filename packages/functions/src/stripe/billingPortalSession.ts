@@ -9,7 +9,7 @@ import { ApiHandler } from "sst/node/api";
 const LOGGER = new Logger("stripe.billingPortalSession");
 
 export const handler = ApiHandler(async (event, _context) => {
-  const { user, error: _error } = await useUser();
+  const { user, error: _error } = await useUser(event, LOGGER);
 
   LOGGER.info("Creating billing protal session", { body: event.body });
 
