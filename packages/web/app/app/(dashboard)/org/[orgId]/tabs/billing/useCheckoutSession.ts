@@ -1,4 +1,4 @@
-import { auth_access_token_key } from "@auth/const";
+import { auth_access_token_key } from "@/app/app/auth/const";
 import { useMutation } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import ky from "ky";

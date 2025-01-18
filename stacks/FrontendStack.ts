@@ -3,7 +3,6 @@ import { App, NextjsSite, StackContext, use } from "sst/constructs";
 import { MainStack } from "./MainStack";
 import { StorageStack } from "./StorageStack";
 import { HOSTED_ZONE } from "./constructs/Api";
-import { assertVarExists } from "./utils/asserts";
 
 export const getFrontendUrl = ({ local, stage }: App) => {
   if (local) return "http://localhost:3000";
@@ -45,7 +44,8 @@ export function FrontendStack({ stack, app }: StackContext) {
           ? "price_1P8CmKBqa9UplzHebShipTnE"
           : "price_1P9FpDBqa9UplzHeeJ57VHoc",
       ...slackEnvVars,
-      ...(app.local ? { NEXT_PUBLIC_LOCAL: "true" } : {}),
+      NEXT_PUBLIC_LOCAL: app.local ? "true" : "false",
+      BASE_URL: app.local ? frontendUrl : `https://${frontendUrl}`,
     },
   });
 

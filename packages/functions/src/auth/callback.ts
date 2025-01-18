@@ -3,6 +3,7 @@ import { Db } from "@domain/dynamodb/client";
 import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { UserResponse } from "@domain/github/endpointTypes";
 import { LOGGER } from "@domain/github/webhooks/handlers/pullRequest";
+import config from "@domain/utils/config";
 import { HTTPException } from "hono/http-exception";
 import { sign } from "jsonwebtoken";
 import ky from "ky";
@@ -96,12 +97,9 @@ export const handler = ApiHandler(async (event, _context) => {
     return {
       statusCode: 302,
       body: JSON.stringify({ success: true }),
-      cookies: [
-        `accessToken=${accessToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`,
-      ],
       headers: {
         "Content-Type": "application/json",
-        Location: `${assertVarExists("BASE_FE_URL")}/app/auth/login/success`,
+        Location: `${config.frontendBaseUrl}/app/login/set-token?token=${accessToken}`,
       },
     };
   } catch (error) {

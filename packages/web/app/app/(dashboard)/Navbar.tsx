@@ -1,6 +1,6 @@
 "use client";
 
-import { useProfile } from "@auth/useProfile";
+import { useProfile } from "@/app/app/auth/useProfile";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
