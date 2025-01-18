@@ -94,13 +94,14 @@ export const handler = ApiHandler(async (event, _context) => {
 
     // Set cookies and return response
     return {
-      statusCode: 200,
+      statusCode: 302,
       body: JSON.stringify({ success: true }),
       cookies: [
         `accessToken=${accessToken}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`,
       ],
       headers: {
         "Content-Type": "application/json",
+        Location: `${assertVarExists("BASE_FE_URL")}/app/auth/login/success`,
       },
     };
   } catch (error) {
