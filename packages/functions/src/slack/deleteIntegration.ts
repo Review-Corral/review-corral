@@ -17,7 +17,7 @@ const pathSchema = z.object({
 });
 
 export const handler = ApiHandler(async (event, _context) => {
-  const { user, error } = await useUser();
+  const { user, error } = await useUser(event, LOGGER);
 
   LOGGER.info("Got request to delete Slack integration", {
     event,

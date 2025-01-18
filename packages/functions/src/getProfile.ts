@@ -4,10 +4,10 @@ import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("profile:getProfile");
 
-export const handler = ApiHandler(async (_event, _context) => {
+export const handler = ApiHandler(async (event, _context) => {
   LOGGER.info("Getting user profile");
 
-  const { user, error } = await useUser();
+  const { user, error } = await useUser(event, LOGGER);
 
   if (error) {
     LOGGER.error("Error fetching user", { error });

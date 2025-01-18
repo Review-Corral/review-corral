@@ -14,8 +14,8 @@ import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("github:installations");
 
-export const getInstallations = ApiHandler(async (_event, _context) => {
-  const { user, error } = await useUser();
+export const getInstallations = ApiHandler(async (event, _context) => {
+  const { user, error } = await useUser(event, LOGGER);
 
   if (!user) {
     LOGGER.error("No user found in session", { error });
