@@ -9,8 +9,6 @@ import { sign } from "jsonwebtoken";
 import ky from "ky";
 import { ApiHandler } from "sst/node/api";
 
-const JWT_SECRET = assertVarExists("JWT_SECRET");
-
 async function exchangeCodeForToken(code: string) {
   const response = await fetch("https://github.com/login/oauth/access_token", {
     method: "POST",
@@ -82,6 +80,8 @@ export const handler = ApiHandler(async (event, _context) => {
       throw new HTTPException(400, { message: "No access token" });
     }
     const githubUser = await getOrCreateUser(tokenData.access_token);
+
+    const JWT_SECRET = assertVarExists("JWT_SECRET");
 
     // Generate JWT access token
     const accessToken = sign(
