@@ -1,4 +1,4 @@
-import { getSessionToken } from "@/app/app/auth/getSessionToken";
+import { getSessionToken } from "@auth/getSessionToken";
 import { Member } from "@core/dynamodb/entities/types";
 import { UpdateMemberArgs } from "@core/fetchTypes/updateOrgMember";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";

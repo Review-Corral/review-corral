@@ -1,4 +1,4 @@
-import { auth_access_token_key } from "@/app/app/auth/const";
+import { AuthAccessTokenKey } from "@auth/const";
 import { useMutation } from "@tanstack/react-query";
 import Cookies from "js-cookie";
 import ky from "ky";
@@ -21,7 +21,7 @@ export const useDeleteSlackIntegration = (slackIntegration: {
         `${process.env.NEXT_PUBLIC_API_URL}/slack/${slackIntegration.orgId}/installations`,
         {
           headers: {
-            Authorization: `Bearer ${Cookies.get(auth_access_token_key)}`,
+            Authorization: `Bearer ${Cookies.get(AuthAccessTokenKey)}`,
           },
           body: JSON.stringify({
             slackTeamId: slackIntegration.slackTeamId,
