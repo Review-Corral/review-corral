@@ -29,13 +29,15 @@ export class Api extends Construct {
 
     const basePath = "packages/functions/src";
 
+    const domain = Api.getDomain(app);
+
     this.api = new SstApi(stack, "api", {
       customDomain: {
-        domainName: Api.getDomain(app),
+        domainName: domain,
         cdk: {
           hostedZone: HostedZone.fromHostedZoneAttributes(stack, "MyZone", {
             hostedZoneId: "Z0854557GLD532VHXK6N",
-            zoneName: "reviewcorral.com",
+            zoneName: HOSTED_ZONE,
           }),
         },
       },

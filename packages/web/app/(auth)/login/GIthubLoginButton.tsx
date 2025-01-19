@@ -8,11 +8,11 @@ import { useEffect } from "react";
 
 const GithubLoginButton: React.FC = () => {
   const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
-  const authUri = `${process.env.NEXT_PUBLIC_API_URL!}/auth`;
 
   const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID!;
+  const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/auth/callback`;
 
-  console.log({ authUri, GITHUB_CLIENT_ID });
+  console.log({ redirectUri, GITHUB_CLIENT_ID });
 
   const isLoading = isRedirecting;
 
@@ -28,7 +28,7 @@ const GithubLoginButton: React.FC = () => {
         onClick={() => {
           console.log("logging in");
           window.open(
-            `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email`,
+            `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${redirectUri}`,
             "_self",
           );
         }}
