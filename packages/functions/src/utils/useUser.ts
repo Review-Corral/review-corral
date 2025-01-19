@@ -46,6 +46,8 @@ export const useUser = async (
 
   const { userId } = verifiedJwt as { userId: number };
 
+  logger.info("Found userId", { userId });
+
   const user = await fetchUserById(userId);
 
   logger.info("Returned user", user);
