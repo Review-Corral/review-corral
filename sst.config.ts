@@ -1,28 +1,13 @@
-import { SSTConfig } from "sst";
-import { FrontendStack } from "./stacks/FrontendStack";
-import { MainStack } from "./stacks/MainStack";
-import { StorageStack } from "./stacks/StorageStack";
+/// <reference path="./.sst/platform/config.d.ts" />
 
-enum Stages {
-  DEV = "dev",
-  PROD = "prod",
-}
-
-export default {
-  config(_input) {
+export default $config({
+  app(input) {
     return {
       name: "review-corral",
-      region: "us-east-1",
-      profile: "rc",
+      removal: input?.stage === "production" ? "retain" : "remove",
+      protect: ["production"].includes(input?.stage),
+      home: "aws",
     };
   },
-  stacks(app) {
-    app.stack(StorageStack).stack(MainStack).stack(FrontendStack);
-
-    if (app.stage !== Stages.PROD) {
-      app.setDefaultRemovalPolicy("destroy");
-    } else {
-      app.setDefaultRemovalPolicy("retain");
-    }
-  },
-} satisfies SSTConfig;
+  async run() {},
+});
