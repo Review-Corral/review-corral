@@ -1,4 +1,4 @@
-import { getSessionToken } from "@/app/app/auth/getSessionToken";
+import { getSessionToken } from "@auth/getSessionToken";
 import { BillingDetailsResponse } from "@core/selectorTypes/organization";
 import { useQuery } from "@tanstack/react-query";
 import ky from "ky";

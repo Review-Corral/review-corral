@@ -1,7 +1,7 @@
+import { getSessionToken } from "@auth/getSessionToken";
 import { Repository } from "@core/dynamodb/entities/types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ky from "ky";
-import { getSessionToken } from "../../auth/getSessionToken";
 
 type setRepoActiveStatusArgs = Required<
   Pick<Repository, "repoId" | "isEnabled" | "orgId">
