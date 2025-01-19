@@ -12,7 +12,17 @@ export const useUser = async (
   user: User | null;
   error: string | null;
 }> => {
-  const authToken = event.headers.authorization;
+  const authHeader = event.headers.authorization;
+
+  if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
+    logger.warn("No auth token found in request", { event });
+    return { user: null, error: "No auth token found" };
+  }
+
+  const authToken = event.headers.authorization?.split(" ")[1];
+  const jwtSecret = assertVarExists<string>("JWT_SECRET");
+
+  logger.info("Getting user from auth token", { authToken });
 
   if (!authToken) {
     logger.warn("No auth token found in request", { event });
@@ -22,7 +32,7 @@ export const useUser = async (
   let verifiedJwt: JwtPayload | string | null = null;
 
   try {
-    verifiedJwt = verify(authToken, assertVarExists<string>("JWT_SECRET"));
+    verifiedJwt = verify(authToken, jwtSecret);
   } catch (error) {
     logger.error("Error verifying JWT", { error });
     return { user: null, error: "Error verifying JWT" };
