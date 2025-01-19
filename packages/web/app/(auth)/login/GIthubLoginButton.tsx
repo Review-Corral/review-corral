@@ -12,12 +12,9 @@ const GithubLoginButton: React.FC = () => {
   const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID!;
   const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/auth/callback`;
 
-  console.log({ redirectUri, GITHUB_CLIENT_ID });
-
   const isLoading = isRedirecting;
 
   useDetectRedirect(() => {
-    console.log(`Is redirecting!: ${!isRedirecting}`);
     setIsRedirecting(!isRedirecting);
   });
 
