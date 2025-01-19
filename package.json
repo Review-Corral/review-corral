@@ -29,11 +29,11 @@
     "@biomejs/biome": "^1.9.4",
     "@octokit/webhooks-types": "^7.6.1",
     "@tsconfig/node18": "^18.2.4",
-    "aws-cdk-lib": "2.142.1",
+    "aws-cdk-lib": "2.171.1",
     "constructs": "10.3.0",
     "drizzle-kit": "^0.20.18",
     "node-fetch": "^3.3.2",
-    "sst": "2.43.3",
+    "sst": "2.47.0",
     "typescript": "^5.7.2",
     "vite-node": "^1.6.0",
     "vitest": "^1.6.0"
