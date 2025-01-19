@@ -86,7 +86,7 @@ export const handler = ApiHandler(async (event, _context) => {
     // Generate JWT access token
     const accessToken = sign(
       {
-        userId: `github_${githubUser.userId}`,
+        userId: githubUser.userId,
         email: githubUser.email,
       },
       JWT_SECRET,
