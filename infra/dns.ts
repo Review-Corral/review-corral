@@ -22,11 +22,11 @@ export const getUrl = (service: "api" | "frontend") => {
 /**
  * Generates DNS information for a given service.
  */
-export const getDns = (service: "api" | "frontend", { override = false } = {}) => {
+export const getDns = (service: "api" | "frontend", { override = true } = {}) => {
   return {
     name: getDomain(service),
     dns: sst.aws.dns({
-      override,
+      override: true,
       zone: "Z0854557GLD532VHXK6N",
     }),
   };
