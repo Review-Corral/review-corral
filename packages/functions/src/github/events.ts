@@ -7,7 +7,7 @@ import { verifyGithubWebhookSecret } from "@domain/github/webhooks/verifyEvent";
 import { Logger } from "@domain/logging";
 import { WebhookEvent } from "@octokit/webhooks-types";
 import { ApiHandler } from "@src/apiHandler";
-import { APIGatewayProxyEventV2 } from "aws-lambda";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import * as z from "zod";
 
 const LOGGER = new Logger("functions.github.events");
@@ -102,7 +102,7 @@ export const isWebhookEvent = (event: any): event is WebhookEvent => {
 /**
  * Verifies the signature of the Github webhook event to ensure it came from Github.
  */
-const checkEventWrapper = async (event: APIGatewayProxyEventV2) => {
+const checkEventWrapper = async (event: APIGatewayProxyEvent) => {
   const webhookSecret = assertVarExists("GH_WEBHOOK_SECRET");
 
   try {
