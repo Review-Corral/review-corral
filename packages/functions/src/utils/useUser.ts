@@ -2,11 +2,11 @@ import { User } from "@core/dynamodb/entities/types";
 import { assertVarExists } from "@core/utils/assert";
 import { fetchUserById } from "@domain/dynamodb/fetchers/users";
 import { Logger } from "@domain/logging";
-import { APIGatewayProxyEventV2 } from "aws-lambda";
+import { APIGatewayProxyEvent } from "aws-lambda";
 import { JwtPayload, verify } from "jsonwebtoken";
 
 export const useUser = async (
-  event: APIGatewayProxyEventV2,
+  event: APIGatewayProxyEvent,
   logger: Logger,
 ): Promise<{
   user: User | null;
