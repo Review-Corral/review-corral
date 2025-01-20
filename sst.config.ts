@@ -1,5 +1,6 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+import { getUrl } from "./infra/dns";
 import { assertVarExists } from "./infra/utils/asserts";
 
 export default $config({
@@ -33,6 +34,7 @@ export default $config({
               };
         args.environment = {
           IS_LOCAL: $dev ? "true" : "false",
+          BASE_FE_URL: getUrl("frontend"),
           LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
           JWT_SECRET: assertVarExists<string>("JWT_SECRET"),
           GH_APP_ID: assertVarExists<string>("GH_APP_ID"),
@@ -46,7 +48,6 @@ export default $config({
       }
     });
 
-    await import("./infra/api");
     await import("./infra/storage");
     await import("./infra/api");
 
