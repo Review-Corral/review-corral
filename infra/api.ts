@@ -1,23 +1,9 @@
+import { getDns } from "./dns";
 import { table } from "./storage";
 
-export const HOSTED_ZONE = "reviewcorral.com";
-export const PROD_STAGE = "prod";
-
-function getDomain() {
-  if ($app.stage.startsWith(PROD_STAGE)) return `api.${HOSTED_ZONE}`;
-
-  return `${$app.stage}-api.${HOSTED_ZONE}`;
-}
-
-const domain = getDomain();
-
 const api = new sst.aws.ApiGatewayV2("api", {
-  // domain: "api.reviewcorral.com", // TODO: add after deploying
-  // dns: sst.aws.dns({ override: true })
   link: [table],
-  domain: {
-    name: domain,
-  },
+  domain: getDns("api"),
 });
 
 const basePath = "packages/functions/src";

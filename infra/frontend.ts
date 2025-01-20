@@ -1,26 +1,11 @@
-import { HOSTED_ZONE, api } from "./api";
-
-export const getFrontendUrl = () => {
-  if ($dev) return "http://localhost:3000";
-
-  if ($app.stage === "prod") return `${HOSTED_ZONE}`;
-
-  return `${$app.stage}.${HOSTED_ZONE}`;
-};
-
-const frontendUrl = getFrontendUrl();
+import { getDns, getUrl } from "./dns";
 
 export const frontend = new sst.aws.Nextjs("frontend", {
   path: "packages/web",
-  domain: $dev
-    ? undefined
-    : {
-        name: frontendUrl,
-        aliases: [`www.${frontendUrl}`],
-      },
+  domain: getDns("frontend"),
   environment: {
-    BASE_URL: $dev ? frontendUrl : `https://${frontendUrl}`,
-    NEXT_PUBLIC_API_URL: api.url,
+    BASE_URL: getUrl("frontend"),
+    NEXT_PUBLIC_API_URL: getUrl("api"),
     NEXT_PUBLIC_REGION: $app.providers!.aws.region,
     NEXT_PUBLIC_GITHUB_CLIENT_ID: process.env.GH_CLIENT_ID!,
     NEXT_PUBLIC_LOCAL: $dev ? "true" : "false",
