@@ -1,4 +1,4 @@
-const table = new sst.aws.Dynamo("MyTable", {
+const table = new sst.aws.Dynamo("MainTable", {
   fields: {
     pk: "string",
     sk: "string",
