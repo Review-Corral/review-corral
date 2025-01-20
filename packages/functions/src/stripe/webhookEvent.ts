@@ -2,7 +2,7 @@ import { assertVarExists } from "@core/utils/assert";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { handleSessionCompleted, handleSubUpdated } from "@domain/stripe/handleEvent";
-import { ApiHandler } from "sst/node/api";
+import { ApiHandler } from "@src/apiHandler";
 
 const LOGGER = new Logger("stripe.webhook");
 

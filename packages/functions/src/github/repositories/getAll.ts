@@ -6,8 +6,8 @@ import {
 } from "@domain/dynamodb/fetchers/repositories";
 import { getInstallationRepositories } from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
+import { ApiHandler } from "@src/apiHandler";
 import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
 import { Organization, Repository } from "../../../../core/dynamodb/entities/types";
 

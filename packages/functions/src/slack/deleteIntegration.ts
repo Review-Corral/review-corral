@@ -1,8 +1,8 @@
 import { Db } from "@domain/dynamodb/client";
 import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
+import { ApiHandler } from "@src/apiHandler";
 import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
 
 const LOGGER = new Logger("slack:deleteIntegration");

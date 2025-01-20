@@ -9,8 +9,8 @@ import {
 } from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
+import { ApiHandler } from "@src/apiHandler";
 import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
 
 const LOGGER = new Logger("stripe.checkoutSession");
 
