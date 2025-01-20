@@ -1,5 +1,7 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+import { assertVarExists } from "./infra/utils/asserts";
+
 export default $config({
   app(input) {
     return {
@@ -29,6 +31,18 @@ export default $config({
             : {
                 retention: "1 week",
               };
+        args.environment = {
+          IS_LOCAL: $dev ? "true" : "false",
+          LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
+          JWT_SECRET: assertVarExists<string>("JWT_SECRET"),
+          GH_APP_ID: assertVarExists<string>("GH_APP_ID"),
+          GH_CLIENT_ID: assertVarExists<string>("GH_CLIENT_ID"),
+          GH_CLIENT_SECRET: assertVarExists<string>("GH_CLIENT_SECRET"),
+          GH_ENCODED_PEM: assertVarExists<string>("GH_ENCODED_PEM"),
+          GH_WEBHOOK_SECRET: assertVarExists<string>("GH_WEBHOOK_SECRET"),
+          STRIPE_SECRET_KEY: assertVarExists<string>("STRIPE_SECRET_KEY"),
+          STRIPE_WEBHOOK_SECRET: assertVarExists<string>("STRIPE_WEBHOOK_SECRET"),
+        };
       }
     });
 
