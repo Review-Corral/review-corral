@@ -4,10 +4,10 @@ import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { UserResponse } from "@domain/github/endpointTypes";
 import { LOGGER } from "@domain/github/webhooks/handlers/pullRequest";
 import config from "@domain/utils/config";
+import { ApiHandler } from "@src/apiHandler";
 import { HTTPException } from "hono/http-exception";
 import { sign } from "jsonwebtoken";
 import ky from "ky";
-import { ApiHandler } from "sst/node/api";
 
 async function exchangeCodeForToken(code: string) {
   const response = await fetch("https://github.com/login/oauth/access_token", {

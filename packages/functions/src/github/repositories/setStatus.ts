@@ -3,8 +3,8 @@ import {
   setRespositoryActiveStatus,
 } from "@domain/dynamodb/fetchers/repositories";
 import { Logger } from "@domain/logging";
+import { ApiHandler } from "@src/apiHandler";
 import { useUser } from "src/utils/useUser";
-import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
 
 const LOGGER = new Logger("github:repositories:setStatus");

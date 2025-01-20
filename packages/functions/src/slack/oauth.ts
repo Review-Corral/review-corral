@@ -1,8 +1,8 @@
 import { assertVarExists } from "@core/utils/assert";
 import { insertSlackIntegration } from "@domain/dynamodb/fetchers/slack";
 import { Logger } from "@domain/logging";
+import { ApiHandler } from "@src/apiHandler";
 import ky from "ky";
-import { ApiHandler } from "sst/node/api";
 import * as z from "zod";
 
 const LOGGER = new Logger("slack:oauth");
