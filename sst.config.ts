@@ -48,6 +48,7 @@ export default $config({
           LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
         };
         args.link = [
+          ...(Array.isArray(args.link) ? args.link : [args.link]),
           jwtSecret,
           ghAppId,
           ghClientId,
