@@ -1,5 +1,7 @@
 import { getDns, getUrl } from "./dns";
 
+import { ghClientId } from "./secrets";
+
 export const frontend = new sst.aws.Nextjs("frontend", {
   path: "packages/web",
   domain: getDns("frontend"),
@@ -7,7 +9,9 @@ export const frontend = new sst.aws.Nextjs("frontend", {
     BASE_URL: getUrl("frontend"),
     NEXT_PUBLIC_API_URL: getUrl("api"),
     NEXT_PUBLIC_REGION: $app.providers!.aws.region,
-    NEXT_PUBLIC_GITHUB_CLIENT_ID: process.env.GH_CLIENT_ID!,
+    NEXT_PUBLIC_GITHUB_CLIENT_ID: ghClientId.value,
+    // NEXT_PUBLIC_SLACK_BOT_ID: TODO:
+    // NEXT_PUBLIC_SLACK_AUTH_URL: // TODO:
     NEXT_PUBLIC_LOCAL: $dev ? "true" : "false",
     NEXT_PUBLIC_STRIPE_PRICE_ID:
       $app.stage === "prod"
@@ -16,4 +20,5 @@ export const frontend = new sst.aws.Nextjs("frontend", {
     // ...slackEnvVars, // TODO:
     ...($app.stage === "alex" ? { NEXT_PUBLIC_LOCAL: "true" } : {}),
   },
+  link: [ghClientId],
 });

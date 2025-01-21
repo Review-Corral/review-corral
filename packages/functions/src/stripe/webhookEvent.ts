@@ -1,8 +1,8 @@
-import { assertVarExists } from "@core/utils/assert";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { handleSessionCompleted, handleSubUpdated } from "@domain/stripe/handleEvent";
 import { ApiHandler } from "@src/apiHandler";
+import { Resource } from "sst";
 
 const LOGGER = new Logger("stripe.webhook");
 
@@ -30,7 +30,7 @@ export const handler = ApiHandler(async (event, _context) => {
   const stripeEvent = StripeClient.webhooks.constructEvent(
     event.body,
     webhookSignature,
-    assertVarExists("STRIPE_WEBHOOK_SECRET"),
+    Resource.STRIPE_WEBHOOK_SECRET.value,
   );
 
   switch (stripeEvent.type) {

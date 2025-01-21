@@ -1,7 +1,6 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
 import { getUrl } from "./infra/dns";
-import { assertVarExists } from "./infra/utils/asserts";
 
 export default $config({
   app(input) {
@@ -19,6 +18,17 @@ export default $config({
     };
   },
   async run() {
+    const {
+      jwtSecret,
+      ghAppId,
+      ghClientId,
+      ghClientSecret,
+      ghEncodedPem,
+      ghWebhookSecret,
+      stripeSecretKey,
+      stripeWebhookSecret,
+    } = await import("./infra/secrets");
+
     $transform(sst.aws.Function, (args, _opts) => {
       // Set the default if it's not set by the component
       if (args.runtime === undefined) {
@@ -36,15 +46,17 @@ export default $config({
           IS_LOCAL: $dev ? "true" : "false",
           BASE_FE_URL: getUrl("frontend"),
           LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
-          JWT_SECRET: assertVarExists<string>("JWT_SECRET"),
-          GH_APP_ID: assertVarExists<string>("GH_APP_ID"),
-          GH_CLIENT_ID: assertVarExists<string>("GH_CLIENT_ID"),
-          GH_CLIENT_SECRET: assertVarExists<string>("GH_CLIENT_SECRET"),
-          GH_ENCODED_PEM: assertVarExists<string>("GH_ENCODED_PEM"),
-          GH_WEBHOOK_SECRET: assertVarExists<string>("GH_WEBHOOK_SECRET"),
-          STRIPE_SECRET_KEY: assertVarExists<string>("STRIPE_SECRET_KEY"),
-          STRIPE_WEBHOOK_SECRET: assertVarExists<string>("STRIPE_WEBHOOK_SECRET"),
         };
+        args.link = [
+          jwtSecret,
+          ghAppId,
+          ghClientId,
+          ghClientSecret,
+          ghEncodedPem,
+          ghWebhookSecret,
+          stripeSecretKey,
+          stripeWebhookSecret,
+        ];
       }
     });
 
