@@ -1,5 +1,5 @@
 import * as nJwt from "njwt";
-import { assertVarExists } from "../assert";
+import { Resource } from "sst";
 
 /**
  * Creates a JWT to be used to get an installation access token from Github
@@ -8,9 +8,9 @@ export async function getJwt(): Promise<nJwt.Jwt> {
   const now = Math.floor(Date.now() / 1000) - 30;
   const expiration = now + 120; // JWT expiration time (10 minute maximum)
 
-  const ghClientId = assertVarExists("GH_APP_ID");
+  const ghClientId = Resource.GH_CLIENT_ID.value;
 
-  const ghEncodedPem = assertVarExists("GH_ENCODED_PEM");
+  const ghEncodedPem = Resource.GH_ENCODED_PEM.value;
   // The PEM is base64 encoded, so we need to decode it
   const ghDecodedPem = Buffer.from(ghEncodedPem, "base64");
 

@@ -3,6 +3,7 @@ import { insertSlackIntegration } from "@domain/dynamodb/fetchers/slack";
 import { Logger } from "@domain/logging";
 import { ApiHandler } from "@src/apiHandler";
 import ky from "ky";
+import { Resource } from "sst";
 import * as z from "zod";
 
 const LOGGER = new Logger("slack:oauth");
@@ -58,9 +59,9 @@ export const handler = ApiHandler(async (event, _context) => {
   const searchParams = slackAuthRequestSchema.parse(event.queryStringParameters);
 
   const formData = new FormData();
-  formData.append("client_id", assertVarExists("NEXT_PUBLIC_SLACK_BOT_ID"));
+  formData.append("client_id", Resource.SLACK_BOT_ID.value);
   formData.append("code", searchParams.code);
-  formData.append("client_secret", assertVarExists("SLACK_CLIENT_SECRET"));
+  formData.append("client_secret", Resource.SLACK_CLIENT_SECRET.value);
   formData.append("redirect_uri", assertVarExists("NEXT_PUBLIC_SLACK_AUTH_URL"));
 
   const orgId = Number(searchParams.state);
@@ -113,6 +114,7 @@ export const handler = ApiHandler(async (event, _context) => {
       headers: {
         Location: `${assertVarExists("BASE_FE_URL")}`,
       },
+      body: JSON.stringify({ message: "Success" }),
     };
   }
 });

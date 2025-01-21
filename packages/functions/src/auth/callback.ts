@@ -1,4 +1,3 @@
-import { assertVarExists } from "@core/utils/assert";
 import { Db } from "@domain/dynamodb/client";
 import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
 import { UserResponse } from "@domain/github/endpointTypes";
@@ -8,6 +7,7 @@ import { ApiHandler } from "@src/apiHandler";
 import { HTTPException } from "hono/http-exception";
 import { sign } from "jsonwebtoken";
 import ky from "ky";
+import { Resource } from "sst";
 
 async function exchangeCodeForToken(code: string) {
   const response = await fetch("https://github.com/login/oauth/access_token", {
@@ -17,8 +17,8 @@ async function exchangeCodeForToken(code: string) {
       Accept: "application/json",
     },
     body: JSON.stringify({
-      client_id: assertVarExists("GH_CLIENT_ID"),
-      client_secret: assertVarExists("GH_CLIENT_SECRET"),
+      client_id: Resource.GH_CLIENT_ID.value,
+      client_secret: Resource.GH_CLIENT_SECRET.value,
       code,
     }),
   });
@@ -81,15 +81,13 @@ export const handler = ApiHandler(async (event, _context) => {
     }
     const githubUser = await getOrCreateUser(tokenData.access_token);
 
-    const JWT_SECRET = assertVarExists("JWT_SECRET");
-
     // Generate JWT access token
     const accessToken = sign(
       {
         userId: githubUser.userId,
         email: githubUser.email,
       },
-      JWT_SECRET,
+      Resource.JWT_SECRET.value,
       { expiresIn: "12h" },
     );
 

@@ -1,9 +1,9 @@
 import { User } from "@core/dynamodb/entities/types";
-import { assertVarExists } from "@core/utils/assert";
 import { fetchUserById } from "@domain/dynamodb/fetchers/users";
 import { Logger } from "@domain/logging";
 import { APIGatewayProxyEvent } from "aws-lambda";
 import { JwtPayload, verify } from "jsonwebtoken";
+import { Resource } from "sst";
 
 export const useUser = async (
   event: APIGatewayProxyEvent,
@@ -20,7 +20,7 @@ export const useUser = async (
   }
 
   const authToken = event.headers.authorization?.split(" ")[1];
-  const jwtSecret = assertVarExists<string>("JWT_SECRET");
+  const jwtSecret = Resource.JWT_SECRET.value;
 
   logger.info("Getting user from auth token", { authToken });
 
