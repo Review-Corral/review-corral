@@ -1,0 +1,17 @@
+meta {
+  name: Get Test Org
+  type: http
+  seq: 1
+}
+
+get {
+  url: https://alex-api.review-corral.com/test/{orgId}
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "orgId": "1234"
+  }
+}

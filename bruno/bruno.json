@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "name": "Review Corral",
+  "type": "collection",
+  "presets": {
+    "requestType": "http",
+    "requestUrl": "https://alex-api.review-corral.com"
+  }
+}

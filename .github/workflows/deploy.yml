@@ -1,0 +1,32 @@
+name: Deploy with SEED
+
+on:
+  release:
+    types:
+      - published
+
+jobs:
+  deploy:
+    runs-on: buildjet-4vcpu-ubuntu-2204
+    steps:
+      - name: Checkout main branch
+        uses: actions/checkout@v2
+        with:
+          ref: main
+
+      - name: Install SEED CLI
+        run: npm install -g @seed-run/cli
+
+      - name: Deploy to stages
+        env:
+          SEED_TOKEN: ${{ secrets.SEED_TOKEN }}
+          SEED_PROD_STAGES: ${{ vars.SEED_PROD_STAGES }}
+        run: |
+          IFS=' ' read -ra stages <<< "$SEED_PROD_STAGES"
+          for stage in "${stages[@]}"; do
+            seed deploy \
+              --org understory \
+              --app client-app \
+              --stage $stage \
+              --commit $(git rev-parse HEAD)
+          done

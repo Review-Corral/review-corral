@@ -1,0 +1,124 @@
+{
+  "Basic vitest setup": {
+    "prefix": "vitest",
+    "body": [
+      "import { describe, expect, it } from \"vitest\";",
+      "",
+      "describe(\"${1:${TM_FILENAME_BASE}}\", () => {",
+      "  it(\"should test something\", () => {",
+      "    expect(1).toBe(1);",
+      "  });",
+      "});",
+      ""
+    ],
+    "description": ""
+  },
+  "React FC": {
+    "prefix": "rc",
+    "body": [
+      "import React, { FC } from 'react';",
+      "",
+      "interface ${1}Props {",
+      "\t",
+      "}",
+      "",
+      "export const ${1:${TM_FILENAME_BASE}}: FC<${1}Props> = () => {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t$0",
+      "\t\t</div>",
+      "\t);",
+      "};"
+    ]
+  },
+  "Authorized React FC": {
+    "prefix": "arc",
+    "body": [
+      "import React, { FC } from 'react';",
+      "import WithAuthRequired from '@auth/hooks/WithAuthRequired';",
+      "",
+      "interface ${1}Props {",
+      "\t",
+      "}",
+      "",
+      "const ${1:${TM_FILENAME_BASE}}: FC<${1}Props> = () => {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t$0",
+      "\t\t</div>",
+      "\t);",
+      "};",
+      "",
+      "export default WithAuthRequired(${1});"
+    ]
+  },
+  "Next Page": {
+    "prefix": "np",
+    "body": [
+      "import type { NextPage } from 'next';",
+      "",
+      "export const ${1:${TM_FILENAME_BASE}}: NextPage = () => {",
+      "\treturn (",
+      "\t\t<div>",
+      "\t\t\t$0",
+      "\t\t</div>",
+      "\t);",
+      "};",
+      "",
+      "export default ${1};"
+    ]
+  },
+  "useState": {
+    "prefix": "useState",
+    "body": [
+      "const [${1:state}, set${1/(.*)/${1:/capitalize}/}] = useState<${2:type}>(${3:initialState});"
+    ],
+    "description": "React useState hook"
+  },
+  "useEffect": {
+    "prefix": "useEffect",
+    "body": [
+      "useEffect(() => {",
+      "\t${1:effect}",
+      "\treturn () => {",
+      "\t\t${2:cleanup}",
+      "\t}",
+      "}, [${3:input}]);"
+    ],
+    "description": "React useEffect hook"
+  },
+  "useContext": {
+    "prefix": "useContext",
+    "body": ["const ${1:context} = useContext(${2:contextValue});"],
+    "description": "React useContext hook"
+  },
+  "useReducer": {
+    "prefix": "useReducer",
+    "body": [
+      "const [state, dispatch] = useReducer(${1:reducer}, ${2:initialState}, ${3:init});"
+    ],
+    "description": "React useReducer hook"
+  },
+  "useCallback": {
+    "prefix": "useCallback",
+    "body": [
+      "useCallback(",
+      "\t() => {",
+      "\t\t${1:callback}",
+      "\t},",
+      "\t[${2:input}],",
+      ");"
+    ],
+    "description": "React useCallback hook"
+  },
+  "useMemo": {
+    "prefix": "useMemo",
+    "body": ["useMemo(() => ${1:function}, ${2:input});"],
+    "description": "React useMemo hook"
+  },
+  "useRef": {
+    "prefix": "useRef",
+    "body": ["const ${1:ref} = useRef<${2:HTMLInputElement}>();"],
+    "description": "React useRef hook"
+  }
+}

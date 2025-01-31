@@ -1,0 +1,33 @@
+meta {
+  name: Create Users Orgs
+  type: http
+  seq: 3
+}
+
+post {
+  url: https://alex-api.review-corral.com/test/create
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "user": {
+      "userId": 123,
+      "email": "alex.mclean25@gmail.com",
+      "name": "alexmclean",
+      "avatarUrl": "whatever.com"
+    }, "orgs": [
+      {
+        "orgId": 1,
+        "name": "Review Corral",
+        "avatarUrl": "reviewcorral.com"
+      },
+      {
+        "orgId": 2,
+        "name": "Understory",
+        "avatarUrl": "understory.com"
+      }
+    ]
+  }
+}

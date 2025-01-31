@@ -1,100 +1,188 @@
 {
   "version": "2.0.0",
-  "presentation": {
-    "echo": false,
-    "reveal": "always",
-    "focus": false,
-    "panel": "dedicated",
-    "showReuseMessage": true
-  },
   "tasks": [
     {
-      "label": "Create terminals",
-      "dependsOn": [
-        "Supabase",
-        "zsh",
-        "Frontend",
-        "ngrok"
-      ],
+      "label": "Web",
+      "type": "shell",
+      "command": "./scripts/nvmPnpm.sh",
+      "args": ["dev"],
+      "options": {
+        "cwd": "${workspaceFolder}/packages/web"
+      },
+      "icon": {
+        "id": "browser",
+        "color": "terminal.ansiBlue"
+      },
       "group": {
         "kind": "build",
         "isDefault": true
       },
-      "icon": {
-        "id": "paintcan",
-        "color": "terminal.ansiCyan"
-      }
-    },
-    {
-      "label": "zsh",
-      "type": "process",
-      "command": [
-        "zsh"
-      ],
-      "isBackground": true,
       "presentation": {
-        "group": "main",
-        "focus": true,
+        "reveal": "always",
         "panel": "dedicated"
       },
-      "icon": {
-        "id": "terminal",
-        "color": "terminal.ansiWhite"
-      }
+      "problemMatcher": [],
+      "isBackground": true
     },
     {
-      "label": "Supabase",
+      "label": "Backend",
       "type": "shell",
-      "command": [
-        "source ./supabase/.env && supabase status"
-      ],
-      "isBackground": true,
-      "problemMatcher": [],
+      "command": "./scripts/nvmPnpm.sh",
+      "args": ["dev"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "icon": {
+        "id": "vm",
+        "color": "terminal.ansiRed"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "presentation": {
-        "group": "main"
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Test (Watch)",
+      "type": "shell",
+      "command": "./scripts/nvmPnpm.sh",
+      "icon": {
+        "id": "beaker",
+        "color": "terminal.ansiGreen"
+      },
+      "args": ["test:watch"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Connect to Prod Database",
+      "type": "shell",
+      "command": "sh",
+      "args": ["./scripts/connectDatabase.sh", "staging", "--profile", "main"],
+      "options": {
+        "cwd": "${workspaceFolder}"
       },
       "icon": {
         "id": "database",
-        "color": "terminal.ansiGreen"
-      }
-    },
-    {
-      "label": "Frontend",
-      "type": "process",
-      "command": [
-        "zsh"
-      ],
-      "isBackground": true,
-      "problemMatcher": [],
+        "color": "terminal.ansiWhite"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
       "presentation": {
-        "panel": "dedicated",
-        "group": "dev-group"
-      }
+        "focus": true,
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "isBackground": true
     },
     {
-      "label": "ngrok",
+      "label": "Sync Staging Results Buckets",
       "type": "shell",
-      "command": [
-        "ngrok http 3000 --subdomain reviewcorral"
-      ],
-      "isBackground": true,
       "icon": {
-        "id": "globe",
-        "color": "terminal.ansiRed"
-      }
+        "id": "folder",
+        "color": "terminal.ansiGreen"
+      },
+      "command": "sh",
+      "args": ["./scripts/syncStagingResultsBucket.sh"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "isBackground": true
     },
     {
-      "label": "Generate Supabase Types ",
+      "label": "Generate Migrations",
       "type": "shell",
-      "command": [
-        "source ./supabase/.env && supabase gen types typescript --local > ./database-types.d.ts",
-      ],
-      "isBackground": true,
+      "command": "./scripts/nvmPnpm.sh",
+      "args": ["migrate:gen"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
       "icon": {
-        "id": "symbol-type-parameter",
+        "id": "database",
         "color": "terminal.ansiBlue"
       },
-      "problemMatcher": []
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Run Migrations",
+      "type": "shell",
+      "command": "./scripts/nvmPnpm.sh",
+      "args": ["migrate"],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "icon": {
+        "id": "database",
+        "color": "terminal.ansiBlue"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Drizzle Studio",
+      "type": "shell",
+      "command": "open http://localhost:4983 && pnpm studio",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "icon": {
+        "id": "database",
+        "color": "terminal.ansiRed"
+      },
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      },
+      "problemMatcher": [],
+      "isBackground": true
     }
   ]
 }

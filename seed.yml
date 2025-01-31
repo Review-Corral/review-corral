@@ -1,0 +1,7 @@
+before_compile:
+  - n 18.20.3
+
+compile:
+  - npm install -g pnpm@9.14.2
+  - pnpm --version
+  - pnpm install --frozen-lockfile --prefer-offline
