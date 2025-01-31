@@ -11,6 +11,12 @@ export const lookups = {
       import: "dev-review-corral-main",
     },
   },
+  prod: {
+    table: {
+      name: "prod-review-corral-main",
+      import: "prod-review-corral-main",
+    },
+  },
 } as const;
 
 export const getStageLookups = (stage: string) => {
