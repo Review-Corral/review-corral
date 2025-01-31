@@ -44,6 +44,6 @@
   ],
   "packageManager": "pnpm@9.14.2",
   "dependencies": {
-    "sst": "3.5.15"
+    "sst": "3.6.40"
   }
 }

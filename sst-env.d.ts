@@ -57,14 +57,6 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
-    "api": {
-      "type": "sst.aws.ApiGatewayV2"
-      "url": string
-    }
-    "frontend": {
-      "type": "sst.aws.Nextjs"
-      "url": string
-    }
   }
 }
 /// <reference path="sst-env.d.ts" />
