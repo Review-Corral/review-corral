@@ -7,7 +7,6 @@
     "build": "sst build",
     "build:core": "tsc -p ./packages/core/tsconfig.json",
     "build:core:watch": "p build:core --watch",
-    "build:types": "JWT_SECRET=test sst types --profile test --stage test",
     "check": "biome check --apply .",
     "check:ci": "biome check --error-on-warnings .",
     "console": "sst console",
