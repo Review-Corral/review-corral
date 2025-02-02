@@ -1,6 +1,6 @@
 import { getDns, getUrl } from "./dns";
 
-import { ghClientId } from "./secrets";
+import { ghClientId, slackBotId } from "./secrets";
 
 export const frontend = new sst.aws.Nextjs("frontend", {
   path: "packages/web",
@@ -10,8 +10,7 @@ export const frontend = new sst.aws.Nextjs("frontend", {
     NEXT_PUBLIC_API_URL: getUrl("api"),
     NEXT_PUBLIC_REGION: $app.providers!.aws.region,
     NEXT_PUBLIC_GITHUB_CLIENT_ID: ghClientId.value,
-    // NEXT_PUBLIC_SLACK_BOT_ID: TODO:
-    // NEXT_PUBLIC_SLACK_AUTH_URL: // TODO:
+    NEXT_PUBLIC_SLACK_BOT_ID: slackBotId.value,
     NEXT_PUBLIC_LOCAL: $dev ? "true" : "false",
     NEXT_PUBLIC_STRIPE_PRICE_ID:
       $app.stage === "prod"
