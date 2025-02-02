@@ -1,4 +1,5 @@
 import { Button } from "@/components/shadcn/button";
+import { getSlackAuthUrl } from "@core/slack/utils";
 import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import React from "react";
@@ -12,13 +13,11 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
   const queryClient = useQueryClient();
 
   const slackBotId = process.env.NEXT_PUBLIC_SLACK_BOT_ID;
-  const slackAuthUrl = process.env.NEXT_PUBLIC_SLACK_AUTH_URL;
   if (!slackBotId) {
     throw Error("NEXT_PUBLIC_SLACK_BOT_ID not set");
   }
-  if (!slackAuthUrl) {
-    throw Error("NEXT_PUBLIC_SLACK_AUTH_URL not set");
-  }
+
+  const slackAuthUrl = getSlackAuthUrl();
 
   const searchParams = new URLSearchParams({
     state: organizationId.toString(),
