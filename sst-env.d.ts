@@ -5,69 +5,69 @@
 
 declare module "sst" {
   export interface Resource {
-    "GH_APP_ID": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "GH_CLIENT_ID": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "GH_CLIENT_SECRET": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "GH_ENCODED_PEM": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "GH_WEBHOOK_SECRET": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "JWT_SECRET": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "MainTable": {
-      "name": string
-      "type": "sst.aws.Dynamo"
-    }
-    "SLACK_BOT_ID": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "SLACK_BOT_TOKEN": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "SLACK_CLIENT_SECRET": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "SLACK_SIGNING_SECRET": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "STRIPE_SECRET_KEY": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "STRIPE_WEBHOOK_SECRET": {
-      "type": "sst.sst.Secret"
-      "value": string
-    }
-    "api": {
-      "type": "sst.aws.ApiGatewayV2"
-      "url": string
-    }
-    "frontend": {
-      "type": "sst.aws.Nextjs"
-      "url": string
-    }
+    GH_APP_ID: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    GH_CLIENT_ID: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    GH_CLIENT_SECRET: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    GH_ENCODED_PEM: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    GH_WEBHOOK_SECRET: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    JWT_SECRET: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    MainTable: {
+      name: string;
+      type: "sst.aws.Dynamo";
+    };
+    SLACK_BOT_ID: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    SLACK_BOT_TOKEN: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    SLACK_CLIENT_SECRET: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    SLACK_SIGNING_SECRET: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    STRIPE_SECRET_KEY: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    STRIPE_WEBHOOK_SECRET: {
+      type: "sst.sst.Secret";
+      value: string;
+    };
+    api: {
+      type: "sst.aws.ApiGatewayV2";
+      url: string;
+    };
+    frontend: {
+      type: "sst.aws.Nextjs";
+      url: string;
+    };
   }
 }
 /// <reference path="sst-env.d.ts" />
 
-import "sst"
-export {}
+import "sst";
+export {};
