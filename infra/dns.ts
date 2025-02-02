@@ -22,7 +22,7 @@ export const getUrl = (service: "api" | "frontend"): string => {
 /**
  * Generates DNS information for a given service.
  */
-export const getDns = (service: "api" | "frontend", { override = true } = {}) => {
+export const getDns = (service: "api" | "frontend") => {
   return {
     name: getDomain(service),
     dns: sst.aws.dns({
