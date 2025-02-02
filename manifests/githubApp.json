@@ -1,0 +1,29 @@
+{
+  "name": "Review Corral",
+  "description": "Review Corral is a tool for reviewing code changes in a collaborative way.",
+  "url": "https://reviewcorral.com",
+  "redirect_uris": [
+    "https://reviewcorral.com/api/github/oauth"
+  ],
+  "hook_attributes": {
+    "active": true,
+    "url": "https://reviewcorral.com/api/github/webhook"
+  },
+  "default_permissions": {
+   "actions": "read",
+   "administration": "read",
+   "checks": "read",
+   "issues": "write",
+   "metadata": "read",
+   "pull_requests": "read",
+   "members": "read",
+   "email_addresses": "read"
+  },
+  "default_events": [
+    "check_suite",
+    "check_run",
+    "pull_request",
+    "pull_request_review",
+    "pull_request_review_comment"
+  ]
+}
