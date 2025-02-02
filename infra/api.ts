@@ -1,9 +1,16 @@
-import { getDns } from "./dns";
+import { getDns, getUrl } from "./dns";
 import { table } from "./storage";
 
 const api = new sst.aws.ApiGatewayV2("api", {
   link: [table],
   domain: getDns("api"),
+  cors: {
+    // Allow requests from your frontend domain
+    allowOrigins: [getUrl("frontend")],
+    // Define allowed methods, headers, etc. as needed
+    allowMethods: ["GET", "PUT", "POST", "DELETE", "OPTIONS"],
+    allowHeaders: ["Content-Type", "Authorization"],
+  },
 });
 
 const basePath = "packages/functions/src";
@@ -15,8 +22,12 @@ api.route("GET /profile", `${basePath}/getProfile.handler`);
 // ==============================
 // Github
 // ==============================
-api.route("GET /gh/webhook-event", `${basePath}/github/events.handler`);
+api.route("POST /gh/webhook-event", `${basePath}/github/events.handler`);
 api.route("GET /gh/installations", `${basePath}/github/installations.getInstallations`);
+api.route(
+  "GET /gh/{organizationId}/repositories",
+  `${basePath}/github/repositories/getAll.handler`,
+);
 api.route(
   "PUT /gh/{organizationId}/repositories/{repositoryId}",
   `${basePath}/github/repositories/setStatus.handler`,
