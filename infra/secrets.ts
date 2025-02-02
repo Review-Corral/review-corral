@@ -13,3 +13,18 @@ export const slackBotId = new sst.Secret("SLACK_BOT_ID");
 export const slackBotToken = new sst.Secret("SLACK_BOT_TOKEN");
 export const slackClientSecret = new sst.Secret("SLACK_CLIENT_SECRET");
 export const slackSigningSecret = new sst.Secret("SLACK_SIGNING_SECRET");
+
+export const allSecrets = [
+  jwtSecret,
+  ghAppId,
+  ghClientId,
+  ghClientSecret,
+  ghEncodedPem,
+  ghWebhookSecret,
+  stripeSecretKey,
+  stripeWebhookSecret,
+  slackBotId,
+  slackBotToken,
+  slackClientSecret,
+  slackSigningSecret,
+];

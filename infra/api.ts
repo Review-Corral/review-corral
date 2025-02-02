@@ -1,8 +1,9 @@
 import { getDns, getUrl } from "./dns";
+import { allSecrets } from "./secrets";
 import { table } from "./storage";
 
 const api = new sst.aws.ApiGatewayV2("api", {
-  link: [table],
+  link: [table, ...allSecrets],
   domain: getDns("api"),
   cors: {
     // Allow requests from your frontend domain
