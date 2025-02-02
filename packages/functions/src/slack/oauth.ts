@@ -62,7 +62,7 @@ export const handler = ApiHandler(async (event, _context) => {
   formData.append("client_id", Resource.SLACK_BOT_ID.value);
   formData.append("code", searchParams.code);
   formData.append("client_secret", Resource.SLACK_CLIENT_SECRET.value);
-  formData.append("redirect_uri", assertVarExists("NEXT_PUBLIC_SLACK_AUTH_URL"));
+  formData.append("redirect_uri", `${assertVarExists("BASE_API_URL")}/slack/oauth`);
 
   const orgId = Number(searchParams.state);
 
