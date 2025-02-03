@@ -8,7 +8,7 @@ export const ORGANIZATION_MEMBERS_QUERY_KEY = "organizationMembers";
 
 export const useOrganizationMembers = (orgId: number) => {
   return useQuery({
-    queryKey: [ORGANIZATION_MEMBERS_QUERY_KEY],
+    queryKey: [ORGANIZATION_MEMBERS_QUERY_KEY, orgId],
     queryFn: async () => {
       return await ky
         .get(`${process.env.NEXT_PUBLIC_API_URL}/org/${orgId}/members`, {

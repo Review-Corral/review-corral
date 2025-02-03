@@ -7,7 +7,7 @@ export const INSTALLATION_QUERY_KEY = "installation";
 
 export const useOrganization = (orgId: number) => {
   return useQuery({
-    queryKey: [INSTALLATION_QUERY_KEY],
+    queryKey: [INSTALLATION_QUERY_KEY, orgId],
     queryFn: async () => {
       return await ky
         .get(`${process.env.NEXT_PUBLIC_API_URL}/org/${orgId}`, {

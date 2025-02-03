@@ -7,7 +7,7 @@ import { useQuery } from "@tanstack/react-query";
 
 export const useSlackUsers = (orgId: number) =>
   useQuery({
-    queryKey: ["slackInstallMembers"],
+    queryKey: ["slackInstallMembers", orgId],
     queryFn: async () => {
       return await ky
         .get(`${process.env.NEXT_PUBLIC_API_URL}/slack/${orgId}/users`, {
