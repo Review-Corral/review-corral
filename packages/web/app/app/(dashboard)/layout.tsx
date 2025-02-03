@@ -13,7 +13,7 @@ export default function Layout({
   return (
     <>
       <Navbar />
-      {children}
+      <div className="bg-white min-h-screen">{children}</div>
     </>
   );
 }
