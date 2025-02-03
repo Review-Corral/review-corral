@@ -3,6 +3,21 @@
 import { getUrl } from "./infra/dns";
 
 export default $config({
+  console: {
+    autodeploy: {
+      target: (event) => {
+        if (
+          event.type === "branch" &&
+          event.action === "pushed" &&
+          event.branch === "main"
+        ) {
+          return {
+            stage: "dev",
+          };
+        }
+      },
+    },
+  },
   app(input) {
     return {
       name: "review-corral",
