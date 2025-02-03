@@ -1,14 +1,6 @@
-import { getStageLookups } from "./utils/lookups";
-
 const table = new sst.aws.Dynamo(
   "MainTable",
   {
-    transform: {
-      table: (args, opts) => {
-        args.name = getStageLookups($app.stage).table.name;
-        opts.import = getStageLookups($app.stage).table.import;
-      },
-    },
     fields: {
       pk: "string",
       sk: "string",
