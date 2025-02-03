@@ -23,6 +23,8 @@ jobs:
           cache: "pnpm"
       - name: Install Pnpm Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Install sst
+        run: pnpm sst install
       - run: pnpm format:check
 
   typecheck:
@@ -39,6 +41,8 @@ jobs:
           cache: "pnpm"
       - name: Install Pnpm Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Install sst
+        run: pnpm sst install
       - run: cp .env.example .env.local
       - run: pnpm typecheck
 
@@ -56,4 +60,6 @@ jobs:
           cache: "pnpm"
       - name: Install Pnpm Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Install sst
+        run: pnpm sst install
       - run: pnpm test:ci
