@@ -21,7 +21,7 @@
     "test": "vitest run --exclude 'e2e.ts'",
     "test:ci": "vitest run --silent .spec.ts",
     "test:e2e": "vitest run .e2e.ts",
-    "test:watch": "sst bind vitest watch .spec.ts",
+    "test:watch": "vitest watch .spec.ts",
     "typecheck": "tsc -p ./tsconfig.json -noEmit && pnpm run -r typecheck"
   },
   "devDependencies": {

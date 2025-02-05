@@ -4,17 +4,17 @@ import { APIGatewayProxyEvent, APIGatewayProxyEventV2, Context } from "aws-lambd
 import { describe, expect, it, vi } from "vitest";
 import { handler } from "./events";
 
-vi.mock("sst/node/table", () => ({
-  Table: {
-    main: {
-      tableName: "mock-table-name",
+vi.mock("sst", () => ({
+  Resource: {
+    MainTable: {
+      name: "test-table",
     },
+    GH_WEBHOOK_SECRET: "test-secret",
   },
 }));
 
 describe("event.spec", () => {
   beforeEach(() => {
-    vi.stubEnv("GH_WEBHOOK_SECRET", "test-secret");
     const mocks = vi.hoisted(() => {
       return {
         handleGithubWebhookEvent: vi.fn(),
@@ -60,7 +60,6 @@ describe("event.spec", () => {
 
     expect(result).toMatchObject({
       headers: {},
-      cookies: [],
       statusCode: 200,
       body: '{"message":"Success"}',
     });

@@ -7,10 +7,10 @@ import { handlePullRequestEvent } from "./pullRequest";
 import { getSlackUserName } from "./shared";
 import { convertPrEventToBaseProps } from "./utils";
 
-vi.mock("sst/node/table", () => ({
-  Table: {
-    main: {
-      tableName: "mock-table-name",
+vi.mock("sst", () => ({
+  Resource: {
+    MainTable: {
+      name: "test-table",
     },
   },
 }));
