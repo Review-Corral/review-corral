@@ -1,6 +1,6 @@
 import { getDns, getUrl } from "./dns";
 
-import { ghClientId, slackBotId } from "./secrets";
+import { ghClientId, posthogHost, posthogKey, slackBotId } from "./secrets";
 
 export const frontend = new sst.aws.Nextjs("frontend", {
   path: "packages/web",
@@ -18,6 +18,8 @@ export const frontend = new sst.aws.Nextjs("frontend", {
         : "price_1P9FpDBqa9UplzHeeJ57VHoc",
     // ...slackEnvVars, // TODO:
     ...($app.stage === "alex" ? { NEXT_PUBLIC_LOCAL: "true" } : {}),
+    NEXT_PUBLIC_POSTHOG_KEY: posthogKey.value,
+    NEXT_PUBLIC_POSTHOG_HOST: posthogHost.value,
   },
   link: [ghClientId],
 });
