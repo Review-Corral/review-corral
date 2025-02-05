@@ -14,6 +14,9 @@ export const slackBotToken = new sst.Secret("SLACK_BOT_TOKEN");
 export const slackClientSecret = new sst.Secret("SLACK_CLIENT_SECRET");
 export const slackSigningSecret = new sst.Secret("SLACK_SIGNING_SECRET");
 
+export const posthogKey = new sst.Secret("POSTHOG_KEY");
+export const posthogHost = new sst.Secret("POSTHOG_HOST");
+
 export const allSecrets = [
   jwtSecret,
   ghAppId,
@@ -27,4 +30,6 @@ export const allSecrets = [
   slackBotToken,
   slackClientSecret,
   slackSigningSecret,
+  posthogKey,
+  posthogHost,
 ];
