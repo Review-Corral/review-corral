@@ -13,10 +13,12 @@ export const Navbar: FC = () => {
         </Link>
 
         <div className="flex items-center gap-4">
-          <Button variant="outline" className="text-black gap-2">
-            <GithubIcon className="w-4 h-4" />
-            Source Code
-          </Button>
+          <Link href="https://github.com/Review-Corral/review-corral">
+            <Button variant="outline" className="text-black gap-2">
+              <GithubIcon className="w-4 h-4" />
+              Source Code
+            </Button>
+          </Link>
           <Link href="/app">
             <Button className="text-white">Get Started</Button>
           </Link>
