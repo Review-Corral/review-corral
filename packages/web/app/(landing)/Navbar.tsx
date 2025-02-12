@@ -13,7 +13,11 @@ export const Navbar: FC = () => {
         </Link>
 
         <div className="flex items-center gap-4">
-          <Link href="https://github.com/Review-Corral/review-corral">
+          <Link
+            href="https://github.com/Review-Corral/review-corral"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             <Button variant="outline" className="text-black gap-2">
               <GithubIcon className="w-4 h-4" />
               Source Code
