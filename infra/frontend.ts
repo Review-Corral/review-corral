@@ -2,9 +2,14 @@ import { getDns, getUrl } from "./dns";
 
 import { ghClientId, posthogHost, posthogKey, slackBotId } from "./secrets";
 
+const dns = getDns("frontend");
+
+console.log("DNS settings for frontend", {
+  dns,
+});
 export const frontend = new sst.aws.Nextjs("frontend", {
   path: "packages/web",
-  domain: getDns("frontend"),
+  domain: dns,
   environment: {
     BASE_URL: getUrl("frontend"),
     NEXT_PUBLIC_API_URL: getUrl("api"),
