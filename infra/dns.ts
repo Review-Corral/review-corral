@@ -23,11 +23,15 @@ export const getUrl = (service: "api" | "frontend"): string => {
  * Generates DNS information for a given service.
  */
 export const getDns = (service: "api" | "frontend") => {
+  const domain = getDomain(service);
   return {
-    name: getDomain(service),
+    name: domain,
     dns: sst.aws.dns({
       override: true,
       zone: "Z0854557GLD532VHXK6N",
+      ...($app.stage === "prod" && service === "frontend"
+        ? { redirects: [`www.${domain}`] }
+        : {}),
     }),
   };
 };
