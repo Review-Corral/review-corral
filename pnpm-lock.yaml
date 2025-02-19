@@ -216,8 +216,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7
       hono:
-        specifier: ^4.6.16
-        version: 4.6.16
+        specifier: ^4.6.17
+        version: 4.6.17
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
@@ -3174,8 +3174,8 @@ packages:
     resolution: {integrity: sha512-ZbezypZfn4odyApjCCv+Fw5OgweBqRLA/EsMyc4FUknFvBJcBIKhHy4sqmD1rWpBc/3wUlaQ6tqOPjk36R1ckg==}
     engines: {node: '>=16.0.0'}
 
-  hono@4.6.16:
-    resolution: {integrity: sha512-iE6xOPwDYlfnZFwk6BfIMMIH4WZm3pPhz6rc1uJM/OPew0pjG5K6p8WTLaMBY1/szF/T0TaEjprMpwn16BA0NQ==}
+  hono@4.6.17:
+    resolution: {integrity: sha512-Kbh4M0so2RzLiIg6iP33DoTU68TdvP2O/kb1Hhhdwa37fazuf402ig8ZRfjkz2dqXwiWl2dAgh0f++TuKAdOtQ==}
     engines: {node: '>=16.9.0'}
 
   http-errors@1.8.1:
@@ -6779,7 +6779,7 @@ snapshots:
 
   '@smithy/is-array-buffer@2.2.0':
     dependencies:
-      tslib: 2.6.3
+      tslib: 2.8.1
 
   '@smithy/is-array-buffer@3.0.0':
     dependencies:
@@ -7987,7 +7987,7 @@ snapshots:
 
   hono@4.5.0: {}
 
-  hono@4.6.16: {}
+  hono@4.6.17: {}
 
   http-errors@1.8.1:
     dependencies:

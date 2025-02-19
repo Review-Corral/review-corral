@@ -20,7 +20,7 @@
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.716.0",
     "aws-lambda": "^1.0.7",
-    "hono": "^4.6.16",
+    "hono": "^4.6.17",
     "jsonwebtoken": "^9.0.2",
     "ky": "^1.7.4",
     "stripe": "^15.12.0",
