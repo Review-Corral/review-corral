@@ -1,21 +1,22 @@
+import { LogoWithText } from "@/app/(landing)/LogoWithText";
 import GithubLoginButton from "./GIthubLoginButton";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center px-6 py-12 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-sm">
-        <img
-          className="mx-auto h-24 w-auto"
-          src="https://avatars.githubusercontent.com/in/203068?s=120&u=4f27b80d54a1405e10756a1dc0175d1ef3866422&v=4"
-          alt="Review Corral Logo"
-        />
-      </div>
-      <h2 className="mt-2 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">
-        Review Corral
-      </h2>
+    <div className="flex min-h-screen flex-col items-center justify-center bg-[#e9edf6] px-4 py-8 sm:px-6 lg:px-8">
+      <div className="flex-col items-center border border-gray-200 w-full max-w-md overflow-hidden  bg-white rounded-lg">
+        <div className="flex flex-col items-center justify-center px-8 pt-8 pb-6">
+          <LogoWithText />
 
-      <div className="flex justify-center mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <GithubLoginButton />
+          <p className="mt-8 text-center text-sm text-gray-500">
+            Login with your GitHub to get started. This will allow Review Corral to see
+            the repositories you're a part of in order to install.
+          </p>
+
+          <div className="flex justify-center mt-8">
+            <GithubLoginButton />
+          </div>
+        </div>
       </div>
     </div>
   );
