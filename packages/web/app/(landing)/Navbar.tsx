@@ -1,11 +1,11 @@
 "use client";
 
-import Link from "next/link";
-import { FC } from "react";
-import { LogoWithText } from "./LogoWithText";
 import { Button } from "@/components/shadcn/button";
 import { GithubIcon, Menu, X } from "lucide-react";
+import Link from "next/link";
+import { FC } from "react";
 import { useState } from "react";
+import { LogoWithText } from "./LogoWithText";
 
 export const Navbar: FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);

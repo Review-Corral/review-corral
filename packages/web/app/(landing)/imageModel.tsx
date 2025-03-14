@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function ClientModal() {
   const [isModalOpen, setIsModalOpen] = useState(false);

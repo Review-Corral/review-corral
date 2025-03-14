@@ -3,8 +3,8 @@ import { Slack } from "lucide-react";
 import { FC } from "react";
 import { OrgViewProps } from "../shared";
 import { SetupSlackCard } from "./SetupSlackCard";
-import { useSlackIntegrations } from "./useSlackIntegrations";
 import { SlackIntegration } from "./SlackIntegration";
+import { useSlackIntegrations } from "./useSlackIntegrations";
 
 interface SlackOverviewCardProps extends OrgViewProps {}
 

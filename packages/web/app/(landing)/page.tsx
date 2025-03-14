@@ -1,5 +1,5 @@
-import Link from "next/link";
 import { Button } from "@/components/shadcn/button";
+import Link from "next/link";
 import { ClientModal } from "./imageModel";
 
 export default function LandingPage() {

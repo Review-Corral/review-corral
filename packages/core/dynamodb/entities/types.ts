@@ -1,4 +1,5 @@
 import { CreateEntityItem, EntityItem, UpdateEntityItem } from "electrodb";
+import { BranchEntity } from "./branch";
 import { MemberEntity } from "./member";
 import { OrganizationEntity } from "./organization";
 import { PullRequestEntity } from "./pullRequest";
@@ -7,7 +8,6 @@ import { SlackEntity } from "./slack";
 import { SlackUserEntity } from "./slackUser";
 import { SubscriptionEntity } from "./subscription";
 import { UserEntity } from "./user";
-import { BranchEntity } from "./branch";
 
 export type Organization = EntityItem<typeof OrganizationEntity>;
 export type User = EntityItem<typeof UserEntity>;

@@ -1,6 +1,6 @@
 import {
-  PullRequestItem,
   PullRequestInsertArgs,
+  PullRequestItem,
   PullRequestUpdateArgs,
 } from "@core/dynamodb/entities/types";
 import { Db } from "../client";

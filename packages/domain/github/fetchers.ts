@@ -12,7 +12,6 @@ import {
   PullRequestReviewsResponse,
   RepositoryPullRequestsResponse,
 } from "./endpointTypes";
-import { SimplePullRequest } from "@octokit/webhooks-types";
 
 const LOGGER = new Logger("github.fetchers.ts");
 

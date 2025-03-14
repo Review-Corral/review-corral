@@ -1,6 +1,6 @@
 import { beforeEach } from "node:test";
 import { handleGithubWebhookEvent } from "@domain/github/webhooks";
-import { APIGatewayProxyEvent, APIGatewayProxyEventV2, Context } from "aws-lambda";
+import { APIGatewayProxyEvent, Context } from "aws-lambda";
 import { describe, expect, it, vi } from "vitest";
 import { handler } from "./events";
 
