@@ -1,20 +1,18 @@
+"use client";
+
+import { Switch } from "@components/shadcn/switch";
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Organization } from "@core/dynamodb/entities/types";
-
-import { useSetRepoActive } from "@/app/app/(dashboard)/github/useRepos";
-import { Button } from "@components/shadcn/button";
-import { Switch } from "@components/shadcn/switch";
 import { Github } from "lucide-react";
 import { FC } from "react";
 import toast from "react-hot-toast";
 import Xarrow from "react-xarrows";
-import { useOrganizationRepositories } from "../useOrgRepos";
-import { OrgViewProps } from "./shared";
-import { useSlackIntegrations } from "./slack/useSlackIntegrations";
+import { OrgViewProps } from "../shared";
+import { useSlackIntegrations } from "../slack/useSlackIntegrations";
+import { useOrganizationRepositories, useSetRepoActive } from "./useRepos";
 
 interface GithubCardProps extends OrgViewProps {
   organization: Organization;
-  onEdit: () => void;
 }
 
 export const GithubCard: FC<GithubCardProps> = ({ organization }) => {
@@ -25,18 +23,9 @@ export const GithubCard: FC<GithubCardProps> = ({ organization }) => {
           <Github className="h-8 w-8 fill-black" />
           <span className="font-semibold text-lg">Repositories</span>
         </div>
-        <div
-          className="cursor-pointer underline text-indigo-500 underline-offset-2"
-          onClick={() => window.alert("Todo")}
-        >
-          Edit
-        </div>
       </div>
       <div className="py-6">
-        <GithubCardData
-          organization={organization}
-          onEdit={() => window.alert("todo")}
-        />
+        <GithubCardData organization={organization} />
       </div>
     </div>
   );
@@ -44,12 +33,10 @@ export const GithubCard: FC<GithubCardProps> = ({ organization }) => {
 
 interface GithubCardDataProps {
   organization: Organization;
-  onEdit: () => void;
 }
 
-const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
+const GithubCardData: FC<GithubCardDataProps> = ({ organization }) => {
   const getInstalledRepos = useOrganizationRepositories(organization.orgId);
-
   const { data: slackData } = useSlackIntegrations(organization.orgId);
 
   const setRepoActive = useSetRepoActive();
@@ -85,10 +72,8 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization, onEdit }) => {
     return (
       <div className="p-4 border border-grey-200 rounded-md space-y-6 max-w-xl">
         <span>
-          Configure your repositories below to tell Review Corral which repositories to
-          post events for and which ones to ignore.
+          It looks like we couldn't detect any repositories for this organization.
         </span>
-        <Button onClick={onEdit}>Setup Github Repositories</Button>
       </div>
     );
   }

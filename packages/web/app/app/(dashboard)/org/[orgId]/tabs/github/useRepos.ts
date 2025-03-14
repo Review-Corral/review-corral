@@ -13,14 +13,11 @@ export const useOrganizationRepositories = (orgId: number) => {
     queryKey: [reposKey, orgId],
     queryFn: async () => {
       return await ky
-        .get(
-          `${process.env.NEXT_PUBLIC_API_URL}/gh/installations/${orgId}/repositories`,
-          {
-            headers: {
-              Authorization: `Bearer ${getSessionToken()}`,
-            },
+        .get(`${process.env.NEXT_PUBLIC_API_URL}/gh/${orgId}/repositories`, {
+          headers: {
+            Authorization: `Bearer ${getSessionToken()}`,
           },
-        )
+        })
         .json<Repository[]>();
     },
   });

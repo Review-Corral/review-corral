@@ -1,6 +1,7 @@
 "use client";
 
 import { useProtectedRoute } from "@auth/useProtectedRoute";
+import { Toaster } from "react-hot-toast";
 import { Navbar } from "./Navbar";
 
 export default function Layout({
@@ -14,6 +15,7 @@ export default function Layout({
     <>
       <Navbar />
       <div className="bg-white min-h-screen">{children}</div>
+      <Toaster />
     </>
   );
 }

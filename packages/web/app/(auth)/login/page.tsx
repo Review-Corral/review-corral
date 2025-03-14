@@ -3,7 +3,7 @@ import GithubLoginButton from "./GIthubLoginButton";
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-[#e9edf6] px-4 py-8 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gray-100 px-4 py-8 sm:px-6 lg:px-8">
       <div className="flex-col items-center border border-gray-200 w-full max-w-md overflow-hidden  bg-white rounded-lg">
         <div className="flex flex-col items-center justify-center px-8 pt-8 pb-6">
           <LogoWithText />

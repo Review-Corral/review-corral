@@ -28,7 +28,7 @@ const OrgView: React.FC = () => {
 
   switch (page) {
     case "users":
-      return <UsersTab orgId={orgId} />;
+      return <UsersTab organization={organization} />;
     case "billing":
       return <BillingTab orgId={orgId} />;
     default:
