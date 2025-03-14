@@ -7,24 +7,24 @@
     "typecheck": "tsc -noEmit"
   },
   "devDependencies": {
-    "@octokit/types": "^12.6.0",
+    "@octokit/types": "^13.8.0",
     "@octokit/webhooks-types": "^7.6.1",
-    "@types/aws-lambda": "^8.10.146",
-    "@types/jsonwebtoken": "^9.0.7",
-    "@types/node": "^20.17.10",
-    "sst": "3.6.40",
-    "vite-tsconfig-paths": "^4.3.2",
-    "vitest": "^3.0.5",
-    "vitest-mock-extended": "^2.0.2"
+    "@types/aws-lambda": "^8.10.147",
+    "@types/jsonwebtoken": "^9.0.9",
+    "@types/node": "^22.13.10",
+    "sst": "3.9.37",
+    "vite-tsconfig-paths": "^5.1.4",
+    "vitest": "^3.0.8",
+    "vitest-mock-extended": "^3.0.1"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.716.0",
+    "@aws-sdk/client-sqs": "^3.758.0",
     "aws-lambda": "^1.0.7",
-    "hono": "^4.6.16",
+    "hono": "^4.7.4",
     "jsonwebtoken": "^9.0.2",
-    "ky": "^1.7.4",
-    "stripe": "^15.12.0",
-    "zod": "^3.24.1"
+    "ky": "^1.7.5",
+    "stripe": "^17.7.0",
+    "zod": "^3.24.2"
   },
   "packageManager": "pnpm@9.14.2"
 }
