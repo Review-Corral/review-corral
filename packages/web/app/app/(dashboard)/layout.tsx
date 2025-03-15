@@ -2,7 +2,7 @@
 
 import { useProtectedRoute } from "@auth/useProtectedRoute";
 import { Toaster } from "react-hot-toast";
-import { Navbar } from "./Navbar";
+import { NavbarWithOrgContext } from "./NavbarWithOrgContext";
 
 export default function Layout({
   children,
@@ -13,7 +13,7 @@ export default function Layout({
 
   return (
     <>
-      <Navbar />
+      <NavbarWithOrgContext />
       <div className="bg-white min-h-screen">{children}</div>
       <Toaster />
     </>

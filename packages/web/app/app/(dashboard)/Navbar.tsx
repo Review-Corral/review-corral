@@ -23,7 +23,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrgId }) => {
     organizations.data &&
     activeOrgId &&
     organizations.data.find((org) => org.orgId === activeOrgId);
-
+  console.log("activeOrg", activeOrg);
   const user = useProfile();
 
   const avatarUrl: string | undefined = user.data?.avatarUrl;
@@ -50,7 +50,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrgId }) => {
                     <div className="-mt-0.5 text-3xl text-gray-400 font-extralight">
                       /
                     </div>
-                    <div className="rounded-md px-2 py- flex gap-2 items-center">
+                    <div className="rounded-md px-2 py-1 bg-gray-50 border border-gray-200 flex gap-2 items-center">
                       <div className="flex items-center space-x-2">
                         <div className="rounded-md overflow-hidden">
                           {/* biome-ignore lint/a11y/useAltText: <explanation> */}
