@@ -1,5 +1,5 @@
 import { cn } from "@/components/lib/utils";
-import { Button } from "@components/shadcn/button";
+import { BetterButton } from "@/components/ui/BetterButton";
 import {
   Select,
   SelectContent,
@@ -11,7 +11,7 @@ import {
 import { DataTableColumnHeader } from "@components/table/DataTableColumnHeader";
 import { Member, SlackUser } from "@core/dynamodb/entities/types";
 import { ColumnDef } from "@tanstack/react-table";
-import { FC, useMemo } from "react";
+import { FC, useMemo, useState } from "react";
 import {
   Control,
   Controller,
@@ -20,6 +20,7 @@ import {
   useFieldArray,
   useForm,
 } from "react-hook-form";
+import toast from "react-hot-toast";
 import { useMutateOrganizationMembers } from "../../useOrganizationMembers";
 import { UsersTable } from "./UsersTable";
 
@@ -39,6 +40,7 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({
   slackUsers,
 }) => {
   const updateOrgMember = useMutateOrganizationMembers(orgId);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const { control, register, handleSubmit } = useForm<FormValues>({
     defaultValues: {
@@ -61,15 +63,47 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({
     );
   }, [data]);
 
-  const onSubmit = (newMemebrs: FormValues) => {
-    for (const newMember of newMemebrs.members) {
-      if (newMember.slackId !== membersById[newMember.memberId].slackId) {
-        updateOrgMember.mutate({
-          orgId,
-          memberId: newMember.memberId,
-          slackId: newMember.slackId ?? null,
-        });
+  const onSubmit = async (newMembers: FormValues) => {
+    const changedMembers = newMembers.members.filter(
+      (newMember) => newMember.slackId !== membersById[newMember.memberId].slackId
+    );
+    
+    if (changedMembers.length === 0) {
+      toast.success("No changes to save");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    
+    try {
+      // Create an array of promises for all mutations
+      const updatePromises = changedMembers.map((newMember) => 
+        toast.promise(
+          updateOrgMember.mutateAsync({
+            orgId,
+            memberId: newMember.memberId,
+            slackId: newMember.slackId ?? null,
+          }),
+          {
+            loading: `Updating ${newMember.name}...`,
+            success: `Updated ${newMember.name}`,
+            error: (err) => `Failed to update ${newMember.name}: ${err.message}`
+          }
+        )
+      );
+      
+      // Wait for all updates to complete
+      await Promise.all(updatePromises);
+      
+      // Show a summary toast if multiple members were updated
+      if (changedMembers.length > 1) {
+        toast.success(`Updated ${changedMembers.length} team members`);
       }
+    } catch (error) {
+      console.error("Error updating members:", error);
+      toast.error("Some updates failed. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -83,7 +117,9 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({
       <div className="flex flex-col gap-6 w-full">
         <UsersTable columns={columns} data={fields} />
         <div className="flex flex-row w-full justify-end">
-          <Button>Save</Button>
+          <BetterButton isLoading={isSubmitting} type="submit">
+            Save
+          </BetterButton>
         </div>
       </div>
     </form>

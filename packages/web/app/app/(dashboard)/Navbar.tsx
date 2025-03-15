@@ -58,7 +58,6 @@ export const Navbar: FC<NavbarProps> = ({ activeOrgId }) => {
                         </div>
                         <div>{activeOrg.name}</div>
                       </div>
-                      {/* <SelectorIcon className="h-5 w-5" /> */}
                     </div>
                   </>
                 )}
