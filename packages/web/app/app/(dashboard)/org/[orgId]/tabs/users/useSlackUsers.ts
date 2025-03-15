@@ -5,9 +5,11 @@ import { getSessionToken } from "@auth/getSessionToken";
 import { SlackUser } from "@core/dynamodb/entities/types";
 import { useQuery } from "@tanstack/react-query";
 
+export const SLACK_USERS_QUERY_KEY = "slackInstallMembers";
+
 export const useSlackUsers = (orgId: number) =>
   useQuery({
-    queryKey: ["slackInstallMembers", orgId],
+    queryKey: [SLACK_USERS_QUERY_KEY, orgId],
     queryFn: async () => {
       return await ky
         .get(`${process.env.NEXT_PUBLIC_API_URL}/slack/${orgId}/users`, {
