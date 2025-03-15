@@ -1,9 +1,11 @@
 "use client";
 
 import { useParams, useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as z from "zod";
 import { DashboardPaddedBody } from "../../../../../components/ui/layout/DashboardPaddedBody";
+import { useQueryClient } from "@tanstack/react-query";
+import { prefetchOrgQueries } from "../prefetchOrgQueries";
 
 const PageSchema = z.enum(["billing", "users", "overview"]);
 
@@ -37,6 +39,7 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
   const searchParams = useSearchParams();
   const params = useParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const parsedPage = PageSchema.safeParse(searchParams.get("page"));
   const { orgId } = orgViewParamsSchema.parse(params);
@@ -44,6 +47,11 @@ export default function RootLayout({ children }: React.PropsWithChildren) {
   const [_page, setPage] = useState<Page>(
     parsedPage.success ? parsedPage.data : "overview",
   );
+
+  // Prefetch all organization-related queries when this layout is mounted
+  useEffect(() => {
+    prefetchOrgQueries(queryClient, orgId);
+  }, [orgId, queryClient]);
 
   const setPageWrapper = (page: Page): void => {
     if (orgId) {

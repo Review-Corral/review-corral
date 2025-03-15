@@ -7,11 +7,16 @@ import Link from "next/link";
 import { FC } from "react";
 import { DashboardPaddedBody } from "../../../components/ui/layout/DashboardPaddedBody";
 import { useOrganizations } from "./org/useOrganizations";
+import { useQueryClient } from "@tanstack/react-query";
+import { prefetchOrgQueries } from "./org/prefetchOrgQueries";
 
 const HomeView: FC = () => {
   const { data, isLoading } = useOrganizations();
+  const queryClient = useQueryClient();
 
-  console.log("on dashboard main page");
+  const prefetchOrgData = (orgId: number) => {
+    prefetchOrgQueries(queryClient, orgId);
+  };
 
   if (data && data.length <= 0) {
     return (
@@ -52,7 +57,11 @@ const HomeView: FC = () => {
       <div className="mt-8 inline-flex flex-col gap-2">
         {isLoading && <Loading />}
         {data?.map((org) => (
-          <Link key={org.orgId} href={`/app/org/${org.orgId}`}>
+          <Link 
+            key={org.orgId} 
+            href={`/app/org/${org.orgId}`}
+            onMouseEnter={() => prefetchOrgData(org.orgId)}
+          >
             <div className="inline-flex items-center space-x-2 w-72 cursor-pointer rounded-md p-4 border border-gray-200 hover:shadow-sm">
               <div className="rounded-md overflow-hidden">
                 <img alt={"Avatar url"} src={org.avatarUrl} width={32} height={32} />

@@ -92,8 +92,8 @@ export const handler = ApiHandler(async (event, _context) => {
     mode: "subscription",
     metadata: metaData,
     customer_email: organization.billingEmail,
-    success_url: `${frontendUrl}/org/${body.data.orgId}/payment/success`,
-    cancel_url: `${frontendUrl}/org/${body.data.orgId}/payment/failure`,
+    success_url: `${frontendUrl}/app/org/${body.data.orgId}/payment/success`,
+    cancel_url: `${frontendUrl}/app/org/${body.data.orgId}/payment/failure`,
   });
 
   if (!session.url) {
