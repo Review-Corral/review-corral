@@ -16,6 +16,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                 Privacy Policy
               </Link>
             </p>
+            <p className="text-gray-300"> | </p>
+            <p>
+              <a href="mailto:alex.mclean25+rc@gmail.com" className="underline">
+                Contact
+              </a>
+            </p>
           </div>
         </footer>
       </div>

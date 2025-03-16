@@ -64,6 +64,12 @@ export const Navbar: FC<NavbarProps> = ({ activeOrgId }) => {
               </div>
               <div className="block">
                 <div className="ml-4 flex items-center md:ml-6">
+                  <a
+                    href="mailto:alex.mclean25+rc@gmail.com"
+                    className="inline-flex items-center px-4 py-2 mr-3 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                  >
+                    Contact
+                  </a>
                   <Menu as="div" className="ml-3 relative">
                     <div>
                       <Menu.Button className="max-w-xs bg-slate-200 rounded-full flex items-center text-sm text-black">
