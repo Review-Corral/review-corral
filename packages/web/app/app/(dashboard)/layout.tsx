@@ -12,10 +12,10 @@ export default function Layout({
   useProtectedRoute();
 
   return (
-    <>
+    <div className="flex flex-col h-full">
       <NavbarWithOrgContext />
-      <div className="bg-white min-h-screen">{children}</div>
+      <div className="bg-white flex-grow">{children}</div>
       <Toaster />
-    </>
+    </div>
   );
 }

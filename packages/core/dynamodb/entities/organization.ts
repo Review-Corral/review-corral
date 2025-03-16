@@ -43,8 +43,18 @@ export const OrganizationEntity = new Entity({
       required: false,
     },
     stripeSubStatus: {
-      type: "string",
+      type: "map",
       required: false,
+      properties: {
+        isActive: {
+          type: "boolean",
+          required: true,
+        },
+        status: {
+          type: "string",
+          required: true,
+        },
+      },
     },
     // =============
     // END Stripe Stuff
