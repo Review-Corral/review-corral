@@ -15,7 +15,7 @@ export default function Providers({ children }: React.PropsWithChildren) {
             staleTime: 1000 * 20, // 20 seconds
           },
         },
-      })
+      }),
   );
 
   return (

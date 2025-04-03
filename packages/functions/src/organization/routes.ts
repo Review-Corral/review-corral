@@ -2,9 +2,9 @@ import { Member, Organization } from "@core/dynamodb/entities/types";
 import { updateMemberSchema } from "@core/fetchTypes/updateOrgMember";
 import {
   addOrganizationMembers,
-  getOrganizationMembers,
   getOrganizationMembers as fetchOrgMembers,
-  updateOrgMember
+  getOrganizationMembers,
+  updateOrgMember,
 } from "@domain/dynamodb/fetchers/members";
 import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
 import { OrgMembers } from "@domain/github/endpointTypes";
@@ -31,7 +31,7 @@ app.use("*", authMiddleware, requireAuth);
 app.get("/:organizationId", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
-    
+
     const organization = await fetchOrganizationById(organizationId);
 
     if (!organization) {
@@ -53,7 +53,7 @@ app.get("/:organizationId", async (c) => {
 app.get("/:organizationId/billing", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
-    
+
     const organization = await fetchOrganizationById(organizationId);
 
     if (!organization) {
@@ -72,7 +72,7 @@ app.get("/:organizationId/billing", async (c) => {
 app.get("/:organizationId/members", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
-    
+
     const organization = await fetchOrganizationById(organizationId);
 
     if (!organization) {
@@ -91,7 +91,7 @@ app.get("/:organizationId/members", async (c) => {
 app.put("/:organizationId/member", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
-    
+
     const organization = await fetchOrganizationById(organizationId);
 
     if (!organization) {
@@ -101,7 +101,7 @@ app.put("/:organizationId/member", async (c) => {
     try {
       const body = await c.req.json();
       const parsedBody = updateMemberSchema.parse(body);
-      
+
       const newMember = await updateOrgMember(parsedBody);
       return c.json(newMember);
     } catch (error) {

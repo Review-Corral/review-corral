@@ -1,21 +1,27 @@
 import { getSessionToken } from "@auth/getSessionToken";
-import { Organization, Member, Repository, SlackIntegration, SlackUser } from "@core/dynamodb/entities/types";
+import {
+  Member,
+  Organization,
+  Repository,
+  SlackIntegration,
+  SlackUser,
+} from "@core/dynamodb/entities/types";
 import { BillingDetailsResponse } from "@core/selectorTypes/organization";
 import { QueryClient } from "@tanstack/react-query";
 import ky from "ky";
-import { INSTALLATION_QUERY_KEY } from "./[orgId]/useOrganization";
-import { ORGANIZATION_MEMBERS_QUERY_KEY } from "./[orgId]/useOrganizationMembers";
-import { reposKey } from "./[orgId]/tabs/github/useRepos";
 import { ORGANIZATION_BILLING_QUERY_KEY } from "./[orgId]/tabs/billing/useOrgBillingDetails";
+import { reposKey } from "./[orgId]/tabs/github/useRepos";
 import { SLACK_INTEGRATIONS_QUERY_KEY } from "./[orgId]/tabs/slack/useSlackIntegrations";
 import { SLACK_USERS_QUERY_KEY } from "./[orgId]/tabs/users/useSlackUsers";
+import { INSTALLATION_QUERY_KEY } from "./[orgId]/useOrganization";
+import { ORGANIZATION_MEMBERS_QUERY_KEY } from "./[orgId]/useOrganizationMembers";
 
 /**
  * Prefetches all organization-related queries
  */
 export const prefetchOrgQueries = async (
   queryClient: QueryClient,
-  orgId: number
+  orgId: number,
 ): Promise<void> => {
   const token = getSessionToken();
   if (!token) return;
@@ -29,9 +35,7 @@ export const prefetchOrgQueries = async (
   queryClient.prefetchQuery({
     queryKey: [INSTALLATION_QUERY_KEY, orgId],
     queryFn: async () => {
-      return await ky
-        .get(`${apiUrl}/org/${orgId}`, { headers })
-        .json<Organization>();
+      return await ky.get(`${apiUrl}/org/${orgId}`, { headers }).json<Organization>();
     },
   });
 

@@ -40,7 +40,10 @@ app.get("/callback", async (c) => {
     );
 
     // Set location header for redirect
-    return c.redirect(`${config.frontendBaseUrl}/login/set-token?token=${accessToken}`, 302);
+    return c.redirect(
+      `${config.frontendBaseUrl}/login/set-token?token=${accessToken}`,
+      302,
+    );
   } catch (error) {
     console.error("Auth error:", error);
     throw new HTTPException(500, { message: "Authentication failed" });
