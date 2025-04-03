@@ -12,13 +12,12 @@ import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { handleSessionCompleted, handleSubUpdated } from "@domain/stripe/handleEvent";
 import { Hono } from "hono";
-import { handle } from "hono/aws-lambda";
 import { Resource } from "sst";
 import { authMiddleware, requireAuth } from "../middleware/auth";
 
 const LOGGER = new Logger("stripe:routes");
 
-const app = new Hono();
+export const app = new Hono();
 
 // Create a group for authenticated routes
 const authRoutes = new Hono();
@@ -27,7 +26,7 @@ const authRoutes = new Hono();
 authRoutes.use("*", authMiddleware, requireAuth);
 
 // Checkout session route
-authRoutes.post("/stripe/checkout-session", async (c) => {
+authRoutes.post("/checkout-session", async (c) => {
   const user = c.get("user");
   
   try {
@@ -107,7 +106,7 @@ authRoutes.post("/stripe/checkout-session", async (c) => {
 });
 
 // Billing portal session route
-authRoutes.post("/stripe/billing-portal", async (c) => {
+authRoutes.post("/billing-portal", async (c) => {
   const user = c.get("user");
   
   try {
@@ -141,7 +140,7 @@ authRoutes.post("/stripe/billing-portal", async (c) => {
 });
 
 // Webhook event route - no auth required
-app.post("/stripe/webhook-event", async (c) => {
+app.post("/webhook-event", async (c) => {
   try {
     const body = await c.req.text();
     
@@ -193,5 +192,3 @@ app.post("/stripe/webhook-event", async (c) => {
 
 // Merge the authenticated routes into main app
 app.route("/", authRoutes);
-
-export const handler = handle(app);

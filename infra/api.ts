@@ -14,30 +14,8 @@ const api = new sst.aws.ApiGatewayV2("api", {
   },
 });
 
-const basePath = "packages/functions/src";
-
-api.route("GET /", `${basePath}/lambda.handler`);
-api.route("GET /auth/callback", `${basePath}/auth/callback.handler`);
-api.route("GET /profile", `${basePath}/getProfile.handler`);
-
-// ==============================
-// Github
-// ==============================
-api.route("ANY /gh/{proxy+}", `${basePath}/github/routes.handler`);
-
-// ==============================
-// Stripe
-// ==============================
-api.route("ANY /stripe/{proxy+}", `${basePath}/stripe/routes.handler`);
-
-// ==============================
-// Organization
-// ==============================
-api.route("ANY /org/{proxy+}", `${basePath}/organization/routes.handler`);
-
-// ==============================
-// Slack
-// ==============================
-api.route("ANY /slack/{proxy+}", `${basePath}/slack/routes.handler`);
+// Single Hono app that handles all routes
+api.route("ANY /", "packages/functions/src/app.handler");
+api.route("ANY /{proxy+}", "packages/functions/src/app.handler");
 
 export { api };

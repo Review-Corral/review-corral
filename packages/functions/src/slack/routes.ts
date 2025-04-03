@@ -7,7 +7,6 @@ import {
 import { Logger } from "@domain/logging";
 import { Db } from "@domain/dynamodb/client";
 import { Hono } from "hono";
-import { handle } from "hono/aws-lambda";
 import ky from "ky";
 import { Resource } from "sst";
 import { assertVarExists } from "@core/utils/assert";
@@ -16,7 +15,7 @@ import { authMiddleware, requireAuth } from "../middleware/auth";
 
 const LOGGER = new Logger("slack:routes");
 
-const app = new Hono();
+export const app = new Hono();
 
 // Schema definitions
 const slackAuthRequestSchema = z.object({
@@ -72,7 +71,7 @@ const deleteIntegrationSchema = z.object({
 });
 
 // OAuth route - no auth required
-app.get("/slack/oauth", async (c) => {
+app.get("/oauth", async (c) => {
   const query = c.req.query();
   LOGGER.debug("Received query params", { queryParams: query });
 
@@ -136,7 +135,7 @@ const protectedRoutes = new Hono();
 protectedRoutes.use("*", authMiddleware, requireAuth);
 
 // Get users route
-protectedRoutes.get("/slack/:organizationId/users", async (c) => {
+protectedRoutes.get("/:organizationId/users", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
 
@@ -172,7 +171,7 @@ protectedRoutes.get("/slack/:organizationId/users", async (c) => {
 });
 
 // Get installations route
-protectedRoutes.get("/slack/:organizationId/installations", async (c) => {
+protectedRoutes.get("/:organizationId/installations", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
 
@@ -191,7 +190,7 @@ protectedRoutes.get("/slack/:organizationId/installations", async (c) => {
 });
 
 // Delete integration route
-protectedRoutes.delete("/slack/:organizationId/installations", async (c) => {
+protectedRoutes.delete("/:organizationId/installations", async (c) => {
   const user = c.get("user");
   
   LOGGER.info("Got request to delete Slack integration", {
@@ -232,5 +231,3 @@ protectedRoutes.delete("/slack/:organizationId/installations", async (c) => {
 
 // Merge the protected routes into main app
 app.route("/", protectedRoutes);
-
-export const handler = handle(app);

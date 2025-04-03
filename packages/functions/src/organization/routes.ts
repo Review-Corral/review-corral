@@ -12,27 +12,23 @@ import { getInstallationAccessToken, getOrgMembers } from "@domain/github/fetche
 import { Logger } from "@domain/logging";
 import { getBillingDetails } from "@domain/selectors/organization/getBillingDetails";
 import { Hono } from "hono";
-import { handle } from "hono/aws-lambda";
 import * as z from "zod";
 import { authMiddleware, requireAuth } from "../middleware/auth";
 
 const LOGGER = new Logger("organization:routes");
 
-const app = new Hono();
+export const app = new Hono();
 
 // Schema definitions
 const orgIdSchema = z.object({
   organizationId: z.string().transform(Number),
 });
 
-// Create a group for all organization routes (all require auth)
-const orgRoutes = new Hono();
-
 // Apply authentication middleware to all organization routes
-orgRoutes.use("*", authMiddleware, requireAuth);
+app.use("*", authMiddleware, requireAuth);
 
 // Get organization details
-orgRoutes.get("/org/:organizationId", async (c) => {
+app.get("/:organizationId", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
     
@@ -54,7 +50,7 @@ orgRoutes.get("/org/:organizationId", async (c) => {
 });
 
 // Get organization billing details
-orgRoutes.get("/org/:organizationId/billing", async (c) => {
+app.get("/:organizationId/billing", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
     
@@ -73,7 +69,7 @@ orgRoutes.get("/org/:organizationId/billing", async (c) => {
 });
 
 // Get organization members
-orgRoutes.get("/org/:organizationId/members", async (c) => {
+app.get("/:organizationId/members", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
     
@@ -92,7 +88,7 @@ orgRoutes.get("/org/:organizationId/members", async (c) => {
 });
 
 // Update organization member
-orgRoutes.put("/org/:organizationId/member", async (c) => {
+app.put("/:organizationId/member", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
     
@@ -177,8 +173,3 @@ const reduceOrgMembers = (ghMembers: OrgMembers, dbMembers: Member[]) => {
 
   return { toAdd };
 };
-
-// Merge the organization routes into main app
-app.route("/", orgRoutes);
-
-export const handler = handle(app);
