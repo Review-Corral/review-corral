@@ -23,49 +23,17 @@ api.route("GET /profile", `${basePath}/getProfile.handler`);
 // ==============================
 // Github
 // ==============================
-api.route("POST /gh/webhook-event", `${basePath}/github/events.handler`);
-api.route("GET /gh/installations", `${basePath}/github/installations.getInstallations`);
-api.route(
-  "GET /gh/{organizationId}/repositories",
-  `${basePath}/github/repositories/getAll.handler`,
-);
-api.route(
-  "PUT /gh/{organizationId}/repositories/{repositoryId}",
-  `${basePath}/github/repositories/setStatus.handler`,
-);
+api.route("ANY /gh/{proxy+}", `${basePath}/github/routes.handler`);
 
 // ==============================
 // Stripe
 // ==============================
-api.route(
-  "POST /stripe/checkout-session",
-  `${basePath}/stripe/checkoutSession.handler`,
-);
-api.route("POST /stripe/webhook-event", `${basePath}/stripe/webhookEvent.handler`);
-api.route(
-  "POST /stripe/billing-portal",
-  `${basePath}/stripe/billingPortalSession.handler`,
-);
+api.route("ANY /stripe/{proxy+}", `${basePath}/stripe/routes.handler`);
 
 // ==============================
 // Organization
 // ==============================
-api.route(
-  "GET /org/{organizationId}",
-  `${basePath}/organization/getOrganization.handler`,
-);
-api.route(
-  "GET /org/{organizationId}/billing",
-  `${basePath}/organization/getBillingDetails.handler`,
-);
-api.route(
-  "GET /org/{organizationId}/members",
-  `${basePath}/organization/getMembers.handler`,
-);
-api.route(
-  "PUT /org/{organizationId}/member",
-  `${basePath}/organization/updateMember.handler`,
-);
+api.route("ANY /org/{proxy+}", `${basePath}/organization/routes.handler`);
 
 // ==============================
 // Slack
