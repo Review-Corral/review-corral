@@ -1,74 +1,116 @@
-import { beforeEach } from "node:test";
-import { handleGithubWebhookEvent } from "@domain/github/webhooks";
-import { APIGatewayProxyEvent, Context } from "aws-lambda";
-import { describe, expect, it, vi } from "vitest";
-import { handler } from "./events";
+import { APIGatewayEvent } from "aws-lambda";
+import { Context } from "hono";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { handleGithubWebhookEvent } from "./handleWebhook";
 
-vi.mock("sst", () => ({
+// Mock SST resources
+vi.mock("sst/dist/resource", () => ({
   Resource: {
-    MainTable: {
-      name: "test-table",
+    GH_WEBHOOK_SECRET: {
+      value: "test-secret",
     },
-    GH_WEBHOOK_SECRET: "test-secret",
   },
 }));
 
-describe("event.spec", () => {
+// Mock verifyGithubWebhookSecret
+vi.mock("@domain/github/webhooks/verifyEvent", () => ({
+  verifyGithubWebhookSecret: vi.fn().mockResolvedValue(true),
+}));
+
+// Mock githubWebhookBodySchema
+vi.mock("@domain/github/webhooks", () => ({
+  githubWebhookBodySchema: {
+    safeParse: vi.fn(() => ({ success: true, data: {} })),
+  },
+}));
+
+describe("handleGithubWebhookEvent", () => {
+  // Define a mock Hono context
+  let mockContext: Partial<Context>;
+  let mockJsonResponse: any;
+  let mockJson: any;
+  let mockHeader: any;
+  let mockReqJson: any;
+
   beforeEach(() => {
-    const mocks = vi.hoisted(() => {
-      return {
-        handleGithubWebhookEvent: vi.fn(),
-      };
-    });
+    // Reset all mocks
+    vi.clearAllMocks();
 
-    vi.mock("@domain/github/webhooks", async () => {
-      const actual = await vi.importActual("@domain/github/webhooks");
-      return {
-        ...actual,
-        handleGithubWebhookEvent: mocks.handleGithubWebhookEvent,
-      };
-    });
+    // Setup mock for JSON response
+    mockJsonResponse = { message: "Success" };
+    mockJson = vi.fn().mockReturnValue(mockJsonResponse);
+    mockHeader = vi.fn().mockReturnValue("sha256=test-signature");
+    mockReqJson = vi.fn().mockResolvedValue({ test: "data" });
 
-    vi.mock("@domain/github/webhooks/verifyEvent", () => ({
-      verifyGithubWebhookSecret: vi.fn(() => true),
-    }));
+    // Create a mock Hono context
+    mockContext = {
+      env: {
+        event: {
+          headers: {
+            "x-github-delivery": "123",
+            "x-github-event": "pull_request",
+            "x-hub-signature-256": "sha256=test-signature",
+          },
+          body: JSON.stringify({
+            action: "opened",
+            repository: { id: 123, owner: { id: 456 } },
+          }),
+        } as unknown as APIGatewayEvent,
+      },
+      req: {
+        header: mockHeader,
+        json: mockReqJson,
+      },
+      json: mockJson,
+    } as unknown as Context;
   });
 
-  it("should properly parse HTTP JSON body and pass to event handlers", async () => {
-    const eventBody = {
-      action: "opened",
-      repository: {
-        id: 123,
-        owner: {
-          id: 456,
-        },
-      },
-    };
+  it("should successfully handle a valid webhook event", async () => {
+    // Call the handler with our mock context
+    await handleGithubWebhookEvent(mockContext as Context, {} as any);
 
-    const result = await handler(
-      {
-        headers: {
-          "x-github-delivery": "123",
-          "x-github-event": "pull_request",
-          "x-hub-signature-256":
-            "sha256=b68844bb46a27548f37cede3c726a13bf677a081a4a10ff37cc6acbe89e7d6f3",
-        },
-        body: JSON.stringify(eventBody),
-      } as any as APIGatewayProxyEvent,
-      {} as any as Context,
-    );
+    // Verify that the header function was called with the expected parameter
+    expect(mockHeader).toHaveBeenCalledWith("x-hub-signature-256");
 
-    expect(result).toMatchObject({
-      headers: {},
-      statusCode: 200,
-      body: '{"message":"Success"}',
+    // Verify the JSON response was called with success message and 200 status code
+    expect(mockJson).toHaveBeenCalledWith({ message: "Success" }, 200);
+  });
+
+  it("should return 401 when signature verification fails", async () => {
+    // Override the mock to return false for this test
+    const verifyMock = await import("@domain/github/webhooks/verifyEvent");
+    (verifyMock.verifyGithubWebhookSecret as any).mockResolvedValueOnce(false);
+
+    // Call the handler
+    await handleGithubWebhookEvent(mockContext as Context, {} as any);
+
+    // Verify it returns an Unauthorized response
+    expect(mockJson).toHaveBeenCalledWith({ message: "Unauthorized" }, 401);
+  });
+
+  it("should return 401 when signature header is missing", async () => {
+    // Override the mock to return null for this test
+    mockHeader.mockReturnValueOnce(null);
+
+    // Call the handler
+    await handleGithubWebhookEvent(mockContext as Context, {} as any);
+
+    // Verify it returns an Unauthorized response
+    expect(mockJson).toHaveBeenCalledWith({ message: "Unauthorized" }, 401);
+  });
+
+  it("should handle invalid event structure", async () => {
+    // Override the mock for githubWebhookBodySchema.safeParse
+    const webhooksMock = await import("@domain/github/webhooks");
+    (webhooksMock.githubWebhookBodySchema.safeParse as any).mockReturnValueOnce({
+      success: false,
+      error: new Error("Invalid schema"),
     });
 
-    const handleGithubEventEventMock = handleGithubWebhookEvent;
-    expect(handleGithubEventEventMock).toHaveBeenCalledTimes(1);
-    expect(handleGithubEventEventMock).toHaveBeenCalledWith({
-      event: eventBody,
-      eventName: "pull_request",
-    });
+    // Call the handler
+    await handleGithubWebhookEvent(mockContext as Context, {} as any);
+
+    // Verify it returns a Bad Request response
+    expect(mockJson).toHaveBeenCalledWith({ message: "Invalid event body" }, 400);
   });
 });
