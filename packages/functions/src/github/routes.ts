@@ -22,14 +22,13 @@ import {
 import { verifyGithubWebhookSecret } from "@domain/github/webhooks/verifyEvent";
 import { Logger } from "@domain/logging";
 import { Hono } from "hono";
-import { handle } from "hono/aws-lambda";
 import { Resource } from "sst";
 import * as z from "zod";
 import { authMiddleware, requireAuth } from "../middleware/auth";
 
 const LOGGER = new Logger("github:routes");
 
-const app = new Hono();
+export const app = new Hono();
 
 // Schema definitions
 const githubWebhookEventSchema = z
@@ -52,7 +51,7 @@ const repoSchema = z.object({
 });
 
 // Webhook event route - no auth required but verified with webhook secret
-app.post("/gh/webhook-event", async (c) => {
+app.post("/webhook-event", async (c) => {
   const event = c.env.awsGateway;
   
   LOGGER.debug("Received Github event", { event }, { depth: 3 });
@@ -136,7 +135,7 @@ const authRoutes = new Hono();
 authRoutes.use("*", authMiddleware, requireAuth);
 
 // Get installations route
-authRoutes.get("/gh/installations", async (c) => {
+authRoutes.get("/installations", async (c) => {
   const user = c.get("user");
   
   try {
@@ -155,7 +154,7 @@ authRoutes.get("/gh/installations", async (c) => {
 });
 
 // Get repositories route
-authRoutes.get("/gh/:organizationId/repositories", async (c) => {
+authRoutes.get("/:organizationId/repositories", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
     
@@ -175,7 +174,7 @@ authRoutes.get("/gh/:organizationId/repositories", async (c) => {
 });
 
 // Set repository status route
-authRoutes.put("/gh/:organizationId/repositories/:repositoryId", async (c) => {
+authRoutes.put("/:organizationId/repositories/:repositoryId", async (c) => {
   try {
     const { organizationId, repositoryId } = repoSchema.parse(c.req.param());
     
@@ -312,5 +311,3 @@ const getRepositories = async (organization: Organization): Promise<Repository[]
 
 // Merge the authenticated routes into main app
 app.route("/", authRoutes);
-
-export const handler = handle(app);
