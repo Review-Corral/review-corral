@@ -4,42 +4,29 @@ import {
   fetchOrganizationById,
   fetchUsersOrganizations,
   insertOrganizationAndAssociateUser,
-  updateOrganizationInstallationId
+  updateOrganizationInstallationId,
 } from "@domain/dynamodb/fetchers/organizations";
 import {
-  fetchRepository,
   fetchRepositoriesForOrganization,
+  fetchRepository,
   insertRepository,
   removeRepository,
-  setRespositoryActiveStatus
+  setRespositoryActiveStatus,
 } from "@domain/dynamodb/fetchers/repositories";
 import { InstallationsData } from "@domain/github/endpointTypes";
-import { getInstallationRepositories, getUserInstallations } from "@domain/github/fetchers";
 import {
-  githubWebhookBodySchema,
-  handleGithubWebhookEvent
-} from "@domain/github/webhooks";
-import { verifyGithubWebhookSecret } from "@domain/github/webhooks/verifyEvent";
+  getInstallationRepositories,
+  getUserInstallations,
+} from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
 import { Hono } from "hono";
-import { Resource } from "sst";
 import * as z from "zod";
 import { authMiddleware, requireAuth } from "../middleware/auth";
+import { Bindings, handleGithubWebhookEvent } from "./handleWebhook";
 
 const LOGGER = new Logger("github:routes");
 
-export const app = new Hono();
-
-// Schema definitions
-const githubWebhookEventSchema = z
-  .object({
-    headers: z.object({
-      "x-github-delivery": z.string(),
-      "x-github-event": z.string(),
-    }),
-    body: z.string(),
-  })
-  .passthrough();
+export const app = new Hono<{ Bindings: Bindings }>();
 
 const orgIdSchema = z.object({
   organizationId: z.string().transform(Number),
@@ -51,82 +38,7 @@ const repoSchema = z.object({
 });
 
 // Webhook event route - no auth required but verified with webhook secret
-app.post("/webhook-event", async (c) => {
-  const event = c.env.awsGateway;
-  
-  LOGGER.debug("Received Github event", { event }, { depth: 3 });
-  
-  if (!event) {
-    return c.json({ message: "Invalid event" }, 400);
-  }
-  
-  // Verify webhook signature
-  try {
-    const webhookSecret = Resource.GH_WEBHOOK_SECRET.value;
-    const signature = event.headers["x-hub-signature-256"];
-    
-    if (!signature) {
-      LOGGER.debug("No signature found", { headers: event.headers });
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-    
-    if (Array.isArray(signature)) {
-      LOGGER.debug("Signature is invalid type--expected array", {
-        signature,
-        signatureType: typeof signature,
-      });
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-    
-    const verified = await verifyGithubWebhookSecret({
-      eventBody: event.body,
-      signature,
-      secret: webhookSecret,
-    });
-    
-    if (!verified) {
-      return c.json({ message: "Unauthorized" }, 401);
-    }
-  } catch (error) {
-    LOGGER.error("Error checking event signature", { error });
-    return c.json({ message: "Unauthorized" }, 401);
-  }
-  
-  // Parse and validate event
-  const expectedEvent = githubWebhookEventSchema.safeParse(event);
-  
-  if (!expectedEvent.success) {
-    LOGGER.debug("Invalid event", { event, parsedResult: expectedEvent });
-    return c.json({ message: "Invalid event" }, 400);
-  }
-  
-  const parsedBody = JSON.parse(expectedEvent.data.body);
-  
-  LOGGER.debug("Parsed event body as JSON", { parsedBody }, { depth: 3 });
-  
-  const expectedBody = githubWebhookBodySchema.safeParse(parsedBody);
-  
-  if (!expectedBody.success) {
-    LOGGER.debug(
-      "Received unexpected structure to event",
-      {
-        parsedResult: expectedBody,
-        error: expectedBody.error,
-      },
-      {
-        depth: 4,
-      },
-    );
-    return c.json({ message: "Invalid event body" }, 400);
-  }
-  
-  await handleGithubWebhookEvent({
-    event: expectedBody.data,
-    eventName: expectedEvent.data.headers["x-github-event"],
-  });
-  
-  return c.json({ message: "Success" });
-});
+app.post("/webhook-event", async (c, next) => await handleGithubWebhookEvent(c, next));
 
 // Create a group for authenticated routes
 const authRoutes = new Hono();
@@ -137,15 +49,19 @@ authRoutes.use("*", authMiddleware, requireAuth);
 // Get installations route
 authRoutes.get("/installations", async (c) => {
   const user = c.get("user");
-  
+
+  if (!user) {
+    return c.json({ message: "Unauthorized" }, 401);
+  }
+
   try {
     // Installations appear to have effectively a 1:1 mapping with organizations
     const installations = await getUserInstallations(user);
-    
+
     LOGGER.debug("Installations fetch response: ", { installations });
-    
+
     const organizations: Organization[] = await getOrganizations(user, installations);
-    
+
     return c.json(organizations);
   } catch (error) {
     LOGGER.error("Error getting installations", { error });
@@ -157,15 +73,15 @@ authRoutes.get("/installations", async (c) => {
 authRoutes.get("/:organizationId/repositories", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
-    
+
     const organization = await fetchOrganizationById(organizationId);
-    
+
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
     }
-    
+
     const repositories = await getRepositories(organization);
-    
+
     return c.json(repositories);
   } catch (error) {
     LOGGER.error("Error getting repositories", { error });
@@ -177,18 +93,18 @@ authRoutes.get("/:organizationId/repositories", async (c) => {
 authRoutes.put("/:organizationId/repositories/:repositoryId", async (c) => {
   try {
     const { organizationId, repositoryId } = repoSchema.parse(c.req.param());
-    
+
     const repository = await fetchRepository({
       repoId: repositoryId,
       orgId: organizationId,
     });
-    
+
     await setRespositoryActiveStatus({
       orgId: repository.orgId,
       repoId: repository.repoId,
       isEnabled: !repository.isEnabled,
     });
-    
+
     return c.json({});
   } catch (error) {
     LOGGER.error("Error setting repository status", { error });
