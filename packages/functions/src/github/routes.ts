@@ -44,7 +44,8 @@ app.post("/webhook-event", async (c, next) => await handleGithubWebhookEvent(c, 
 const authRoutes = new Hono();
 
 // Apply authentication middleware to all authenticated routes
-authRoutes.use("*", authMiddleware, requireAuth);
+authRoutes.use(authMiddleware);
+authRoutes.use(requireAuth);
 
 // Get installations route
 authRoutes.get("/installations", async (c) => {

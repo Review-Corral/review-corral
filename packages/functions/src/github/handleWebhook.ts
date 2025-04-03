@@ -3,7 +3,7 @@ import { verifyGithubWebhookSecret } from "@domain/github/webhooks/verifyEvent";
 import { Logger } from "@domain/logging";
 import { APIGatewayEvent } from "aws-lambda";
 import { Handler } from "hono/types";
-import { Resource } from "sst/dist/resource";
+import { Resource } from "sst";
 import { z } from "zod";
 
 const LOGGER = new Logger("github:routes:handleWebhook");

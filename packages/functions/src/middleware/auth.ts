@@ -1,6 +1,7 @@
 import { User } from "@core/dynamodb/entities/types";
 import { fetchUserById } from "@domain/dynamodb/fetchers/users";
 import { Logger } from "@domain/logging";
+import { APIGatewayEvent } from "aws-lambda";
 import { MiddlewareHandler } from "hono";
 import { JwtPayload, verify } from "jsonwebtoken";
 import { Resource } from "sst";
@@ -15,9 +16,26 @@ declare module "hono" {
   }
 }
 
+export type Bindings = {
+  event: APIGatewayEvent;
+};
+
 // Create auth middleware for Hono
-export const authMiddleware: MiddlewareHandler = async (c, next) => {
-  const event = c.env.awsGateway;
+export const authMiddleware: MiddlewareHandler<{ Bindings: Bindings }> = async (
+  c,
+  next,
+) => {
+  const authHeader = c.req.header("Authorization");
+  console.log("Auth header from Hono:", authHeader);
+
+  const event = c.env.event;
+
+  // Log all available headers for debugging
+  console.log("All Hono headers:", Object.fromEntries(c.req.raw.headers.entries()));
+
+  if (event && event.headers) {
+    console.log("API Gateway event headers:", event.headers);
+  }
 
   if (!event) {
     LOGGER.error("No API Gateway event found");
@@ -27,7 +45,9 @@ export const authMiddleware: MiddlewareHandler = async (c, next) => {
     return;
   }
 
-  const authHeader = event.headers.authorization;
+  LOGGER.info("event", { event });
+
+  LOGGER.info("Header straight from event", { auth: event.headers["Authorization"] });
 
   if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
     LOGGER.warn("No auth token found in request");

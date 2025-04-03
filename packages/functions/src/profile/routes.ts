@@ -6,8 +6,8 @@ const LOGGER = new Logger("profile:routes");
 
 export const app = new Hono();
 
-// Apply authentication middleware to all profile routes
-app.use("*", authMiddleware, requireAuth);
+app.use(authMiddleware);
+app.use(requireAuth);
 
 // Get user profile
 app.get("/", async (c) => {
