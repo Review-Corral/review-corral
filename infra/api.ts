@@ -70,15 +70,6 @@ api.route(
 // ==============================
 // Slack
 // ==============================
-api.route("GET /slack/oauth", `${basePath}/slack/oauth.handler`);
-api.route("GET /slack/{organizationId}/users", `${basePath}/slack/getUsers.handler`);
-api.route(
-  "GET /slack/{organizationId}/installations",
-  `${basePath}/slack/installations.getSlackInstallations`,
-);
-api.route(
-  "DELETE /slack/{organizationId}/installations",
-  `${basePath}/slack/deleteIntegration.handler`,
-);
+api.route("ANY /slack/{proxy+}", `${basePath}/slack/routes.handler`);
 
 export { api };
