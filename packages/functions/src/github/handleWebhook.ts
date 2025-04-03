@@ -88,5 +88,5 @@ export const handleGithubWebhookEvent: Handler<{
     return c.json({ message: "Invalid event body" }, 400);
   }
 
-  return c.json({ message: "Success" });
+  return c.json({ message: "Success" }, 200);
 };
