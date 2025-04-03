@@ -1,12 +1,12 @@
 import {
   StripeCheckoutCreatedMetadata,
   createBillingPortalSessionSchema,
-  createCheckoutSessionBodySchema
+  createCheckoutSessionBodySchema,
 } from "@core/stripe/types";
 import { assertVarExists } from "@core/utils/assert";
 import {
   fetchOrganizationById,
-  updateOrganization
+  updateOrganization,
 } from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
@@ -28,24 +28,28 @@ authRoutes.use("*", authMiddleware, requireAuth);
 // Checkout session route
 authRoutes.post("/checkout-session", async (c) => {
   const user = c.get("user");
-  
+
+  if (!user) {
+    return c.json({ message: "Unauthorized" }, 401);
+  }
+
   try {
     const body = await c.req.json();
     const parsedBody = createCheckoutSessionBodySchema.safeParse(body);
-    
+
     if (!parsedBody.success) {
       LOGGER.error("Invalid request body", { body, error: parsedBody.error });
       return c.json({ message: "Invalid request body" }, 400);
     }
-    
+
     const organization = await fetchOrganizationById(parsedBody.data.orgId);
-    
+
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
     }
-    
+
     let customerId: string;
-    
+
     if (!organization.customerId) {
       const customer = await StripeClient.customers.create({
         email: organization.billingEmail,
@@ -55,26 +59,26 @@ authRoutes.post("/checkout-session", async (c) => {
           orgId: parsedBody.data.orgId,
         },
       });
-      
+
       await updateOrganization({
         orgId: parsedBody.data.orgId,
         customerId: customer.id,
       });
-      
+
       customerId = customer.id;
     } else {
       customerId = organization.customerId;
     }
-    
+
     const metaData: StripeCheckoutCreatedMetadata = {
       userId: user.userId,
       orgId: parsedBody.data.orgId,
     };
-    
+
     const frontendUrl = assertVarExists("BASE_FE_URL");
-    
+
     LOGGER.info("frontendUrl", { frontendUrl });
-    
+
     const session = await StripeClient.checkout.sessions.create({
       payment_method_types: ["card"],
       customer: customerId,
@@ -90,14 +94,18 @@ authRoutes.post("/checkout-session", async (c) => {
       success_url: `${frontendUrl}/app/org/${parsedBody.data.orgId}/payment/success`,
       cancel_url: `${frontendUrl}/app/org/${parsedBody.data.orgId}/payment/failure`,
     });
-    
+
     if (!session.url) {
-      LOGGER.error("Failed to create session URL", { session, user, body }, { depth: 4 });
+      LOGGER.error(
+        "Failed to create session URL",
+        { session, user, body },
+        { depth: 4 },
+      );
       return c.json({ message: "Failed to create session" }, 500);
     }
-    
+
     LOGGER.info("Returning session URL", { url: session.url });
-    
+
     return c.json({ url: session.url });
   } catch (error) {
     LOGGER.error("Error creating checkout session", { error });
@@ -108,30 +116,34 @@ authRoutes.post("/checkout-session", async (c) => {
 // Billing portal session route
 authRoutes.post("/billing-portal", async (c) => {
   const user = c.get("user");
-  
+
   try {
     const body = await c.req.json();
     const parsedBody = createBillingPortalSessionSchema.safeParse(body);
-    
+
     if (!parsedBody.success) {
       LOGGER.error("Invalid request body", { body, error: parsedBody.error });
       return c.json({ message: "Invalid request body" }, 400);
     }
-    
+
     const frontendUrl = assertVarExists("BASE_FE_URL");
-    
+
     const session = await StripeClient.billingPortal.sessions.create({
       customer: parsedBody.data.customerId,
       return_url: `${frontendUrl}/org/${parsedBody.data.orgId}/billing`,
     });
-    
+
     if (!session.url) {
-      LOGGER.error("Failed to create session URL", { session, user, body }, { depth: 4 });
+      LOGGER.error(
+        "Failed to create session URL",
+        { session, user, body },
+        { depth: 4 },
+      );
       return c.json({ message: "Failed to create session" }, 500);
     }
-    
+
     LOGGER.info("Returning session URL", { url: session.url });
-    
+
     return c.json({ url: session.url });
   } catch (error) {
     LOGGER.error("Error creating billing portal session", { error });
@@ -143,23 +155,23 @@ authRoutes.post("/billing-portal", async (c) => {
 app.post("/webhook-event", async (c) => {
   try {
     const body = await c.req.text();
-    
+
     if (!body) {
       return c.json({ message: "No body provided" }, 400);
     }
-    
+
     const webhookSignature = c.req.header("stripe-signature");
-    
+
     if (!webhookSignature) {
       return c.json({ message: "No stripe-signature provided" }, 400);
     }
-    
+
     const stripeEvent = StripeClient.webhooks.constructEvent(
       body,
       webhookSignature,
-      Resource.STRIPE_WEBHOOK_SECRET.value
+      Resource.STRIPE_WEBHOOK_SECRET.value,
     );
-    
+
     switch (stripeEvent.type) {
       case "customer.subscription.created":
         // Don't do anything on this event, since the "subscription updated" event will
@@ -177,12 +189,12 @@ app.post("/webhook-event", async (c) => {
         break;
       default:
         LOGGER.warn(
-          `🤷‍♀️ Unhandled Stripe event type: ${stripeEvent.type}`,
+          `🤷 Unhandled Stripe event type: ${stripeEvent.type}`,
           { stripeEvent },
-          { depth: 5 }
+          { depth: 5 },
         );
     }
-    
+
     return c.json({ message: "Handled event" });
   } catch (error) {
     LOGGER.error("Error handling webhook event", { error });

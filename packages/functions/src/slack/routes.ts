@@ -1,15 +1,15 @@
+import { assertVarExists } from "@core/utils/assert";
+import { Db } from "@domain/dynamodb/client";
 import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
-import { 
-  getSlackInstallationsForOrganization, 
-  getSlackInstallationUsers, 
-  insertSlackIntegration 
+import {
+  getSlackInstallationUsers,
+  getSlackInstallationsForOrganization,
+  insertSlackIntegration,
 } from "@domain/dynamodb/fetchers/slack";
 import { Logger } from "@domain/logging";
-import { Db } from "@domain/dynamodb/client";
 import { Hono } from "hono";
 import ky from "ky";
 import { Resource } from "sst";
-import { assertVarExists } from "@core/utils/assert";
 import * as z from "zod";
 import { authMiddleware, requireAuth } from "../middleware/auth";
 
@@ -148,9 +148,12 @@ protectedRoutes.get("/:organizationId/users", async (c) => {
     const slackIntegration = await getSlackInstallationsForOrganization(organizationId);
 
     if (slackIntegration.length === 0) {
-      return c.json({
-        message: `No Slack installations found for org Id ${organizationId}`,
-      }, 404);
+      return c.json(
+        {
+          message: `No Slack installations found for org Id ${organizationId}`,
+        },
+        404,
+      );
     }
 
     LOGGER.info("Got Slack Integration for organization", {
@@ -192,10 +195,14 @@ protectedRoutes.get("/:organizationId/installations", async (c) => {
 // Delete integration route
 protectedRoutes.delete("/:organizationId/installations", async (c) => {
   const user = c.get("user");
-  
+
   LOGGER.info("Got request to delete Slack integration", {
     user,
   });
+
+  if (!user) {
+    return c.json({ message: "Unauthorized" }, 401);
+  }
 
   try {
     const { organizationId: orgId } = orgIdSchema.parse(c.req.param());
