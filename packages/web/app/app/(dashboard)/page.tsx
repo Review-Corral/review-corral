@@ -3,12 +3,12 @@
 import { Button } from "@/components/shadcn/button";
 import { Loading } from "@/components/ui/cards/loading";
 import { Header } from "@/components/ui/header";
+import { useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import { FC } from "react";
 import { DashboardPaddedBody } from "../../../components/ui/layout/DashboardPaddedBody";
-import { useOrganizations } from "./org/useOrganizations";
-import { useQueryClient } from "@tanstack/react-query";
 import { prefetchOrgQueries } from "./org/prefetchOrgQueries";
+import { useOrganizations } from "./org/useOrganizations";
 
 const HomeView: FC = () => {
   const { data, isLoading } = useOrganizations();
@@ -57,8 +57,8 @@ const HomeView: FC = () => {
       <div className="mt-8 inline-flex flex-col gap-2">
         {isLoading && <Loading />}
         {data?.map((org) => (
-          <Link 
-            key={org.orgId} 
+          <Link
+            key={org.orgId}
             href={`/app/org/${org.orgId}`}
             onMouseEnter={() => prefetchOrgData(org.orgId)}
           >

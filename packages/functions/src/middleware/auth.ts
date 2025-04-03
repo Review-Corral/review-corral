@@ -18,7 +18,7 @@ declare module "hono" {
 // Create auth middleware for Hono
 export const authMiddleware: MiddlewareHandler = async (c, next) => {
   const event = c.env.awsGateway;
-  
+
   if (!event) {
     LOGGER.error("No API Gateway event found");
     c.set("user", null);

@@ -65,19 +65,19 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({
 
   const onSubmit = async (newMembers: FormValues) => {
     const changedMembers = newMembers.members.filter(
-      (newMember) => newMember.slackId !== membersById[newMember.memberId].slackId
+      (newMember) => newMember.slackId !== membersById[newMember.memberId].slackId,
     );
-    
+
     if (changedMembers.length === 0) {
       toast.success("No changes to save");
       return;
     }
-    
+
     setIsSubmitting(true);
-    
+
     try {
       // Create an array of promises for all mutations
-      const updatePromises = changedMembers.map((newMember) => 
+      const updatePromises = changedMembers.map((newMember) =>
         toast.promise(
           updateOrgMember.mutateAsync({
             orgId,
@@ -87,14 +87,14 @@ export const UsersTableForm: FC<UsersTableFormProps> = ({
           {
             loading: `Updating ${newMember.name}...`,
             success: `Updated ${newMember.name}`,
-            error: (err) => `Failed to update ${newMember.name}: ${err.message}`
-          }
-        )
+            error: (err) => `Failed to update ${newMember.name}: ${err.message}`,
+          },
+        ),
       );
-      
+
       // Wait for all updates to complete
       await Promise.all(updatePromises);
-      
+
       // Show a summary toast if multiple members were updated
       if (changedMembers.length > 1) {
         toast.success(`Updated ${changedMembers.length} team members`);

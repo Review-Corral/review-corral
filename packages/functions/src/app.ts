@@ -1,14 +1,14 @@
+import { Logger } from "@domain/logging";
 import { Hono } from "hono";
 import { handle } from "hono/aws-lambda";
-import { Logger } from "@domain/logging";
 
 // Import all route modules
 import { app as authRoutes } from "./auth/routes";
-import { app as profileRoutes } from "./profile/routes";
 import { app as githubRoutes } from "./github/routes";
-import { app as stripeRoutes } from "./stripe/routes";
 import { app as organizationRoutes } from "./organization/routes";
+import { app as profileRoutes } from "./profile/routes";
 import { app as slackRoutes } from "./slack/routes";
+import { app as stripeRoutes } from "./stripe/routes";
 
 const LOGGER = new Logger("app:main");
 
