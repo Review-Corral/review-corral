@@ -4,7 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { handleGithubWebhookEvent } from "./handleWebhook";
 
 // Mock SST resources
-vi.mock("sst/dist/resource", () => ({
+vi.mock("sst", () => ({
   Resource: {
     GH_WEBHOOK_SECRET: {
       value: "test-secret",
@@ -60,6 +60,7 @@ describe("handleGithubWebhookEvent", () => {
       req: {
         header: mockHeader,
         json: mockReqJson,
+        method: "POST",
       },
       json: mockJson,
     } as unknown as Context;
