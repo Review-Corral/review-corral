@@ -22,7 +22,7 @@ import { Logger } from "@domain/logging";
 import { Hono } from "hono";
 import * as z from "zod";
 import { authMiddleware, requireAuth } from "../middleware/auth";
-import { Bindings, handleGithubWebhookEvent } from "./handleWebhook";
+import { Bindings, verifyGithubWebhookEvent } from "./handleWebhook";
 
 const LOGGER = new Logger("github:routes");
 
@@ -38,7 +38,7 @@ const repoSchema = z.object({
 });
 
 // Webhook event route - no auth required but verified with webhook secret
-app.post("/webhook-event", async (c, next) => await handleGithubWebhookEvent(c, next));
+app.post("/webhook-event", async (c, next) => await verifyGithubWebhookEvent(c, next));
 
 // Create a group for authenticated routes
 const authRoutes = new Hono();

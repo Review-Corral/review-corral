@@ -1,7 +1,7 @@
 import { APIGatewayEvent } from "aws-lambda";
 import { Context } from "hono";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { handleGithubWebhookEvent } from "./handleWebhook";
+import { verifyGithubWebhookEvent } from "./handleWebhook";
 
 // Mock SST resources
 vi.mock("sst", () => ({
@@ -68,7 +68,7 @@ describe("handleGithubWebhookEvent", () => {
 
   it("should successfully handle a valid webhook event", async () => {
     // Call the handler with our mock context
-    await handleGithubWebhookEvent(mockContext as Context, {} as any);
+    await verifyGithubWebhookEvent(mockContext as Context, {} as any);
 
     // Verify that the header function was called with the expected parameter
     expect(mockHeader).toHaveBeenCalledWith("x-hub-signature-256");
@@ -83,7 +83,7 @@ describe("handleGithubWebhookEvent", () => {
     (verifyMock.verifyGithubWebhookSecret as any).mockResolvedValueOnce(false);
 
     // Call the handler
-    await handleGithubWebhookEvent(mockContext as Context, {} as any);
+    await verifyGithubWebhookEvent(mockContext as Context, {} as any);
 
     // Verify it returns an Unauthorized response
     expect(mockJson).toHaveBeenCalledWith({ message: "Unauthorized" }, 401);
@@ -94,7 +94,7 @@ describe("handleGithubWebhookEvent", () => {
     mockHeader.mockReturnValueOnce(null);
 
     // Call the handler
-    await handleGithubWebhookEvent(mockContext as Context, {} as any);
+    await verifyGithubWebhookEvent(mockContext as Context, {} as any);
 
     // Verify it returns an Unauthorized response
     expect(mockJson).toHaveBeenCalledWith({ message: "Unauthorized" }, 401);
@@ -109,7 +109,7 @@ describe("handleGithubWebhookEvent", () => {
     });
 
     // Call the handler
-    await handleGithubWebhookEvent(mockContext as Context, {} as any);
+    await verifyGithubWebhookEvent(mockContext as Context, {} as any);
 
     // Verify it returns a Bad Request response
     expect(mockJson).toHaveBeenCalledWith({ message: "Invalid event body" }, 400);

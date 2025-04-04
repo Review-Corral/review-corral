@@ -1,4 +1,4 @@
-import { githubWebhookBodySchema } from "@domain/github/webhooks";
+import { githubWebhookBodySchema, handleGithubWebhookEvent } from "@domain/github/webhooks";
 import { verifyGithubWebhookSecret } from "@domain/github/webhooks/verifyEvent";
 import { Logger } from "@domain/logging";
 import { APIGatewayEvent } from "aws-lambda";
@@ -23,7 +23,7 @@ const githubWebhookEventSchema = z
   })
   .passthrough();
 
-export const handleGithubWebhookEvent: Handler<{
+export const verifyGithubWebhookEvent: Handler<{
   Bindings: Bindings;
 }> = async (c) => {
   const event = c.env.event;
@@ -87,6 +87,13 @@ export const handleGithubWebhookEvent: Handler<{
     );
     return c.json({ message: "Invalid event body" }, 400);
   }
+
+  LOGGER.debug("Event is valid, continuing");
+
+  await handleGithubWebhookEvent({
+    event: expectedBody.data,
+    eventName: expectedEvent.data.headers["x-github-event"],
+  });
 
   return c.json({ message: "Success" }, 200);
 };
