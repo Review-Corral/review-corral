@@ -47,7 +47,7 @@ export const handleGithubWebhookEvent: Handler<{
     }
 
     const verified = await verifyGithubWebhookSecret({
-      eventBody: c.req.json(),
+      eventBody: event.body,
       signature,
       secret: webhookSecret,
     });
