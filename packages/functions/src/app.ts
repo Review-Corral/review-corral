@@ -1,6 +1,8 @@
 import { Hono } from "hono";
 import { handle } from "hono/aws-lambda";
+import { cors } from "hono/cors";
 
+import { Resource } from "sst";
 // Import all route modules
 import { app as authRoutes } from "./auth/routes";
 import { app as githubRoutes } from "./github/routes";
@@ -10,6 +12,18 @@ import { app as slackRoutes } from "./slack/routes";
 import { app as stripeRoutes } from "./stripe/routes";
 
 const app = new Hono();
+
+const frontendUrl = Resource.frontend.url || "*";
+
+console.log("Frontend URL in API:", frontendUrl);
+
+app.use(
+  cors({
+    origin: frontendUrl,
+    allowMethods: ["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
+    allowHeaders: ["Content-Type", "Authorization"],
+  }),
+);
 
 // Home route - simple health check
 app.get("/", (c) => {

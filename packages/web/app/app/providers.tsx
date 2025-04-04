@@ -11,6 +11,7 @@ export default function Providers({ children }: React.PropsWithChildren) {
       new QueryClient({
         defaultOptions: {
           queries: {
+            retry: false,
             gcTime: 1000 * 60 * 10, // 10 minutes
             staleTime: 1000 * 20, // 20 seconds
           },

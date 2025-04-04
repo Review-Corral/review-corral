@@ -25,6 +25,14 @@ export const authMiddleware: MiddlewareHandler<{ Bindings: Bindings }> = async (
   c,
   next,
 ) => {
+  // Skip auth check for OPTIONS requests (CORS preflight)
+  if (c.req.method === "OPTIONS") {
+    c.set("user", null);
+    c.set("userError", null);
+    await next();
+    return;
+  }
+
   const authHeader = c.req.header("Authorization");
   console.log("Auth header from Hono:", authHeader);
 
@@ -32,10 +40,6 @@ export const authMiddleware: MiddlewareHandler<{ Bindings: Bindings }> = async (
 
   // Log all available headers for debugging
   console.log("All Hono headers:", Object.fromEntries(c.req.raw.headers.entries()));
-
-  if (event && event.headers) {
-    console.log("API Gateway event headers:", event.headers);
-  }
 
   if (!event) {
     LOGGER.error("No API Gateway event found");
@@ -46,8 +50,6 @@ export const authMiddleware: MiddlewareHandler<{ Bindings: Bindings }> = async (
   }
 
   LOGGER.info("event", { event });
-
-  LOGGER.info("Header straight from event", { auth: event.headers["Authorization"] });
 
   if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
     LOGGER.warn("No auth token found in request");
@@ -112,6 +114,12 @@ export const authMiddleware: MiddlewareHandler<{ Bindings: Bindings }> = async (
 
 // Helper middleware to require authentication
 export const requireAuth: MiddlewareHandler = async (c, next) => {
+  // Skip auth check for OPTIONS requests (CORS preflight)
+  if (c.req.method === "OPTIONS") {
+    await next();
+    return;
+  }
+  
   // authMiddleware should be run before this middleware
   const user = c.get("user");
   const userError = c.get("userError");
