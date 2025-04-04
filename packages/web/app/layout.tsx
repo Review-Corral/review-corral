@@ -1,13 +1,9 @@
-import type { Metadata } from "next";
+"use client";
+
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { CSPostHogProvider } from "./providers";
 const inter = Inter({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Review Corral",
-  description: "Github Slack Integration",
-};
 
 export default function RootLayout({
   children,
