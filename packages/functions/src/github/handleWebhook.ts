@@ -26,11 +26,6 @@ const githubWebhookEventSchema = z
 export const handleGithubWebhookEvent: Handler<{
   Bindings: Bindings;
 }> = async (c) => {
-  // Skip verification for OPTIONS requests (CORS preflight)
-  if (c.req.method === "OPTIONS") {
-    return c.json({ message: "OK" }, 200);
-  }
-  
   const event = c.env.event;
   LOGGER.debug("Received Github event", { event }, { depth: 3 });
 
