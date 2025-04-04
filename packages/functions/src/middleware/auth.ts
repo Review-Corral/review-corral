@@ -34,12 +34,7 @@ export const authMiddleware: MiddlewareHandler<{ Bindings: Bindings }> = async (
   }
 
   const authHeader = c.req.header("Authorization");
-  console.log("Auth header from Hono:", authHeader);
-
   const event = c.env.event;
-
-  // Log all available headers for debugging
-  console.log("All Hono headers:", Object.fromEntries(c.req.raw.headers.entries()));
 
   if (!event) {
     LOGGER.error("No API Gateway event found");
@@ -48,8 +43,6 @@ export const authMiddleware: MiddlewareHandler<{ Bindings: Bindings }> = async (
     await next();
     return;
   }
-
-  LOGGER.info("event", { event });
 
   if (!authHeader || !authHeader.toLowerCase().startsWith("bearer ")) {
     LOGGER.warn("No auth token found in request");
@@ -119,7 +112,7 @@ export const requireAuth: MiddlewareHandler = async (c, next) => {
     await next();
     return;
   }
-  
+
   // authMiddleware should be run before this middleware
   const user = c.get("user");
   const userError = c.get("userError");
