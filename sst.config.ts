@@ -60,11 +60,11 @@ export default $config({
         args.logging =
           $app.stage === "prod"
             ? {
-                retention: "6 months",
-              }
+              retention: "6 months",
+            }
             : {
-                retention: "1 week",
-              };
+              retention: "1 week",
+            };
         args.environment = {
           IS_LOCAL: $dev ? "true" : "false",
           BASE_FE_URL: getUrl("frontend"),
@@ -87,6 +87,7 @@ export default $config({
 
     await import("./infra/storage");
     await import("./infra/api");
+    await import("./infra/alerts");
 
     const { frontend } = await import("./infra/frontend");
 

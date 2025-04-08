@@ -73,6 +73,10 @@ declare module "sst" {
       "type": "sst.aws.Nextjs"
       "url": string
     }
+    "lambda-error-alerts": {
+      "arn": string
+      "type": "sst.aws.SnsTopic"
+    }
   }
 }
 /// <reference path="sst-env.d.ts" />

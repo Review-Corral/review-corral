@@ -1,4 +1,7 @@
-import { githubWebhookBodySchema, handleGithubWebhookEvent } from "@domain/github/webhooks";
+import {
+  githubWebhookBodySchema,
+  handleGithubWebhookEvent,
+} from "@domain/github/webhooks";
 import { verifyGithubWebhookSecret } from "@domain/github/webhooks/verifyEvent";
 import { Logger } from "@domain/logging";
 import { APIGatewayEvent } from "aws-lambda";
