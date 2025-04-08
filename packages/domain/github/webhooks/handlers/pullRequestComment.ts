@@ -9,7 +9,12 @@ const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 export const handlePullRequestCommentEvent: GithubWebhookEventHander<
   PullRequestReviewCommentCreatedEvent
 > = async ({ event, slackClient, ...args }) => {
-  if (event.action === "created" && event.comment.user.type === "User") {
+  if (event.comment.user.type === "Bot") {
+    LOGGER.debug("Pull request comment is from a bot--skipping");
+    return;
+  }
+
+  if (event.action === "created") {
     const pullRequestItem = await fetchPrItem({
       pullRequestId: event.pull_request.id,
       repoId: event.repository.id,

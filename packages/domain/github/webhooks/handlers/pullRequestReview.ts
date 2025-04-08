@@ -17,6 +17,11 @@ const LOGGER = new Logger("github.handlers.pullRequestReview");
 export const handlePullRequestReviewEvent: GithubWebhookEventHander<
   PullRequestReviewEvent
 > = async ({ event, slackClient, ...args }) => {
+  if (event.review.user.type === "Bot") {
+    LOGGER.debug("Pull request review is from a bot--skipping");
+    return;
+  }
+
   if (event.action === "submitted") {
     if (event.review.state === "commented" && event.review.body === null) {
       // This means they left a comment on the PR, not an actual review comment
