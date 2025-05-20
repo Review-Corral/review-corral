@@ -7,6 +7,7 @@ import { OrganizationEntity } from "@core/dynamodb/entities/organization";
 import { PullRequestEntity } from "@core/dynamodb/entities/pullRequest";
 import { RepositoryEntity } from "@core/dynamodb/entities/repository";
 import { SlackEntity } from "@core/dynamodb/entities/slack";
+import { SlackApiThrottleEntity } from "@core/dynamodb/entities/slackApiThrottle";
 import { SlackUserEntity } from "@core/dynamodb/entities/slackUser";
 import { SubscriptionEntity } from "@core/dynamodb/entities/subscription";
 import { UserEntity } from "@core/dynamodb/entities/user";
@@ -30,6 +31,7 @@ export const Db = new Service(
     user: UserEntity,
     slack: SlackEntity,
     slackUsers: SlackUserEntity,
+    slackApiThrottle: SlackApiThrottleEntity,
     branch: BranchEntity,
   },
   Configuration,
