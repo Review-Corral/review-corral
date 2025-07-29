@@ -17,11 +17,12 @@ vi.mock("@domain/github/webhooks/verifyEvent", () => ({
   verifyGithubWebhookSecret: vi.fn().mockResolvedValue(true),
 }));
 
-// Mock githubWebhookBodySchema
+// Mock githubWebhookBodySchema and handleGithubWebhookEvent
 vi.mock("@domain/github/webhooks", () => ({
   githubWebhookBodySchema: {
     safeParse: vi.fn(() => ({ success: true, data: {} })),
   },
+  handleGithubWebhookEvent: vi.fn().mockResolvedValue(undefined),
 }));
 
 describe("handleGithubWebhookEvent", () => {
