@@ -77,6 +77,10 @@ export const buidMainMessageAttachements = ({
     return [...base, getPrClosedAttatchment(slackUsername)];
   }
 
+  if (pullRequestItem?.isQueuedToMerge) {
+    return [...base, getQueuedToMergeAttachment()];
+  }
+
   return base;
 };
 
@@ -89,6 +93,21 @@ export function getMergedAttachment(): MessageAttachment {
         text: {
           type: "mrkdwn",
           text: ":large_purple_circle: Pull request merged",
+        },
+      },
+    ],
+  };
+}
+
+export function getQueuedToMergeAttachment(): MessageAttachment {
+  return {
+    color: "#D9CD27",
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: ":large_yellow_circle: Queued to merge",
         },
       },
     ],
