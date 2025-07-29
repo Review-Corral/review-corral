@@ -31,12 +31,12 @@
     "@types/aws-lambda": "8.10.147",
     "aws-cdk-lib": "2.184.0",
     "constructs": "10.4.2",
-    "drizzle-kit": "^0.30.5",
+    "drizzle-kit": "^0.30.6",
     "node-fetch": "^3.3.2",
     "sst": "3.5.15",
-    "typescript": "^5.8.2",
-    "vite-node": "^3.0.8",
-    "vitest": "^3.0.8"
+    "typescript": "^5.8.3",
+    "vite-node": "^3.2.4",
+    "vitest": "^3.2.4"
   },
   "workspaces": [
     "packages/*"

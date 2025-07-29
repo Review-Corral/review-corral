@@ -7,17 +7,17 @@
     "typecheck": "tsc -noEmit"
   },
   "devDependencies": {
-    "@middy/core": "^6.1.5",
-    "@octokit/types": "^13.8.0",
+    "@middy/core": "^6.4.1",
+    "@octokit/types": "^13.10.0",
     "@octokit/webhooks-types": "^7.6.1",
-    "@types/aws-lambda": "^8.10.147",
-    "@types/node": "^22.13.10",
-    "@types/pg": "^8.11.11",
-    "dotenv": "^16.4.7",
-    "drizzle-kit": "^0.30.5",
+    "@types/aws-lambda": "^8.10.152",
+    "@types/node": "^22.16.5",
+    "@types/pg": "^8.15.5",
+    "dotenv": "^16.6.1",
+    "drizzle-kit": "^0.30.6",
     "sst": "3.9.37",
-    "vitest": "^3.0.8",
-    "vitest-mock-extended": "^3.0.1"
+    "vitest": "^3.2.4",
+    "vitest-mock-extended": "^3.1.0"
   },
   "paths": {
     "@core": [
@@ -25,21 +25,21 @@
     ]
   },
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.767.0",
-    "@aws-sdk/client-secrets-manager": "^3.758.0",
+    "@aws-sdk/client-dynamodb": "^3.855.0",
+    "@aws-sdk/client-secrets-manager": "^3.855.0",
     "@slack/web-api": "^6.13.0",
     "date-fns": "^4.1.0",
-    "drizzle-orm": "^0.40.0",
-    "electrodb": "^3.4.1",
-    "ky": "^1.7.5",
+    "drizzle-orm": "^0.40.1",
+    "electrodb": "^3.4.3",
+    "ky": "^1.8.2",
     "middy": "^0.36.0",
-    "nanoid": "^5.1.3",
+    "nanoid": "^5.1.5",
     "njwt": "^2.0.1",
-    "pg": "^8.14.0",
-    "slackify-markdown": "^4.4.0",
+    "pg": "^8.16.3",
+    "slackify-markdown": "^4.5.0",
     "stripe": "^15.12.0",
     "vite-tsconfig-paths": "^5.1.4",
-    "zod": "^3.24.2"
+    "zod": "^3.25.76"
   },
   "packageManager": "pnpm@9.14.2"
 }
