@@ -19,6 +19,7 @@ export type MainMessageArgs<T extends BasePullRequestProperties> = {
   slackUsername: string;
   pullRequestItem: PullRequestItem | null;
   requiredApprovals: RequiredApprovalsQueryPayloadArg;
+  checkStatus?: CheckStatus | null;
 };
 
 /**
@@ -32,6 +33,7 @@ export const getBaseChatUpdateArguments = async ({
   slackUsername,
   pullRequestItem,
   requiredApprovals,
+  checkStatus,
 }: MainMessageArgs<BasePullRequestProperties>): Promise<{
   ts: string;
   text: string;
@@ -45,6 +47,7 @@ export const getBaseChatUpdateArguments = async ({
       slackUsername,
       pullRequestItem,
       requiredApprovals,
+      checkStatus,
     }),
   };
 };
@@ -54,16 +57,24 @@ export const buidMainMessageAttachements = ({
   slackUsername,
   pullRequestItem,
   requiredApprovals,
+  checkStatus,
 }: {
   body: BasePullRequestProperties;
   slackUsername: string;
   pullRequestItem: PullRequestItem | null;
   requiredApprovals: RequiredApprovalsQueryPayloadArg;
+  checkStatus?: CheckStatus | null;
 }) => {
   const base = [
     getPrOpenedBaseAttachment(body, slackUsername),
     ...buildRequiredApprovalsAttachment({ pullRequestItem, requiredApprovals }),
   ];
+
+  // Add check status attachment if available
+  const checkStatusAttachment = getCheckStatusAttachment(checkStatus ?? null);
+  if (checkStatusAttachment) {
+    base.push(checkStatusAttachment);
+  }
 
   if (body.pull_request.draft) {
     return [...base, getConvertedToDraftAttachment()];
@@ -292,6 +303,54 @@ const getPrOpenedBaseAttachment = (
     ],
   };
 };
+
+export type CheckStatus = {
+  pending: number;
+  success: number;
+  failure: number;
+  total: number;
+};
+
+export function getCheckStatusAttachment(
+  checkStatus: CheckStatus | null,
+): MessageAttachment | null {
+  if (!checkStatus || checkStatus.total === 0) {
+    return null;
+  }
+
+  const { pending, success, failure, total } = checkStatus;
+
+  let emoji: string;
+  let color: string;
+  let text: string;
+
+  if (pending > 0) {
+    emoji = ":hourglass_flowing_sand:";
+    color = "#D9CD27";
+    text = `${success + failure}/${total} checks completed`;
+  } else if (failure > 0) {
+    emoji = ":x:";
+    color = "#FB0909";
+    text = `${failure}/${total} checks failed`;
+  } else {
+    emoji = ":white_check_mark:";
+    color = "#02A101";
+    text = `${success}/${total} checks passed`;
+  }
+
+  return {
+    color,
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `${emoji} ${text}`,
+        },
+      },
+    ],
+  };
+}
 
 async function getPrOpenedMessage(slackUsername: string): Promise<string> {
   return `Pull request opened by ${slackUsername}`;

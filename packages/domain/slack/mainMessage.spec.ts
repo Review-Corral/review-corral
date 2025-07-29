@@ -2,8 +2,10 @@ import { PullRequestItem } from "@core/dynamodb/entities/types";
 import { beforeEach, describe, expect, it } from "vitest";
 import { mock } from "vitest-mock-extended";
 import {
+  CheckStatus,
   RequiredApprovalsQueryPayloadArg,
   buidMainMessageAttachements,
+  getCheckStatusAttachment,
   getQueuedToMergeAttachment,
 } from "./mainMessage";
 
@@ -64,6 +66,7 @@ describe("mainMessage", () => {
         slackUsername: "@testuser",
         pullRequestItem: queuedPrItem,
         requiredApprovals: null,
+        checkStatus: null,
       });
 
       expect(attachments).toHaveLength(3); // base + approvals + queued
@@ -87,6 +90,7 @@ describe("mainMessage", () => {
         slackUsername: "@testuser",
         pullRequestItem: mockPullRequestItem,
         requiredApprovals: null,
+        checkStatus: null,
       });
 
       const queuedAttachment = attachments.find((attachment) =>
@@ -120,6 +124,7 @@ describe("mainMessage", () => {
         slackUsername: "@testuser",
         pullRequestItem: nonQueuedPrItem,
         requiredApprovals: null,
+        checkStatus: null,
       });
 
       const mergedAttachment = attachments.find((attachment) =>
@@ -158,6 +163,7 @@ describe("mainMessage", () => {
         slackUsername: "@testuser",
         pullRequestItem: mockPullRequestItem,
         requiredApprovals: null,
+        checkStatus: null,
       });
 
       const draftAttachment = attachments.find((attachment) =>
@@ -188,6 +194,7 @@ describe("mainMessage", () => {
         slackUsername: "@testuser",
         pullRequestItem: mockPullRequestItem,
         requiredApprovals: null,
+        checkStatus: null,
       });
 
       const closedAttachment = attachments.find((attachment) =>
@@ -211,6 +218,7 @@ describe("mainMessage", () => {
         slackUsername: "@testuser",
         pullRequestItem: mockPullRequestItem,
         requiredApprovals: requiredApprovals,
+        checkStatus: null,
       });
 
       const approvalAttachment = attachments.find((attachment) =>
@@ -241,6 +249,110 @@ describe("mainMessage", () => {
             },
           },
         ],
+      });
+    });
+  });
+
+  describe("getCheckStatusAttachment", () => {
+    it("should return null for null check status", () => {
+      const attachment = getCheckStatusAttachment(null);
+      expect(attachment).toBeNull();
+    });
+
+    it("should return null for empty check status", () => {
+      const checkStatus: CheckStatus = {
+        total: 0,
+        pending: 0,
+        success: 0,
+        failure: 0,
+      };
+      const attachment = getCheckStatusAttachment(checkStatus);
+      expect(attachment).toBeNull();
+    });
+
+    it("should show pending status with hourglass when checks are pending", () => {
+      const checkStatus: CheckStatus = {
+        total: 3,
+        pending: 2,
+        success: 1,
+        failure: 0,
+      };
+      const attachment = getCheckStatusAttachment(checkStatus);
+
+      expect(attachment).toEqual({
+        color: "#D9CD27",
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: ":hourglass_flowing_sand: 1/3 checks completed",
+            },
+          },
+        ],
+      });
+    });
+
+    it("should show success status when all checks pass", () => {
+      const checkStatus: CheckStatus = {
+        total: 3,
+        pending: 0,
+        success: 3,
+        failure: 0,
+      };
+      const attachment = getCheckStatusAttachment(checkStatus);
+
+      expect(attachment).toEqual({
+        color: "#02A101",
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: ":white_check_mark: 3/3 checks passed",
+            },
+          },
+        ],
+      });
+    });
+
+    it("should show failure status when some checks fail", () => {
+      const checkStatus: CheckStatus = {
+        total: 3,
+        pending: 0,
+        success: 1,
+        failure: 2,
+      };
+      const attachment = getCheckStatusAttachment(checkStatus);
+
+      expect(attachment).toEqual({
+        color: "#FB0909",
+        blocks: [
+          {
+            type: "section",
+            text: {
+              type: "mrkdwn",
+              text: ":x: 2/3 checks failed",
+            },
+          },
+        ],
+      });
+    });
+
+    it("should prioritize pending status over failure status", () => {
+      const checkStatus: CheckStatus = {
+        total: 4,
+        pending: 1,
+        success: 1,
+        failure: 2,
+      };
+      const attachment = getCheckStatusAttachment(checkStatus);
+
+      expect(attachment?.color).toBe("#D9CD27");
+      expect(attachment?.blocks?.[0]).toMatchObject({
+        text: {
+          text: ":hourglass_flowing_sand: 3/4 checks completed",
+        },
       });
     });
   });

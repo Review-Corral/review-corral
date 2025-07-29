@@ -25,6 +25,9 @@ export type PullRequestReviewsResponse =
 export type BranchProtectionResponse =
   Endpoints["GET /repos/{owner}/{repo}/branches/{branch}/protection"]["response"]["data"];
 
+export type PullRequestCheckRunsResponse =
+  Endpoints["GET /repos/{owner}/{repo}/commits/{ref}/check-runs"]["response"]["data"];
+
 // For some of these types, I'm manually creating the types instead of using Octokit
 // because it's currently giving me the wrong result even though it was just installed
 // at the day of writing.

@@ -234,6 +234,7 @@ export class SlackClient {
             slackUsername,
             pullRequestItem,
             requiredApprovals,
+            checkStatus: null, // TODO: Fetch check status when creating new PR message
           }),
         },
         threadTs: undefined,

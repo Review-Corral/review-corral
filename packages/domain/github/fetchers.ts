@@ -8,6 +8,7 @@ import {
   InstallationRespositoriesResponse,
   InstallationsData,
   OrgMembers,
+  PullRequestCheckRunsResponse,
   PullRequestInfoResponse,
   PullRequestReviewsResponse,
   RepositoryPullRequestsResponse,
@@ -202,4 +203,31 @@ export const getPrRequiredApprovalsCount = async (
   return (
     branchProtection.required_pull_request_reviews?.required_approving_review_count ?? 0
   );
+};
+
+/**
+ * Gets the check runs for a pull request
+ */
+export const getPullRequestCheckRuns = async ({
+  repoOwner,
+  repoName,
+  sha,
+  accessToken,
+}: {
+  repoOwner: string;
+  repoName: string;
+  sha: string;
+  accessToken: string;
+}): Promise<PullRequestCheckRunsResponse> => {
+  return await ky
+    .get(
+      `https://api.github.com/repos/${repoOwner}/${repoName}/commits/${sha}/check-runs`,
+      {
+        headers: {
+          ...defaultHeaders,
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    )
+    .json<PullRequestCheckRunsResponse>();
 };

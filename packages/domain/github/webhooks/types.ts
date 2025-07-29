@@ -7,6 +7,8 @@ export type handledEventNames = keyof Pick<
   | "pull_request_review_comment"
   | "pull_request_review"
   | "issue_comment"
+  | "check_suite"
+  | "check_run"
 >;
 
 export interface GithubWebhookEventHanderArgs<EventT> {
