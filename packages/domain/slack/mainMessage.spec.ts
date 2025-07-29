@@ -2,9 +2,9 @@ import { PullRequestItem } from "@core/dynamodb/entities/types";
 import { beforeEach, describe, expect, it } from "vitest";
 import { mock } from "vitest-mock-extended";
 import {
+  RequiredApprovalsQueryPayloadArg,
   buidMainMessageAttachements,
   getQueuedToMergeAttachment,
-  RequiredApprovalsQueryPayloadArg,
 } from "./mainMessage";
 
 describe("mainMessage", () => {
@@ -67,15 +67,16 @@ describe("mainMessage", () => {
       });
 
       expect(attachments).toHaveLength(3); // base + approvals + queued
-      
-      const queuedAttachment = attachments.find(attachment => 
-        attachment.blocks?.some(block => 
-          block.type === "section" && 
-          "text" in block && 
-          block.text?.text?.includes("Queued to merge")
-        )
+
+      const queuedAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Queued to merge"),
+        ),
       );
-      
+
       expect(queuedAttachment).toBeDefined();
       expect(queuedAttachment?.color).toBe("#D9CD27");
     });
@@ -88,14 +89,15 @@ describe("mainMessage", () => {
         requiredApprovals: null,
       });
 
-      const queuedAttachment = attachments.find(attachment => 
-        attachment.blocks?.some(block => 
-          block.type === "section" && 
-          "text" in block && 
-          block.text?.text?.includes("Queued to merge")
-        )
+      const queuedAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Queued to merge"),
+        ),
       );
-      
+
       expect(queuedAttachment).toBeUndefined();
     });
 
@@ -120,22 +122,24 @@ describe("mainMessage", () => {
         requiredApprovals: null,
       });
 
-      const mergedAttachment = attachments.find(attachment => 
-        attachment.blocks?.some(block => 
-          block.type === "section" && 
-          "text" in block && 
-          block.text?.text?.includes("Pull request merged")
-        )
+      const mergedAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Pull request merged"),
+        ),
       );
 
-      const queuedAttachment = attachments.find(attachment => 
-        attachment.blocks?.some(block => 
-          block.type === "section" && 
-          "text" in block && 
-          block.text?.text?.includes("Queued to merge")
-        )
+      const queuedAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Queued to merge"),
+        ),
       );
-      
+
       expect(mergedAttachment).toBeDefined();
       expect(queuedAttachment).toBeUndefined();
     });
@@ -156,18 +160,18 @@ describe("mainMessage", () => {
         requiredApprovals: null,
       });
 
-      const draftAttachment = attachments.find(attachment => 
-        attachment.blocks?.some(block => 
-          block.type === "section" && 
-          "text" in block && 
-          block.text?.text?.includes("Pull request converted back to draft")
-        )
+      const draftAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Pull request converted back to draft"),
+        ),
       );
-      
+
       expect(draftAttachment).toBeDefined();
       expect(draftAttachment?.color).toBe("#D9CD27");
     });
-
 
     it("should include closed attachment when PR is closed but not merged", () => {
       const closedBody = {
@@ -186,14 +190,15 @@ describe("mainMessage", () => {
         requiredApprovals: null,
       });
 
-      const closedAttachment = attachments.find(attachment => 
-        attachment.blocks?.some(block => 
-          block.type === "section" && 
-          "text" in block && 
-          block.text?.text?.includes("Pull request closed by @testuser")
-        )
+      const closedAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Pull request closed by @testuser"),
+        ),
       );
-      
+
       expect(closedAttachment).toBeDefined();
       expect(closedAttachment?.color).toBe("#FB0909");
     });
@@ -208,14 +213,15 @@ describe("mainMessage", () => {
         requiredApprovals: requiredApprovals,
       });
 
-      const approvalAttachment = attachments.find(attachment => 
-        attachment.blocks?.some(block => 
-          block.type === "section" && 
-          "text" in block && 
-          block.text?.text?.includes("approvals met")
-        )
+      const approvalAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("approvals met"),
+        ),
       );
-      
+
       expect(approvalAttachment).toBeDefined();
     });
   });
