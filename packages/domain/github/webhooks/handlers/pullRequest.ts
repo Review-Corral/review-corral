@@ -52,11 +52,18 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
         );
       case "closed":
         if (payload.pull_request.merged) {
+          // Clear queue status when PR is merged
+          await updatePullRequest({
+            pullRequestId: pullRequestItem.prId,
+            repoId: pullRequestItem.repoId,
+            isQueuedToMerge: false,
+          });
+
           await props.slackClient.postPrMerged({
             body: payload,
             threadTs: pullRequestItem.threadTs,
             slackUsername: await getSlackUserName(payload.sender.login, props),
-            pullRequestItem,
+            pullRequestItem: { ...pullRequestItem, isQueuedToMerge: false },
             // Default to getting this from the PR item
             requiredApprovals: null,
           });
@@ -104,6 +111,22 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           payload,
           props,
           pullRequestItem,
+        );
+      case "enqueued":
+        return await handleQueueStatusChange(
+          pullRequestItem.threadTs,
+          payload,
+          props,
+          pullRequestItem,
+          true,
+        );
+      case "dequeued":
+        return await handleQueueStatusChange(
+          pullRequestItem.threadTs,
+          payload,
+          props,
+          pullRequestItem,
+          false,
         );
       default:
         LOGGER.debug("Got unhandled pull_request event", {
@@ -158,6 +181,38 @@ const handleEdited = async (
       requiredApprovals: null,
     },
     "pr-edited",
+  );
+};
+
+const handleQueueStatusChange = async (
+  threadTs: string,
+  event: PullRequestEvent,
+  props: BaseGithubWebhookEventHanderArgs,
+  pullRequestItem: PullRequestItem,
+  isEnqueued: boolean,
+) => {
+  const action = isEnqueued ? "enqueued" : "dequeued";
+  LOGGER.info(`Handling PR ${action} event`, {
+    prId: event.pull_request.id,
+  });
+
+  // Update the database to mark PR queue status
+  await updatePullRequest({
+    pullRequestId: pullRequestItem.prId,
+    repoId: pullRequestItem.repoId,
+    isQueuedToMerge: isEnqueued,
+  });
+
+  // Update the main message to show/hide queued status
+  await props.slackClient.updateMainMessage(
+    {
+      body: convertPrEventToBaseProps(event),
+      threadTs,
+      slackUsername: await getSlackUserName(event.pull_request.user.login, props),
+      pullRequestItem: { ...pullRequestItem, isQueuedToMerge: isEnqueued },
+      requiredApprovals: null,
+    },
+    `pr-${action}`,
   );
 };
 

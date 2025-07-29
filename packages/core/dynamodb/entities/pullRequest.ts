@@ -33,6 +33,11 @@ export const PullRequestEntity = new Entity({
       default: 0,
       required: false,
     },
+    isQueuedToMerge: {
+      type: "boolean",
+      default: false,
+      required: false,
+    },
     createdAt: {
       type: "string",
       readOnly: true,
