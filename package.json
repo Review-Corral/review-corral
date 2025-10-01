@@ -36,7 +36,7 @@
     "drizzle-kit": "^0.30.6",
     "node-fetch": "^3.3.2",
     "sst": "3.5.15",
-    "typescript": "^5.8.3",
+    "typescript": "^5.9.3",
     "vite-node": "^3.2.4",
     "vitest": "^3.2.4"
   },

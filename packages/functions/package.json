@@ -9,20 +9,20 @@
   "devDependencies": {
     "@octokit/types": "^13.10.0",
     "@octokit/webhooks-types": "^7.6.1",
-    "@types/aws-lambda": "^8.10.152",
+    "@types/aws-lambda": "^8.10.153",
     "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^22.16.5",
+    "@types/node": "^22.18.8",
     "sst": "3.9.37",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
     "vitest-mock-extended": "^3.1.0"
   },
   "dependencies": {
-    "@aws-sdk/client-sqs": "^3.855.0",
+    "@aws-sdk/client-sqs": "^3.899.0",
     "aws-lambda": "^1.0.7",
-    "hono": "^4.9.7",
+    "hono": "^4.9.9",
     "jsonwebtoken": "^9.0.2",
-    "ky": "^1.8.2",
+    "ky": "^1.11.0",
     "stripe": "^15.12.0",
     "zod": "^3.25.76"
   },
