@@ -153,6 +153,8 @@ const buildRequiredApprovalsAttachment = ({
   pullRequestItem: PullRequestItem | null;
   requiredApprovals: RequiredApprovalsQueryPayloadArg;
 }) => {
+  console.log("pullRequestItem", pullRequestItem);
+  console.log("requiredApprovals", requiredApprovals);
   if (pullRequestItem?.requiredApprovals) {
     return [
       getRequiredApprovalsAttatchment({
@@ -281,7 +283,7 @@ const getPrOpenedBaseAttachment = (
           } as ImageElement,
           {
             type: "mrkdwn",
-            text: `+${body.pull_request.additions}-${body.pull_request.deletions}`,
+            text: `+${body.pull_request.additions.toLocaleString()}-${body.pull_request.deletions.toLocaleString()}`,
           },
           {
             type: "mrkdwn",
