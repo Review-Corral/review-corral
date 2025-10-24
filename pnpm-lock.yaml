@@ -216,8 +216,8 @@ importers:
         specifier: ^1.0.7
         version: 1.0.7
       hono:
-        specifier: ^4.10.2
-        version: 4.10.2
+        specifier: ^4.10.3
+        version: 4.10.3
       jsonwebtoken:
         specifier: ^9.0.2
         version: 9.0.2
@@ -3446,8 +3446,8 @@ packages:
   help-me@3.0.0:
     resolution: {integrity: sha512-hx73jClhyk910sidBB7ERlnhMlFsJJIBqSVMFDwPN8o2v9nmp5KgLq1Xz1Bf1fCMMZ6mPrX159iG0VLy/fPMtQ==}
 
-  hono@4.10.2:
-    resolution: {integrity: sha512-p6fyzl+mQo6uhESLxbF5WlBOAJMDh36PljwlKtP5V1v09NxlqGru3ShK+4wKhSuhuYf8qxMmrivHOa/M7q0sMg==}
+  hono@4.10.3:
+    resolution: {integrity: sha512-2LOYWUbnhdxdL8MNbNg9XZig6k+cZXm5IjHn2Aviv7honhBMOHb+jxrKIeJRZJRmn+htUCKhaicxwXuUDlchRA==}
     engines: {node: '>=16.9.0'}
 
   hono@4.7.4:
@@ -8657,7 +8657,7 @@ snapshots:
       readable-stream: 3.6.2
     optional: true
 
-  hono@4.10.2: {}
+  hono@4.10.3: {}
 
   hono@4.7.4: {}
 
