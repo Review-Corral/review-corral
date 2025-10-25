@@ -26,13 +26,16 @@ export type MainMessageArgs<T extends BasePullRequestProperties> = {
  * include the same base attachments (updating without an attachment that existed
  * before will remove it)
  */
-export const getBaseChatUpdateArguments = async ({
-  body,
-  threadTs,
-  slackUsername,
-  pullRequestItem,
-  requiredApprovals,
-}: MainMessageArgs<BasePullRequestProperties>): Promise<{
+export const getBaseChatUpdateArguments = async (
+  {
+    body,
+    threadTs,
+    slackUsername,
+    pullRequestItem,
+    requiredApprovals,
+  }: MainMessageArgs<BasePullRequestProperties>,
+  actionPerformerUsername?: string,
+): Promise<{
   ts: string;
   text: string;
   attachments: MessageAttachment[];
@@ -45,6 +48,7 @@ export const getBaseChatUpdateArguments = async ({
       slackUsername,
       pullRequestItem,
       requiredApprovals,
+      actionPerformerUsername,
     }),
   };
 };
@@ -54,11 +58,13 @@ export const buidMainMessageAttachements = ({
   slackUsername,
   pullRequestItem,
   requiredApprovals,
+  actionPerformerUsername,
 }: {
   body: BasePullRequestProperties;
   slackUsername: string;
   pullRequestItem: PullRequestItem | null;
   requiredApprovals: RequiredApprovalsQueryPayloadArg;
+  actionPerformerUsername?: string;
 }) => {
   const base = [
     getPrOpenedBaseAttachment(body, slackUsername),
@@ -74,7 +80,7 @@ export const buidMainMessageAttachements = ({
   }
 
   if (body.pull_request.closed_at) {
-    return [...base, getPrClosedAttatchment(slackUsername)];
+    return [...base, getPrClosedAttatchment(actionPerformerUsername ?? slackUsername)];
   }
 
   if (pullRequestItem?.isQueuedToMerge) {
