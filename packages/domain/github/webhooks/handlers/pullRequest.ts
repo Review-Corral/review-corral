@@ -59,24 +59,36 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             isQueuedToMerge: false,
           });
 
-          await props.slackClient.postPrMerged({
-            body: payload,
-            threadTs: pullRequestItem.threadTs,
-            slackUsername: await getSlackUserName(payload.sender.login, props),
-            pullRequestItem: { ...pullRequestItem, isQueuedToMerge: false },
-            // Default to getting this from the PR item
-            requiredApprovals: null,
-          });
+          await props.slackClient.postPrMerged(
+            {
+              body: payload,
+              threadTs: pullRequestItem.threadTs,
+              slackUsername: await getSlackUserName(
+                payload.pull_request.user.login,
+                props,
+              ),
+              pullRequestItem: { ...pullRequestItem, isQueuedToMerge: false },
+              // Default to getting this from the PR item
+              requiredApprovals: null,
+            },
+            await getSlackUserName(payload.sender.login, props),
+          );
           return;
         } else {
-          await props.slackClient.postPrClosed({
-            body: payload,
-            threadTs: pullRequestItem.threadTs,
-            slackUsername: await getSlackUserName(payload.sender.login, props),
-            pullRequestItem,
-            // Default to getting this from the PR item
-            requiredApprovals: null,
-          });
+          await props.slackClient.postPrClosed(
+            {
+              body: payload,
+              threadTs: pullRequestItem.threadTs,
+              slackUsername: await getSlackUserName(
+                payload.pull_request.user.login,
+                props,
+              ),
+              pullRequestItem,
+              // Default to getting this from the PR item
+              requiredApprovals: null,
+            },
+            await getSlackUserName(payload.sender.login, props),
+          );
           return;
         }
       case "review_requested":

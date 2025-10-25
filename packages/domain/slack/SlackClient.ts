@@ -98,16 +98,19 @@ export class SlackClient {
     }
   }
 
-  async postPrMerged(args: MainMessageArgs<BasePullRequestProperties>) {
+  async postPrMerged(
+    args: MainMessageArgs<BasePullRequestProperties>,
+    actionPerformerUsername: string,
+  ) {
     await this.postMessage({
       message: {
-        text: `Pull request merged by ${args.slackUsername}`,
+        text: `Pull request merged by ${actionPerformerUsername}`,
         attachments: [getMergedAttachment()],
       },
       threadTs: args.threadTs,
     });
 
-    await this.updateMainMessage(args, "pr-merged");
+    await this.updateMainMessage(args, "pr-merged", actionPerformerUsername);
   }
 
   async postConvertedToDraft(args: MainMessageArgs<BasePullRequestProperties>) {
@@ -151,31 +154,38 @@ export class SlackClient {
 
   async getBaseMessageArgsWithToken(
     args: MainMessageArgs<BasePullRequestProperties>,
+    actionPerformerUsername?: string,
   ): Promise<ChatUpdateArguments> {
     return {
       token: this.slackToken,
       channel: this.channelId,
-      ...(await getBaseChatUpdateArguments(args)),
+      ...(await getBaseChatUpdateArguments(args, actionPerformerUsername)),
     };
   }
 
-  async postPrClosed(args: MainMessageArgs<PullRequestClosedEvent>) {
+  async postPrClosed(
+    args: MainMessageArgs<PullRequestClosedEvent>,
+    actionPerformerUsername: string,
+  ) {
     await this.postMessage({
       message: {
-        attachments: [getPrClosedAttatchment(args.slackUsername)],
+        attachments: [getPrClosedAttatchment(actionPerformerUsername)],
       },
       threadTs: args.threadTs,
     });
 
-    await this.updateMainMessage(args, "pr-closed");
+    await this.updateMainMessage(args, "pr-closed", actionPerformerUsername);
   }
 
   async updateMainMessage(
     args: MainMessageArgs<BasePullRequestProperties>,
     eventName: string,
+    actionPerformerUsername?: string,
   ) {
     try {
-      await this.client.chat.update(await this.getBaseMessageArgsWithToken(args));
+      await this.client.chat.update(
+        await this.getBaseMessageArgsWithToken(args, actionPerformerUsername),
+      );
       LOGGER.debug(`Succesfully updated main message for ${eventName}`);
     } catch (error) {
       LOGGER.error(`Got error updating main message for ${eventName}: `, error);

@@ -257,13 +257,16 @@ describe("handlePullRequestEvent", () => {
         isQueuedToMerge: false,
       });
 
-      expect(mockSlackClientWithMerged.postPrMerged).toHaveBeenCalledWith({
-        body: mergedEvent,
-        threadTs: "thread-ts-123",
-        slackUsername: "@testuser",
-        pullRequestItem: { ...queuedPrItem, isQueuedToMerge: false },
-        requiredApprovals: null,
-      });
+      expect(mockSlackClientWithMerged.postPrMerged).toHaveBeenCalledWith(
+        {
+          body: mergedEvent,
+          threadTs: "thread-ts-123",
+          slackUsername: "@testuser",
+          pullRequestItem: { ...queuedPrItem, isQueuedToMerge: false },
+          requiredApprovals: null,
+        },
+        "@testuser",
+      );
     });
 
     it("should handle closed PR without clearing queue status when not merged", async () => {
@@ -293,13 +296,16 @@ describe("handlePullRequestEvent", () => {
 
       expect(updatePullRequest).not.toHaveBeenCalled();
 
-      expect(mockSlackClientWithClosed.postPrClosed).toHaveBeenCalledWith({
-        body: closedEvent,
-        threadTs: "thread-ts-123",
-        slackUsername: "@testuser",
-        pullRequestItem: prItem,
-        requiredApprovals: null,
-      });
+      expect(mockSlackClientWithClosed.postPrClosed).toHaveBeenCalledWith(
+        {
+          body: closedEvent,
+          threadTs: "thread-ts-123",
+          slackUsername: "@testuser",
+          pullRequestItem: prItem,
+          requiredApprovals: null,
+        },
+        "@testuser",
+      );
     });
   });
 });
