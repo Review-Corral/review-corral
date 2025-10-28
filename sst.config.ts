@@ -85,11 +85,19 @@ export default $config({
       }
     });
 
-    await import("./infra/storage");
+    const { table } = await import("./infra/storage");
     await import("./infra/api");
     await import("./infra/alerts");
 
     const { frontend } = await import("./infra/frontend");
+
+    new sst.x.DevCommand("ElectroViewer", {
+      link: [table],
+      dev: {
+        autostart: true,
+        command: "pnpm electro-viewer",
+      },
+    });
 
     return {
       webUrl: frontend.url,

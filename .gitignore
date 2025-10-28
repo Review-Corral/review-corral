@@ -1,5 +1,6 @@
 # dependencies
 node_modules
+.electro-viewer
 
 # sst
 .sst
@@ -14,3 +15,4 @@ node_modules
 # local env files
 .env*
 !.env*.example
+
