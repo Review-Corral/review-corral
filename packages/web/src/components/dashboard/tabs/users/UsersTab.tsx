@@ -40,7 +40,7 @@ export const UsersTab: FC<UsersTabProps> = ({ organization }) => {
   return (
     <SharedLayout title="Users">
       <div className="flex flex-col gap-8 w-full">
-        <div className="max-w-[40rem] flex flex-col gap-4 text-md text-gray-700">
+        <div className="max-w-160 flex flex-col gap-4 text-md text-gray-700">
           <p>
             Use this table to map your Github Users with your Slack users so that Review
             Corral can properly notify the correct users in Slack on Github events.

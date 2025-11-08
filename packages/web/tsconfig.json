@@ -22,6 +22,7 @@
 
     /* Path aliases */
     "paths": {
+      "@/components/*": ["./components/*"],
       "@/*": ["./src/*"],
       "@core/*": ["../core/*"],
       "@components/*": ["./components/*"]

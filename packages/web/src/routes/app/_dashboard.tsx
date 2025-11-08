@@ -17,7 +17,7 @@ function DashboardLayout() {
   return (
     <div className="flex flex-col h-full">
       <NavbarWithOrgContext />
-      <div className="bg-white flex-grow">
+      <div className="bg-white grow">
         <Outlet />
       </div>
       <Toaster />

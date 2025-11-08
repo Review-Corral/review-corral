@@ -36,7 +36,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrgId }) => {
             <div className="flex items-center justify-between h-16">
               <div className="flex items-center gap-4">
                 <Link to="/app">
-                  <div className="flex-shrink-0 hover:cursor-pointer">
+                  <div className="shrink-0 hover:cursor-pointer">
                     <img
                       className="h-12 w-12"
                       src="https://avatars.githubusercontent.com/in/203068?s=120&u=4f27b80d54a1405e10756a1dc0175d1ef3866422&v=4"
