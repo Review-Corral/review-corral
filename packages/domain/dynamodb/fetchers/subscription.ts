@@ -19,6 +19,15 @@ export const fetchSubscriptionsByOrgId = async (
     .then(({ data }) => data);
 };
 
+export const fetchSubscriptionsByCustomerId = async (
+  customerId: string,
+): Promise<Subscription[]> => {
+  return await Db.entities.subscription.query
+    .primary({ customerId })
+    .go()
+    .then(({ data }) => data);
+};
+
 export const fetchSubscription = async ({
   customerId,
   subId,
