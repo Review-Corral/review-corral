@@ -4,11 +4,9 @@ import { ghClientId, posthogHost, posthogKey, slackBotId } from "./secrets";
 
 const dns = getDns("frontend");
 
-console.log("DNS settings for frontend", {
-  dns,
-});
-export const frontend = new sst.aws.Nextjs("frontend", {
+export const frontend = new sst.aws.TanStackStart("frontend", {
   path: "packages/web",
+  buildCommand: "pnpm build",
   domain: dns,
   environment: {
     BASE_URL: getUrl("frontend"),
@@ -21,10 +19,9 @@ export const frontend = new sst.aws.Nextjs("frontend", {
       $app.stage === "prod"
         ? "price_1P8CmKBqa9UplzHebShipTnE"
         : "price_1P9FpDBqa9UplzHeeJ57VHoc",
-    // ...slackEnvVars, // TODO:
-    ...($app.stage === "alex" ? { NEXT_PUBLIC_LOCAL: "true" } : {}),
     NEXT_PUBLIC_POSTHOG_KEY: posthogKey.value,
     NEXT_PUBLIC_POSTHOG_HOST: posthogHost.value,
+    NEXT_PUBLIC_GITHUB_APP_URL: `https://github.com/apps/${$app.stage === "prod" ? "review-corral" : "review-corral-dev"}`,
+    ...($app.stage === "alex" ? { NEXT_PUBLIC_LOCAL: "true" } : {}),
   },
-  link: [ghClientId],
 });

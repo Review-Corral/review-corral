@@ -70,7 +70,7 @@ declare module "sst" {
       "url": string
     }
     "frontend": {
-      "type": "sst.aws.Nextjs"
+      "type": "sst.aws.TanstackStart"
       "url": string
     }
     "lambda-error-alerts": {
