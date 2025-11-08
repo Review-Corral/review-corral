@@ -1,7 +1,5 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
-import { getUrl } from "./infra/dns";
-
 export default $config({
   console: {
     autodeploy: {
@@ -14,14 +12,6 @@ export default $config({
           return {
             stage: "dev",
           };
-        }
-
-        // Deploy tags like v2025-01-23-1
-        if (
-          event.type === "tag" &&
-          event.tag.match(/^v\d{4}\.\d{1,2}\.\d{1,2}(?:-\d+)?$/)
-        ) {
-          return { stage: "prod" };
         }
       },
     },
@@ -51,6 +41,8 @@ export default $config({
       stripeSecretKey,
       stripeWebhookSecret,
     } = await import("./infra/secrets");
+
+    const { getUrl } = await import("./infra/dns");
 
     $transform(sst.aws.Function, (args, _opts) => {
       // Set the default if it's not set by the component
