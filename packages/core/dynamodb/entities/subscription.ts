@@ -7,14 +7,16 @@ export const SubscriptionEntity = new Entity({
     service: "rc",
   },
   attributes: {
+    // 0 = not yet associated with an organization (sentinel value)
     orgId: {
       type: "number",
-      required: false,
+      required: true,
+      default: 0,
     },
     customerId: {
       type: "string",
       readony: true,
-      required: false,
+      required: true,
     },
     subId: {
       type: "string",
@@ -55,6 +57,17 @@ export const SubscriptionEntity = new Entity({
       },
       sk: {
         field: "sk",
+        composite: ["subId"],
+      },
+    },
+    byOrg: {
+      index: "gsi1",
+      pk: {
+        field: "gsi1pk",
+        composite: ["orgId"],
+      },
+      sk: {
+        field: "gsi1sk",
         composite: ["subId"],
       },
     },
