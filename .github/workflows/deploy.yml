@@ -1,32 +1,52 @@
-name: Deploy with SEED
+name: Deploy to Production
 
 on:
   release:
-    types:
-      - published
+    types: [created]
 
 jobs:
   deploy:
-    runs-on: buildjet-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
-      - name: Checkout main branch
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v4
         with:
-          ref: main
+          ref: ${{ github.event.release.tag_name }}
 
-      - name: Install SEED CLI
-        run: npm install -g @seed-run/cli
+      - name: Set up Pnpm
+        uses: pnpm/action-setup@v4
 
-      - name: Deploy to stages
-        env:
-          SEED_TOKEN: ${{ secrets.SEED_TOKEN }}
-          SEED_PROD_STAGES: ${{ vars.SEED_PROD_STAGES }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+
+      - name: Install sst
+        run: pnpm sst install
+
+      - name: Run linter
+        run: pnpm format:check
+        continue-on-error: true
+
+      - name: Run type check
         run: |
-          IFS=' ' read -ra stages <<< "$SEED_PROD_STAGES"
-          for stage in "${stages[@]}"; do
-            seed deploy \
-              --org understory \
-              --app client-app \
-              --stage $stage \
-              --commit $(git rev-parse HEAD)
-          done
+          cp .env.example .env.local
+          pnpm typecheck
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Deploy to production
+        run: pnpm sst deploy --stage prod
