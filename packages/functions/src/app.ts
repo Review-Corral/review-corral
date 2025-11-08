@@ -1,7 +1,7 @@
 import { Hono } from "hono";
 import { handle } from "hono/aws-lambda";
 import { cors } from "hono/cors";
-
+import { logger } from "hono/logger";
 import { Resource } from "sst";
 // Import all route modules
 import { app as authRoutes } from "./auth/routes";
@@ -24,6 +24,7 @@ app.use(
     allowHeaders: ["Content-Type", "Authorization"],
   }),
 );
+app.use(logger());
 
 // Home route - simple health check
 app.get("/", (c) => {
