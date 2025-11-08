@@ -7,10 +7,10 @@ export const Route = createFileRoute("/_landing")({
 
 function LandingLayout() {
   return (
-    <div className="h-[100dvh] flex flex-col">
+    <div className="h-dvh flex flex-col">
       <Navbar />
-      <div className="flex-grow flex flex-col">
-        <main className="flex-grow">
+      <div className="grow flex flex-col">
+        <main className="grow">
           <Outlet />
         </main>
         <footer className="text-xs md:text-sm container mx-auto px-4 py-8 text-center text-gray-600">

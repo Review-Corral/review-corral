@@ -5,7 +5,7 @@ export const InfoCard: React.FC<CardProps> = ({ message, subMessage }) => {
   return (
     <div className="rounded-md bg-blue-50 p-4 max-w-lg">
       <div className="flex">
-        <div className="flex-shrink-0">
+        <div className="shrink-0">
           <Info className="h-5 w-5 text-blue-400" aria-hidden="true" />
         </div>
         <div>
