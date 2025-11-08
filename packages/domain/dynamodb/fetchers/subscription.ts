@@ -10,11 +10,11 @@ interface SubscriptionKeys {
   subId: string;
 }
 
-export const fetchSubscriptionsByCustomerId = async (
-  customerId: string,
+export const fetchSubscriptionsByOrgId = async (
+  orgId: number,
 ): Promise<Subscription[]> => {
   return await Db.entities.subscription.query
-    .primary({ customerId })
+    .byOrg({ orgId })
     .go()
     .then(({ data }) => data);
 };
@@ -22,9 +22,9 @@ export const fetchSubscriptionsByCustomerId = async (
 export const fetchSubscription = async ({
   customerId,
   subId,
-}: SubscriptionKeys): Promise<Subscription[]> => {
-  return await Db.entities.subscription.query
-    .primary({ customerId, subId })
+}: SubscriptionKeys): Promise<Subscription | null> => {
+  return await Db.entities.subscription
+    .get({ customerId, subId })
     .go()
     .then(({ data }) => data);
 };
