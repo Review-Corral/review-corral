@@ -1,6 +1,6 @@
 import { Organization } from "@core/dynamodb/entities/types";
 import { BillingDetailsResponse } from "@core/selectorTypes/organization";
-import { fetchSubscriptionsByCustomerId } from "@domain/dynamodb/fetchers/subscription";
+import { fetchSubscriptionsByOrgId } from "@domain/dynamodb/fetchers/subscription";
 import { Logger } from "@domain/logging";
 
 const LOGGER = new Logger("organization:getBillingDetails");
@@ -13,13 +13,7 @@ export const getBillingDetails = async (
     customerId: organization.customerId,
   });
 
-  if (!organization.customerId) {
-    return {
-      subscriptions: [],
-    };
-  }
-
-  const subscriptions = await fetchSubscriptionsByCustomerId(organization.customerId);
+  const subscriptions = await fetchSubscriptionsByOrgId(organization.orgId);
 
   LOGGER.info("Found subscriptions", { subscriptions });
 
