@@ -35,7 +35,7 @@ export default $config({
       providers: {
         aws: {
           region: "us-east-1",
-          profile: "rc",
+          ...(process.env.CI ? {} : { profile: "rc" }),
         },
       },
     };
