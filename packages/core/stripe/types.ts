@@ -16,7 +16,6 @@ export const stripeCheckoutCreatedMetadataSchema = z.object({
     .transform((v) => v ?? Number(v)),
   orgId: z.string().transform(Number),
 });
-
 export type StripeCheckoutCreatedMetadata = z.infer<
   typeof stripeCheckoutCreatedMetadataSchema
 >;

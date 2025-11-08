@@ -1,4 +1,7 @@
-import { stripeCheckoutCreatedMetadataSchema } from "@core/stripe/types";
+import {
+  StripeCheckoutCreatedMetadata,
+  stripeCheckoutCreatedMetadataSchema,
+} from "@core/stripe/types";
 import {
   fetchOrganizationById,
   updateOrganization,
@@ -9,6 +12,7 @@ import {
 } from "@domain/dynamodb/fetchers/subscription";
 import { Logger } from "@domain/logging";
 import Stripe from "stripe";
+import { StripeClient } from "./Stripe";
 
 const LOGGER = new Logger("stripe.handleEvent");
 
@@ -42,20 +46,21 @@ export const handleSubUpdated = async (
     return;
   }
 
+  const parsedMetadata = stripeCheckoutCreatedMetadataSchema.safeParse(
+    actualEvent.metadata,
+  );
+
   const args = {
     customerId: actualEvent.customer.toString(),
     status: actualEvent.status,
     subId: actualEvent.id,
     priceId: priceId,
+    ...(parsedMetadata.success ? { orgId: parsedMetadata.data.orgId } : {}),
   };
 
   LOGGER.info("Going to upsert subscription with args:", { args }, { depth: 3 });
   await upsertSubscription(args);
   LOGGER.info("Finshed upserting subscription", { depth: 3 });
-
-  const parsedMetadata = stripeCheckoutCreatedMetadataSchema.safeParse(
-    actualEvent.metadata,
-  );
 
   if (parsedMetadata.success) {
     // Update the organization with the new info for quicker access
@@ -66,7 +71,7 @@ export const handleSubUpdated = async (
       stripeSubStatus: actualEvent.status,
     });
   } else {
-    LOGGER.warn("Subscription does not have an orgId", {
+    LOGGER.warn("Subscription does not have an orgId in metadata", {
       input: actualEvent.metadata,
       zodParseError: parsedMetadata.error,
     });
@@ -128,9 +133,19 @@ export const handleSessionCompleted = async (
 
   // Update the subscription with the OrgId for future use
   const newSub = await updateSubscription({
-    subId: actualEvent.subscription,
     customerId: actualEvent.customer,
+    subId: actualEvent.subscription,
     orgId: org.orgId,
+  });
+
+  const metadataUpdate: StripeCheckoutCreatedMetadata = {
+    userId: metadata.data.userId?.toString(),
+    orgId: org.orgId,
+  };
+
+  // Update the Stripe subscription's metadata so future webhook events include orgId
+  await StripeClient.subscriptions.update(actualEvent.subscription, {
+    metadata: metadataUpdate,
   });
 
   // Update the organization with the new info for quicker access
