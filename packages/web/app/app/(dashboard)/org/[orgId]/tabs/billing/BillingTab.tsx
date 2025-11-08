@@ -12,6 +12,49 @@ interface BillingTabProps {
   orgId: number;
 }
 
+type SubscriptionStatus = {
+  label: string;
+  color: string;
+  message?: string;
+};
+
+const getSubscriptionStatus = (subscription: Subscription): SubscriptionStatus => {
+  if (subscription.deletedAt) {
+    return {
+      label: "Deleted",
+      color: "bg-gray-600 text-white",
+    };
+  }
+
+  if (subscription.status === "canceled") {
+    return {
+      label: "Canceled",
+      color: "bg-red-600 text-white",
+    };
+  }
+
+  if (subscription.cancelAtPeriodEnd && subscription.currentPeriodEnd) {
+    const endDate = new Date(subscription.currentPeriodEnd * 1000);
+    return {
+      label: "Canceling",
+      color: "bg-yellow-600 text-white",
+      message: `Active until ${endDate.toLocaleDateString()}`,
+    };
+  }
+
+  if (subscription.status === "active") {
+    return {
+      label: "Active",
+      color: "bg-green-600 text-white",
+    };
+  }
+
+  return {
+    label: subscription.status,
+    color: "bg-gray-600 text-white",
+  };
+};
+
 export const BillingTab: FC<BillingTabProps> = ({ orgId }) => {
   const getBillingDetails = useOrgBillingDetails(orgId);
 
@@ -70,13 +113,23 @@ const ActivePlanCard: FC<{ subscription: Subscription; orgId: number }> = ({
     subscription.customerId,
   );
 
+  const status = getSubscriptionStatus(subscription);
+
   return (
     <div className="max-w-md rounded-3xl ring-1 ring-gray-200">
       <div className="p-8 sm:p-10 lg:flex-auto">
-        <h3 className="text-2xl font-bold tracking-tight text-gray-900">
-          Startup Plan
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-2xl font-bold tracking-tight text-gray-900">
+            Startup Plan
+          </h3>
+          <span className={`px-3 py-1 text-xs font-semibold ${status.color}`}>
+            {status.label}
+          </span>
+        </div>
         <p className="mt-3 text-base leading-7 text-gray-600">$10/month</p>
+        {status.message && (
+          <p className="mt-2 text-sm text-gray-700 font-medium">{status.message}</p>
+        )}
         <div className="mt-6">
           <BetterButton
             isLoading={getBillingPortalSession.isPending}

@@ -34,6 +34,26 @@ export const SubscriptionEntity = new Entity({
       type: "string",
       required: true,
     },
+    // True if subscription is set to cancel at the end of the current period
+    cancelAtPeriodEnd: {
+      type: "boolean",
+      required: false,
+    },
+    // Unix timestamp of when the current period ends
+    currentPeriodEnd: {
+      type: "number",
+      required: false,
+    },
+    // Unix timestamp of when the subscription was canceled (if applicable)
+    canceledAt: {
+      type: "number",
+      required: false,
+    },
+    // Timestamp when Stripe deleted the subscription (soft delete - we keep the record)
+    deletedAt: {
+      type: "string",
+      required: false,
+    },
     createdAt: {
       type: "string",
       readOnly: true,

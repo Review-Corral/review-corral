@@ -16,22 +16,33 @@ import { StripeClient } from "./Stripe";
 
 const LOGGER = new Logger("stripe.handleEvent");
 
-export const handleSubUpdated = async (
-  event: Stripe.CustomerSubscriptionUpdatedEvent,
+/**
+ * Handles subscription update and delete events.
+ * IMPORTANT: We NEVER delete subscription records from the database.
+ * When Stripe deletes a subscription, we mark it with deletedAt timestamp (soft delete).
+ * This maintains a complete audit trail of all subscriptions.
+ */
+const handleSubEvent = async (
+  event:
+    | Stripe.CustomerSubscriptionUpdatedEvent
+    | Stripe.CustomerSubscriptionDeletedEvent,
+  eventType: "updated" | "deleted",
 ) => {
-  LOGGER.info(`📝 Subscription updated: ${event.id}`, { event }, { depth: 5 });
+  LOGGER.info(`📝 Subscription ${eventType}: ${event.id}`, { event }, { depth: 5 });
 
   const actualEvent = event.data.object;
 
   if (!actualEvent.status) {
-    LOGGER.warn("Recieved subUpdated event without status", { actualEvent: event });
+    LOGGER.warn(`Received sub${eventType} event without status`, {
+      actualEvent: event,
+    });
     return;
   }
 
   const priceId = actualEvent.items.data[0].price?.id;
 
   if (!priceId) {
-    LOGGER.warn("Recieved subCreated event without priceId", {
+    LOGGER.warn(`Received sub${eventType} event without priceId`, {
       actualEvent: event,
       priceId,
     });
@@ -39,7 +50,7 @@ export const handleSubUpdated = async (
   }
 
   if (typeof actualEvent.customer !== "string") {
-    LOGGER.error("Recieved subUpdated event where customer is not a string", {
+    LOGGER.error(`Received sub${eventType} event where customer is not a string`, {
       actualEvent: event,
       typeofCustomer: typeof actualEvent.customer,
     });
@@ -55,12 +66,16 @@ export const handleSubUpdated = async (
     status: actualEvent.status,
     subId: actualEvent.id,
     priceId: priceId,
+    cancelAtPeriodEnd: actualEvent.cancel_at_period_end,
+    currentPeriodEnd: actualEvent.current_period_end,
+    canceledAt: actualEvent.canceled_at ?? undefined,
+    ...(eventType === "deleted" ? { deletedAt: new Date().toISOString() } : {}),
     ...(parsedMetadata.success ? { orgId: parsedMetadata.data.orgId } : {}),
   };
 
   LOGGER.info("Going to upsert subscription with args:", { args }, { depth: 3 });
   await upsertSubscription(args);
-  LOGGER.info("Finshed upserting subscription", { depth: 3 });
+  LOGGER.info("Finished upserting subscription", { depth: 3 });
 
   if (parsedMetadata.success) {
     // Update the organization with the new info for quicker access
@@ -78,6 +93,18 @@ export const handleSubUpdated = async (
   }
 
   LOGGER.info("Subscription updated", args);
+};
+
+export const handleSubUpdated = async (
+  event: Stripe.CustomerSubscriptionUpdatedEvent,
+) => {
+  await handleSubEvent(event, "updated");
+};
+
+export const handleSubDeleted = async (
+  event: Stripe.CustomerSubscriptionDeletedEvent,
+) => {
+  await handleSubEvent(event, "deleted");
 };
 
 /**

@@ -12,20 +12,34 @@ interface SubscriptionKeys {
 
 export const fetchSubscriptionsByOrgId = async (
   orgId: number,
+  options: { includeDeleted?: boolean } = {},
 ): Promise<Subscription[]> => {
-  return await Db.entities.subscription.query
+  const subscriptions = await Db.entities.subscription.query
     .byOrg({ orgId })
     .go()
     .then(({ data }) => data);
+
+  // Filter out soft-deleted subscriptions unless explicitly requested
+  if (options.includeDeleted) {
+    return subscriptions;
+  }
+  return subscriptions.filter((sub) => !sub.deletedAt);
 };
 
 export const fetchSubscriptionsByCustomerId = async (
   customerId: string,
+  options: { includeDeleted?: boolean } = {},
 ): Promise<Subscription[]> => {
-  return await Db.entities.subscription.query
+  const subscriptions = await Db.entities.subscription.query
     .primary({ customerId })
     .go()
     .then(({ data }) => data);
+
+  // Filter out soft-deleted subscriptions unless explicitly requested
+  if (options.includeDeleted) {
+    return subscriptions;
+  }
+  return subscriptions.filter((sub) => !sub.deletedAt);
 };
 
 export const fetchSubscription = async ({

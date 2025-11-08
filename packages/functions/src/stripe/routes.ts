@@ -10,7 +10,11 @@ import {
 } from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
 import { StripeClient } from "@domain/stripe/Stripe";
-import { handleSessionCompleted, handleSubUpdated } from "@domain/stripe/handleEvent";
+import {
+  handleSessionCompleted,
+  handleSubDeleted,
+  handleSubUpdated,
+} from "@domain/stripe/handleEvent";
 import { Hono } from "hono";
 import { Resource } from "sst";
 import { authMiddleware, requireAuth } from "../middleware/auth";
@@ -183,6 +187,9 @@ app.post("/webhook-event", async (c) => {
         break;
       case "customer.subscription.updated":
         handleSubUpdated(stripeEvent);
+        break;
+      case "customer.subscription.deleted":
+        handleSubDeleted(stripeEvent);
         break;
       case "checkout.session.completed":
         handleSessionCompleted(stripeEvent);
