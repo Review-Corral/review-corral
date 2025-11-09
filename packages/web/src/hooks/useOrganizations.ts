@@ -1,7 +1,7 @@
 "use client";
 
 import { getSessionToken } from "@/lib/auth/getSessionToken";
-import { Organization } from "@core/dynamodb/entities/types";
+import { Organization } from "@core/apiTypes";
 import { useQuery } from "@tanstack/react-query";
 import ky from "ky";
 

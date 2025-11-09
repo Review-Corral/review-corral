@@ -25,7 +25,7 @@ export const SlackOverviewCard: FC<SlackOverviewCardProps> = ({ organization }) 
 };
 
 const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
-  const slackChannels = useSlackIntegrations(organization.orgId);
+  const slackChannels = useSlackIntegrations(organization.id);
 
   if (slackChannels.isLoading) {
     return (
@@ -58,7 +58,7 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
         {slackChannels.data.map((channel) => (
           <SlackIntegration
             key={`${channel.slackTeamId}-${channel.channelId}`}
-            organizationId={organization.orgId}
+            organizationId={organization.id}
             slackTeamName={channel.slackTeamName}
             slackTeamId={channel.slackTeamId}
             channelId={channel.channelId}

@@ -22,7 +22,7 @@ export const Navbar: FC<NavbarProps> = ({ activeOrgId }) => {
   const activeOrg =
     organizations.data &&
     activeOrgId &&
-    organizations.data.find((org) => org.orgId === activeOrgId);
+    organizations.data.find((org) => org.id === activeOrgId);
   console.log("activeOrg", activeOrg);
   const user = useProfile();
 

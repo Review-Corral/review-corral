@@ -58,10 +58,10 @@ function HomeView() {
         {isLoading && <Loading />}
         {data?.map((org) => (
           <Link
-            key={org.orgId}
+            key={org.id}
             to="/app/org/$orgId"
-            params={{ orgId: org.orgId.toString() }}
-            onMouseEnter={() => prefetchOrgData(org.orgId)}
+            params={{ orgId: org.id.toString() }}
+            onMouseEnter={() => prefetchOrgData(org.id)}
           >
             <div className="inline-flex items-center space-x-2 w-72 cursor-pointer rounded-md p-4 border border-gray-200 hover:shadow-sm">
               <div className="rounded-md overflow-hidden">
