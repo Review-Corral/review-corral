@@ -27,8 +27,6 @@
     "typecheck": "tsc -p ./tsconfig.json -noEmit && pnpm run -r typecheck"
   },
   "devDependencies": {
-    "electro-viewer": "^0.1.14",
-    "sst": "3.17.14",
     "@biomejs/biome": "^1.9.4",
     "@octokit/webhooks-types": "^7.6.1",
     "@tsconfig/node18": "^18.2.4",
@@ -36,7 +34,10 @@
     "aws-cdk-lib": "2.184.0",
     "constructs": "10.4.2",
     "drizzle-kit": "^0.30.6",
+    "electro-viewer": "^0.1.14",
+    "nitro": "3.0.1-alpha.0",
     "node-fetch": "^3.3.2",
+    "sst": "3.17.14",
     "typescript": "^5.9.3",
     "vite-node": "^3.2.4",
     "vitest": "^3.2.4"
