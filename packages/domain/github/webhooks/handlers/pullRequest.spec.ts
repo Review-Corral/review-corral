@@ -1,18 +1,18 @@
-import { PullRequestItem } from "@core/dynamodb/entities/types";
-import { fetchPrItem, updatePullRequest } from "@domain/dynamodb/fetchers/pullRequests";
-import { SlackClient } from "@domain/slack/SlackClient";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
-import { handlePullRequestEvent } from "./pullRequest";
-import { getSlackUserName } from "./shared";
-import { convertPrEventToBaseProps } from "./utils";
 
+// Mock SST Resources before any imports that use it
 vi.mock("sst", () => ({
   Resource: {
-    MainTable: {
-      name: "test-table",
+    NEON_DATABASE_URL: {
+      value: "postgresql://test:test@localhost:5432/test",
     },
   },
+}));
+
+// Mock Postgres client to prevent actual database connections
+vi.mock("@domain/postgres/client", () => ({
+  db: {},
 }));
 
 // Mock dependencies
@@ -20,15 +20,27 @@ vi.mock("./shared", () => ({
   getSlackUserName: vi.fn(),
 }));
 
-vi.mock("@domain/dynamodb/fetchers/pullRequests", () => ({
+vi.mock("@domain/postgres/fetchers/pull-requests", () => ({
   fetchPrItem: vi.fn(),
   updatePullRequest: vi.fn(),
+  insertPullRequest: vi.fn(),
 }));
+
+// Import after mocks are set up
+import {
+  fetchPrItem,
+  PullRequestWithAlias,
+  updatePullRequest,
+} from "@domain/postgres/fetchers/pull-requests";
+import { SlackClient } from "@domain/slack/SlackClient";
+import { handlePullRequestEvent } from "./pullRequest";
+import { getSlackUserName } from "./shared";
+import { convertPrEventToBaseProps } from "./utils";
 
 describe("handlePullRequestEvent", () => {
   let mockSlackClient: SlackClient;
   let mockEvent: any;
-  let prItem: PullRequestItem;
+  let prItem: PullRequestWithAlias;
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -55,8 +67,15 @@ describe("handlePullRequestEvent", () => {
       },
     };
 
-    prItem = mock<PullRequestItem>({
+    prItem = mock<PullRequestWithAlias>({
+      id: 123,
+      prId: 123,
+      repoId: 456,
       threadTs: "thread-ts-123",
+      isDraft: false,
+      requiredApprovals: 0,
+      approvalCount: 0,
+      isQueuedToMerge: false,
     });
 
     vi.mocked(getSlackUserName).mockResolvedValue("@testuser");
@@ -167,7 +186,7 @@ describe("handlePullRequestEvent", () => {
       });
 
       expect(updatePullRequest).toHaveBeenCalledWith({
-        pullRequestId: prItem.prId,
+        pullRequestId: prItem.id,
         repoId: prItem.repoId,
         isQueuedToMerge: true,
       });
@@ -201,7 +220,7 @@ describe("handlePullRequestEvent", () => {
       });
 
       expect(updatePullRequest).toHaveBeenCalledWith({
-        pullRequestId: prItem.prId,
+        pullRequestId: prItem.id,
         repoId: prItem.repoId,
         isQueuedToMerge: false,
       });
@@ -221,7 +240,7 @@ describe("handlePullRequestEvent", () => {
 
   describe("merge events", () => {
     it("should clear queue status when PR is merged", async () => {
-      const queuedPrItem = mock<PullRequestItem>({
+      const queuedPrItem = mock<PullRequestWithAlias>({
         ...prItem,
         isQueuedToMerge: true,
       });
@@ -252,7 +271,7 @@ describe("handlePullRequestEvent", () => {
       });
 
       expect(updatePullRequest).toHaveBeenCalledWith({
-        pullRequestId: queuedPrItem.prId,
+        pullRequestId: queuedPrItem.id,
         repoId: queuedPrItem.repoId,
         isQueuedToMerge: false,
       });
