@@ -23,12 +23,8 @@ export const slackIntegrations = pgTable(
     accessToken: text("access_token"),
     channelId: text("channel_id"),
     channelName: text("channel_name"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     orgIdx: index("idx_slack_integrations_org").on(table.orgId),

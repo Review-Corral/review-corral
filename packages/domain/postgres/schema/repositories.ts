@@ -22,20 +22,13 @@ export const repositories = pgTable(
     name: text("name").notNull(),
     avatarUrl: text("avatar_url"),
     isEnabled: boolean("is_enabled").notNull().default(true),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     orgIdx: index("idx_repositories_org").on(table.orgId),
     enabledIdx: index("idx_repositories_enabled").on(table.orgId, table.isEnabled),
-    orgNameUnique: unique("repositories_org_name_unique").on(
-      table.orgId,
-      table.name,
-    ),
+    orgNameUnique: unique("repositories_org_name_unique").on(table.orgId, table.name),
   }),
 );
 

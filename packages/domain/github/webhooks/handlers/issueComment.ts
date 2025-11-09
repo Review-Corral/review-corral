@@ -1,8 +1,8 @@
-import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import {
   getInstallationAccessToken,
   getPullRequestInfo,
 } from "@domain/github/fetchers";
+import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";

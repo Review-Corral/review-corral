@@ -24,12 +24,8 @@ export const pullRequests = pgTable(
     requiredApprovals: integer("required_approvals").notNull().default(0),
     approvalCount: integer("approval_count").notNull().default(0),
     isQueuedToMerge: boolean("is_queued_to_merge").notNull().default(false),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     repoIdx: index("idx_pull_requests_repo").on(table.repoId),

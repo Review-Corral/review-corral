@@ -5,13 +5,13 @@ import {
   PullRequestEditedEvent,
   PullRequestEvent,
 } from "@octokit/webhooks-types";
+import { Logger } from "../../../logging";
 import {
   fetchPrItem,
   insertPullRequest,
   updatePullRequest,
 } from "../../../postgres/fetchers/pull-requests";
 import { type PullRequest } from "../../../postgres/schema";
-import { Logger } from "../../../logging";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
 import { getInstallationAccessToken } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
@@ -400,9 +400,7 @@ const handleNewPr = async (
           threadTs: response.ts,
         });
         if (existingPullRequest) {
-          LOGGER.debug(
-            `Updating existing PR record of id ${existingPullRequest.id}}`,
-          );
+          LOGGER.debug(`Updating existing PR record of id ${existingPullRequest.id}}`);
           await updatePullRequest({
             pullRequestId: existingPullRequest.id,
             repoId: body.repository.id,

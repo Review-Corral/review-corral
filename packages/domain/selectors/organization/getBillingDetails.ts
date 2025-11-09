@@ -1,6 +1,6 @@
 import { BillingDetailsResponse } from "@core/selectorTypes/organization";
-import { fetchSubscriptionsByCustomerId } from "@domain/postgres/fetchers/subscriptions";
 import { Logger } from "@domain/logging";
+import { fetchSubscriptionsByCustomerId } from "@domain/postgres/fetchers/subscriptions";
 import { Organization } from "@domain/postgres/schema";
 
 const LOGGER = new Logger("organization:getBillingDetails");

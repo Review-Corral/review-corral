@@ -1,13 +1,13 @@
 import {
-  fetchPrItem,
-  updatePullRequest,
-} from "@domain/postgres/fetchers/pull-requests";
-import {
   getInstallationAccessToken,
   getNumberOfApprovals,
   getPullRequestInfo,
 } from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
+import {
+  fetchPrItem,
+  updatePullRequest,
+} from "@domain/postgres/fetchers/pull-requests";
 import {} from "@domain/slack/SlackClient";
 import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-types";
 import slackifyMarkdown from "slackify-markdown";

@@ -6,8 +6,8 @@ import {
   OrganizationUpdateArgs,
   User,
 } from "@core/dynamodb/entities/types";
-import { User as PgUser } from "../../postgres/schema";
 import { Logger } from "../../logging";
+import { User as PgUser } from "../../postgres/schema";
 import { addOrganizationMemberFromUser } from "./members";
 
 const _LOGGER = new Logger("fetchers.organizations");

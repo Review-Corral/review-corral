@@ -54,7 +54,11 @@ export const Navbar: FC<NavbarProps> = ({ activeOrgId }) => {
                       <div className="flex items-center space-x-2">
                         <div className="rounded-md overflow-hidden">
                           {/* biome-ignore lint/a11y/useAltText: <explanation> */}
-                          <img src={activeOrg.avatarUrl ?? undefined} width={32} height={32} />
+                          <img
+                            src={activeOrg.avatarUrl ?? undefined}
+                            width={32}
+                            height={32}
+                          />
                         </div>
                         <div>{activeOrg.name}</div>
                       </div>
