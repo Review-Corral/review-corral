@@ -1,10 +1,5 @@
-import {
-  HeadContent,
-  Outlet,
-  ScrollRestoration,
-  createRootRoute,
-} from "@tanstack/react-router";
-import appCss from "../globals.css?url";
+import { HeadContent, Outlet, createRootRoute } from "@tanstack/react-router";
+import appCss from "./globals.css?url";
 
 export const Route = createRootRoute({
   head: () => ({
@@ -17,16 +12,6 @@ export const Route = createRootRoute({
       { title: "Review Corral" },
     ],
     links: [
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      {
-        rel: "preconnect",
-        href: "https://fonts.gstatic.com",
-        crossOrigin: "anonymous",
-      },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap",
-      },
       {
         rel: "stylesheet",
         href: appCss,
@@ -46,7 +31,6 @@ function RootComponent() {
         <div className="bg-gray-50">
           <Outlet />
         </div>
-        <ScrollRestoration />
       </body>
     </html>
   );
