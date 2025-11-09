@@ -267,6 +267,18 @@ importers:
         specifier: ^3.1.0
         version: 3.1.0(typescript@5.9.3)(vitest@3.2.4(@types/node@22.18.8)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
 
+  packages/scripts:
+    dependencies:
+      '@review-corral/core':
+        specifier: workspace:*
+        version: link:../core
+      '@review-corral/domain':
+        specifier: workspace:*
+        version: link:../domain
+      sst:
+        specifier: 3.17.14
+        version: 3.17.14
+
   packages/web:
     dependencies:
       '@headlessui/react':
