@@ -20,7 +20,8 @@
       "./packages/frontend/src/sst-env.d.ts",
       "./packages/web/.next/**",
       "./packages/web/.open-next/**",
-      "**/sst-env.d.ts"
+      "**/sst-env.d.ts",
+      "**/routeTree.gen.ts"
     ]
   },
   "formatter": {
