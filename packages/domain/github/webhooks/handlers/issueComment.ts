@@ -1,4 +1,4 @@
-import { fetchPrItem } from "@domain/dynamodb/fetchers/pullRequests";
+import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import {
   getInstallationAccessToken,
   getPullRequestInfo,

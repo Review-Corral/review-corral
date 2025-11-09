@@ -1,4 +1,4 @@
-import { fetchPrItem } from "@domain/dynamodb/fetchers/pullRequests";
+import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import { PullRequestReviewCommentCreatedEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";

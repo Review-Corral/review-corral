@@ -1,4 +1,3 @@
-import { PullRequestItem } from "@core/dynamodb/entities/types";
 import { postCommentsForNewPR } from "@domain/selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "@domain/selectors/pullRequests/getRequiredApprovals";
 import {
@@ -10,7 +9,8 @@ import {
   fetchPrItem,
   insertPullRequest,
   updatePullRequest,
-} from "../../../dynamodb/fetchers/pullRequests";
+} from "../../../postgres/fetchers/pull-requests";
+import { type PullRequest } from "../../../postgres/schema";
 import { Logger } from "../../../logging";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
 import { getInstallationAccessToken } from "../../fetchers";
@@ -54,7 +54,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
         if (payload.pull_request.merged) {
           // Clear queue status when PR is merged
           await updatePullRequest({
-            pullRequestId: pullRequestItem.prId,
+            pullRequestId: pullRequestItem.id,
             repoId: pullRequestItem.repoId,
             isQueuedToMerge: false,
           });
@@ -153,7 +153,7 @@ const handleConvertedToDraft = async (
   threadTs: string,
   event: PullRequestConvertedToDraftEvent,
   props: BaseGithubWebhookEventHanderArgs,
-  pullRequestItem: PullRequestItem,
+  pullRequestItem: PullRequest,
 ) => {
   await props.slackClient.postConvertedToDraft({
     body: event,
@@ -169,7 +169,7 @@ const handleEdited = async (
   threadTs: string,
   event: PullRequestEditedEvent,
   props: BaseGithubWebhookEventHanderArgs,
-  pullRequestItem: PullRequestItem,
+  pullRequestItem: PullRequest,
 ) => {
   LOGGER.info("Handling edited PR event", {
     changes: event.changes,
@@ -200,7 +200,7 @@ const handleQueueStatusChange = async (
   threadTs: string,
   event: PullRequestEvent,
   props: BaseGithubWebhookEventHanderArgs,
-  pullRequestItem: PullRequestItem,
+  pullRequestItem: PullRequest,
   isEnqueued: boolean,
 ) => {
   const action = isEnqueued ? "enqueued" : "dequeued";
@@ -210,7 +210,7 @@ const handleQueueStatusChange = async (
 
   // Update the database to mark PR queue status
   await updatePullRequest({
-    pullRequestId: pullRequestItem.prId,
+    pullRequestId: pullRequestItem.id,
     repoId: pullRequestItem.repoId,
     isQueuedToMerge: isEnqueued,
   });
@@ -231,7 +231,7 @@ const handleQueueStatusChange = async (
 const handleNewPr = async (
   payload: PullRequestEventOpenedOrReadyForReview,
   props: BaseGithubWebhookEventHanderArgs,
-  pullRequestItem: PullRequestItem | null,
+  pullRequestItem: PullRequest | null,
 ) => {
   LOGGER.debug("Handling new PR");
   // If the PR is opened or ready for review but in draft, save the PR in the database
@@ -239,10 +239,11 @@ const handleNewPr = async (
   if (payload.pull_request.draft) {
     LOGGER.debug("Handling draft PR");
     await insertPullRequest({
+      id: payload.pull_request.id,
       repoId: payload.repository.id,
-      prId: payload.pull_request.id,
+      prNumber: payload.pull_request.number,
       isDraft: true,
-      threadTs: undefined,
+      threadTs: null,
     });
   } else {
     const { threadTs, wasCreated } = await getThreadTsForNewPr(
@@ -319,7 +320,7 @@ const handleNewPr = async (
   async function getThreadTsForNewPr(
     body: PullRequestEventOpenedOrReadyForReview,
     baseProps: BaseGithubWebhookEventHanderArgs,
-    pullRequestItem: PullRequestItem | null,
+    pullRequestItem: PullRequest | null,
   ): Promise<{
     threadTs?: string;
     wasCreated: boolean;
@@ -369,7 +370,7 @@ const handleNewPr = async (
     body,
     baseProps,
   }: {
-    existingPullRequest: PullRequestItem | null;
+    existingPullRequest: PullRequest | null;
     body: PullRequestEventOpenedOrReadyForReview;
     baseProps: BaseGithubWebhookEventHanderArgs;
   }): Promise<string> {
@@ -395,15 +396,15 @@ const handleNewPr = async (
         LOGGER.debug("Succesfully created new threadTs. About to update database", {
           prId: body.pull_request.id,
           organizationId: baseProps.organizationId,
-          existingPrId: existingPullRequest?.prId,
+          existingPrId: existingPullRequest?.id,
           threadTs: response.ts,
         });
         if (existingPullRequest) {
           LOGGER.debug(
-            `Updating existing PR record of id ${existingPullRequest.prId}}`,
+            `Updating existing PR record of id ${existingPullRequest.id}}`,
           );
           await updatePullRequest({
-            pullRequestId: existingPullRequest.prId,
+            pullRequestId: existingPullRequest.id,
             repoId: body.repository.id,
             isDraft: body.pull_request.draft,
             requiredApprovals:
@@ -413,9 +414,10 @@ const handleNewPr = async (
         } else {
           LOGGER.debug("Creating new PR record");
           await insertPullRequest({
+            id: body.pull_request.id,
             repoId: body.repository.id,
-            prId: body.pull_request.id,
-            requiredApprovals: requiredApprovals?.count ?? undefined,
+            prNumber: body.pull_request.number,
+            requiredApprovals: requiredApprovals?.count ?? 0,
             threadTs: response.ts,
           });
         }

@@ -1,4 +1,4 @@
-import { PullRequestItem } from "@core/dynamodb/entities/types";
+import { type PullRequest } from "@domain/postgres/schema";
 import { beforeEach, describe, expect, it } from "vitest";
 import { mock } from "vitest-mock-extended";
 import {
@@ -8,18 +8,21 @@ import {
 } from "./mainMessage";
 
 describe("mainMessage", () => {
-  let mockPullRequestItem: PullRequestItem;
+  let mockPullRequestItem: PullRequest;
   let mockBody: any;
 
   beforeEach(() => {
-    mockPullRequestItem = mock<PullRequestItem>({
-      prId: 123,
+    mockPullRequestItem = mock<PullRequest>({
+      id: 123,
       repoId: 456,
+      prNumber: 1,
       threadTs: "thread-ts-123",
       isDraft: false,
       isQueuedToMerge: false,
       requiredApprovals: 2,
       approvalCount: 1,
+      createdAt: new Date(),
+      updatedAt: new Date(),
     });
 
     mockBody = {
