@@ -2,7 +2,7 @@ import ky from "ky";
 
 import { getSessionToken } from "@/lib/auth/getSessionToken";
 // THis is super hacky, but gets the job done for now
-import { SlackUser } from "@core/dynamodb/entities/types";
+import { SlackUser } from "@core/apiTypes";
 import { useQuery } from "@tanstack/react-query";
 
 export const SLACK_USERS_QUERY_KEY = "slackInstallMembers";

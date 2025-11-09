@@ -1,7 +1,7 @@
 import { useOrganizationMembers } from "@/hooks/useOrganizationMembers";
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Loading } from "@components/ui/cards/loading";
-import { Organization } from "@core/dynamodb/entities/types";
+import { Organization } from "@core/apiTypes";
 import { FC } from "react";
 import { SharedLayout } from "../SharedLayout";
 import SlackButton from "../slack/SetupSlackButton";
@@ -14,7 +14,7 @@ interface UsersTabProps {
 }
 
 export const UsersTab: FC<UsersTabProps> = ({ organization }) => {
-  const slackIntegrations = useSlackIntegrations(organization.orgId);
+  const slackIntegrations = useSlackIntegrations(organization.id);
   const isLoading = slackIntegrations.isLoading;
 
   const hasSlackIntegrations =
@@ -31,7 +31,7 @@ export const UsersTab: FC<UsersTabProps> = ({ organization }) => {
               No Slack Integration Found
             </h3>
             <p className="text-red-700">You don't have any Slack integrations set up</p>
-            <SlackButton organizationId={organization.orgId} />
+            <SlackButton organizationId={organization.id} />
           </div>
         </div>
       );
@@ -53,8 +53,8 @@ export const UsersTab: FC<UsersTabProps> = ({ organization }) => {
 };
 
 export const UsersTabData: FC<UsersTabProps> = ({ organization }) => {
-  const orgMembers = useOrganizationMembers(organization.orgId);
-  const slackInstallMembers = useSlackUsers(organization.orgId);
+  const orgMembers = useOrganizationMembers(organization.id);
+  const slackInstallMembers = useSlackUsers(organization.id);
 
   if (slackInstallMembers.isLoading || orgMembers.isLoading) {
     return <Loading text="Getting Slack integration users" />;
@@ -82,7 +82,7 @@ export const UsersTabData: FC<UsersTabProps> = ({ organization }) => {
     <>
       {orgMembers.data && (
         <UsersTableForm
-          orgId={organization.orgId}
+          orgId={organization.id}
           data={orgMembers.data}
           slackUsers={slackInstallMembers.data}
         />

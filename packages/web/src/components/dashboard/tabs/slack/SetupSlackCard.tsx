@@ -1,4 +1,4 @@
-import { Organization } from "@core/dynamodb/entities/types";
+import { Organization } from "@core/apiTypes";
 import { FC } from "react";
 import SlackButton from "./SetupSlackButton";
 

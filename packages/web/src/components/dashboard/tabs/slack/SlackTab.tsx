@@ -8,7 +8,7 @@ import { SetupSlackCard } from "./SetupSlackCard";
 import { useSlackIntegrations } from "./useSlackIntegrations";
 
 export const SlackTab: FC<OrgViewProps> = ({ organization }) => {
-  const slackIntegration = useSlackIntegrations(organization.orgId);
+  const slackIntegration = useSlackIntegrations(organization.id);
 
   const slackTable = (
     <div className="mt-8 flex flex-col">

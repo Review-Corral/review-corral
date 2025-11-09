@@ -1,5 +1,5 @@
 import { getSessionToken } from "@/lib/auth/getSessionToken";
-import { Repository } from "@core/dynamodb/entities/types";
+import { Repository } from "@core/apiTypes";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import ky from "ky";
 

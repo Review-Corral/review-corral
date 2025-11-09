@@ -2,7 +2,7 @@
 
 import { Switch } from "@components/shadcn/switch";
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
-import { Organization } from "@core/dynamodb/entities/types";
+import { Organization } from "@core/apiTypes";
 import { Github } from "lucide-react";
 import { FC } from "react";
 import toast from "react-hot-toast";
@@ -36,8 +36,8 @@ interface GithubCardDataProps {
 }
 
 const GithubCardData: FC<GithubCardDataProps> = ({ organization }) => {
-  const getInstalledRepos = useOrganizationRepositories(organization.orgId);
-  const { data: slackData } = useSlackIntegrations(organization.orgId);
+  const getInstalledRepos = useOrganizationRepositories(organization.id);
+  const { data: slackData } = useSlackIntegrations(organization.id);
 
   const setRepoActive = useSetRepoActive();
 
@@ -95,7 +95,7 @@ const GithubCardData: FC<GithubCardDataProps> = ({ organization }) => {
                   const verb = repo.isEnabled ? "disabl" : "enabl";
                   toast.promise(
                     setRepoActive.mutateAsync({
-                      orgId: organization.orgId,
+                      orgId: organization.id,
                       repoId: repo.repoId,
                       isEnabled: !repo.isEnabled,
                     }),
