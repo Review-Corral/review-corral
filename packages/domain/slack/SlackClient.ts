@@ -1,4 +1,4 @@
-import { PullRequestItem } from "@core/dynamodb/entities/types";
+import { type PullRequest } from "@domain/postgres/schema";
 import { convertPrEventToBaseProps } from "@domain/github/webhooks/handlers/utils";
 import {
   PullRequestClosedEvent,
@@ -231,7 +231,7 @@ export class SlackClient {
     requiredApprovals,
   }: {
     body: PullRequestEventOpenedOrReadyForReview;
-    pullRequestItem: PullRequestItem | null;
+    pullRequestItem: PullRequest | null;
     slackUsername: string;
     requiredApprovals: RequiredApprovalsQueryPayloadArg;
   }): Promise<ChatPostMessageResponse | undefined> {

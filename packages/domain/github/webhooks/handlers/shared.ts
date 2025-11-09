@@ -1,17 +1,17 @@
-import { getOrgMember } from "../../../dynamodb/fetchers/members";
+import { getOrgMemberByUsername } from "../../../postgres/fetchers/members";
 import { BaseGithubWebhookEventHanderArgs } from "../types";
 
 export async function getSlackUserName(
   githubLogin: string,
   props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">,
 ): Promise<string> {
-  const usernameMap = await getOrgMember({
+  const member = await getOrgMemberByUsername({
     orgId: props.organizationId,
     githubUsername: githubLogin,
   });
 
-  if (usernameMap?.slackId) {
-    return `<@${usernameMap.slackId}>`;
+  if (member?.slackId) {
+    return `<@${member.slackId}>`;
   }
 
   return githubLogin;
