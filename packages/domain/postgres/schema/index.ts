@@ -7,5 +7,4 @@ export * from "./pull-requests";
 export * from "./branches";
 export * from "./slack-integrations";
 export * from "./slack-users";
-export * from "./slack-api-throttles";
 export * from "./subscriptions";
