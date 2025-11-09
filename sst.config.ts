@@ -109,6 +109,18 @@ export default $config({
       },
     });
 
+    new sst.x.DevCommand("TestMigration", {
+      environment: {
+        AWS_REGION: "us-east-1",
+        AWS_PROFILE: "rc",
+      },
+      link: [table, neonDatabaseUrl],
+      dev: {
+        autostart: false,
+        command: "bun packages/scripts/test-connection.ts",
+      },
+    });
+
     return {
       webUrl: frontend.url,
     };
