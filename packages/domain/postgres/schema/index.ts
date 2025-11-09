@@ -1,2 +1,11 @@
-// Export all schema tables here
-export * from "./health-check";
+// Export all schema tables and relations
+export * from "./users";
+export * from "./organizations";
+export * from "./organization-members";
+export * from "./repositories";
+export * from "./pull-requests";
+export * from "./branches";
+export * from "./slack-integrations";
+export * from "./slack-users";
+export * from "./slack-api-throttles";
+export * from "./subscriptions";
