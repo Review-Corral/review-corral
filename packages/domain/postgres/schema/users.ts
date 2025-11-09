@@ -1,11 +1,11 @@
 import { relations } from "drizzle-orm";
-import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { bigint, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { organizationMembers } from "./organization-members";
 
 export const users = pgTable(
   "users",
   {
-    id: text("id").primaryKey(),
+    id: bigint("id", { mode: "number" }).primaryKey(),
     name: text("name"),
     email: text("email"),
     avatarUrl: text("avatar_url"),
