@@ -26,11 +26,9 @@
     "test:claude": "CI=true vitest run .spec.ts --reporter=default --no-color",
     "typecheck": "tsc -p ./tsconfig.json -noEmit && pnpm run -r typecheck"
   },
-    "dependencies": {
-    "electro-viewer": "^0.1.14",
-    "sst": "3.17.14"
-  },
   "devDependencies": {
+    "electro-viewer": "^0.1.14",
+    "sst": "3.17.14",
     "@biomejs/biome": "^1.9.4",
     "@octokit/webhooks-types": "^7.6.1",
     "@tsconfig/node18": "^18.2.4",
