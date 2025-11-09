@@ -6,7 +6,7 @@
 export interface User {
   id: number;
   login: string;
-  name: string | null;
+  name: string;
   email: string | null;
   avatarUrl: string | null;
   createdAt: Date | string;
@@ -52,10 +52,10 @@ export interface SlackIntegration {
   id: string;
   orgId: number;
   slackTeamId: string;
-  slackTeamName: string | null;
-  accessToken: string | null;
-  channelId: string | null;
-  channelName: string | null;
+  slackTeamName: string;
+  accessToken: string;
+  channelId: string;
+  channelName: string;
   createdAt: Date | string;
   updatedAt: Date | string;
 }
@@ -64,7 +64,7 @@ export interface SlackUser {
   id: string;
   slackTeamId: string;
   slackUserId: string;
-  realNameNormalized: string | null;
+  realNameNormalized: string;
   isBot: boolean;
   isOwner: boolean;
   isAdmin: boolean;
@@ -80,8 +80,8 @@ export interface Subscription {
   orgId: number;
   customerId: string;
   subscriptionId: string;
-  priceId: string | null;
-  status: string | null;
+  priceId: string;
+  status: string;
   createdAt: Date | string;
   updatedAt: Date | string;
 }

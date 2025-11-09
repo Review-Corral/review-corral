@@ -16,7 +16,7 @@ export const slackUsers = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     slackTeamId: text("slack_team_id").notNull(),
     slackUserId: text("slack_user_id").notNull(),
-    realNameNormalized: text("real_name_normalized"),
+    realNameNormalized: text("real_name_normalized").notNull(),
     isBot: boolean("is_bot").notNull().default(false),
     isOwner: boolean("is_owner").notNull().default(false),
     isAdmin: boolean("is_admin").notNull().default(false),
