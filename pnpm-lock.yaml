@@ -7,13 +7,6 @@ settings:
 importers:
 
   .:
-    dependencies:
-      electro-viewer:
-        specifier: ^0.1.14
-        version: 0.1.14(@types/node@22.18.12)(@types/react-dom@19.1.9(@types/react@19.1.16))(@types/react@19.1.16)(aws-crt@1.21.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
-      sst:
-        specifier: 3.17.14
-        version: 3.17.14
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -36,9 +29,15 @@ importers:
       drizzle-kit:
         specifier: ^0.30.6
         version: 0.30.6
+      electro-viewer:
+        specifier: ^0.1.14
+        version: 0.1.14(@types/node@22.18.12)(@types/react-dom@19.1.9(@types/react@19.1.16))(@types/react@19.1.16)(aws-crt@1.21.3)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
       node-fetch:
         specifier: ^3.3.2
         version: 3.3.2
+      sst:
+        specifier: 3.17.14
+        version: 3.17.14
       typescript:
         specifier: ^5.9.3
         version: 5.9.3
