@@ -121,6 +121,18 @@ export default $config({
       },
     });
 
+    new sst.x.DevCommand("MigrateToPostgres", {
+      environment: {
+        AWS_REGION: "us-east-1",
+        AWS_PROFILE: "rc",
+      },
+      link: [table, neonDatabaseUrl],
+      dev: {
+        autostart: false,
+        command: "bun packages/scripts/migrate-to-postgres.ts",
+      },
+    });
+
     return {
       webUrl: frontend.url,
     };
