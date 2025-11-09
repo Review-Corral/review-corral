@@ -1,7 +1,7 @@
+import { AuthAccessTokenKey } from "@/lib/auth/const";
 import { createFileRoute } from "@tanstack/react-router";
 import { setCookie } from "@tanstack/react-start/server";
 import { z } from "zod";
-import { AuthAccessTokenKey } from "@/lib/auth/const";
 
 const searchSchema = z.object({
   token: z.string().optional(),

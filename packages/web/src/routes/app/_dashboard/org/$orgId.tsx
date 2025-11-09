@@ -1,9 +1,9 @@
-import { createFileRoute, Outlet, useNavigate } from "@tanstack/react-router";
+import { prefetchOrgQueries } from "@/hooks/prefetchOrgQueries";
+import { DashboardPaddedBody } from "@components/ui/layout/DashboardPaddedBody";
 import { useQueryClient } from "@tanstack/react-query";
+import { Outlet, createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { z } from "zod";
-import { DashboardPaddedBody } from "@components/ui/layout/DashboardPaddedBody";
-import { prefetchOrgQueries } from "@/hooks/prefetchOrgQueries";
 
 const PageSchema = z.enum(["billing", "users", "overview"]);
 type Page = z.infer<typeof PageSchema>;

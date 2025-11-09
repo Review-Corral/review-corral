@@ -1,4 +1,3 @@
-import { BetterButton } from "@components/ui/BetterButton";
 import {
   Dialog,
   DialogContent,
@@ -6,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@components/shadcn/dialog";
+import { BetterButton } from "@components/ui/BetterButton";
 import { DeleteIcon } from "lucide-react";
 import { FC, useState } from "react";
 import toast from "react-hot-toast";

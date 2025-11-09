@@ -1,10 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { z } from "zod";
-import { Loading } from "@components/ui/cards/loading";
 import { OverviewTab } from "@/components/dashboard/tabs/OverviewTab";
 import { BillingTab } from "@/components/dashboard/tabs/billing/BillingTab";
 import { UsersTab } from "@/components/dashboard/tabs/users/UsersTab";
 import { useOrganization } from "@/hooks/useOrganization";
+import { Loading } from "@components/ui/cards/loading";
+import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
 
 const searchSchema = z.object({
   page: z.enum(["billing", "users", "overview"]).optional().default("overview"),

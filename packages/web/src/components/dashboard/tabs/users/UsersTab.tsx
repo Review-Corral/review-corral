@@ -1,8 +1,8 @@
+import { useOrganizationMembers } from "@/hooks/useOrganizationMembers";
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { Loading } from "@components/ui/cards/loading";
 import { Organization } from "@core/dynamodb/entities/types";
 import { FC } from "react";
-import { useOrganizationMembers } from "@/hooks/useOrganizationMembers";
 import { SharedLayout } from "../SharedLayout";
 import SlackButton from "../slack/SetupSlackButton";
 import { useSlackIntegrations } from "../slack/useSlackIntegrations";

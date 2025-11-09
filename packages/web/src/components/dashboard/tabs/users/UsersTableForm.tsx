@@ -1,5 +1,5 @@
+import { useMutateOrganizationMembers } from "@/hooks/useOrganizationMembers";
 import { cn } from "@components/lib/utils";
-import { BetterButton } from "@components/ui/BetterButton";
 import {
   Select,
   SelectContent,
@@ -9,6 +9,7 @@ import {
   SelectValue,
 } from "@components/shadcn/select";
 import { DataTableColumnHeader } from "@components/table/DataTableColumnHeader";
+import { BetterButton } from "@components/ui/BetterButton";
 import { Member, SlackUser } from "@core/dynamodb/entities/types";
 import { ColumnDef } from "@tanstack/react-table";
 import { FC, useMemo, useState } from "react";
@@ -21,7 +22,6 @@ import {
   useForm,
 } from "react-hook-form";
 import toast from "react-hot-toast";
-import { useMutateOrganizationMembers } from "@/hooks/useOrganizationMembers";
 import { UsersTable } from "./UsersTable";
 
 interface UsersTableFormProps {

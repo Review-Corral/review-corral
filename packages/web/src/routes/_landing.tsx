@@ -1,5 +1,5 @@
-import { createFileRoute, Outlet, Link } from "@tanstack/react-router";
 import { Navbar } from "@/components/landing/Navbar";
+import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_landing")({
   component: LandingLayout,
