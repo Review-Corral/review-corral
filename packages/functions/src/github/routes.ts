@@ -1,4 +1,5 @@
-import { Organization, Repository, User } from "@core/dynamodb/entities/types";
+import { Organization, Repository } from "@core/dynamodb/entities/types";
+import { User } from "@domain/postgres/schema";
 import { addOrganizationMemberFromUser } from "@domain/dynamodb/fetchers/members";
 import {
   fetchOrganizationById,
@@ -121,7 +122,7 @@ authRoutes.put("/:organizationId/repositories/:repositoryId", async (c) => {
 async function getOrganizations(user: User, installations: InstallationsData) {
   const organizations: Organization[] = [];
 
-  const usersOrganizations = await fetchUsersOrganizations(user.userId);
+  const usersOrganizations = await fetchUsersOrganizations(user.id);
   const usersOrganizationsIds = usersOrganizations.map((org) => org.orgId);
 
   for (const installation of installations.installations) {

@@ -55,7 +55,7 @@ authRoutes.post("/checkout-session", async (c) => {
         email: organization.billingEmail,
         name: organization.name,
         metadata: {
-          userId: user.userId,
+          userId: user.id,
           orgId: parsedBody.data.orgId,
         },
       });
@@ -71,7 +71,7 @@ authRoutes.post("/checkout-session", async (c) => {
     }
 
     const metaData: StripeCheckoutCreatedMetadata = {
-      userId: user.userId,
+      userId: user.id,
       orgId: parsedBody.data.orgId,
     };
 
