@@ -40,6 +40,7 @@ export default $config({
       ghWebhookSecret,
       stripeSecretKey,
       stripeWebhookSecret,
+      neonDatabaseUrl,
     } = await import("./infra/secrets");
 
     const { getUrl } = await import("./infra/dns");
@@ -73,6 +74,7 @@ export default $config({
           ghWebhookSecret,
           stripeSecretKey,
           stripeWebhookSecret,
+          neonDatabaseUrl,
         ];
       }
     });
@@ -88,6 +90,22 @@ export default $config({
       dev: {
         autostart: true,
         command: "pnpm electro-viewer",
+      },
+    });
+
+    new sst.x.DevCommand("DrizzleGenerate", {
+      link: [neonDatabaseUrl],
+      dev: {
+        autostart: false,
+        command: "drizzle-kit generate --config=packages/domain/drizzle.config.ts",
+      },
+    });
+
+    new sst.x.DevCommand("DrizzleMigrate", {
+      link: [neonDatabaseUrl],
+      dev: {
+        autostart: false,
+        command: "drizzle-kit migrate --config=packages/domain/drizzle.config.ts",
       },
     });
 

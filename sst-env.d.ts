@@ -33,6 +33,10 @@ declare module "sst" {
       "name": string
       "type": "sst.aws.Dynamo"
     }
+    "NEON_DATABASE_URL": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "POSTHOG_HOST": {
       "type": "sst.sst.Secret"
       "value": string
