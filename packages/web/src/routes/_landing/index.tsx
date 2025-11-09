@@ -27,6 +27,14 @@ function LandingPage() {
             </div>
           </div>
 
+          <div className="md:w-1/2 flex justify-center">
+            <img
+              src="/rc_example_1.png"
+              alt="Review Corral threaded notifications example"
+              className="rounded-lg shadow-lg max-w-full h-auto"
+            />
+          </div>
+
           <div className="md:hidden mt-8">
             <Link to="/app">
               <Button size="lg" className="bg-black hover:bg-gray-800 text-white">
