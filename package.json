@@ -35,7 +35,7 @@
     "sst": "3.17.14",
     "typescript": "^5.9.3",
     "vite-node": "^3.2.4",
-    "vitest": "^3.2.4"
+    "vitest": "^4.0.8"
   },
   "workspaces": [
     "packages/*"
