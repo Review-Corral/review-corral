@@ -28,8 +28,8 @@ vi.mock("@domain/postgres/fetchers/pull-requests", () => ({
 
 // Import after mocks are set up
 import {
-  fetchPrItem,
   PullRequestWithAlias,
+  fetchPrItem,
   updatePullRequest,
 } from "@domain/postgres/fetchers/pull-requests";
 import { SlackClient } from "@domain/slack/SlackClient";
