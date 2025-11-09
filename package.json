@@ -11,7 +11,7 @@
     "console": "sst console",
     "deploy": "sst deploy",
     "dev": "sst dev",
-    "check": "p biome check",
+    "check": "biome check",
     "check:write": "biome check --write . --unsafe",
     "remove": "sst remove",
     "test": "vitest run --exclude '**/*.e2e.ts'",
