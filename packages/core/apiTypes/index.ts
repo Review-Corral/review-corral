@@ -80,7 +80,6 @@ export interface Subscription {
   orgId: number;
   customerId: string;
   subscriptionId: string;
-  subId: string; // Alias for subscriptionId for compatibility
   priceId: string | null;
   status: string | null;
   createdAt: Date | string;

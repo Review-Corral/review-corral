@@ -65,7 +65,7 @@ function HomeView() {
           >
             <div className="inline-flex items-center space-x-2 w-72 cursor-pointer rounded-md p-4 border border-gray-200 hover:shadow-sm">
               <div className="rounded-md overflow-hidden">
-                <img alt={"Avatar url"} src={org.avatarUrl} width={32} height={32} />
+                <img alt={"Avatar url"} src={org.avatarUrl ?? undefined} width={32} height={32} />
               </div>
               <div>{org.name}</div>
             </div>

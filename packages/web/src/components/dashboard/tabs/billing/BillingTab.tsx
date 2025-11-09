@@ -48,7 +48,7 @@ const ActiveSubscriptionsSection: FC<{
         {subscriptions.map((subscription) => {
           return (
             <ActivePlanCard
-              key={subscription.subId}
+              key={subscription.subscriptionId}
               subscription={subscription}
               orgId={orgId}
             />
