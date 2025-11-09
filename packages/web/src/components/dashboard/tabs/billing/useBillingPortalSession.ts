@@ -8,7 +8,7 @@ export const useBillingPortalSession = (orgId: number, customerId: string) => {
     mutationKey: ["checkout-session"],
     mutationFn: async () => {
       return await ky
-        .post(`${process.env.NEXT_PUBLIC_API_URL}/stripe/billing-portal`, {
+        .post(`${import.meta.env.VITE_API_URL}/stripe/billing-portal`, {
           headers: {
             Authorization: `Bearer ${Cookies.get(AuthAccessTokenKey)}`,
           },

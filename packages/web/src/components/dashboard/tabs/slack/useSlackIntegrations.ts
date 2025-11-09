@@ -12,7 +12,7 @@ export const useSlackIntegrations = (organizationId: Organization["orgId"]) => {
       return await ky
         .get(
           `${
-            process.env.NEXT_PUBLIC_API_URL
+            import.meta.env.VITE_API_URL
           }/slack/${organizationId.toString()}/installations`,
           {
             headers: {

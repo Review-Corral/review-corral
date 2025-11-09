@@ -29,7 +29,7 @@ export const prefetchOrgQueries = async (
   const headers = {
     Authorization: `Bearer ${token}`,
   };
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = import.meta.env.VITE_API_URL;
 
   // Prefetch organization details
   queryClient.prefetchQuery({

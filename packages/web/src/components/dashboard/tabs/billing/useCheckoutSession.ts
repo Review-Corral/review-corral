@@ -8,13 +8,13 @@ export const useCheckoutSession = (orgId: number) => {
     mutationKey: ["checkout-session"],
     mutationFn: async () => {
       return await ky
-        .post(`${process.env.NEXT_PUBLIC_API_URL}/stripe/checkout-session`, {
+        .post(`${import.meta.env.VITE_API_URL}/stripe/checkout-session`, {
           headers: {
             Authorization: `Bearer ${Cookies.get(AuthAccessTokenKey)}`,
           },
           body: JSON.stringify({
             orgId: orgId,
-            priceId: process.env.NEXT_PUBLIC_STRIPE_PRICE_ID,
+            priceId: import.meta.env.VITE_STRIPE_PRICE_ID,
           }),
         })
         .json<{ url: string }>();
