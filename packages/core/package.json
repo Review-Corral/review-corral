@@ -1,7 +1,6 @@
 {
   "name": "@review-corral/core",
   "version": "0.0.0",
-  "type": "module",
   "scripts": {
     "test": "sst bind vitest",
     "typecheck": "tsc -noEmit"
@@ -15,7 +14,7 @@
     "@types/pg": "^8.15.5",
     "dotenv": "^16.6.1",
     "drizzle-kit": "^0.30.6",
-    "sst": "3.17.23",
+    "sst": "3.17.14",
     "vitest": "^3.2.4",
     "vitest-mock-extended": "^3.1.0"
   },
