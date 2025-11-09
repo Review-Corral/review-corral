@@ -12,7 +12,7 @@
     "deploy": "sst deploy",
     "dev": "sst dev",
     "check": "p biome check",
-    "check:write": "p biome check --write . --unsafe",
+    "check:write": "biome check --write . --unsafe",
     "remove": "sst remove",
     "test": "vitest run --exclude '**/*.e2e.ts'",
     "test:ci": "vitest run --silent=true .spec.ts",
