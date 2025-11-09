@@ -26,7 +26,6 @@ export async function insertUser(
       email: user.email,
       ghAccessToken: accessToken,
       avatarUrl: user.avatar_url,
-      status: "standard",
     })
     .returning();
   return result[0];
