@@ -19,7 +19,9 @@
     "test:e2e": "vitest run .e2e.ts",
     "test:watch": "vitest watch .spec.ts",
     "test:claude": "CI=true vitest run .spec.ts --reporter=default --no-color",
-    "typecheck": "tsc -p ./tsconfig.json -noEmit && pnpm run -r typecheck"
+    "typecheck": "tsc -p ./tsconfig.json -noEmit && pnpm run -r typecheck",
+    "db:generate": "sst dev -- drizzle-kit generate --config=packages/domain/drizzle.config.ts",
+    "db:migrate": "sst dev -- drizzle-kit migrate --config=packages/domain/drizzle.config.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
