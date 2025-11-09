@@ -1,4 +1,5 @@
 import { stripeCheckoutCreatedMetadataSchema } from "@core/stripe/types";
+import { Logger } from "@domain/logging";
 import {
   getOrganization,
   updateOrganization,
@@ -7,7 +8,6 @@ import {
   updateSubscription,
   upsertSubscription,
 } from "@domain/postgres/fetchers/subscriptions";
-import { Logger } from "@domain/logging";
 import Stripe from "stripe";
 
 const LOGGER = new Logger("stripe.handleEvent");

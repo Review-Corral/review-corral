@@ -1,9 +1,9 @@
 import * as z from "zod";
 
+import { Logger } from "@domain/logging";
 import { getOrganization } from "@domain/postgres/fetchers/organizations";
 import { safeFetchRepository } from "@domain/postgres/fetchers/repositories";
 import { getSlackInstallationsForOrganization } from "@domain/postgres/fetchers/slack-integrations";
-import { Logger } from "@domain/logging";
 import { SlackClient } from "@domain/slack/SlackClient";
 import { handleIssueCommentEvent } from "./handlers/issueComment";
 import { handlePullRequestEvent } from "./handlers/pullRequest";

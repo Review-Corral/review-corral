@@ -180,7 +180,10 @@ const getColumns = (
               control={control}
               name={`members.${row.index}.slackId`}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value ?? undefined}
+                >
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select a user" />
                   </SelectTrigger>
