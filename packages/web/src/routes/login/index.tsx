@@ -1,6 +1,6 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { LogoWithText } from "@/components/landing/LogoWithText";
 import GithubLoginButton from "@/components/landing/GIthubLoginButton";
+import { LogoWithText } from "@/components/landing/LogoWithText";
+import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/login/")({
   component: LoginPage,

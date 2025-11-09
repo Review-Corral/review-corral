@@ -1,11 +1,11 @@
 "use client";
 
+import { useOrganizations } from "@/hooks/useOrganizations";
 import { useProfile } from "@/hooks/useProfile";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { UserCircleIcon } from "@heroicons/react/24/outline";
 import { Link } from "@tanstack/react-router";
 import { FC, Fragment } from "react";
-import { useOrganizations } from "@/hooks/useOrganizations";
 
 export interface NavbarProps {
   activeOrgId?: number;

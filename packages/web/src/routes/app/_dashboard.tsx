@@ -1,8 +1,8 @@
-import { createFileRoute, Outlet, useRouter } from "@tanstack/react-router";
-import { Toaster } from "react-hot-toast";
 import { NavbarWithOrgContext } from "@/components/dashboard/NavbarWithOrgContext";
 import { userIsLoggedIn } from "@/lib/auth/utils";
+import { Outlet, createFileRoute, useRouter } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { Toaster } from "react-hot-toast";
 
 export const Route = createFileRoute("/app/_dashboard")({
   component: DashboardLayout,

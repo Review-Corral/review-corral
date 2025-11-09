@@ -1,11 +1,11 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { prefetchOrgQueries } from "@/hooks/prefetchOrgQueries";
+import { useOrganizations } from "@/hooks/useOrganizations";
 import { Button } from "@components/shadcn/button";
 import { Loading } from "@components/ui/cards/loading";
 import { Header } from "@components/ui/header";
-import { useQueryClient } from "@tanstack/react-query";
 import { DashboardPaddedBody } from "@components/ui/layout/DashboardPaddedBody";
-import { prefetchOrgQueries } from "@/hooks/prefetchOrgQueries";
-import { useOrganizations } from "@/hooks/useOrganizations";
+import { useQueryClient } from "@tanstack/react-query";
+import { Link, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/app/_dashboard/")({
   component: HomeView,

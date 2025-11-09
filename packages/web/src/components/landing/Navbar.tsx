@@ -1,8 +1,8 @@
 "use client";
 
 import { Button } from "@components/shadcn/button";
-import { GithubIcon, Menu, X } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { GithubIcon, Menu, X } from "lucide-react";
 import { FC } from "react";
 import { useState } from "react";
 import { LogoWithText } from "./LogoWithText";

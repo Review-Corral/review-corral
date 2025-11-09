@@ -1,7 +1,7 @@
-import { createFileRoute, redirect } from "@tanstack/react-router";
-import Cookies from "js-cookie";
 import { AuthAccessTokenKey } from "@/lib/auth/const";
 import { Loading } from "@components/ui/cards/loading";
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import Cookies from "js-cookie";
 
 export const Route = createFileRoute("/logout")({
   beforeLoad: () => {
