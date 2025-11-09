@@ -226,8 +226,11 @@ console.log(
 console.log("💳 Migrating Subscriptions...");
 const dynamoSubs = await Db.entities.subscription.scan.go();
 for (const sub of dynamoSubs.data) {
-  // Skip subscriptions without orgId (required in Postgres)
-  if (!sub.orgId) {
+  // Skip subscriptions without required fields
+  if (!sub.orgId || !sub.priceId || !sub.status) {
+    console.log(
+      `  ⏭️  Skipping subscription ${sub.subId} (missing required fields: orgId=${!!sub.orgId}, priceId=${!!sub.priceId}, status=${!!sub.status})`,
+    );
     stats.subscriptions.skipped++;
     continue;
   }
@@ -239,8 +242,8 @@ for (const sub of dynamoSubs.data) {
         orgId: sub.orgId,
         customerId: sub.customerId ?? "",
         subscriptionId: sub.subId,
-        priceId: sub.priceId ?? undefined,
-        status: sub.status ?? undefined,
+        priceId: sub.priceId,
+        status: sub.status,
       })
       .onConflictDoNothing();
     stats.subscriptions.success++;
@@ -250,7 +253,7 @@ for (const sub of dynamoSubs.data) {
   }
 }
 console.log(
-  `  ✅ Migrated ${stats.subscriptions.success} subscriptions (${stats.subscriptions.errors} errors)\n`,
+  `  ✅ Migrated ${stats.subscriptions.success} subscriptions (${stats.subscriptions.skipped} skipped, ${stats.subscriptions.errors} errors)\n`,
 );
 
 // Print final summary
@@ -258,10 +261,11 @@ console.log("═".repeat(60));
 console.log("📊 Migration Summary:");
 console.log("═".repeat(60));
 for (const [entity, counts] of Object.entries(stats)) {
-  const total = counts.success + counts.errors;
+  const total = counts.success + counts.errors + counts.skipped;
   const status = counts.errors === 0 ? "✅" : "⚠️";
+  const skippedInfo = counts.skipped > 0 ? `, ${counts.skipped} skipped` : "";
   console.log(
-    `${status} ${entity.padEnd(25)} ${counts.success}/${total} (${counts.errors} errors)`,
+    `${status} ${entity.padEnd(25)} ${counts.success}/${total} (${counts.errors} errors${skippedInfo})`,
   );
 }
 console.log("═".repeat(60));
