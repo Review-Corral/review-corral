@@ -1,19 +1,19 @@
-import { Organization, Repository } from "@core/dynamodb/entities/types";
-import { User } from "@domain/postgres/schema";
-import { addOrganizationMemberFromUser } from "@domain/dynamodb/fetchers/members";
+import { User, Organization } from "@domain/postgres/schema";
+import { addOrganizationMember } from "@domain/postgres/fetchers/members";
 import {
-  fetchOrganizationById,
-  fetchUsersOrganizations,
-  insertOrganizationAndAssociateUser,
-  updateOrganizationInstallationId,
-} from "@domain/dynamodb/fetchers/organizations";
+  getOrganization,
+  getOrganizationsByUser,
+  createOrganization,
+  updateOrgInstallationId,
+} from "@domain/postgres/fetchers/organizations";
 import {
   fetchRepositoriesForOrganization,
   fetchRepository,
   insertRepository,
   removeRepository,
-  setRespositoryActiveStatus,
-} from "@domain/dynamodb/fetchers/repositories";
+  setRepositoryActiveStatus,
+  type RepositoryWithAlias,
+} from "@domain/postgres/fetchers/repositories";
 import { InstallationsData } from "@domain/github/endpointTypes";
 import {
   getInstallationRepositories,
@@ -76,7 +76,7 @@ authRoutes.get("/:organizationId/repositories", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
 
-    const organization = await fetchOrganizationById(organizationId);
+    const organization = await getOrganization(organizationId);
 
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
@@ -101,7 +101,7 @@ authRoutes.put("/:organizationId/repositories/:repositoryId", async (c) => {
       orgId: organizationId,
     });
 
-    await setRespositoryActiveStatus({
+    await setRepositoryActiveStatus({
       orgId: repository.orgId,
       repoId: repository.repoId,
       isEnabled: !repository.isEnabled,
@@ -122,8 +122,8 @@ authRoutes.put("/:organizationId/repositories/:repositoryId", async (c) => {
 async function getOrganizations(user: User, installations: InstallationsData) {
   const organizations: Organization[] = [];
 
-  const usersOrganizations = await fetchUsersOrganizations(user.id);
-  const usersOrganizationsIds = usersOrganizations.map((org) => org.orgId);
+  const usersOrganizations = await getOrganizationsByUser(user.id);
+  const usersOrganizationsIds = usersOrganizations.map((org) => org.id);
 
   for (const installation of installations.installations) {
     // Try to see if we find an organization with the same id (account id)
@@ -133,53 +133,65 @@ async function getOrganizations(user: User, installations: InstallationsData) {
       continue;
     }
 
-    const organization = await fetchOrganizationById(installation.account.id);
+    const organization = await getOrganization(installation.account.id);
 
     if (organization) {
       LOGGER.debug("Found organization for installation", { organization });
       // We should update the installation ID if it's different
       if (organization.installationId !== installation.id) {
-        updateOrganizationInstallationId({
-          orgId: organization.orgId,
-          installationId: installation.id,
-        });
+        await updateOrgInstallationId(organization.id, installation.id);
       }
 
       // If the user isn't part of the existing organization (m2m), then add them to
       // it. this can happen if someone else installed the app into an organization
       // that the user is part of.
-      if (!usersOrganizationsIds.includes(organization.orgId)) {
+      if (!usersOrganizationsIds.includes(organization.id)) {
         LOGGER.info(
           "User is not part of organization. Associating user with organization...",
         );
-        await addOrganizationMemberFromUser({ orgId: organization.orgId, user });
+        await addOrganizationMember({
+          orgId: organization.id,
+          userId: user.id,
+        });
       }
 
       organizations.push(organization);
     } else {
       LOGGER.info("No organization found for installation. Inserting...");
-      const newOrg = await insertOrganizationAndAssociateUser({
-        createOrgArgs: {
-          orgId: installation.account.id,
-          name: installation.account.login,
-          avatarUrl: installation.account.avatar_url,
-          installationId: installation.id,
-          type: installation.account.type,
-        },
-        user,
+      const newOrg = await createOrganization({
+        id: installation.account.id,
+        name: installation.account.login,
+        avatarUrl: installation.account.avatar_url,
+        installationId: installation.id,
+        type: installation.account.type,
       });
+
+      await addOrganizationMember({
+        orgId: newOrg.id,
+        userId: user.id,
+      });
+
       organizations.push(newOrg);
     }
   }
   return organizations;
 }
 
-const getRepositories = async (organization: Organization): Promise<Repository[]> => {
+const getRepositories = async (
+  organization: Organization,
+): Promise<RepositoryWithAlias[]> => {
+  if (!organization.installationId) {
+    LOGGER.warn("Organization has no installation ID, returning empty repositories", {
+      organizationId: organization.id,
+    });
+    return [];
+  }
+
   const repositories = await getInstallationRepositories({
     installationId: organization.installationId,
   });
 
-  const allInstallRepos = await fetchRepositoriesForOrganization(organization.orgId);
+  const allInstallRepos = await fetchRepositoriesForOrganization(organization.id);
 
   const allInstalledRepoIds = allInstallRepos.map((repo) => repo.repoId);
 
@@ -209,9 +221,9 @@ const getRepositories = async (organization: Organization): Promise<Repository[]
   for (const repoToInsert of reposToInsert) {
     reposToReturn.push(
       await insertRepository({
-        repoId: repoToInsert.id,
+        id: repoToInsert.id,
         name: repoToInsert.name,
-        orgId: organization.orgId,
+        orgId: organization.id,
         isEnabled: false,
       }),
     );
@@ -219,7 +231,7 @@ const getRepositories = async (organization: Organization): Promise<Repository[]
 
   for (const repoToRemoveId of reposToRemove) {
     await removeRepository({
-      orgId: organization.orgId,
+      orgId: organization.id,
       repoId: repoToRemoveId,
     });
   }
