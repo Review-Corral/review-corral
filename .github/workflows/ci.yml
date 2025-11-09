@@ -25,7 +25,8 @@ jobs:
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Install sst
         run: pnpm sst install
-      - run: pnpm format:check
+      - name: Formatting check
+        run: pnpm check
 
   typecheck:
     name: Typecheck
@@ -44,7 +45,8 @@ jobs:
       - name: Install sst
         run: pnpm sst install
       - run: cp .env.example .env.local
-      - run: pnpm typecheck
+      - name: Run typecheck
+        run: pnpm typecheck
 
   unit-tests:
     name: Unit Tests
@@ -62,4 +64,5 @@ jobs:
         run: pnpm install --frozen-lockfile --prefer-offline
       - name: Install sst
         run: pnpm sst install
-      - run: pnpm test:ci
+      - name: Run tests
+        run: pnpm test:ci
