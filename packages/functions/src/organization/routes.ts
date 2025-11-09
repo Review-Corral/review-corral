@@ -1,12 +1,12 @@
-import { Member, Organization } from "@core/dynamodb/entities/types";
 import { updateMemberSchema } from "@core/fetchTypes/updateOrgMember";
 import {
   addOrganizationMembers,
-  getOrganizationMembers as fetchOrgMembers,
   getOrganizationMembers,
-  updateOrgMember,
-} from "@domain/dynamodb/fetchers/members";
-import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
+  updateOrgMemberSlackId,
+  type MemberWithUser,
+} from "@domain/postgres/fetchers/members";
+import { getOrganization } from "@domain/postgres/fetchers/organizations";
+import { insertUser } from "@domain/postgres/fetchers/users";
 import { OrgMembers } from "@domain/github/endpointTypes";
 import { getInstallationAccessToken, getOrgMembers } from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
@@ -14,6 +14,7 @@ import { getBillingDetails } from "@domain/selectors/organization/getBillingDeta
 import { Hono } from "hono";
 import * as z from "zod";
 import { authMiddleware, requireAuth } from "../middleware/auth";
+import { Organization } from "@domain/postgres/schema";
 
 const LOGGER = new Logger("organization:routes");
 
@@ -32,7 +33,7 @@ app.get("/:organizationId", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
 
-    const organization = await fetchOrganizationById(organizationId);
+    const organization = await getOrganization(organizationId);
 
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
@@ -54,7 +55,7 @@ app.get("/:organizationId/billing", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
 
-    const organization = await fetchOrganizationById(organizationId);
+    const organization = await getOrganization(organizationId);
 
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
@@ -73,13 +74,14 @@ app.get("/:organizationId/members", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
 
-    const organization = await fetchOrganizationById(organizationId);
+    const organization = await getOrganization(organizationId);
 
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
     }
 
-    const members = await getOrganizationMembers(organization.orgId);
+    const members = await getOrganizationMembers(organization.id);
+
     return c.json(members);
   } catch (error) {
     LOGGER.error("Error getting organization members", { error });
@@ -92,7 +94,7 @@ app.put("/:organizationId/member", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
 
-    const organization = await fetchOrganizationById(organizationId);
+    const organization = await getOrganization(organizationId);
 
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
@@ -102,8 +104,14 @@ app.put("/:organizationId/member", async (c) => {
       const body = await c.req.json();
       const parsedBody = updateMemberSchema.parse(body);
 
-      const newMember = await updateOrgMember(parsedBody);
-      return c.json(newMember);
+      await updateOrgMemberSlackId({
+        orgId: parsedBody.orgId,
+        userId: parsedBody.memberId,
+        slackId: parsedBody.slackId,
+      });
+
+      // Return success - Postgres version doesn't return the updated member
+      return c.json({ success: true });
     } catch (error) {
       LOGGER.error("Invalid request body", { error });
       return c.json({ message: "Invalid request body" }, 400);
@@ -120,13 +128,13 @@ app.put("/:organizationId/member", async (c) => {
  */
 const syncOrgMembers = async (organization: Organization) => {
   LOGGER.info("Syncing members for organization", {
-    organizationId: organization.orgId,
+    organizationId: organization.id,
   });
 
   const accessToken = await getInstallationAccessToken(organization.installationId);
 
   LOGGER.debug("Got installation access token", {
-    organizationId: organization.orgId,
+    organizationId: organization.id,
     orgName: organization.name,
     isToken: !!accessToken,
   });
@@ -137,28 +145,46 @@ const syncOrgMembers = async (organization: Organization) => {
     accessToken: accessToken.token,
   });
 
-  const dbMembers = await fetchOrgMembers(organization.orgId);
+  const dbMembers = await getOrganizationMembers(organization.id);
 
   const { toAdd } = reduceOrgMembers(members, dbMembers);
 
   if (toAdd.length > 0) {
     LOGGER.info("Adding members to database", {
-      organizationId: organization.orgId,
+      organizationId: organization.id,
       existingMembers: dbMembers.length,
       toAdd: toAdd,
     });
 
-    await addOrganizationMembers(organization.orgId, toAdd);
+    // First ensure all users exist in the users table
+    for (const member of toAdd) {
+      await insertUser(
+        {
+          id: member.id,
+          login: member.login,
+          email: member.email ?? null,
+          avatar_url: member.avatar_url,
+        },
+        null, // Empty access token for org members added via sync
+      );
+    }
+
+    // Then add them to the organization_members junction table
+    const membersToInsert = toAdd.map((member) => ({
+      orgId: organization.id,
+      userId: member.id,
+    }));
+    await addOrganizationMembers(membersToInsert);
   }
 };
 
-const reduceOrgMembers = (ghMembers: OrgMembers, dbMembers: Member[]) => {
+const reduceOrgMembers = (ghMembers: OrgMembers, dbMembers: MemberWithUser[]) => {
   const dbMembersMap = dbMembers.reduce(
     (acc, m) => {
-      acc[m.memberId] = m;
+      acc[m.userId] = m;
       return acc;
     },
-    {} as Record<number, Member>,
+    {} as Record<number, MemberWithUser>,
   );
 
   const toAdd: OrgMembers = [];

@@ -1,7 +1,7 @@
-import { Organization } from "@core/dynamodb/entities/types";
 import { BillingDetailsResponse } from "@core/selectorTypes/organization";
 import { fetchSubscriptionsByCustomerId } from "@domain/dynamodb/fetchers/subscription";
 import { Logger } from "@domain/logging";
+import { Organization } from "@domain/postgres/schema";
 
 const LOGGER = new Logger("organization:getBillingDetails");
 
@@ -9,17 +9,19 @@ export const getBillingDetails = async (
   organization: Organization,
 ): Promise<BillingDetailsResponse> => {
   LOGGER.info("Querying subscription details for organization", {
-    id: organization.orgId,
-    customerId: organization.customerId,
+    id: organization.id,
+    stripeCustomerId: organization.stripeCustomerId,
   });
 
-  if (!organization.customerId) {
+  if (!organization.stripeCustomerId) {
     return {
       subscriptions: [],
     };
   }
 
-  const subscriptions = await fetchSubscriptionsByCustomerId(organization.customerId);
+  const subscriptions = await fetchSubscriptionsByCustomerId(
+    organization.stripeCustomerId,
+  );
 
   LOGGER.info("Found subscriptions", { subscriptions });
 
