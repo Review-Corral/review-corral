@@ -8,8 +8,14 @@ import { useEffect } from "react";
 const GithubLoginButton: React.FC = () => {
   const [isRedirecting, setIsRedirecting] = useState<boolean>(false);
 
-  const GITHUB_CLIENT_ID = process.env.NEXT_PUBLIC_GITHUB_CLIENT_ID!;
-  const redirectUri = `${process.env.NEXT_PUBLIC_API_URL}/auth/callback`;
+  const GITHUB_CLIENT_ID = import.meta.env.VITE_GITHUB_CLIENT_ID!;
+  const redirectUri = `${import.meta.env.VITE_API_URL}/auth/callback`;
+
+  console.log("Environment variables:", {
+    GITHUB_CLIENT_ID,
+    VITE_API_URL: import.meta.env.VITE_API_URL,
+    allEnv: import.meta.env,
+  });
 
   const isLoading = isRedirecting;
 

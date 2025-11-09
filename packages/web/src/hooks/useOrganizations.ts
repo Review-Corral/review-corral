@@ -13,7 +13,7 @@ export const useOrganizations = () => {
     queryFn: async () => {
       console.log("Going to return useOrganizations query");
       return await ky
-        .get(`${process.env.NEXT_PUBLIC_API_URL}/gh/installations`, {
+        .get(`${import.meta.env.VITE_API_URL}/gh/installations`, {
           headers: {
             Authorization: `Bearer ${getSessionToken()}`,
           },

@@ -13,7 +13,7 @@ export const useOrganizationRepositories = (orgId: number) => {
     queryKey: [reposKey, orgId],
     queryFn: async () => {
       return await ky
-        .get(`${process.env.NEXT_PUBLIC_API_URL}/gh/${orgId}/repositories`, {
+        .get(`${import.meta.env.VITE_API_URL}/gh/${orgId}/repositories`, {
           headers: {
             Authorization: `Bearer ${getSessionToken()}`,
           },
@@ -31,7 +31,7 @@ export const useSetRepoActive = () => {
     mutationFn: async (args) => {
       return await ky
         .put(
-          `${process.env.NEXT_PUBLIC_API_URL}/gh/${args.orgId}/repositories/${args.repoId}`,
+          `${import.meta.env.VITE_API_URL}/gh/${args.orgId}/repositories/${args.repoId}`,
           {
             body: JSON.stringify({ isActive: args.isEnabled }),
             headers: {

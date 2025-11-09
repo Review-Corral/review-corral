@@ -18,7 +18,7 @@ export const useDeleteSlackIntegration = (slackIntegration: {
     ],
     mutationFn: async () => {
       return await ky.delete(
-        `${process.env.NEXT_PUBLIC_API_URL}/slack/${slackIntegration.orgId}/installations`,
+        `${import.meta.env.VITE_API_URL}/slack/${slackIntegration.orgId}/installations`,
         {
           headers: {
             Authorization: `Bearer ${Cookies.get(AuthAccessTokenKey)}`,

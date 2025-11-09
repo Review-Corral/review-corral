@@ -6,14 +6,14 @@ interface SlackButtonProps {
 }
 
 const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
-  const slackBotId = process.env.NEXT_PUBLIC_SLACK_BOT_ID;
+  const slackBotId = import.meta.env.VITE_SLACK_BOT_ID;
   if (!slackBotId) {
-    throw Error("NEXT_PUBLIC_SLACK_BOT_ID not set");
+    throw Error("VITE_SLACK_BOT_ID not set");
   }
 
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
+  const apiUrl = import.meta.env.VITE_API_URL;
   if (!apiUrl) {
-    throw Error("NEXT_PUBLIC_API_URL not set");
+    throw Error("VITE_API_URL not set");
   }
 
   const slackAuthUrl = `${apiUrl}/slack/oauth`;

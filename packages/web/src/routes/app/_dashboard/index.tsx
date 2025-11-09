@@ -37,7 +37,7 @@ function HomeView() {
               at any time.
             </p>
             <div className="flex gap-2">
-              <a href={import.meta.env.NEXT_PUBLIC_GITHUB_APP_URL!}>
+              <a href={import.meta.env.VITE_GITHUB_APP_URL!}>
                 <Button color="indigo">Install Integration</Button>
               </a>
             </div>
