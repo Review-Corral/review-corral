@@ -118,8 +118,8 @@ importers:
         specifier: ^0.30.6
         version: 0.30.6
       sst:
-        specifier: 3.17.23
-        version: 3.17.23
+        specifier: 3.17.14
+        version: 3.17.14
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@22.18.8)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
@@ -200,8 +200,8 @@ importers:
         specifier: ^0.30.6
         version: 0.30.6
       sst:
-        specifier: 3.17.23
-        version: 3.17.23
+        specifier: 3.17.14
+        version: 3.17.14
       vitest:
         specifier: ^3.2.4
         version: 3.2.4(@types/node@22.18.8)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1)
@@ -249,8 +249,8 @@ importers:
         specifier: ^22.18.8
         version: 22.18.8
       sst:
-        specifier: 3.17.23
-        version: 3.17.23
+        specifier: 3.17.14
+        version: 3.17.14
       vite-tsconfig-paths:
         specifier: ^5.1.4
         version: 5.1.4(typescript@5.9.3)(vite@7.2.2(@types/node@22.18.8)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)(yaml@2.8.1))
@@ -5219,18 +5219,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  sst-darwin-arm64@3.17.23:
-    resolution: {integrity: sha512-R6kvmF+rUideOoU7KBs2SdvrIupoE+b+Dor/eq9Uo4Dojj7KvYDZI/EDm8sSCbbcx/opiWeyNqKtlnLEdCxE6g==}
-    cpu: [arm64]
-    os: [darwin]
-
   sst-darwin-x64@3.17.14:
     resolution: {integrity: sha512-J22TN1Fa878qUXsZtPybzrUbGd68p6CjXpmpqMVTyKJ9u/purkO2TiXtcFs7Ow4nr1RuCXFKo3eQ1fHDeO9YUg==}
-    cpu: [x64]
-    os: [darwin]
-
-  sst-darwin-x64@3.17.23:
-    resolution: {integrity: sha512-WW4P1S35iYCifQXxD+sE3wuzcN+LHLpuKMaNoaBqEcWGZnH3IPaDJ7rpLF0arkDAo/z3jZmWWzOCkr0JuqJ8vQ==}
     cpu: [x64]
     os: [darwin]
 
@@ -5239,18 +5229,8 @@ packages:
     cpu: [arm64]
     os: [linux]
 
-  sst-linux-arm64@3.17.23:
-    resolution: {integrity: sha512-TjtNqgIh7RlAWgPLFCAt0mXvIB+J7WjmRvIRrAdX0mXsndOiBJ/DMOgXSLVsIWHCfPj8MIEot/hWpnJgXgIeag==}
-    cpu: [arm64]
-    os: [linux]
-
   sst-linux-x64@3.17.14:
     resolution: {integrity: sha512-fAaTdD6eP3kuNzkGVdYu3MOuNJkpm1rOH5Um2R2gbjtHwZ0QwP8r0f1d/ghP2kHXdgJqiNwqBbZmOuRCqmCuRA==}
-    cpu: [x64]
-    os: [linux]
-
-  sst-linux-x64@3.17.23:
-    resolution: {integrity: sha512-qdqJiEbYfCjZlI3F/TA6eoIU7JXVkEEI/UMILNf2JWhky0KQdCW2Xyz+wb6c0msVJCWdUM/uj+1DaiP2eXvghw==}
     cpu: [x64]
     os: [linux]
 
@@ -5259,18 +5239,8 @@ packages:
     cpu: [x86]
     os: [linux]
 
-  sst-linux-x86@3.17.23:
-    resolution: {integrity: sha512-aGmUujIvoNlmAABEGsOgfY1rxD9koC6hN8bnTLbDI+oI/u/zjHYh50jsbL0p3TlaHpwF/lxP3xFSuT6IKp+KgA==}
-    cpu: [x86]
-    os: [linux]
-
   sst-win32-arm64@3.17.14:
     resolution: {integrity: sha512-fueSfZqrGcPlhN0Lm5HpmDcCKr+JmMBBBjt38HlRU08ekY7lB05QAWNXgyBwXxLdXqVIFHCUaO2Mf4K+SMCv9A==}
-    cpu: [arm64]
-    os: [win32]
-
-  sst-win32-arm64@3.17.23:
-    resolution: {integrity: sha512-ZxdkGqYDrrZGz98rijDCN+m5yuCcwD6Bc9/6hubLsvdpNlVorUqzpg801Ec97xSK0nIC9g6pNiRyxAcsQQstUg==}
     cpu: [arm64]
     os: [win32]
 
@@ -5279,27 +5249,13 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  sst-win32-x64@3.17.23:
-    resolution: {integrity: sha512-yc9cor4MS49Ccy2tQCF1tf6M81yLeSGzGL+gjhUxpVKo2pN3bxl3w70eyU/mTXSEeyAmG9zEfbt6FNu4sy5cUA==}
-    cpu: [x64]
-    os: [win32]
-
   sst-win32-x86@3.17.14:
     resolution: {integrity: sha512-Q+QKLERFU05wzYpcIhGX0XaLe+jsMuh95IQnrGDU8f82LM1KdWY+a62BaY1J4lbGpNrdZO22GXwIcqrFZOw8qA==}
     cpu: [x86]
     os: [win32]
 
-  sst-win32-x86@3.17.23:
-    resolution: {integrity: sha512-DIp3s54IpNAfdYjSRt6McvkbEPQDMxUu6RUeRAd2C+FcTJgTloon/ghAPQBaDgu2VoVgymjcJARO/XyfKcCLOQ==}
-    cpu: [x86]
-    os: [win32]
-
   sst@3.17.14:
     resolution: {integrity: sha512-HkyMnBj55DZjzgNFoHQ1XPr9vXi2UHWz3TkuboyCybpJQcR7vW4za8uDDDPivAcUyqQe2aP8pzuxL6+cAztqsg==}
-    hasBin: true
-
-  sst@3.17.23:
-    resolution: {integrity: sha512-TwKgUgDnZdc1Swe+bvCNeyO4dQnYz5cTodMpYj3jlXZdK9/KNz0PVxT1f0u5E76i1pmilXrUBL/f7iiMPw4RDg==}
     hasBin: true
 
   stackback@0.0.2:
@@ -7729,8 +7685,8 @@ snapshots:
       express-rate-limit: 7.5.1(express@5.1.0)
       pkce-challenge: 4.1.0
       raw-body: 3.0.1
-      zod: 3.24.2
-      zod-to-json-schema: 3.24.3(zod@3.24.2)
+      zod: 3.25.76
+      zod-to-json-schema: 3.24.3(zod@3.25.76)
     transitivePeerDependencies:
       - supports-color
 
@@ -10629,7 +10585,7 @@ snapshots:
   buffer@4.9.2:
     dependencies:
       base64-js: 1.5.1
-      ieee754: 1.1.13
+      ieee754: 1.2.1
       isarray: 1.0.0
 
   buffer@5.7.1:
@@ -11426,8 +11382,7 @@ snapshots:
 
   ieee754@1.1.13: {}
 
-  ieee754@1.2.1:
-    optional: true
+  ieee754@1.2.1: {}
 
   inflight@1.0.6:
     dependencies:
@@ -12502,49 +12457,25 @@ snapshots:
   sst-darwin-arm64@3.17.14:
     optional: true
 
-  sst-darwin-arm64@3.17.23:
-    optional: true
-
   sst-darwin-x64@3.17.14:
-    optional: true
-
-  sst-darwin-x64@3.17.23:
     optional: true
 
   sst-linux-arm64@3.17.14:
     optional: true
 
-  sst-linux-arm64@3.17.23:
-    optional: true
-
   sst-linux-x64@3.17.14:
-    optional: true
-
-  sst-linux-x64@3.17.23:
     optional: true
 
   sst-linux-x86@3.17.14:
     optional: true
 
-  sst-linux-x86@3.17.23:
-    optional: true
-
   sst-win32-arm64@3.17.14:
-    optional: true
-
-  sst-win32-arm64@3.17.23:
     optional: true
 
   sst-win32-x64@3.17.14:
     optional: true
 
-  sst-win32-x64@3.17.23:
-    optional: true
-
   sst-win32-x86@3.17.14:
-    optional: true
-
-  sst-win32-x86@3.17.23:
     optional: true
 
   sst@3.17.14:
@@ -12563,25 +12494,6 @@ snapshots:
       sst-win32-arm64: 3.17.14
       sst-win32-x64: 3.17.14
       sst-win32-x86: 3.17.14
-    transitivePeerDependencies:
-      - supports-color
-
-  sst@3.17.23:
-    dependencies:
-      aws-sdk: 2.1692.0
-      aws4fetch: 1.0.18
-      jose: 5.2.3
-      opencontrol: 0.0.6
-      openid-client: 5.6.4
-    optionalDependencies:
-      sst-darwin-arm64: 3.17.23
-      sst-darwin-x64: 3.17.23
-      sst-linux-arm64: 3.17.23
-      sst-linux-x64: 3.17.23
-      sst-linux-x86: 3.17.23
-      sst-win32-arm64: 3.17.23
-      sst-win32-x64: 3.17.23
-      sst-win32-x86: 3.17.23
     transitivePeerDependencies:
       - supports-color
 
@@ -13100,6 +13012,10 @@ snapshots:
   zod-to-json-schema@3.24.3(zod@3.24.2):
     dependencies:
       zod: 3.24.2
+
+  zod-to-json-schema@3.24.3(zod@3.25.76):
+    dependencies:
+      zod: 3.25.76
 
   zod@3.24.2: {}
 

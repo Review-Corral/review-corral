@@ -12,7 +12,7 @@
     "@types/aws-lambda": "^8.10.153",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^22.18.8",
-    "sst": "3.17.23",
+    "sst": "3.17.14",
     "vite-tsconfig-paths": "^5.1.4",
     "vitest": "^3.2.4",
     "vitest-mock-extended": "^3.1.0"
