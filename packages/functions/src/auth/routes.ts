@@ -1,5 +1,4 @@
-import { Db } from "@domain/dynamodb/client";
-import { fetchUserById, insertUser } from "@domain/dynamodb/fetchers/users";
+import { fetchUserById, insertUser, updateUser } from "@domain/postgres/fetchers/users";
 import { UserResponse } from "@domain/github/endpointTypes";
 import { LOGGER } from "@domain/github/webhooks/handlers/pullRequest";
 import config from "@domain/utils/config";
@@ -32,7 +31,7 @@ app.get("/callback", async (c) => {
     // Generate JWT access token
     const accessToken = sign(
       {
-        userId: githubUser.userId,
+        userId: githubUser.id,
         email: githubUser.email,
       },
       Resource.JWT_SECRET.value,
@@ -81,21 +80,16 @@ const getOrCreateUser = async (accessToken: string) => {
 
   const existingUser = await fetchUserById(ghUser.id);
 
-  if (existingUser?.userId) {
-    LOGGER.info("Found existing user", { id: existingUser.userId });
+  if (existingUser?.id) {
+    LOGGER.info("Found existing user", { id: existingUser.id });
 
     // Update the GH access token if different
     if (existingUser.ghAccessToken !== accessToken) {
-      LOGGER.info("Updating user access token", { id: existingUser.userId });
+      LOGGER.info("Updating user access token", { id: existingUser.id });
 
-      await Db.entities.user
-        .patch({
-          userId: existingUser.userId,
-        })
-        .set({
-          ghAccessToken: accessToken,
-        })
-        .go();
+      await updateUser(existingUser.id, {
+        ghAccessToken: accessToken,
+      });
     }
 
     return existingUser;

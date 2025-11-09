@@ -1,4 +1,3 @@
-import { User } from "@core/dynamodb/entities/types";
 import { getJwt } from "@core/utils/jwt/createGithubJwt";
 import ky from "ky";
 import { Logger } from "../logging";
@@ -19,7 +18,14 @@ const defaultHeaders = {
   "X-GitHub-Api-Version": "2022-11-28",
 };
 
-export const getUserInstallations = async (user: User): Promise<InstallationsData> =>
+// Temporary type for user with ghAccessToken - will be replaced with Postgres User once migration is complete
+type UserWithAccessToken = {
+  ghAccessToken?: string | null;
+};
+
+export const getUserInstallations = async (
+  user: UserWithAccessToken,
+): Promise<InstallationsData> =>
   await ky
     .get("https://api.github.com/user/installations", {
       headers: {

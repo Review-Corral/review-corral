@@ -6,10 +6,14 @@ import {
   OrganizationUpdateArgs,
   User,
 } from "@core/dynamodb/entities/types";
+import { User as PgUser } from "../../postgres/schema";
 import { Logger } from "../../logging";
 import { addOrganizationMemberFromUser } from "./members";
 
 const _LOGGER = new Logger("fetchers.organizations");
+
+// Temporary type for accepting both DynamoDB and Postgres users during migration
+type UserLike = User | PgUser;
 
 /**
  * Fetches an organization by it's ID
@@ -102,7 +106,7 @@ export const insertOrganizationAndAssociateUser = async ({
   user,
   createOrgArgs,
 }: {
-  user: User;
+  user: UserLike;
   createOrgArgs: OrganizationInsertArgs;
 }) => {
   const org = await insertOrganization(createOrgArgs);

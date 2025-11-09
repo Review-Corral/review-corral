@@ -1,5 +1,5 @@
-import { User } from "@core/dynamodb/entities/types";
-import { fetchUserById } from "@domain/dynamodb/fetchers/users";
+import { User } from "@domain/postgres/schema";
+import { fetchUserById } from "@domain/postgres/fetchers/users";
 import { Logger } from "@domain/logging";
 import { APIGatewayEvent } from "aws-lambda";
 import { MiddlewareHandler } from "hono";
