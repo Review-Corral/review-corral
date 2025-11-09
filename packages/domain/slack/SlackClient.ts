@@ -1,5 +1,5 @@
-import { type PullRequest } from "@domain/postgres/schema";
 import { convertPrEventToBaseProps } from "@domain/github/webhooks/handlers/utils";
+import { type PullRequest } from "@domain/postgres/schema";
 import {
   PullRequestClosedEvent,
   PullRequestOpenedEvent,

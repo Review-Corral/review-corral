@@ -1,10 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../client";
-import {
-  type NewSubscription,
-  type Subscription,
-  subscriptions,
-} from "../schema";
+import { type NewSubscription, type Subscription, subscriptions } from "../schema";
 
 /**
  * Get all subscriptions for a customer
@@ -44,9 +40,7 @@ export async function fetchSubscription({
 /**
  * Create a new subscription
  */
-export async function insertSubscription(
-  data: NewSubscription,
-): Promise<Subscription> {
+export async function insertSubscription(data: NewSubscription): Promise<Subscription> {
   const result = await db.insert(subscriptions).values(data).returning();
   return result[0];
 }

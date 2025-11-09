@@ -25,12 +25,8 @@ export const slackUsers = pgTable(
     expiresAt: timestamp("expires_at", { withTimezone: true })
       .notNull()
       .$defaultFn(() => new Date(Date.now() + 60000)),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     teamIdx: index("idx_slack_users_team").on(table.slackTeamId),

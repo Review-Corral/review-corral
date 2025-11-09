@@ -20,19 +20,12 @@ export const branches = pgTable(
       .references(() => repositories.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
     requiredApprovals: integer("required_approvals").notNull().default(0),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     repoIdx: index("idx_branches_repo").on(table.repoId),
-    repoNameUnique: unique("branches_repo_name_unique").on(
-      table.repoId,
-      table.name,
-    ),
+    repoNameUnique: unique("branches_repo_name_unique").on(table.repoId, table.name),
   }),
 );
 

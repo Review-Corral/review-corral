@@ -1,6 +1,10 @@
+import type { SlackApiThrottleInsertArgs } from "@core/dynamodb/entities/types";
 import { and, eq } from "drizzle-orm";
-import { db } from "../client";
 import { Db } from "../../dynamodb/client";
+import { Logger } from "../../logging";
+import { SlackClient } from "../../slack/SlackClient";
+import { type SlackIntegrationUsers } from "../../slack/types";
+import { db } from "../client";
 import {
   type NewSlackIntegration,
   type NewSlackUser,
@@ -9,10 +13,6 @@ import {
   slackIntegrations,
   slackUsers,
 } from "../schema";
-import { Logger } from "../../logging";
-import { SlackClient } from "../../slack/SlackClient";
-import { type SlackIntegrationUsers } from "../../slack/types";
-import type { SlackApiThrottleInsertArgs } from "@core/dynamodb/entities/types";
 
 const LOGGER = new Logger("fetchers.slack");
 const THROTTLE_MINUTES = 5;
@@ -58,9 +58,7 @@ export async function deleteSlackIntegration({
       and(
         eq(slackIntegrations.orgId, orgId),
         eq(slackIntegrations.slackTeamId, slackTeamId),
-        channelId !== null
-          ? eq(slackIntegrations.channelId, channelId)
-          : undefined,
+        channelId !== null ? eq(slackIntegrations.channelId, channelId) : undefined,
       ),
     );
 }

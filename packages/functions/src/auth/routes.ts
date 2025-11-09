@@ -1,6 +1,6 @@
-import { fetchUserById, insertUser, updateUser } from "@domain/postgres/fetchers/users";
 import { UserResponse } from "@domain/github/endpointTypes";
 import { LOGGER } from "@domain/github/webhooks/handlers/pullRequest";
+import { fetchUserById, insertUser, updateUser } from "@domain/postgres/fetchers/users";
 import config from "@domain/utils/config";
 import { Hono } from "hono";
 import { HTTPException } from "hono/http-exception";

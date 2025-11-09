@@ -1,20 +1,20 @@
 import { updateMemberSchema } from "@core/fetchTypes/updateOrgMember";
-import {
-  addOrganizationMembers,
-  getOrganizationMembers,
-  updateOrgMemberSlackId,
-  type MemberWithUser,
-} from "@domain/postgres/fetchers/members";
-import { getOrganization } from "@domain/postgres/fetchers/organizations";
-import { insertUser } from "@domain/postgres/fetchers/users";
 import { OrgMembers } from "@domain/github/endpointTypes";
 import { getInstallationAccessToken, getOrgMembers } from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
+import {
+  type MemberWithUser,
+  addOrganizationMembers,
+  getOrganizationMembers,
+  updateOrgMemberSlackId,
+} from "@domain/postgres/fetchers/members";
+import { getOrganization } from "@domain/postgres/fetchers/organizations";
+import { insertUser } from "@domain/postgres/fetchers/users";
+import { Organization } from "@domain/postgres/schema";
 import { getBillingDetails } from "@domain/selectors/organization/getBillingDetails";
 import { Hono } from "hono";
 import * as z from "zod";
 import { authMiddleware, requireAuth } from "../middleware/auth";
-import { Organization } from "@domain/postgres/schema";
 
 const LOGGER = new Logger("organization:routes");
 

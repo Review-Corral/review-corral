@@ -21,12 +21,8 @@ export const subscriptions = pgTable(
     subscriptionId: text("subscription_id").notNull(),
     priceId: text("price_id"),
     status: text("status"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     orgIdx: index("idx_subscriptions_org").on(table.orgId),

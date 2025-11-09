@@ -1,10 +1,10 @@
-import { fetchBranch, insertBranch } from "@domain/postgres/fetchers/branches";
 import {
   getInstallationAccessToken,
   getPrRequiredApprovalsCount,
 } from "@domain/github/fetchers";
 import { LOGGER } from "@domain/github/webhooks/handlers/pullRequest";
 import { BaseGithubWebhookEventHanderArgs } from "@domain/github/webhooks/types";
+import { fetchBranch, insertBranch } from "@domain/postgres/fetchers/branches";
 import { RequiredApprovalsQueryPayloadArg } from "@domain/slack/mainMessage";
 import { HTTPError } from "ky";
 

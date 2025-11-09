@@ -1,12 +1,12 @@
 import { assertVarExists } from "@core/utils/assert";
+import { Logger } from "@domain/logging";
 import { getOrganization } from "@domain/postgres/fetchers/organizations";
 import {
+  deleteSlackIntegration,
   getSlackInstallationUsers,
   getSlackInstallationsForOrganization,
   insertSlackIntegration,
-  deleteSlackIntegration,
 } from "@domain/postgres/fetchers/slack-integrations";
-import { Logger } from "@domain/logging";
 import { Hono } from "hono";
 import ky from "ky";
 import { Resource } from "sst";
