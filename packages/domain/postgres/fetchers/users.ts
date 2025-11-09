@@ -15,8 +15,8 @@ export async function fetchUserById(id: number): Promise<User | null> {
  * Creates a user. Should only be used when logging in and the user doesn't exist
  */
 export async function insertUser(
-  user: UserResponse,
-  accessToken: string,
+  user: Pick<UserResponse, "id" | "login" | "email" | "avatar_url">,
+  accessToken: string | null,
 ): Promise<User> {
   const result = await db
     .insert(users)
