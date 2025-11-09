@@ -19,7 +19,6 @@
     {
       "idx": 2,
       "version": "7",
-<<<<<<< HEAD
       "when": 1762713050953,
       "tag": "0002_parallel_kang",
       "breakpoints": true
@@ -36,10 +35,6 @@
       "version": "7",
       "when": 1762670312334,
       "tag": "0001_polite_ultron",
-=======
-      "when": 1762712206301,
-      "tag": "0002_strange_captain_marvel",
->>>>>>> 3ed7f4a (Applying nonNull() to more required fields)
       "breakpoints": true
     }
   ]
