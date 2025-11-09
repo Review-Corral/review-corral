@@ -1,4 +1,4 @@
-import { fetchBranch, insertBranch } from "@domain/dynamodb/fetchers/branches";
+import { fetchBranch, insertBranch } from "@domain/postgres/fetchers/branches";
 import {
   getInstallationAccessToken,
   getPrRequiredApprovalsCount,
@@ -41,7 +41,6 @@ export async function tryGetPrRequiredApprovalsCount(args: {
     if (requiredApprovals !== null) {
       await insertBranch({
         repoId: args.repository.id,
-        branchName: args.pullRequest.base.ref,
         name: args.pullRequest.base.ref,
         requiredApprovals,
       });

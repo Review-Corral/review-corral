@@ -1,4 +1,4 @@
-import { PullRequestItem } from "@core/dynamodb/entities/types";
+import { type PullRequest } from "@domain/postgres/schema";
 import { MessageAttachment, SectionBlock } from "@slack/web-api";
 import { ContextBlock, ImageElement } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
@@ -6,8 +6,8 @@ import { BasePullRequestProperties } from "./SlackClient";
 
 /**
  * Wrapping in it's own type just so that this ins't confused as being the same thing
- * as PullRequestItem.requiredApprovals. This is the response we get by querying from
- * dynamo or the GH API before we've created the PR item.
+ * as PullRequest.requiredApprovals. This is the response we get by querying from
+ * the database or the GH API before we've created the PR item.
  */
 export type RequiredApprovalsQueryPayloadArg = {
   count: number;
@@ -17,7 +17,7 @@ export type MainMessageArgs<T extends BasePullRequestProperties> = {
   body: T;
   threadTs: string; // TODO: Get this from the pr item (need to assert it exists tho)
   slackUsername: string;
-  pullRequestItem: PullRequestItem | null;
+  pullRequestItem: PullRequest | null;
   requiredApprovals: RequiredApprovalsQueryPayloadArg;
 };
 
@@ -62,7 +62,7 @@ export const buidMainMessageAttachements = ({
 }: {
   body: BasePullRequestProperties;
   slackUsername: string;
-  pullRequestItem: PullRequestItem | null;
+  pullRequestItem: PullRequest | null;
   requiredApprovals: RequiredApprovalsQueryPayloadArg;
   actionPerformerUsername?: string;
 }) => {
@@ -156,7 +156,7 @@ const buildRequiredApprovalsAttachment = ({
   pullRequestItem,
   requiredApprovals,
 }: {
-  pullRequestItem: PullRequestItem | null;
+  pullRequestItem: PullRequest | null;
   requiredApprovals: RequiredApprovalsQueryPayloadArg;
 }) => {
   if (pullRequestItem?.requiredApprovals) {
