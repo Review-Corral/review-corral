@@ -5,7 +5,7 @@ import ky from "ky";
 
 export const SLACK_INTEGRATIONS_QUERY_KEY = "slack-integrations";
 
-export const useSlackIntegrations = (organizationId: Organization["orgId"]) => {
+export const useSlackIntegrations = (organizationId: Organization["id"]) => {
   return useQuery({
     queryKey: [SLACK_INTEGRATIONS_QUERY_KEY, organizationId],
     queryFn: async () => {

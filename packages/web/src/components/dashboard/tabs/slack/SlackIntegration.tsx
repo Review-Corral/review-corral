@@ -14,9 +14,9 @@ import { useDeleteSlackIntegration } from "./useDeleteSlackIntegration";
 interface SlackIntegration {
   organizationId: number;
   slackTeamId: string;
-  slackTeamName: string;
-  channelId: string;
-  channelName: string;
+  slackTeamName: string | null;
+  channelId: string | null;
+  channelName: string | null;
 }
 
 export const SlackIntegration: FC<SlackIntegration> = ({

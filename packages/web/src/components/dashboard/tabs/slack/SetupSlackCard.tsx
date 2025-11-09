@@ -7,7 +7,7 @@ interface SetupSlackCardProps {
 }
 
 export const SetupSlackCard: FC<SetupSlackCardProps> = ({
-  organization: { orgId: organizationId },
+  organization: { id: organizationId },
 }) => {
   return (
     <div className="p-4 border border-grey-200 rounded-md space-y-6 max-w-xl">

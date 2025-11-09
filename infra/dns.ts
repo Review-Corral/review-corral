@@ -14,7 +14,7 @@ export const getDomain = (service: "api" | "frontend") => {
 };
 
 export const getUrl = (service: "api" | "frontend"): string => {
-  if (service === "frontend" && $dev) return "http://localhost:5173";
+  if (service === "frontend" && $dev) return "http://localhost:3000";
 
   return `https://${getDomain(service)}`;
 };
