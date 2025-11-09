@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
+import { bigint, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { organizationMembers } from "./organization-members";
 import { repositories } from "./repositories";
 import { slackIntegrations } from "./slack-integrations";
@@ -8,11 +8,11 @@ import { subscriptions } from "./subscriptions";
 export const organizations = pgTable(
   "organizations",
   {
-    id: text("id").primaryKey(),
+    id: bigint("id", { mode: "number" }).primaryKey(),
     name: text("name").notNull(),
     avatarUrl: text("avatar_url"),
     billingEmail: text("billing_email"),
-    installationId: text("installation_id").unique(),
+    installationId: bigint("installation_id", { mode: "number" }).unique(),
     type: text("type"),
     stripeCustomerId: text("stripe_customer_id").unique(),
     stripeSubscriptionStatus: text("stripe_subscription_status"),

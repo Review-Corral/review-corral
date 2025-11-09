@@ -1,6 +1,6 @@
 CREATE TABLE "branches" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"repo_id" text NOT NULL,
+	"repo_id" bigint NOT NULL,
 	"name" text NOT NULL,
 	"required_approvals" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -9,7 +9,7 @@ CREATE TABLE "branches" (
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" bigint PRIMARY KEY NOT NULL,
 	"name" text,
 	"email" text,
 	"avatar_url" text,
@@ -20,11 +20,11 @@ CREATE TABLE "users" (
 );
 --> statement-breakpoint
 CREATE TABLE "organizations" (
-	"id" text PRIMARY KEY NOT NULL,
+	"id" bigint PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
 	"avatar_url" text,
 	"billing_email" text,
-	"installation_id" text,
+	"installation_id" bigint,
 	"type" text,
 	"stripe_customer_id" text,
 	"stripe_subscription_status" text,
@@ -35,8 +35,8 @@ CREATE TABLE "organizations" (
 );
 --> statement-breakpoint
 CREATE TABLE "organization_members" (
-	"org_id" text NOT NULL,
-	"user_id" text NOT NULL,
+	"org_id" bigint NOT NULL,
+	"user_id" bigint NOT NULL,
 	"slack_id" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -44,8 +44,8 @@ CREATE TABLE "organization_members" (
 );
 --> statement-breakpoint
 CREATE TABLE "repositories" (
-	"id" text PRIMARY KEY NOT NULL,
-	"org_id" text NOT NULL,
+	"id" bigint PRIMARY KEY NOT NULL,
+	"org_id" bigint NOT NULL,
 	"name" text NOT NULL,
 	"avatar_url" text,
 	"is_enabled" boolean DEFAULT true NOT NULL,
@@ -55,8 +55,8 @@ CREATE TABLE "repositories" (
 );
 --> statement-breakpoint
 CREATE TABLE "pull_requests" (
-	"id" text PRIMARY KEY NOT NULL,
-	"repo_id" text NOT NULL,
+	"id" bigint PRIMARY KEY NOT NULL,
+	"repo_id" bigint NOT NULL,
 	"pr_number" integer NOT NULL,
 	"thread_ts" text,
 	"is_draft" boolean DEFAULT false NOT NULL,
@@ -70,7 +70,7 @@ CREATE TABLE "pull_requests" (
 --> statement-breakpoint
 CREATE TABLE "slack_integrations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"org_id" text NOT NULL,
+	"org_id" bigint NOT NULL,
 	"slack_team_id" text NOT NULL,
 	"slack_team_name" text,
 	"access_token" text,
@@ -109,7 +109,7 @@ CREATE TABLE "slack_api_throttles" (
 --> statement-breakpoint
 CREATE TABLE "subscriptions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"org_id" text NOT NULL,
+	"org_id" bigint NOT NULL,
 	"customer_id" text NOT NULL,
 	"subscription_id" text NOT NULL,
 	"price_id" text,
@@ -119,7 +119,6 @@ CREATE TABLE "subscriptions" (
 	CONSTRAINT "subscriptions_customer_sub_unique" UNIQUE("customer_id","subscription_id")
 );
 --> statement-breakpoint
-DROP TABLE "health_check" CASCADE;--> statement-breakpoint
 ALTER TABLE "branches" ADD CONSTRAINT "branches_repo_id_repositories_id_fk" FOREIGN KEY ("repo_id") REFERENCES "public"."repositories"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "organization_members" ADD CONSTRAINT "organization_members_org_id_organizations_id_fk" FOREIGN KEY ("org_id") REFERENCES "public"."organizations"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "organization_members" ADD CONSTRAINT "organization_members_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint

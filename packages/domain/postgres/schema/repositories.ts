@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  bigint,
   boolean,
   index,
   pgTable,
@@ -14,8 +15,8 @@ import { pullRequests } from "./pull-requests";
 export const repositories = pgTable(
   "repositories",
   {
-    id: text("id").primaryKey(),
-    orgId: text("org_id")
+    id: bigint("id", { mode: "number" }).primaryKey(),
+    orgId: bigint("org_id", { mode: "number" })
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
     name: text("name").notNull(),
