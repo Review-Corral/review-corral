@@ -1,8 +1,11 @@
 {
   "extends": "@tsconfig/node18/tsconfig.json",
-  "exclude": ["packages", ".sst/"],
+  "include": ["infra"],
   "compilerOptions": {
-    "module": "esnext",
-    "moduleResolution": "node"
+    "baseUrl": ".",
+    "experimentalDecorators": true,
+    "preserveSymlinks": false,
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
   }
 }
