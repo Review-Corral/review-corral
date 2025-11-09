@@ -1,4 +1,6 @@
-import { HeadContent, Outlet, createRootRoute } from "@tanstack/react-router";
+/// <reference types="vite/client" />
+
+import { HeadContent, Outlet, Scripts, createRootRoute } from "@tanstack/react-router";
 import appCss from "./globals.css?url";
 
 export const Route = createRootRoute({
@@ -31,6 +33,7 @@ function RootComponent() {
         <div className="bg-gray-50">
           <Outlet />
         </div>
+        <Scripts />
       </body>
     </html>
   );
