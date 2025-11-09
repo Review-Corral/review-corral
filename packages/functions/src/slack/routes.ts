@@ -1,11 +1,11 @@
 import { assertVarExists } from "@core/utils/assert";
-import { Db } from "@domain/dynamodb/client";
-import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
+import { getOrganization } from "@domain/postgres/fetchers/organizations";
 import {
   getSlackInstallationUsers,
   getSlackInstallationsForOrganization,
   insertSlackIntegration,
-} from "@domain/dynamodb/fetchers/slack";
+  deleteSlackIntegration,
+} from "@domain/postgres/fetchers/slack-integrations";
 import { Logger } from "@domain/logging";
 import { Hono } from "hono";
 import ky from "ky";
@@ -139,7 +139,7 @@ protectedRoutes.get("/:organizationId/users", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
 
-    const organization = await fetchOrganizationById(organizationId);
+    const organization = await getOrganization(organizationId);
 
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
@@ -178,7 +178,7 @@ protectedRoutes.get("/:organizationId/installations", async (c) => {
   try {
     const { organizationId } = orgIdSchema.parse(c.req.param());
 
-    const organization = await fetchOrganizationById(organizationId);
+    const organization = await getOrganization(organizationId);
 
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
@@ -209,19 +209,17 @@ protectedRoutes.delete("/:organizationId/installations", async (c) => {
     const body = await c.req.json();
     const { slackTeamId, channelId } = deleteIntegrationSchema.parse(body);
 
-    const organization = await fetchOrganizationById(orgId);
+    const organization = await getOrganization(orgId);
 
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
     }
 
-    await Db.entities.slack
-      .delete({
-        orgId,
-        slackTeamId,
-        channelId,
-      })
-      .go();
+    await deleteSlackIntegration({
+      orgId,
+      slackTeamId,
+      channelId,
+    });
 
     LOGGER.info("Slack integration deleted", {
       orgId,

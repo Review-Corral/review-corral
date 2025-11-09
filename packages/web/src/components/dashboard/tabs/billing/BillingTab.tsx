@@ -1,6 +1,6 @@
 import { BetterButton } from "@components/ui/BetterButton";
 import { Loading } from "@components/ui/cards/loading";
-import { Subscription } from "@core/dynamodb/entities/types";
+import { Subscription } from "@core/apiTypes";
 import { CheckIcon } from "lucide-react";
 import React, { FC } from "react";
 import { SharedLayout } from "../SharedLayout";

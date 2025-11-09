@@ -1,5 +1,5 @@
 import { BillingDetailsResponse } from "@core/selectorTypes/organization";
-import { fetchSubscriptionsByCustomerId } from "@domain/dynamodb/fetchers/subscription";
+import { fetchSubscriptionsByCustomerId } from "@domain/postgres/fetchers/subscriptions";
 import { Logger } from "@domain/logging";
 import { Organization } from "@domain/postgres/schema";
 

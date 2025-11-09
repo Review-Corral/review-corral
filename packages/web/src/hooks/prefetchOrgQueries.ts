@@ -9,7 +9,7 @@ import {
   Repository,
   SlackIntegration,
   SlackUser,
-} from "@core/dynamodb/entities/types";
+} from "@core/apiTypes";
 import { BillingDetailsResponse } from "@core/selectorTypes/organization";
 import { QueryClient } from "@tanstack/react-query";
 import ky from "ky";

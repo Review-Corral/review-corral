@@ -10,7 +10,7 @@ import {
 } from "@components/shadcn/select";
 import { DataTableColumnHeader } from "@components/table/DataTableColumnHeader";
 import { BetterButton } from "@components/ui/BetterButton";
-import { Member, SlackUser } from "@core/dynamodb/entities/types";
+import { Member, SlackUser } from "@core/apiTypes";
 import { ColumnDef } from "@tanstack/react-table";
 import { FC, useMemo, useState } from "react";
 import {

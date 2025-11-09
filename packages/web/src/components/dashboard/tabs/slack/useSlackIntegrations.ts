@@ -1,5 +1,5 @@
 import { getSessionToken } from "@/lib/auth/getSessionToken";
-import { Organization, SlackIntegration } from "@core/dynamodb/entities/types";
+import { Organization, SlackIntegration } from "@core/apiTypes";
 import { useQuery } from "@tanstack/react-query";
 import ky from "ky";
 

@@ -1,9 +1,8 @@
 import * as z from "zod";
 
-import { fetchOrganizationById } from "@domain/dynamodb/fetchers/organizations";
-import { safeFetchRepository } from "@domain/dynamodb/fetchers/repositories";
-import { getSlackInstallationsForOrganization } from "@domain/dynamodb/fetchers/slack";
-import { takeFirst } from "@domain/dynamodb/fetchers/utils";
+import { getOrganization } from "@domain/postgres/fetchers/organizations";
+import { safeFetchRepository } from "@domain/postgres/fetchers/repositories";
+import { getSlackInstallationsForOrganization } from "@domain/postgres/fetchers/slack-integrations";
 import { Logger } from "@domain/logging";
 import { SlackClient } from "@domain/slack/SlackClient";
 import { handleIssueCommentEvent } from "./handlers/issueComment";
@@ -77,7 +76,7 @@ export const handleGithubWebhookEvent = async ({
       });
     }
 
-    const organization = await fetchOrganizationById(repository.orgId);
+    const organization = await getOrganization(repository.orgId);
 
     if (!organization) {
       LOGGER.warn("Couldn't load organization for repository from our database", {
@@ -89,9 +88,10 @@ export const handleGithubWebhookEvent = async ({
 
     // TODO: if we want to support multiple slack channels per organization, we'll
     // need to change this.
-    const slackIntegration = await getSlackInstallationsForOrganization(
+    const slackIntegrations = await getSlackInstallationsForOrganization(
       repository.orgId,
-    ).then(takeFirst);
+    );
+    const slackIntegration = slackIntegrations[0] ?? null;
 
     if (!slackIntegration) {
       LOGGER.info(
@@ -101,6 +101,14 @@ export const handleGithubWebhookEvent = async ({
           organizationId: repository.orgId,
         },
       );
+      return;
+    }
+
+    if (!slackIntegration.channelId || !slackIntegration.accessToken) {
+      LOGGER.warn("Slack integration missing required fields", {
+        hasChannelId: !!slackIntegration.channelId,
+        hasAccessToken: !!slackIntegration.accessToken,
+      });
       return;
     }
 
@@ -117,7 +125,7 @@ export const handleGithubWebhookEvent = async ({
       event,
       slackClient,
       installationId: organization.installationId,
-      organizationId: organization.orgId,
+      organizationId: organization.id,
     });
   } else {
     LOGGER.debug("Recieved event we're not handling", { eventName });

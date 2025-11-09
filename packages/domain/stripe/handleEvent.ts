@@ -1,12 +1,12 @@
 import { stripeCheckoutCreatedMetadataSchema } from "@core/stripe/types";
 import {
-  fetchOrganizationById,
+  getOrganization,
   updateOrganization,
-} from "@domain/dynamodb/fetchers/organizations";
+} from "@domain/postgres/fetchers/organizations";
 import {
   updateSubscription,
   upsertSubscription,
-} from "@domain/dynamodb/fetchers/subscription";
+} from "@domain/postgres/fetchers/subscriptions";
 import { Logger } from "@domain/logging";
 import Stripe from "stripe";
 
@@ -42,37 +42,35 @@ export const handleSubUpdated = async (
     return;
   }
 
-  const args = {
-    customerId: actualEvent.customer.toString(),
-    status: actualEvent.status,
-    subId: actualEvent.id,
-    priceId: priceId,
-  };
-
-  LOGGER.info("Going to upsert subscription with args:", { args }, { depth: 3 });
-  await upsertSubscription(args);
-  LOGGER.info("Finshed upserting subscription", { depth: 3 });
-
   const parsedMetadata = stripeCheckoutCreatedMetadataSchema.safeParse(
     actualEvent.metadata,
   );
 
   if (parsedMetadata.success) {
+    const args = {
+      orgId: parsedMetadata.data.orgId,
+      customerId: actualEvent.customer.toString(),
+      status: actualEvent.status,
+      subscriptionId: actualEvent.id,
+      priceId: priceId,
+    };
+
+    LOGGER.info("Going to upsert subscription with args:", { args }, { depth: 3 });
+    await upsertSubscription(args);
+    LOGGER.info("Finshed upserting subscription", { depth: 3 });
+
     // Update the organization with the new info for quicker access
     LOGGER.info("Updating org stripe sub status...");
-    await updateOrganization({
-      orgId: parsedMetadata.data.orgId,
-      customerId: actualEvent.customer,
-      stripeSubStatus: actualEvent.status,
+    await updateOrganization(parsedMetadata.data.orgId, {
+      stripeCustomerId: actualEvent.customer,
+      stripeSubscriptionStatus: actualEvent.status,
     });
   } else {
-    LOGGER.warn("Subscription does not have an orgId", {
+    LOGGER.warn("Subscription update event does not have orgId metadata", {
       input: actualEvent.metadata,
       zodParseError: parsedMetadata.error,
     });
   }
-
-  LOGGER.info("Subscription updated", args);
 };
 
 /**
@@ -100,7 +98,7 @@ export const handleSessionCompleted = async (
     return;
   }
 
-  const org = await fetchOrganizationById(metadata.data.orgId);
+  const org = await getOrganization(metadata.data.orgId);
 
   if (!org) {
     LOGGER.error("Organization not found for sessionCompleted event", { metadata });
@@ -128,15 +126,14 @@ export const handleSessionCompleted = async (
 
   // Update the subscription with the OrgId for future use
   const newSub = await updateSubscription({
-    subId: actualEvent.subscription,
+    subscriptionId: actualEvent.subscription,
     customerId: actualEvent.customer,
-    orgId: org.orgId,
+    orgId: org.id,
   });
 
   // Update the organization with the new info for quicker access
-  await updateOrganization({
-    orgId: org.orgId,
-    customerId: actualEvent.customer,
-    stripeSubStatus: newSub.data.status,
+  await updateOrganization(org.id, {
+    stripeCustomerId: actualEvent.customer,
+    stripeSubscriptionStatus: newSub.status ?? null,
   });
 };
