@@ -3,8 +3,8 @@ export interface Subscription {
   orgId: number;
   customerId: string;
   subscriptionId: string;
-  priceId: string | null;
-  status: string | null;
+  priceId: string;
+  status: string;
   createdAt: Date;
   updatedAt: Date;
 }
