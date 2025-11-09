@@ -1,7 +1,11 @@
 import { Member, User } from "@core/dynamodb/entities/types";
 import { UpdateMemberArgs } from "@core/fetchTypes/updateOrgMember";
 import { OrgMembers } from "@domain/github/endpointTypes";
+import { User as PgUser } from "../../postgres/schema";
 import { Db } from "../client";
+
+// Temporary type for accepting both DynamoDB and Postgres users during migration
+type UserLike = User | PgUser;
 
 export const getOrganizationMembers = async (orgId: number): Promise<Member[]> => {
   return await Db.entities.member.query
@@ -34,15 +38,17 @@ export const addOrganizationMemberFromUser = async ({
   user,
 }: {
   orgId: number;
-  user: User;
+  user: UserLike;
 }) => {
+  const userId = "userId" in user ? user.userId : user.id;
+  const name = user.name ?? "";
   return await Db.entities.member
     .create({
       orgId,
-      memberId: user.userId,
-      name: user.name,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
+      memberId: userId,
+      name,
+      email: user.email ?? undefined,
+      avatarUrl: user.avatarUrl ?? undefined,
     })
     .go()
     .then(({ data }) => data);
