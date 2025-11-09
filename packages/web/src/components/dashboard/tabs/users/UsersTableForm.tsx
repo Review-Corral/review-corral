@@ -180,7 +180,7 @@ const getColumns = (
               control={control}
               name={`members.${row.index}.slackId`}
               render={({ field }) => (
-                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <Select onValueChange={field.onChange} defaultValue={field.value ?? undefined}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder="Select a user" />
                   </SelectTrigger>
@@ -191,7 +191,7 @@ const getColumns = (
                           <div className="flex gap-2">
                             <img
                               alt={`Avatar for ${user.realNameNormalized}`}
-                              src={user.image48}
+                              src={user.image48 ?? undefined}
                               height={8}
                               width={20}
                               className="rounded-full"
