@@ -22,10 +22,11 @@
 
     /* Path aliases */
     "paths": {
-      "@/components/*": ["./components/*"],
       "@/*": ["./src/*"],
       "@core/*": ["../core/*"],
-      "@components/*": ["./components/*"]
+      "@components/*": ["./components/*"],
+      "@shadcn/*": ["./components/shadcn/*"],
+      "@lib/*": ["./components/lib/*"],
     }
   },
   "include": ["src", "app", "components", "vite.config.ts", "app.config.ts"]
