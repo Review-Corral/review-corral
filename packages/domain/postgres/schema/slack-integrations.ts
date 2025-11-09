@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
 import {
+  bigint,
   index,
   pgTable,
   text,
@@ -14,7 +15,7 @@ export const slackIntegrations = pgTable(
   "slack_integrations",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    orgId: text("org_id")
+    orgId: bigint("org_id", { mode: "number" })
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
     slackTeamId: text("slack_team_id").notNull(),
