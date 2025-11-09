@@ -47,7 +47,7 @@ export default $config({
     $transform(sst.aws.Function, (args, _opts) => {
       // Set the default if it's not set by the component
       if (args.runtime === undefined) {
-        args.runtime = "nodejs18.x";
+        args.runtime = "nodejs22.x";
         args.architecture = "arm64";
         args.logging =
           $app.stage === "prod"
