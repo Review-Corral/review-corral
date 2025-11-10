@@ -62,11 +62,8 @@ jobs:
           cache: "pnpm"
       - name: Install Pnpm Dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
-      - name: Install sst
-        run: pnpm sst install
-      - run: cp .env.example .env.local
       - name: Generate migrations
-        run: pnpm drizzle-kit generate --config=packages/domain/drizzle.config.ts
+        run: pnpm drizzle-kit generate --config=packages/domain/drizzle.config.ci.ts
       - name: Check for uncommitted migrations
         run: |
           if ! git diff --quiet packages/domain/postgres/migrations/; then
