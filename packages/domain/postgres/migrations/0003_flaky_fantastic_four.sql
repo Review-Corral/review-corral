@@ -1,0 +1,1 @@
+ALTER TABLE "pull_requests" ALTER COLUMN "pr_number" SET DATA TYPE bigint;

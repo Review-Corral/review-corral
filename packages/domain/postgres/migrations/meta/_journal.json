@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1762672735286,
+      "tag": "0000_misty_pestilence",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1762701548726,
+      "tag": "0001_milky_menace",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1762713050953,
+      "tag": "0002_parallel_kang",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1762718535293,
+      "tag": "0003_flaky_fantastic_four",
+      "breakpoints": true
+    }
+  ]
+}
