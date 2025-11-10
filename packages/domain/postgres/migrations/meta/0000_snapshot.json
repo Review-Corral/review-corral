@@ -1,5 +1,5 @@
 {
-  "id": "98f9c5d8-077f-44ba-98b4-2692b268b9c0",
+  "id": "7dfcf665-11ad-4874-b3bc-49f2ffa79d0e",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -110,7 +110,7 @@
           "name": "name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "email": {
           "name": "email",
@@ -126,12 +126,6 @@
         },
         "gh_access_token": {
           "name": "gh_access_token",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "status": {
-          "name": "status",
           "type": "text",
           "primaryKey": false,
           "notNull": false
@@ -195,7 +189,7 @@
           "name": "avatar_url",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "billing_email": {
           "name": "billing_email",
@@ -207,13 +201,13 @@
           "name": "installation_id",
           "type": "bigint",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "type": {
           "name": "type",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "stripe_customer_id": {
           "name": "stripe_customer_id",
@@ -558,7 +552,7 @@
         },
         "pr_number": {
           "name": "pr_number",
-          "type": "integer",
+          "type": "bigint",
           "primaryKey": false,
           "notNull": true
         },
@@ -715,25 +709,25 @@
           "name": "slack_team_name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "access_token": {
           "name": "access_token",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "channel_id": {
           "name": "channel_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "channel_name": {
           "name": "channel_name",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",
@@ -840,7 +834,7 @@
           "name": "real_name_normalized",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "is_bot": {
           "name": "is_bot",
@@ -944,83 +938,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.slack_api_throttles": {
-      "name": "slack_api_throttles",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "uuid",
-          "primaryKey": true,
-          "notNull": true,
-          "default": "gen_random_uuid()"
-        },
-        "slack_team_id": {
-          "name": "slack_team_id",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "request_type": {
-          "name": "request_type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "request_time": {
-          "name": "request_time",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "expires_at": {
-          "name": "expires_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "idx_slack_throttles_expires": {
-          "name": "idx_slack_throttles_expires",
-          "columns": [
-            {
-              "expression": "expires_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {
-        "slack_throttles_team_type_unique": {
-          "name": "slack_throttles_team_type_unique",
-          "nullsNotDistinct": false,
-          "columns": [
-            "slack_team_id",
-            "request_type"
-          ]
-        }
-      },
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.subscriptions": {
       "name": "subscriptions",
       "schema": "",
@@ -1054,13 +971,13 @@
           "name": "price_id",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "status": {
           "name": "status",
           "type": "text",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "created_at": {
           "name": "created_at",

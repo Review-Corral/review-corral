@@ -10,11 +10,10 @@ CREATE TABLE "branches" (
 --> statement-breakpoint
 CREATE TABLE "users" (
 	"id" bigint PRIMARY KEY NOT NULL,
-	"name" text,
+	"name" text NOT NULL,
 	"email" text,
 	"avatar_url" text,
 	"gh_access_token" text,
-	"status" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -22,10 +21,10 @@ CREATE TABLE "users" (
 CREATE TABLE "organizations" (
 	"id" bigint PRIMARY KEY NOT NULL,
 	"name" text NOT NULL,
-	"avatar_url" text,
+	"avatar_url" text NOT NULL,
 	"billing_email" text,
-	"installation_id" bigint,
-	"type" text,
+	"installation_id" bigint NOT NULL,
+	"type" text NOT NULL,
 	"stripe_customer_id" text,
 	"stripe_subscription_status" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
@@ -57,7 +56,7 @@ CREATE TABLE "repositories" (
 CREATE TABLE "pull_requests" (
 	"id" bigint PRIMARY KEY NOT NULL,
 	"repo_id" bigint NOT NULL,
-	"pr_number" integer NOT NULL,
+	"pr_number" bigint NOT NULL,
 	"thread_ts" text,
 	"is_draft" boolean DEFAULT false NOT NULL,
 	"required_approvals" integer DEFAULT 0 NOT NULL,
@@ -72,10 +71,10 @@ CREATE TABLE "slack_integrations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"org_id" bigint NOT NULL,
 	"slack_team_id" text NOT NULL,
-	"slack_team_name" text,
-	"access_token" text,
-	"channel_id" text,
-	"channel_name" text,
+	"slack_team_name" text NOT NULL,
+	"access_token" text NOT NULL,
+	"channel_id" text NOT NULL,
+	"channel_name" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "slack_integrations_org_team_channel_unique" UNIQUE("org_id","slack_team_id","channel_id")
@@ -85,7 +84,7 @@ CREATE TABLE "slack_users" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"slack_team_id" text NOT NULL,
 	"slack_user_id" text NOT NULL,
-	"real_name_normalized" text,
+	"real_name_normalized" text NOT NULL,
 	"is_bot" boolean DEFAULT false NOT NULL,
 	"is_owner" boolean DEFAULT false NOT NULL,
 	"is_admin" boolean DEFAULT false NOT NULL,
@@ -97,23 +96,13 @@ CREATE TABLE "slack_users" (
 	CONSTRAINT "slack_users_team_user_unique" UNIQUE("slack_team_id","slack_user_id")
 );
 --> statement-breakpoint
-CREATE TABLE "slack_api_throttles" (
-	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
-	"slack_team_id" text NOT NULL,
-	"request_type" text NOT NULL,
-	"request_time" timestamp with time zone DEFAULT now() NOT NULL,
-	"expires_at" timestamp with time zone NOT NULL,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "slack_throttles_team_type_unique" UNIQUE("slack_team_id","request_type")
-);
---> statement-breakpoint
 CREATE TABLE "subscriptions" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"org_id" bigint NOT NULL,
 	"customer_id" text NOT NULL,
 	"subscription_id" text NOT NULL,
-	"price_id" text,
-	"status" text,
+	"price_id" text NOT NULL,
+	"status" text NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "subscriptions_customer_sub_unique" UNIQUE("customer_id","subscription_id")
@@ -142,6 +131,5 @@ CREATE INDEX "idx_slack_integrations_org" ON "slack_integrations" USING btree ("
 CREATE INDEX "idx_slack_integrations_team" ON "slack_integrations" USING btree ("slack_team_id");--> statement-breakpoint
 CREATE INDEX "idx_slack_users_team" ON "slack_users" USING btree ("slack_team_id");--> statement-breakpoint
 CREATE INDEX "idx_slack_users_expires" ON "slack_users" USING btree ("expires_at");--> statement-breakpoint
-CREATE INDEX "idx_slack_throttles_expires" ON "slack_api_throttles" USING btree ("expires_at");--> statement-breakpoint
 CREATE INDEX "idx_subscriptions_org" ON "subscriptions" USING btree ("org_id");--> statement-breakpoint
 CREATE INDEX "idx_subscriptions_customer" ON "subscriptions" USING btree ("customer_id");

@@ -1,1 +1,0 @@
-DROP TABLE "slack_api_throttles" CASCADE;
