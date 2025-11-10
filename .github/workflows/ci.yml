@@ -48,6 +48,34 @@ jobs:
       - name: Run typecheck
         run: pnpm typecheck
 
+  check-migrations:
+    name: Check DB Migrations
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Pnpm
+        uses: pnpm/action-setup@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: ".nvmrc"
+          cache: "pnpm"
+      - name: Install Pnpm Dependencies
+        run: pnpm install --frozen-lockfile --prefer-offline
+      - name: Install sst
+        run: pnpm sst install
+      - run: cp .env.example .env.local
+      - name: Generate migrations
+        run: pnpm db:generate
+      - name: Check for uncommitted migrations
+        run: |
+          if ! git diff --quiet packages/domain/postgres/migrations/; then
+            echo "::error::Database schema changes detected without migrations!"
+            echo "::error::Please run 'pnpm db:generate' to generate migrations and commit them."
+            git diff packages/domain/postgres/migrations/
+            exit 1
+          fi
+
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
