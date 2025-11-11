@@ -1,3 +1,4 @@
+import { LATEST_SLACK_SCOPES } from "@core/slack/const";
 import type { SlackIntegration } from "../postgres/schema/slack-integrations";
 
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
@@ -11,7 +12,7 @@ const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
  * This is a simple check used for UI display purposes.
  */
 export function areScopesOutdated(integration: SlackIntegration): boolean {
-  return integration.scopes === "";
+  return integration.scopes === LATEST_SLACK_SCOPES;
 }
 
 /**

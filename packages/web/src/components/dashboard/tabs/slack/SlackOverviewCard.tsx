@@ -1,11 +1,12 @@
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
 import { WarningCard } from "@components/ui/cards/WarningCard";
-import { Slack } from "lucide-react";
+import { RefreshCw, Slack } from "lucide-react";
 import { FC } from "react";
 import { OrgViewProps } from "../shared";
 import SlackButton from "./SetupSlackButton";
 import { SetupSlackCard } from "./SetupSlackCard";
 import { SlackIntegration } from "./SlackIntegration";
+import { getSlackInstallUrl } from "./getSlackInstallUrl";
 import { useSlackIntegrations } from "./useSlackIntegrations";
 
 interface SlackOverviewCardProps extends OrgViewProps {}
@@ -18,6 +19,13 @@ export const SlackOverviewCard: FC<SlackOverviewCardProps> = ({ organization }) 
           <Slack className="h-8 w-8 fill-black" />
           <span className="font-semibold text-lg">Channels</span>
         </div>
+        <a
+          href={getSlackInstallUrl(organization.id)}
+          className="text-gray-600 hover:text-gray-900 transition-colors"
+          title="Refresh Slack integration"
+        >
+          <RefreshCw className="h-5 w-5" />
+        </a>
       </div>
       <div className="py-6">
         <SlackCardData organization={organization} />
