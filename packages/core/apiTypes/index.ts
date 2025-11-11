@@ -56,6 +56,8 @@ export interface SlackIntegration {
   accessToken: string;
   channelId: string;
   channelName: string;
+  scopes: string;
+  isUpToDate: boolean;
   createdAt: Date | string;
   updatedAt: Date | string;
 }
