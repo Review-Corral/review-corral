@@ -1,0 +1,1 @@
+ALTER TABLE "slack_integrations" ADD COLUMN "last_checked" timestamp with time zone;
