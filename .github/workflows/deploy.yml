@@ -34,7 +34,7 @@ jobs:
         run: pnpm sst install
 
       - name: Run linter
-        run: pnpm format:check
+        run: pnpm check
         continue-on-error: true
 
       - name: Run type check
