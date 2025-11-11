@@ -10,6 +10,7 @@ import { app as organizationRoutes } from "./organization/routes";
 import { app as profileRoutes } from "./profile/routes";
 import { app as slackRoutes } from "./slack/routes";
 import { app as stripeRoutes } from "./stripe/routes";
+import { loggerMiddleware } from "./middleware/logging";
 
 const app = new Hono();
 
@@ -24,6 +25,8 @@ app.use(
     allowHeaders: ["Content-Type", "Authorization"],
   }),
 );
+
+app.use(loggerMiddleware);
 
 // Home route - simple health check
 app.get("/", (c) => {

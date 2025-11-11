@@ -1,18 +1,13 @@
-import { LATEST_SLACK_SCOPES } from "@core/slack/const";
+import { haveRequiredScopes } from "@core/slack/const";
 import type { SlackIntegration } from "../postgres/schema/slack-integrations";
 
 const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
 
 /**
  * Checks if the Slack integration scopes are outdated.
- *
- * Returns true if the scopes field is empty, indicating the integration
- * needs to be re-authorized with updated scopes.
- *
- * This is a simple check used for UI display purposes.
  */
 export function areScopesOutdated(integration: SlackIntegration): boolean {
-  return integration.scopes === LATEST_SLACK_SCOPES;
+  return !haveRequiredScopes(integration.scopes);
 }
 
 /**
