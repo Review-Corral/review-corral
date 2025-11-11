@@ -2,6 +2,7 @@ import { relations } from "drizzle-orm";
 import {
   bigint,
   index,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -23,6 +24,13 @@ export const slackIntegrations = pgTable(
     accessToken: text("access_token").notNull(),
     channelId: text("channel_id").notNull(),
     channelName: text("channel_name").notNull(),
+    scopes: text("scopes").notNull().default(""),
+    scopesUpdatedAt: timestamp("scopes_updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    scopeHistory: jsonb("scope_history")
+      .$type<{ scopes: string; updatedAt: string }[]>()
+      .default([]),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
