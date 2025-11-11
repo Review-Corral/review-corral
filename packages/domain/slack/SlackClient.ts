@@ -1,3 +1,4 @@
+import { tryCatch } from "@core/utils/errors/tryCatch";
 import { convertPrEventToBaseProps } from "@domain/github/webhooks/handlers/utils";
 import { type PullRequest } from "@domain/postgres/schema";
 import {
@@ -61,6 +62,8 @@ export type BasePullRequestProperties = {
 
 export class SlackClient {
   readonly client: WebClient;
+  // Cache for DM conversation IDs to avoid rate limiting
+  private dmConversationCache = new Map<string, string>();
 
   constructor(
     readonly channelId: string,
@@ -96,6 +99,81 @@ export class SlackClient {
         { depth: 10 },
       );
     }
+  }
+
+  /**
+   * Opens a DM conversation with a Slack user.
+   * Uses caching to avoid rate limiting on repeated calls.
+   */
+  private async openDirectMessage(slackUserId: string): Promise<string | null> {
+    // Check cache first
+    const cached = this.dmConversationCache.get(slackUserId);
+    if (cached) {
+      return cached;
+    }
+
+    const result = await tryCatch(
+      this.client.conversations.open({
+        users: slackUserId,
+      }),
+    );
+
+    if (!result.ok) {
+      LOGGER.error("Error opening DM conversation", {
+        error: result.error,
+        slackUserId,
+      });
+      return null;
+    }
+
+    if (result.data.channel?.id) {
+      // Cache the conversation ID
+      this.dmConversationCache.set(slackUserId, result.data.channel.id);
+      return result.data.channel.id;
+    }
+
+    LOGGER.error("Failed to open DM: no channel ID returned", {
+      slackUserId,
+    });
+    return null;
+  }
+
+  /**
+   * Sends a direct message to a Slack user.
+   * Silently fails (with logging) if the DM cannot be sent.
+   */
+  async postDirectMessage({
+    slackUserId,
+    message,
+  }: {
+    slackUserId: string;
+    message: Omit<ChatPostMessageArguments, "token" | "channel">;
+  }): Promise<ChatPostMessageResponse | undefined> {
+    const conversationId = await this.openDirectMessage(slackUserId);
+    if (!conversationId) {
+      // Silently skip - error already logged in openDirectMessage
+      return undefined;
+    }
+
+    const payload = {
+      ...message,
+      channel: conversationId,
+      token: this.slackToken,
+      mrkdwn: true,
+    };
+
+    const result = await tryCatch(this.client.chat.postMessage(payload));
+
+    if (!result.ok) {
+      LOGGER.error("Error posting DM", {
+        error: result.error,
+        slackUserId,
+        payload,
+      });
+      return undefined;
+    }
+
+    return result.data;
   }
 
   async postPrMerged(
