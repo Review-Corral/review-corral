@@ -97,6 +97,23 @@ export async function updateSlackIntegrationScopes(
 }
 
 /**
+ * Update the lastChecked timestamp for a slack integration
+ * This should be called after successfully sending a scope warning message
+ */
+export async function updateLastChecked(
+  integrationId: string,
+  timestamp: Date,
+): Promise<void> {
+  await db
+    .update(slackIntegrations)
+    .set({
+      lastChecked: timestamp,
+      updatedAt: timestamp,
+    })
+    .where(eq(slackIntegrations.id, integrationId));
+}
+
+/**
  * Delete a slack integration
  */
 export async function deleteSlackIntegration({
