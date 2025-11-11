@@ -48,5 +48,8 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: us-east-1
 
+      - name: Run database migrations
+        run: pnpm sst shell --stage prod -- drizzle-kit migrate --config=packages/domain/drizzle.config.ts
+
       - name: Deploy to production
         run: pnpm sst deploy --stage prod
