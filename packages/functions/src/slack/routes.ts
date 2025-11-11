@@ -8,7 +8,7 @@ import {
   insertSlackIntegration,
   updateSlackIntegrationScopes,
 } from "@domain/postgres/fetchers/slack-integrations";
-import { shouldWarnAboutScopes } from "@domain/slack/checkScopesOutdated";
+import { areScopesOutdated } from "@domain/slack/checkScopesOutdated";
 import { Hono } from "hono";
 import ky from "ky";
 import { Resource } from "sst";
@@ -212,10 +212,10 @@ protectedRoutes.get("/:organizationId/installations", async (c) => {
 
     const slackIntegration = await getSlackInstallationsForOrganization(organizationId);
 
-    // Add isUpToDate field to each integration
+    // Add scopesAreOutdated field to each integration
     const integrationsWithStatus = slackIntegration.map((integration) => ({
       ...integration,
-      isUpToDate: !shouldWarnAboutScopes(integration),
+      scopesAreOutdated: areScopesOutdated(integration),
     }));
 
     return c.json(integrationsWithStatus);

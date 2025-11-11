@@ -55,7 +55,7 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
   }
 
   const hasOutdatedScopes = slackIntegrations.data.some(
-    (slackIntegration) => !slackIntegration.isUpToDate,
+    (slackIntegration) => slackIntegration.scopesAreOutdated,
   );
 
   return (
