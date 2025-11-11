@@ -7,9 +7,9 @@ import {
   getSlackInstallationsForOrganization,
   updateLastChecked,
 } from "@domain/postgres/fetchers/slack-integrations";
+import { SlackClient } from "@domain/slack/SlackClient";
 import { shouldWarnAboutScopes } from "@domain/slack/checkScopesOutdated";
 import { sendScopeWarning } from "@domain/slack/sendScopeWarning";
-import { SlackClient } from "@domain/slack/SlackClient";
 import { handleIssueCommentEvent } from "./handlers/issueComment";
 import { handlePullRequestEvent } from "./handlers/pullRequest";
 import { handlePullRequestCommentEvent } from "./handlers/pullRequestComment";

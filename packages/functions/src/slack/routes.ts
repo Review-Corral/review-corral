@@ -45,12 +45,16 @@ const slackAuthResponseBodyOKSchema = z.object({
   authed_user: z.object({
     id: z.string(),
   }),
-  incoming_webhook: z.object({
-    channel: z.string(),
-    channel_id: z.string(),
-    configuration_url: z.string(),
-    url: z.string(),
-  }),
+  // NOTE: this is deprecated--we now get perms for all channels
+  // so channel selecting here is not needed
+  incoming_webhook: z
+    .object({
+      channel: z.string(),
+      channel_id: z.string(),
+      configuration_url: z.string(),
+      url: z.string(),
+    })
+    .optional(),
 });
 
 const slackAuthResponseFailedSchema = z.object({
@@ -130,8 +134,8 @@ app.get("/oauth", async (c) => {
         // Create new integration
         await insertSlackIntegration({
           accessToken: parsedBody.access_token,
-          channelId: parsedBody.incoming_webhook.channel_id,
-          channelName: parsedBody.incoming_webhook.channel,
+          channelId: "TEMP: Deprecated",
+          channelName: "TEMP: Deprecated",
           slackTeamName: parsedBody.team.name,
           slackTeamId: parsedBody.team.id,
           orgId,
