@@ -20,6 +20,8 @@ import { Route as AppDashboardRouteImport } from './routes/app/_dashboard'
 import { Route as LandingPrivacyRouteImport } from './routes/_landing/privacy'
 import { Route as LandingAboutRouteImport } from './routes/_landing/about'
 import { Route as AppDashboardIndexRouteImport } from './routes/app/_dashboard/index'
+import { Route as AppSlackInstallSuccessRouteImport } from './routes/app/slack/install/success'
+import { Route as AppSlackInstallFailureRouteImport } from './routes/app/slack/install/failure'
 import { Route as AppDashboardOrgOrgIdRouteImport } from './routes/app/_dashboard/org/$orgId'
 import { Route as AppDashboardOrgOrgIdIndexRouteImport } from './routes/app/_dashboard/org/$orgId/index'
 import { Route as AppDashboardOrgOrgIdPaymentSuccessRouteImport } from './routes/app/_dashboard/org/$orgId/payment/success'
@@ -78,6 +80,16 @@ const AppDashboardIndexRoute = AppDashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppDashboardRoute,
 } as any)
+const AppSlackInstallSuccessRoute = AppSlackInstallSuccessRouteImport.update({
+  id: '/slack/install/success',
+  path: '/slack/install/success',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppSlackInstallFailureRoute = AppSlackInstallFailureRouteImport.update({
+  id: '/slack/install/failure',
+  path: '/slack/install/failure',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppDashboardOrgOrgIdRoute = AppDashboardOrgOrgIdRouteImport.update({
   id: '/org/$orgId',
   path: '/org/$orgId',
@@ -113,6 +125,8 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginIndexRoute
   '/app/': typeof AppDashboardIndexRoute
   '/app/org/$orgId': typeof AppDashboardOrgOrgIdRouteWithChildren
+  '/app/slack/install/failure': typeof AppSlackInstallFailureRoute
+  '/app/slack/install/success': typeof AppSlackInstallSuccessRoute
   '/app/org/$orgId/': typeof AppDashboardOrgOrgIdIndexRoute
   '/app/org/$orgId/payment/failure': typeof AppDashboardOrgOrgIdPaymentFailureRoute
   '/app/org/$orgId/payment/success': typeof AppDashboardOrgOrgIdPaymentSuccessRoute
@@ -126,6 +140,8 @@ export interface FileRoutesByTo {
   '/login/set-token': typeof LoginSetTokenRoute
   '/': typeof LandingIndexRoute
   '/login': typeof LoginIndexRoute
+  '/app/slack/install/failure': typeof AppSlackInstallFailureRoute
+  '/app/slack/install/success': typeof AppSlackInstallSuccessRoute
   '/app/org/$orgId': typeof AppDashboardOrgOrgIdIndexRoute
   '/app/org/$orgId/payment/failure': typeof AppDashboardOrgOrgIdPaymentFailureRoute
   '/app/org/$orgId/payment/success': typeof AppDashboardOrgOrgIdPaymentSuccessRoute
@@ -144,6 +160,8 @@ export interface FileRoutesById {
   '/login/': typeof LoginIndexRoute
   '/app/_dashboard/': typeof AppDashboardIndexRoute
   '/app/_dashboard/org/$orgId': typeof AppDashboardOrgOrgIdRouteWithChildren
+  '/app/slack/install/failure': typeof AppSlackInstallFailureRoute
+  '/app/slack/install/success': typeof AppSlackInstallSuccessRoute
   '/app/_dashboard/org/$orgId/': typeof AppDashboardOrgOrgIdIndexRoute
   '/app/_dashboard/org/$orgId/payment/failure': typeof AppDashboardOrgOrgIdPaymentFailureRoute
   '/app/_dashboard/org/$orgId/payment/success': typeof AppDashboardOrgOrgIdPaymentSuccessRoute
@@ -161,6 +179,8 @@ export interface FileRouteTypes {
     | '/login'
     | '/app/'
     | '/app/org/$orgId'
+    | '/app/slack/install/failure'
+    | '/app/slack/install/success'
     | '/app/org/$orgId/'
     | '/app/org/$orgId/payment/failure'
     | '/app/org/$orgId/payment/success'
@@ -174,6 +194,8 @@ export interface FileRouteTypes {
     | '/login/set-token'
     | '/'
     | '/login'
+    | '/app/slack/install/failure'
+    | '/app/slack/install/success'
     | '/app/org/$orgId'
     | '/app/org/$orgId/payment/failure'
     | '/app/org/$orgId/payment/success'
@@ -191,6 +213,8 @@ export interface FileRouteTypes {
     | '/login/'
     | '/app/_dashboard/'
     | '/app/_dashboard/org/$orgId'
+    | '/app/slack/install/failure'
+    | '/app/slack/install/success'
     | '/app/_dashboard/org/$orgId/'
     | '/app/_dashboard/org/$orgId/payment/failure'
     | '/app/_dashboard/org/$orgId/payment/success'
@@ -284,6 +308,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppDashboardIndexRouteImport
       parentRoute: typeof AppDashboardRoute
     }
+    '/app/slack/install/success': {
+      id: '/app/slack/install/success'
+      path: '/slack/install/success'
+      fullPath: '/app/slack/install/success'
+      preLoaderRoute: typeof AppSlackInstallSuccessRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/app/slack/install/failure': {
+      id: '/app/slack/install/failure'
+      path: '/slack/install/failure'
+      fullPath: '/app/slack/install/failure'
+      preLoaderRoute: typeof AppSlackInstallFailureRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/app/_dashboard/org/$orgId': {
       id: '/app/_dashboard/org/$orgId'
       path: '/org/$orgId'
@@ -363,10 +401,14 @@ const AppDashboardRouteWithChildren = AppDashboardRoute._addFileChildren(
 
 interface AppRouteChildren {
   AppDashboardRoute: typeof AppDashboardRouteWithChildren
+  AppSlackInstallFailureRoute: typeof AppSlackInstallFailureRoute
+  AppSlackInstallSuccessRoute: typeof AppSlackInstallSuccessRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
   AppDashboardRoute: AppDashboardRouteWithChildren,
+  AppSlackInstallFailureRoute: AppSlackInstallFailureRoute,
+  AppSlackInstallSuccessRoute: AppSlackInstallSuccessRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
