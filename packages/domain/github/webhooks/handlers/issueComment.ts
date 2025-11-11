@@ -6,7 +6,22 @@ import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
-import { getSlackUserName } from "./shared";
+import { getSlackUserId, getSlackUserName } from "./shared";
+
+/**
+ * Extracts GitHub username mentions (@username) from a comment body
+ */
+function extractMentions(commentBody: string): string[] {
+  const mentionRegex = /@([a-zA-Z0-9_-]+)/g;
+  const mentions: string[] = [];
+  let match;
+
+  while ((match = mentionRegex.exec(commentBody)) !== null) {
+    mentions.push(match[1]);
+  }
+
+  return mentions;
+}
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
@@ -61,6 +76,37 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
       threadTs: pullRequestItem.threadTs,
       slackUsername: await getSlackUserName(event.sender.login, props),
     });
+
+    // Send DMs to mentioned users
+    const mentions = extractMentions(event.comment.body);
+    for (const githubUsername of mentions) {
+      // Skip if the commenter mentioned themselves
+      if (githubUsername === event.sender.login) {
+        continue;
+      }
+
+      const mentionedUserSlackId = await getSlackUserId(githubUsername, props);
+      if (mentionedUserSlackId) {
+        // Fetch PR info to get title and URL
+        const prInfo = await getPullRequestInfo({
+          url: event.issue.pull_request.url,
+          accessToken: accessToken.token,
+        });
+
+        await slackClient.postDirectMessage({
+          slackUserId: mentionedUserSlackId,
+          message: {
+            text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment on <${prInfo.html_url}|${event.repository.full_name}#${event.issue.number}: ${event.issue.title}>`,
+            attachments: [
+              {
+                text: event.comment.body,
+              },
+            ],
+          },
+        });
+      }
+    }
+
     return;
   } else {
     LOGGER.debug("Issue comment action not handled", { action: event.action });

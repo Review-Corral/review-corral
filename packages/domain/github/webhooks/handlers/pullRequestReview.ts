@@ -12,7 +12,7 @@ import {} from "@domain/slack/SlackClient";
 import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-types";
 import slackifyMarkdown from "slackify-markdown";
 import { GithubWebhookEventHander } from "../types";
-import { getSlackUserName } from "./shared";
+import { getSlackUserId, getSlackUserName } from "./shared";
 import { convertPullRequestInfoToBaseProps } from "./utils";
 
 const LOGGER = new Logger("github.handlers.pullRequestReview");
@@ -65,6 +65,25 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
         },
         threadTs: pullRequestItem.threadTs,
       });
+
+      // Send DM to PR author
+      const authorSlackId = await getSlackUserId(event.pull_request.user.login, args);
+      if (authorSlackId) {
+        await slackClient.postDirectMessage({
+          slackUserId: authorSlackId,
+          message: {
+            text: `✅ ${await getSlackUserName(event.sender.login, args)} approved your PR: <${event.pull_request.html_url}|${event.repository.full_name}#${event.pull_request.number}: ${event.pull_request.title}>`,
+            attachments: event.review.body
+              ? [
+                  {
+                    text: slackifyMarkdown(event.review.body),
+                    color: "#00BB00",
+                  },
+                ]
+              : undefined,
+          },
+        });
+      }
 
       try {
         const accessToken = await getInstallationAccessToken(args.installationId);
@@ -123,6 +142,26 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
         },
         threadTs: pullRequestItem.threadTs,
       });
+
+      // Send DM to PR author
+      const authorSlackId = await getSlackUserId(event.pull_request.user.login, args);
+      if (authorSlackId) {
+        const reviewEmoji =
+          event.review.state === "changes_requested" ? "⚠️" : "💬";
+        await slackClient.postDirectMessage({
+          slackUserId: authorSlackId,
+          message: {
+            text: `${reviewEmoji} ${await getSlackUserName(event.sender.login, args)} ${getReviewText(event.review)}: <${event.pull_request.html_url}|${event.repository.full_name}#${event.pull_request.number}: ${event.pull_request.title}>`,
+            attachments: event.review.body
+              ? [
+                  {
+                    text: slackifyMarkdown(event.review.body),
+                  },
+                ]
+              : undefined,
+          },
+        });
+      }
     }
   }
 };
