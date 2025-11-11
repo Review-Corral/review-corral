@@ -1,7 +1,9 @@
 import { ErrorCard } from "@components/ui/cards/ErrorCard";
+import { WarningCard } from "@components/ui/cards/WarningCard";
 import { Slack } from "lucide-react";
 import { FC } from "react";
 import { OrgViewProps } from "../shared";
+import SlackButton from "./SetupSlackButton";
 import { SetupSlackCard } from "./SetupSlackCard";
 import { SlackIntegration } from "./SlackIntegration";
 import { useSlackIntegrations } from "./useSlackIntegrations";
@@ -25,9 +27,9 @@ export const SlackOverviewCard: FC<SlackOverviewCardProps> = ({ organization }) 
 };
 
 const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
-  const slackChannels = useSlackIntegrations(organization.id);
+  const slackIntegrations = useSlackIntegrations(organization.id);
 
-  if (slackChannels.isLoading) {
+  if (slackIntegrations.isLoading) {
     return (
       <div>
         <div className="space-y-4">
@@ -44,25 +46,48 @@ const SlackCardData: FC<SlackOverviewCardProps> = ({ organization }) => {
     );
   }
 
-  if (slackChannels.isError) {
+  if (slackIntegrations.isError) {
     return <ErrorCard message="Error loading your Slack integrations" />;
   }
 
-  if (!slackChannels.data || slackChannels.data.length === 0) {
+  if (!slackIntegrations.data || slackIntegrations.data.length === 0) {
     return <SetupSlackCard organization={organization} />;
   }
 
+  const hasOutdatedScopes = slackIntegrations.data.some(
+    (slackIntegration) => !slackIntegration.isUpToDate,
+  );
+
   return (
     <div>
+      {hasOutdatedScopes && (
+        <div className="mb-4">
+          <WarningCard
+            message="Your Slack scopes are out of date"
+            subMessage={
+              <div className="flex flex-col gap-2">
+                <span>
+                  Please update your Slack integration to continue receiving
+                  notifications and utilize the latest features
+                </span>
+                <SlackButton
+                  organizationId={organization.id}
+                  buttonText="Update scopes"
+                />
+              </div>
+            }
+          />
+        </div>
+      )}
       <div className="space-y-2">
-        {slackChannels.data.map((channel) => (
+        {slackIntegrations.data.map((slackIntegration) => (
           <SlackIntegration
-            key={`${channel.slackTeamId}-${channel.channelId}`}
+            key={`${slackIntegration.slackTeamId}-${slackIntegration.channelId}`}
             organizationId={organization.id}
-            slackTeamName={channel.slackTeamName}
-            slackTeamId={channel.slackTeamId}
-            channelId={channel.channelId}
-            channelName={channel.channelName}
+            slackTeamName={slackIntegration.slackTeamName}
+            slackTeamId={slackIntegration.slackTeamId}
+            channelId={slackIntegration.channelId}
+            channelName={slackIntegration.channelName}
           />
         ))}
       </div>
