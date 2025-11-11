@@ -39,7 +39,7 @@ jobs:
           aws-region: us-east-1
 
       - name: Run database migrations
-        run: pnpm dev:db:migrate
+        run: pnpm sst shell --stage dev -- drizzle-kit migrate --config=packages/domain/drizzle.config.ts
 
       - name: Deploy to dev
         run: pnpm sst deploy --stage dev
