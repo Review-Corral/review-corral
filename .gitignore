@@ -12,6 +12,7 @@ node_modules
 # misc
 .DS_Store
 .electro-viewer/
+logs/
 
 # local env files
 .env*
