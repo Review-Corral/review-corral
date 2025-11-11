@@ -121,39 +121,64 @@ app.get("/oauth", async (c) => {
         (i) => i.slackTeamId === parsedBody.team.id,
       );
 
-      if (existingIntegration) {
-        // Update existing integration with new scopes
-        await updateSlackIntegrationScopes(existingIntegration.id, scope);
+      const isUpdate = !!existingIntegration;
+      const action = isUpdate ? "update" : "install";
+      const baseUrl = assertVarExists("BASE_FE_URL");
 
-        LOGGER.info("Slack integration scopes updated during oauth", {
-          orgId,
-          slackTeamId: parsedBody.team.id,
-          scopes: scope,
-        });
-      } else {
-        // Create new integration
-        await insertSlackIntegration({
-          accessToken: parsedBody.access_token,
-          channelId: "TEMP: Deprecated",
-          channelName: "TEMP: Deprecated",
-          slackTeamName: parsedBody.team.name,
-          slackTeamId: parsedBody.team.id,
-          orgId,
-          scopes: scope,
-        });
+      try {
+        if (existingIntegration) {
+          // Update existing integration with new scopes
+          await updateSlackIntegrationScopes(existingIntegration.id, scope);
 
-        LOGGER.info("Slack integration created during oauth", {
-          orgId,
-          slackTeamId: parsedBody.team.id,
-          scopes: scope,
-        });
+          LOGGER.info("Slack integration scopes updated during oauth", {
+            orgId,
+            slackTeamId: parsedBody.team.id,
+            scopes: scope,
+          });
+        } else {
+          // Create new integration
+          await insertSlackIntegration({
+            accessToken: parsedBody.access_token,
+            channelId: "TEMP: Deprecated",
+            channelName: "TEMP: Deprecated",
+            slackTeamName: parsedBody.team.name,
+            slackTeamId: parsedBody.team.id,
+            orgId,
+            scopes: scope,
+          });
+
+          LOGGER.info("Slack integration created during oauth", {
+            orgId,
+            slackTeamId: parsedBody.team.id,
+            scopes: scope,
+          });
+        }
+
+        // Redirect to success page
+        return c.redirect(
+          `${baseUrl}/app/slack/install/success?orgId=${orgId}&action=${action}`,
+          302,
+        );
+      } catch (dbError) {
+        LOGGER.error("Error saving Slack integration", { dbError, orgId, action });
+        // Redirect to failure page
+        return c.redirect(
+          `${baseUrl}/app/slack/install/failure?orgId=${orgId}&action=${action}`,
+          302,
+        );
       }
-
-      // Redirect response
-      return c.redirect(`${assertVarExists("BASE_FE_URL")}`, 302);
     }
   } catch (error) {
     LOGGER.error("Error in Slack OAuth", { error });
+    // Try to extract orgId from state if available for redirect
+    const orgIdFromState = query.state ? Number(query.state) : null;
+    if (orgIdFromState) {
+      return c.redirect(
+        `${assertVarExists("BASE_FE_URL")}/app/slack/install/failure?orgId=${orgIdFromState}&action=install`,
+        302,
+      );
+    }
+    // Fallback to JSON error if we can't determine orgId
     return c.json({ message: "Error in Slack OAuth" }, 400);
   }
 });
