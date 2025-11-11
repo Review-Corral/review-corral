@@ -26,8 +26,7 @@ const SlackButton: React.FC<SlackButtonProps> = ({
     state: organizationId.toString(),
     redirect_uri: slackAuthUrl,
     client_id: slackBotId,
-    scope:
-      "channels:join,chat:write,chat:write.public,im:write,incoming-webhook,users:read",
+    scope: "channels:join,chat:write,chat:write.public,im:write,users:read",
     user_scope: "",
   });
 
