@@ -31,6 +31,9 @@ export const slackIntegrations = pgTable(
     scopeHistory: jsonb("scope_history")
       .$type<{ scopes: string; updatedAt: string }[]>()
       .default([]),
+    // Last time we checked if scopes are out of date (not when scopes were last
+    // fetched from Slack server)
+    lastChecked: timestamp("last_checked", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
