@@ -1,0 +1,2 @@
+ALTER TABLE "slack_integrations" DROP CONSTRAINT "slack_integrations_org_team_channel_unique";--> statement-breakpoint
+ALTER TABLE "slack_integrations" ADD CONSTRAINT "slack_integrations_org_team_unique" UNIQUE("org_id","slack_team_id");
