@@ -37,10 +37,9 @@ export const slackIntegrations = pgTable(
   (table) => ({
     orgIdx: index("idx_slack_integrations_org").on(table.orgId),
     teamIdx: index("idx_slack_integrations_team").on(table.slackTeamId),
-    orgTeamChannelUnique: unique("slack_integrations_org_team_channel_unique").on(
+    orgTeamUnique: unique("slack_integrations_org_team_unique").on(
       table.orgId,
       table.slackTeamId,
-      table.channelId,
     ),
   }),
 );

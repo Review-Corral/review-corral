@@ -6,6 +6,7 @@ import {
   getSlackInstallationUsers,
   getSlackInstallationsForOrganization,
   insertSlackIntegration,
+  updateSlackIntegrationScopes,
 } from "@domain/postgres/fetchers/slack-integrations";
 import { Hono } from "hono";
 import ky from "ky";
@@ -67,7 +68,6 @@ const orgIdSchema = z.object({
 
 const deleteIntegrationSchema = z.object({
   slackTeamId: z.string(),
-  channelId: z.string(),
 });
 
 // OAuth route - no auth required
@@ -106,18 +106,43 @@ app.get("/oauth", async (c) => {
       LOGGER.warn("Slack oauth failed", { parsedBody });
       return c.json({ message: "Slack oauth failed" }, 400);
     } else {
-      const { access_token, ...parsedBodyLessToken } = parsedBody;
+      const { access_token, scope, ...parsedBodyLessToken } = parsedBody;
 
       LOGGER.debug("Slack response body (less token)", { parsedBodyLessToken });
 
-      await insertSlackIntegration({
-        accessToken: parsedBody.access_token,
-        channelId: parsedBody.incoming_webhook.channel_id,
-        channelName: parsedBody.incoming_webhook.channel,
-        slackTeamName: parsedBody.team.name,
-        slackTeamId: parsedBody.team.id,
-        orgId,
-      });
+      // Check if an integration already exists for this org and team
+      const existingIntegrations = await getSlackInstallationsForOrganization(orgId);
+      const existingIntegration = existingIntegrations.find(
+        (i) => i.slackTeamId === parsedBody.team.id,
+      );
+
+      if (existingIntegration) {
+        // Update existing integration with new scopes
+        await updateSlackIntegrationScopes(existingIntegration.id, scope);
+
+        LOGGER.info("Slack integration scopes updated during oauth", {
+          orgId,
+          slackTeamId: parsedBody.team.id,
+          scopes: scope,
+        });
+      } else {
+        // Create new integration
+        await insertSlackIntegration({
+          accessToken: parsedBody.access_token,
+          channelId: parsedBody.incoming_webhook.channel_id,
+          channelName: parsedBody.incoming_webhook.channel,
+          slackTeamName: parsedBody.team.name,
+          slackTeamId: parsedBody.team.id,
+          orgId,
+          scopes: scope,
+        });
+
+        LOGGER.info("Slack integration created during oauth", {
+          orgId,
+          slackTeamId: parsedBody.team.id,
+          scopes: scope,
+        });
+      }
 
       // Redirect response
       return c.redirect(`${assertVarExists("BASE_FE_URL")}`, 302);
@@ -207,7 +232,7 @@ protectedRoutes.delete("/:organizationId/installations", async (c) => {
   try {
     const { organizationId: orgId } = orgIdSchema.parse(c.req.param());
     const body = await c.req.json();
-    const { slackTeamId, channelId } = deleteIntegrationSchema.parse(body);
+    const { slackTeamId } = deleteIntegrationSchema.parse(body);
 
     const organization = await getOrganization(orgId);
 
@@ -218,13 +243,11 @@ protectedRoutes.delete("/:organizationId/installations", async (c) => {
     await deleteSlackIntegration({
       orgId,
       slackTeamId,
-      channelId,
     });
 
     LOGGER.info("Slack integration deleted", {
       orgId,
       slackTeamId,
-      channelId,
     });
 
     return c.json({ message: "Slack integration deleted" });

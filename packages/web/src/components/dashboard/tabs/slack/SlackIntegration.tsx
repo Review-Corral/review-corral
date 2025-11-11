@@ -31,7 +31,6 @@ export const SlackIntegration: FC<SlackIntegration> = ({
   const deleteSlackIntegration = useDeleteSlackIntegration({
     orgId: organizationId,
     slackTeamId,
-    channelId,
   });
 
   return (
