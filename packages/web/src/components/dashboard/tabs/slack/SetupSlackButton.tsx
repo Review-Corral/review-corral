@@ -3,9 +3,13 @@ import React from "react";
 
 interface SlackButtonProps {
   organizationId: number;
+  buttonText?: string;
 }
 
-const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
+const SlackButton: React.FC<SlackButtonProps> = ({
+  organizationId,
+  buttonText = "Connect to Slack",
+}) => {
   const slackBotId = import.meta.env.VITE_SLACK_BOT_ID;
   if (!slackBotId) {
     throw Error("VITE_SLACK_BOT_ID not set");
@@ -31,7 +35,7 @@ const SlackButton: React.FC<SlackButtonProps> = ({ organizationId }) => {
   return (
     <div>
       <a href={`https://slack.com/oauth/v2/authorize?${searchParams.toString()}`}>
-        <Button>Connect to Slack</Button>
+        <Button variant="outline">{buttonText}</Button>
       </a>
     </div>
   );
