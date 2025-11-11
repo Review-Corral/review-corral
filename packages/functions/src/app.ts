@@ -6,11 +6,11 @@ import { Resource } from "sst";
 // Import all route modules
 import { app as authRoutes } from "./auth/routes";
 import { app as githubRoutes } from "./github/routes";
+import { loggerMiddleware } from "./middleware/logging";
 import { app as organizationRoutes } from "./organization/routes";
 import { app as profileRoutes } from "./profile/routes";
 import { app as slackRoutes } from "./slack/routes";
 import { app as stripeRoutes } from "./stripe/routes";
-import { loggerMiddleware } from "./middleware/logging";
 
 const app = new Hono();
 
