@@ -30,10 +30,20 @@ describe("areScopesOutdated", () => {
     expect(areScopesOutdated(integration)).toBe(true);
   });
 
-  it("should return false when scopes are not empty", () => {
+  it("should return true when scopes are missing required scopes", () => {
     const integration = mock<SlackIntegration>({
       ...baseIntegration,
       scopes: "chat:write,channels:read",
+    });
+
+    expect(areScopesOutdated(integration)).toBe(true);
+  });
+
+  it("should return false when scopes have all required scopes", () => {
+    const integration = mock<SlackIntegration>({
+      ...baseIntegration,
+      scopes:
+        "chat:write,channels:history,commands,users:read,chat:write.public,channels:join,im:write",
     });
 
     expect(areScopesOutdated(integration)).toBe(false);
@@ -55,17 +65,18 @@ describe("shouldWarnAboutScopes", () => {
     updatedAt: new Date(),
   };
 
-  it("should return false when scopes are not empty", () => {
+  it("should return false when scopes have all required scopes", () => {
     const integration = mock<SlackIntegration>({
       ...baseIntegration,
-      scopes: "chat:write,channels:read",
+      scopes:
+        "chat:write,channels:history,commands,users:read,chat:write.public,channels:join,im:write",
       lastChecked: null,
     });
 
     expect(shouldWarnAboutScopes(integration)).toBe(false);
   });
 
-  it("should return false when scopes are empty but checked less than 24 hours ago", () => {
+  it("should return false when scopes are outdated but checked less than 24 hours ago", () => {
     const recentCheckTime = new Date(Date.now() - 12 * 60 * 60 * 1000); // 12 hours ago
     const integration = mock<SlackIntegration>({
       ...baseIntegration,
@@ -76,7 +87,7 @@ describe("shouldWarnAboutScopes", () => {
     expect(shouldWarnAboutScopes(integration)).toBe(false);
   });
 
-  it("should return true when scopes are empty and lastChecked is null", () => {
+  it("should return true when scopes are outdated and lastChecked is null", () => {
     const integration = mock<SlackIntegration>({
       ...baseIntegration,
       scopes: "",
@@ -86,7 +97,7 @@ describe("shouldWarnAboutScopes", () => {
     expect(shouldWarnAboutScopes(integration)).toBe(true);
   });
 
-  it("should return true when scopes are empty and checked more than 24 hours ago", () => {
+  it("should return true when scopes are outdated and checked more than 24 hours ago", () => {
     const oldCheckTime = new Date(Date.now() - TWENTY_FOUR_HOURS_MS - 1000); // 24 hours + 1 second ago
     const integration = mock<SlackIntegration>({
       ...baseIntegration,
