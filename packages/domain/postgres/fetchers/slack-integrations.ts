@@ -14,6 +14,8 @@ import {
   slackUsers,
 } from "../schema";
 
+type ScopeHistoryEntry = { scopes: string; updatedAt: string };
+
 const LOGGER = new Logger("fetchers.slack");
 const THROTTLE_MINUTES = 5;
 const USERS_REQUEST_TYPE = "users_list";
@@ -41,16 +43,68 @@ export async function insertSlackIntegration(
 }
 
 /**
+ * Update scopes for a slack integration
+ * This should be called after a user re-installs the app
+ */
+export async function updateSlackIntegrationScopes(
+  integrationId: string,
+  newScopes: string,
+): Promise<SlackIntegration> {
+  const now = new Date();
+
+  // Get the current integration to access its scope history
+  const currentIntegration = await db
+    .select()
+    .from(slackIntegrations)
+    .where(eq(slackIntegrations.id, integrationId))
+    .limit(1)
+    .then((results) => results[0]);
+
+  if (!currentIntegration) {
+    throw new Error(`Slack integration not found: ${integrationId}`);
+  }
+
+  // Only update scope history if scopes actually changed
+  const scopeHistory = (currentIntegration.scopeHistory as ScopeHistoryEntry[]) || [];
+
+  if (currentIntegration.scopes !== newScopes) {
+    scopeHistory.push({
+      scopes: currentIntegration.scopes,
+      updatedAt: currentIntegration.scopesUpdatedAt.toISOString(),
+    });
+
+    LOGGER.info("Slack integration scopes updated", {
+      integrationId,
+      orgId: currentIntegration.orgId,
+      previousScopes: currentIntegration.scopes,
+      newScopes,
+      scopeHistoryLength: scopeHistory.length,
+    });
+  }
+
+  const result = await db
+    .update(slackIntegrations)
+    .set({
+      scopes: newScopes,
+      scopesUpdatedAt: now,
+      scopeHistory,
+      updatedAt: now,
+    })
+    .where(eq(slackIntegrations.id, integrationId))
+    .returning();
+
+  return result[0];
+}
+
+/**
  * Delete a slack integration
  */
 export async function deleteSlackIntegration({
   orgId,
   slackTeamId,
-  channelId,
 }: {
   orgId: number;
   slackTeamId: string;
-  channelId: string | null;
 }): Promise<void> {
   await db
     .delete(slackIntegrations)
@@ -58,7 +112,6 @@ export async function deleteSlackIntegration({
       and(
         eq(slackIntegrations.orgId, orgId),
         eq(slackIntegrations.slackTeamId, slackTeamId),
-        channelId !== null ? eq(slackIntegrations.channelId, channelId) : undefined,
       ),
     );
 }

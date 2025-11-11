@@ -6,7 +6,6 @@ import ky from "ky";
 export const useDeleteSlackIntegration = (slackIntegration: {
   orgId: number;
   slackTeamId: string;
-  channelId: string | null;
 }) => {
   return useMutation({
     mutationKey: [
@@ -14,7 +13,6 @@ export const useDeleteSlackIntegration = (slackIntegration: {
       "slack-integration",
       slackIntegration.orgId,
       slackIntegration.slackTeamId,
-      slackIntegration.channelId,
     ],
     mutationFn: async () => {
       return await ky.delete(
@@ -25,7 +23,6 @@ export const useDeleteSlackIntegration = (slackIntegration: {
           },
           body: JSON.stringify({
             slackTeamId: slackIntegration.slackTeamId,
-            channelId: slackIntegration.channelId,
           }),
         },
       );
