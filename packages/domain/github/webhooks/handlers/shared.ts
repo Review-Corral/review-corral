@@ -1,17 +1,18 @@
+import { PullRequestEvent } from "@octokit/webhooks-types";
 import { getOrgMemberByUsername } from "../../../postgres/fetchers/members";
 import { BaseGithubWebhookEventHanderArgs } from "../types";
+import { Attachment } from "@slack/web-api/dist/response/ChannelsHistoryResponse";
+import { MessageAttachment } from "@slack/web-api";
+import { COLOURS } from "@core/slack/const";
 
 export async function getSlackUserName(
   githubLogin: string,
   props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">,
 ): Promise<string> {
-  const member = await getOrgMemberByUsername({
-    orgId: props.organizationId,
-    githubUsername: githubLogin,
-  });
+  const slackId = await getSlackUserId(githubLogin, props);
 
-  if (member?.slackId) {
-    return `<@${member.slackId}>`;
+  if (slackId) {
+    return `<@${slackId}>`;
   }
 
   return githubLogin;
@@ -31,4 +32,55 @@ export async function getSlackUserId(
   });
 
   return member?.slackId ?? null;
+}
+
+/**
+ * Extracts GitHub username mentions (@username) from a comment body
+ */
+export function extractMentions(commentBody: string): string[] {
+  const mentionRegex = /@([a-zA-Z0-9_-]+)/g;
+  const mentions: string[] = [];
+  let match: RegExpExecArray | null = null;
+
+  while ((match = mentionRegex.exec(commentBody)) !== null) {
+    mentions.push(match[1]);
+  }
+
+  return mentions;
+}
+
+export function getDmAttachment(
+  pr: {
+    title: string;
+    number: number;
+    html_url: string;
+  },
+  colour: keyof typeof COLOURS,
+): MessageAttachment {
+  return {
+    color: COLOURS[colour],
+    blocks: [
+      {
+        type: "header",
+        text: {
+          type: "plain_text",
+          text: `${pr.title} #${pr.number}`,
+        },
+      },
+
+      {
+        type: "actions",
+        elements: [
+          {
+            type: "button",
+            text: {
+              type: "plain_text",
+              text: "View",
+            },
+            url: pr.html_url,
+          },
+        ],
+      },
+    ],
+  };
 }

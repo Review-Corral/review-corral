@@ -6,22 +6,7 @@ import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
-import { getSlackUserId, getSlackUserName } from "./shared";
-
-/**
- * Extracts GitHub username mentions (@username) from a comment body
- */
-function extractMentions(commentBody: string): string[] {
-  const mentionRegex = /@([a-zA-Z0-9_-]+)/g;
-  const mentions: string[] = [];
-  let match;
-
-  while ((match = mentionRegex.exec(commentBody)) !== null) {
-    mentions.push(match[1]);
-  }
-
-  return mentions;
-}
+import { extractMentions, getSlackUserId, getSlackUserName } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
@@ -60,52 +45,72 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
     });
 
     if (!pullRequestItem?.threadTs) {
-      // write error log
-      LOGGER.warn("Got a comment event but couldn't find the thread", {
+      LOGGER.warn("Got a comment event but couldn't find the PR", {
         action: event.action,
         prId,
       });
-
       return;
     }
 
-    await slackClient.postComment({
-      prId,
-      commentBody: event.comment.body,
-      commentUrl: undefined,
-      threadTs: pullRequestItem.threadTs,
-      slackUsername: await getSlackUserName(event.sender.login, props),
+    // Fetch PR info once for all DMs
+    const prInfo = await getPullRequestInfo({
+      url: event.issue.pull_request.url,
+      accessToken: accessToken.token,
     });
 
-    // Send DMs to mentioned users
+    // Send DMs to mentioned users and PR author
     const mentions = extractMentions(event.comment.body);
+    const dmPromises: Promise<void>[] = [];
+
     for (const githubUsername of mentions) {
       // Skip if the commenter mentioned themselves
       if (githubUsername === event.sender.login) {
         continue;
       }
 
-      const mentionedUserSlackId = await getSlackUserId(githubUsername, props);
-      if (mentionedUserSlackId) {
-        // Fetch PR info to get title and URL
-        const prInfo = await getPullRequestInfo({
-          url: event.issue.pull_request.url,
-          accessToken: accessToken.token,
-        });
-
-        await slackClient.postDirectMessage({
-          slackUserId: mentionedUserSlackId,
-          message: {
-            text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment on <${prInfo.html_url}|${event.repository.full_name}#${event.issue.number}: ${event.issue.title}>`,
-            attachments: [
-              {
-                text: event.comment.body,
+      dmPromises.push(
+        (async () => {
+          const mentionedUserSlackId = await getSlackUserId(githubUsername, props);
+          if (mentionedUserSlackId) {
+            await slackClient.postDirectMessage({
+              slackUserId: mentionedUserSlackId,
+              message: {
+                text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment on <${prInfo.html_url}|${event.repository.full_name}#${event.issue.number}: ${event.issue.title}>`,
+                attachments: [
+                  {
+                    text: event.comment.body,
+                  },
+                ],
               },
-            ],
-          },
-        });
-      }
+            });
+          }
+        })(),
+      );
     }
+
+    // DM the PR author (if they weren't the commenter)
+    if (prInfo.user.login !== event.sender.login) {
+      dmPromises.push(
+        (async () => {
+          const authorSlackId = await getSlackUserId(prInfo.user.login, props);
+          if (authorSlackId) {
+            await slackClient.postDirectMessage({
+              slackUserId: authorSlackId,
+              message: {
+                text: `💬 ${await getSlackUserName(event.sender.login, props)} commented on your PR: <${prInfo.html_url}|${event.repository.full_name}#${event.issue.number}: ${event.issue.title}>`,
+                attachments: [
+                  {
+                    text: event.comment.body,
+                  },
+                ],
+              },
+            });
+          }
+        })(),
+      );
+    }
+
+    await Promise.all(dmPromises);
 
     return;
   } else {

@@ -20,3 +20,17 @@ export const haveRequiredScopes = (scopes: string): boolean => {
   const split = scopes.split(",");
   return expectedScopes.every((scope) => split.includes(scope));
 };
+
+export const COLOURS = {
+  white: "#fff",
+  green: "#00BB00",
+  yellow: "#FFD700",
+  red: "#FB0909",
+  blue: "#007AFF",
+  purple: "#8839FB",
+  gray: "#35373B",
+  black: "#000000",
+  orange: "#FF9500",
+  pink: "#FF2D55",
+  brown: "#A0522D",
+};

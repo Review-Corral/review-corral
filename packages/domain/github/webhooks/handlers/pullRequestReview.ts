@@ -12,8 +12,9 @@ import {} from "@domain/slack/SlackClient";
 import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-types";
 import slackifyMarkdown from "slackify-markdown";
 import { GithubWebhookEventHander } from "../types";
-import { getSlackUserId, getSlackUserName } from "./shared";
+import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
 import { convertPullRequestInfoToBaseProps } from "./utils";
+import { COLOURS } from "@core/slack/const";
 
 const LOGGER = new Logger("github.handlers.pullRequestReview");
 
@@ -47,40 +48,29 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
     }
 
     if (event.review.state === "approved") {
-      await slackClient.postMessage({
-        message: {
-          text: `${await getSlackUserName(event.sender.login, args)} ${getReviewText(
-            event.review,
-          )}`,
-          attachments: [
-            {
-              text: slackifyMarkdown(event.review.body ?? ""),
-              color: "#fff",
-            },
-            {
-              text: ":white_check_mark:",
-              color: "#00BB00",
-            },
-          ],
-        },
-        threadTs: pullRequestItem.threadTs,
-      });
-
       // Send DM to PR author
       const authorSlackId = await getSlackUserId(event.pull_request.user.login, args);
       if (authorSlackId) {
         await slackClient.postDirectMessage({
           slackUserId: authorSlackId,
           message: {
-            text: `✅ ${await getSlackUserName(event.sender.login, args)} approved your PR: <${event.pull_request.html_url}|${event.repository.full_name}#${event.pull_request.number}: ${event.pull_request.title}>`,
-            attachments: event.review.body
-              ? [
-                  {
+            text: `✅ ${await getSlackUserName(event.sender.login, args)} approved your PR`,
+            attachments: [
+              getDmAttachment(
+                {
+                  title: event.pull_request.title,
+                  number: event.pull_request.number,
+                  html_url: event.pull_request.html_url,
+                },
+                "green",
+              ),
+              event.review.body
+                ? {
                     text: slackifyMarkdown(event.review.body),
-                    color: "#00BB00",
-                  },
-                ]
-              : undefined,
+                    color: "green",
+                  }
+                : {},
+            ],
           },
         });
       }
@@ -128,54 +118,63 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
         });
       }
     } else {
-      await slackClient.postMessage({
-        message: {
-          text: `${await getSlackUserName(event.sender.login, args)} ${getReviewText(
-            event.review,
-          )}`,
-          attachments: [
-            {
-              text: slackifyMarkdown(event.review.body ?? ""),
-              color: "#fff",
-            },
-          ],
-        },
-        threadTs: pullRequestItem.threadTs,
-      });
-
       // Send DM to PR author
       const authorSlackId = await getSlackUserId(event.pull_request.user.login, args);
       if (authorSlackId) {
-        const reviewEmoji =
-          event.review.state === "changes_requested" ? "⚠️" : "💬";
-        await slackClient.postDirectMessage({
-          slackUserId: authorSlackId,
-          message: {
-            text: `${reviewEmoji} ${await getSlackUserName(event.sender.login, args)} ${getReviewText(event.review)}: <${event.pull_request.html_url}|${event.repository.full_name}#${event.pull_request.number}: ${event.pull_request.title}>`,
-            attachments: event.review.body
-              ? [
+        const reviewParams = getReviewParams(event.review);
+        if (reviewParams) {
+          await slackClient.postDirectMessage({
+            slackUserId: authorSlackId,
+            message: {
+              text: `${reviewParams.emoji} ${await getSlackUserName(event.sender.login, args)} ${reviewParams.text}`,
+              attachments: [
+                getDmAttachment(
                   {
-                    text: slackifyMarkdown(event.review.body),
+                    title: event.pull_request.title,
+                    number: event.pull_request.number,
+                    html_url: event.pull_request.html_url,
                   },
-                ]
-              : undefined,
-          },
-        });
+                  reviewParams.color,
+                ),
+                event.review.body
+                  ? {
+                      text: slackifyMarkdown(event.review.body),
+                      color: reviewParams.color,
+                    }
+                  : {},
+              ],
+            },
+          });
+        }
       }
     }
   }
 };
 
-const getReviewText = (review: PullRequestReview) => {
+const getReviewParams = (
+  review: PullRequestReview,
+): { text: string; color: keyof typeof COLOURS; emoji: string } | undefined => {
   switch (review.state) {
     case "approved": {
-      return "*approved* the pull request";
+      return {
+        text: "*approved* the pull request",
+        color: "green",
+        emoji: ":white_check_mark:",
+      };
     }
     case "changes_requested": {
-      return "*requested changes* to the pull request";
+      return {
+        text: "*requested changes* to the pull request",
+        color: "yellow",
+        emoji: ":warning:",
+      };
     }
     case "commented": {
-      return "left a review comment on the pull request";
+      return {
+        text: "left a review comment on the pull request",
+        color: "white",
+        emoji: ":speech_balloon:",
+      };
     }
   }
 };
