@@ -2,11 +2,15 @@ import {
   getInstallationAccessToken,
   getPullRequestInfo,
 } from "@domain/github/fetchers";
-import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
-import { extractMentions, getSlackUserId, getSlackUserName } from "./shared";
+import {
+  extractMentions,
+  getDmAttachment,
+  getSlackUserId,
+  getSlackUserName,
+} from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
@@ -34,24 +38,6 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
 
     const accessToken = await getInstallationAccessToken(props.installationId);
 
-    const { id: prId } = await getPullRequestInfo({
-      url: event.issue.pull_request.url,
-      accessToken: accessToken.token,
-    });
-
-    const pullRequestItem = await fetchPrItem({
-      pullRequestId: prId,
-      repoId: event.repository.id,
-    });
-
-    if (!pullRequestItem?.threadTs) {
-      LOGGER.warn("Got a comment event but couldn't find the PR", {
-        action: event.action,
-        prId,
-      });
-      return;
-    }
-
     // Fetch PR info once for all DMs
     const prInfo = await getPullRequestInfo({
       url: event.issue.pull_request.url,
@@ -75,19 +61,28 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
             await slackClient.postDirectMessage({
               slackUserId: mentionedUserSlackId,
               message: {
-                text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment on <${prInfo.html_url}|${event.repository.full_name}#${event.issue.number}: ${event.issue.title}>`,
-                attachments: [
-                  {
-                    text: event.comment.body,
-                  },
-                ],
+                text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment`,
               },
+              attachments: [
+                getDmAttachment(
+                  {
+                    title: event.issue.title,
+                    number: event.issue.number,
+                    html_url: prInfo.html_url,
+                  },
+                  "gray",
+                ),
+                {
+                  text: event.comment.body,
+                },
+              ],
             });
           }
         })(),
       );
     }
 
+    // TODO: and they weren't messaged about this already
     // DM the PR author (if they weren't the commenter)
     if (prInfo.user.login !== event.sender.login) {
       dmPromises.push(
@@ -97,13 +92,25 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
             await slackClient.postDirectMessage({
               slackUserId: authorSlackId,
               message: {
-                text: `💬 ${await getSlackUserName(event.sender.login, props)} commented on your PR: <${prInfo.html_url}|${event.repository.full_name}#${event.issue.number}: ${event.issue.title}>`,
-                attachments: [
-                  {
-                    text: event.comment.body,
-                  },
-                ],
+                text: `💬 ${await getSlackUserName(event.sender.login, props)} commented on your PR`,
               },
+              attachments: [
+                getDmAttachment(
+                  {
+                    title: event.issue.title,
+                    number: event.issue.number,
+                    html_url: prInfo.html_url,
+                  },
+                  "gray",
+                ),
+                ...(event.comment.body
+                  ? [
+                      {
+                        text: event.comment.body,
+                      },
+                    ]
+                  : []),
+              ],
             });
           }
         })(),

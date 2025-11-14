@@ -68,8 +68,18 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             await props.slackClient.postDirectMessage({
               slackUserId: authorSlackId,
               message: {
-                text: `✅ Your PR was merged: <${payload.pull_request.html_url}|${payload.repository.full_name}#${payload.pull_request.number}: ${payload.pull_request.title}>`,
+                text: "✅ Your PR was merged",
               },
+              attachments: [
+                getDmAttachment(
+                  {
+                    title: payload.pull_request.title,
+                    number: payload.pull_request.number,
+                    html_url: payload.pull_request.html_url,
+                  },
+                  "green",
+                ),
+              ],
             });
           }
           return;
@@ -99,9 +109,18 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             await props.slackClient.postDirectMessage({
               slackUserId: authorSlackId,
               message: {
-                text: `❌ Your PR was closed by ${getSlackUserName(payload.sender.login, props)}: <${payload.pull_request.html_url}|${payload.repository.full_name}#${payload.pull_request.number}: ${payload.pull_request.title}>`,
+                text: `❌ Your PR was closed by ${getSlackUserName(payload.sender.login, props)}`,
               },
-              attachments: [],
+              attachments: [
+                getDmAttachment(
+                  {
+                    title: payload.pull_request.title,
+                    number: payload.pull_request.number,
+                    html_url: payload.pull_request.html_url,
+                  },
+                  "red",
+                ),
+              ],
             });
           }
           return;
@@ -116,7 +135,17 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             await props.slackClient.postDirectMessage({
               slackUserId: reviewerSlackId,
               message: {
-                text: `🔍 You've been requested to review: <${payload.pull_request.html_url}|${payload.repository.full_name}#${payload.pull_request.number}: ${payload.pull_request.title}>`,
+                text: "🔍 You've been requested to review",
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: payload.pull_request.title,
+                      number: payload.pull_request.number,
+                      html_url: payload.pull_request.html_url,
+                    },
+                    "blue",
+                  ),
+                ],
               },
             });
           }
@@ -132,7 +161,17 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             await props.slackClient.postDirectMessage({
               slackUserId: reviewerSlackId,
               message: {
-                text: `Your review request was cancelled: <${payload.pull_request.html_url}|${payload.repository.full_name}#${payload.pull_request.number}: ${payload.pull_request.title}>`,
+                text: "Your review request was cancelled",
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: payload.pull_request.title,
+                      number: payload.pull_request.number,
+                      html_url: payload.pull_request.html_url,
+                    },
+                    "red",
+                  ),
+                ],
               },
             });
           }

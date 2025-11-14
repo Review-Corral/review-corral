@@ -158,7 +158,7 @@ export class SlackClient {
       return undefined;
     }
 
-    const payload = {
+    const payload: ChatPostMessageArguments = {
       ...message,
       channel: conversationId,
       token: this.slackToken,
