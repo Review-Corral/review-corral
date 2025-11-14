@@ -15,7 +15,7 @@ import { type PullRequest } from "../../../postgres/schema";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
 import { getInstallationAccessToken } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
-import { getSlackUserId, getSlackUserName } from "./shared";
+import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
 import { convertPrEventToBaseProps } from "./utils";
 
 export const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
@@ -52,27 +52,12 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
         );
       case "closed":
         if (payload.pull_request.merged) {
-          // Clear queue status when PR is merged
+          // Clear queue status when PR is merged and update to merged
           await updatePullRequest({
             pullRequestId: pullRequestItem.id,
             repoId: pullRequestItem.repoId,
             isQueuedToMerge: false,
           });
-
-          await props.slackClient.postPrMerged(
-            {
-              body: payload,
-              threadTs: pullRequestItem.threadTs,
-              slackUsername: await getSlackUserName(
-                payload.pull_request.user.login,
-                props,
-              ),
-              pullRequestItem: { ...pullRequestItem, isQueuedToMerge: false },
-              // Default to getting this from the PR item
-              requiredApprovals: null,
-            },
-            await getSlackUserName(payload.sender.login, props),
-          );
 
           // Send DM to PR author
           const authorSlackId = await getSlackUserId(
@@ -104,17 +89,19 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             await getSlackUserName(payload.sender.login, props),
           );
 
-          // Send DM to PR author
+          // Send DM to PR author if closed by someone else
           const authorSlackId = await getSlackUserId(
             payload.pull_request.user.login,
             props,
           );
-          if (authorSlackId) {
+          const closedBy = await getSlackUserName(payload.sender.login, props);
+          if (authorSlackId && closedBy !== authorSlackId) {
             await props.slackClient.postDirectMessage({
               slackUserId: authorSlackId,
               message: {
-                text: `❌ Your PR was closed: <${payload.pull_request.html_url}|${payload.repository.full_name}#${payload.pull_request.number}: ${payload.pull_request.title}>`,
+                text: `❌ Your PR was closed by ${getSlackUserName(payload.sender.login, props)}: <${payload.pull_request.html_url}|${payload.repository.full_name}#${payload.pull_request.number}: ${payload.pull_request.title}>`,
               },
+              attachments: [],
             });
           }
           return;
@@ -137,15 +124,18 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
         return;
       case "review_request_removed":
         if ("requested_reviewer" in payload) {
-          await props.slackClient.postMessage({
-            message: {
-              text: `Review request for ${await getSlackUserName(
-                payload.requested_reviewer.login,
-                props,
-              )} removed`,
-            },
-            threadTs: pullRequestItem.threadTs,
-          });
+          const reviewerSlackId = await getSlackUserId(
+            payload.requested_reviewer.login,
+            props,
+          );
+          if (reviewerSlackId) {
+            await props.slackClient.postDirectMessage({
+              slackUserId: reviewerSlackId,
+              message: {
+                text: `Your review request was cancelled: <${payload.pull_request.html_url}|${payload.repository.full_name}#${payload.pull_request.number}: ${payload.pull_request.title}>`,
+              },
+            });
+          }
         }
         return;
       case "edited":
@@ -326,23 +316,35 @@ const handleNewPr = async (
 
     // Send DMs to all requested reviewers
     if (body.pull_request.requested_reviewers) {
-      body.pull_request.requested_reviewers.map(async (requested_reviewer) => {
-        // The requested reviewer could be a 'Team' and not a 'User'
-        if ("login" in requested_reviewer) {
-          const reviewerSlackId = await getSlackUserId(
-            requested_reviewer.login,
-            baseProps,
-          );
-          if (reviewerSlackId) {
-            await baseProps.slackClient.postDirectMessage({
-              slackUserId: reviewerSlackId,
-              message: {
-                text: `🔍 You've been requested to review: <${body.pull_request.html_url}|${body.repository.full_name}#${body.pull_request.number}: ${body.pull_request.title}>`,
-              },
-            });
+      await Promise.all(
+        body.pull_request.requested_reviewers.map(async (requested_reviewer) => {
+          // The requested reviewer could be a 'Team' and not a 'User'
+          if ("login" in requested_reviewer) {
+            const reviewerSlackId = await getSlackUserId(
+              requested_reviewer.login,
+              baseProps,
+            );
+            if (reviewerSlackId) {
+              await baseProps.slackClient.postDirectMessage({
+                slackUserId: reviewerSlackId,
+                message: {
+                  text: `🔍 You've been requested to review`,
+                },
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: body.pull_request.title,
+                      number: body.pull_request.number,
+                      html_url: body.pull_request.html_url,
+                    },
+                    "blue",
+                  ),
+                ],
+              });
+            }
           }
-        }
-      });
+        }),
+      );
     }
   }
 
