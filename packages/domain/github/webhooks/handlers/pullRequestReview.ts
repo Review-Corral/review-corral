@@ -12,8 +12,9 @@ import {} from "@domain/slack/SlackClient";
 import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-types";
 import slackifyMarkdown from "slackify-markdown";
 import { GithubWebhookEventHander } from "../types";
-import { getSlackUserName } from "./shared";
+import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
 import { convertPullRequestInfoToBaseProps } from "./utils";
+import { COLOURS } from "@core/slack/const";
 
 const LOGGER = new Logger("github.handlers.pullRequestReview");
 
@@ -47,24 +48,34 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
     }
 
     if (event.review.state === "approved") {
-      await slackClient.postMessage({
-        message: {
-          text: `${await getSlackUserName(event.sender.login, args)} ${getReviewText(
-            event.review,
-          )}`,
+      // Send DM to PR author
+      const authorSlackId = await getSlackUserId(event.pull_request.user.login, args);
+      if (authorSlackId) {
+        await slackClient.postDirectMessage({
+          slackUserId: authorSlackId,
+          message: {
+            text: `✅ ${await getSlackUserName(event.sender.login, args)} approved your PR`,
+          },
           attachments: [
-            {
-              text: slackifyMarkdown(event.review.body ?? ""),
-              color: "#fff",
-            },
-            {
-              text: ":white_check_mark:",
-              color: "#00BB00",
-            },
+            getDmAttachment(
+              {
+                title: event.pull_request.title,
+                number: event.pull_request.number,
+                html_url: event.pull_request.html_url,
+              },
+              "green",
+            ),
+            ...(event.review.body
+              ? [
+                  {
+                    text: slackifyMarkdown(event.review.body),
+                    color: "green",
+                  },
+                ]
+              : []),
           ],
-        },
-        threadTs: pullRequestItem.threadTs,
-      });
+        });
+      }
 
       try {
         const accessToken = await getInstallationAccessToken(args.installationId);
@@ -109,34 +120,65 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
         });
       }
     } else {
-      await slackClient.postMessage({
-        message: {
-          text: `${await getSlackUserName(event.sender.login, args)} ${getReviewText(
-            event.review,
-          )}`,
-          attachments: [
-            {
-              text: slackifyMarkdown(event.review.body ?? ""),
-              color: "#fff",
+      // Send DM to PR author
+      const authorSlackId = await getSlackUserId(event.pull_request.user.login, args);
+      if (authorSlackId) {
+        const reviewParams = getReviewParams(event.review);
+        if (reviewParams) {
+          await slackClient.postDirectMessage({
+            slackUserId: authorSlackId,
+            message: {
+              text: `${reviewParams.emoji} ${await getSlackUserName(event.sender.login, args)} ${reviewParams.text}`,
             },
-          ],
-        },
-        threadTs: pullRequestItem.threadTs,
-      });
+            attachments: [
+              getDmAttachment(
+                {
+                  title: event.pull_request.title,
+                  number: event.pull_request.number,
+                  html_url: event.pull_request.html_url,
+                },
+                reviewParams.color,
+              ),
+              ...(event.review.body
+                ? [
+                    {
+                      text: slackifyMarkdown(event.review.body),
+                      color: reviewParams.color,
+                    },
+                  ]
+                : []),
+            ],
+          });
+        }
+      }
     }
   }
 };
 
-const getReviewText = (review: PullRequestReview) => {
+const getReviewParams = (
+  review: PullRequestReview,
+): { text: string; color: keyof typeof COLOURS; emoji: string } | undefined => {
   switch (review.state) {
     case "approved": {
-      return "*approved* the pull request";
+      return {
+        text: "*approved* the pull request",
+        color: "green",
+        emoji: ":white_check_mark:",
+      };
     }
     case "changes_requested": {
-      return "*requested changes* to the pull request";
+      return {
+        text: "*requested changes* to the pull request",
+        color: "yellow",
+        emoji: ":warning:",
+      };
     }
     case "commented": {
-      return "left a review comment on the pull request";
+      return {
+        text: "left a review comment on the pull request",
+        color: "white",
+        emoji: ":speech_balloon:",
+      };
     }
   }
 };

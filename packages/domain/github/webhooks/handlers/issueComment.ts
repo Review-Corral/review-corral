@@ -2,11 +2,15 @@ import {
   getInstallationAccessToken,
   getPullRequestInfo,
 } from "@domain/github/fetchers";
-import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
-import { getSlackUserName } from "./shared";
+import {
+  extractMentions,
+  getDmAttachment,
+  getSlackUserId,
+  getSlackUserName,
+} from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
@@ -34,33 +38,87 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
 
     const accessToken = await getInstallationAccessToken(props.installationId);
 
-    const { id: prId } = await getPullRequestInfo({
+    // Fetch PR info once for all DMs
+    const prInfo = await getPullRequestInfo({
       url: event.issue.pull_request.url,
       accessToken: accessToken.token,
     });
 
-    const pullRequestItem = await fetchPrItem({
-      pullRequestId: prId,
-      repoId: event.repository.id,
-    });
+    // Send DMs to mentioned users and PR author
+    const mentions = extractMentions(event.comment.body);
+    const dmPromises: Promise<void>[] = [];
 
-    if (!pullRequestItem?.threadTs) {
-      // write error log
-      LOGGER.warn("Got a comment event but couldn't find the thread", {
-        action: event.action,
-        prId,
-      });
+    for (const githubUsername of mentions) {
+      // Skip if the commenter mentioned themselves
+      if (githubUsername === event.sender.login) {
+        continue;
+      }
 
-      return;
+      dmPromises.push(
+        (async () => {
+          const mentionedUserSlackId = await getSlackUserId(githubUsername, props);
+          if (mentionedUserSlackId) {
+            await slackClient.postDirectMessage({
+              slackUserId: mentionedUserSlackId,
+              message: {
+                text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment`,
+              },
+              attachments: [
+                getDmAttachment(
+                  {
+                    title: event.issue.title,
+                    number: event.issue.number,
+                    html_url: prInfo.html_url,
+                  },
+                  "gray",
+                ),
+                {
+                  text: event.comment.body,
+                },
+              ],
+            });
+          }
+        })(),
+      );
     }
 
-    await slackClient.postComment({
-      prId,
-      commentBody: event.comment.body,
-      commentUrl: undefined,
-      threadTs: pullRequestItem.threadTs,
-      slackUsername: await getSlackUserName(event.sender.login, props),
-    });
+    // TODO: and they weren't messaged about this already
+    // DM the PR author (if they weren't the commenter)
+    if (prInfo.user.login !== event.sender.login) {
+      dmPromises.push(
+        (async () => {
+          const authorSlackId = await getSlackUserId(prInfo.user.login, props);
+          if (authorSlackId) {
+            await slackClient.postDirectMessage({
+              slackUserId: authorSlackId,
+              message: {
+                text: `💬 ${await getSlackUserName(event.sender.login, props)} commented on your PR`,
+              },
+              attachments: [
+                getDmAttachment(
+                  {
+                    title: event.issue.title,
+                    number: event.issue.number,
+                    html_url: prInfo.html_url,
+                  },
+                  "gray",
+                ),
+                ...(event.comment.body
+                  ? [
+                      {
+                        text: event.comment.body,
+                      },
+                    ]
+                  : []),
+              ],
+            });
+          }
+        })(),
+      );
+    }
+
+    await Promise.all(dmPromises);
+
     return;
   } else {
     LOGGER.debug("Issue comment action not handled", { action: event.action });
