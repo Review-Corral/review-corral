@@ -52,21 +52,21 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
               slackUserId: mentionedUserSlackId,
               message: {
                 text: `💬 ${await getSlackUserName(event.sender.login, args)} mentioned you in a comment`,
-              },
-              attachments: [
-                getDmAttachment(
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: event.pull_request.title,
+                      number: event.pull_request.number,
+                      html_url: event.pull_request.html_url,
+                    },
+                    "gray",
+                  ),
                   {
-                    title: event.pull_request.title,
-                    number: event.pull_request.number,
-                    html_url: event.pull_request.html_url,
+                    text: event.comment.body,
+                    color: COLOURS.gray,
                   },
-                  "gray",
-                ),
-                {
-                  text: event.comment.body,
-                  color: COLOURS.gray,
-                },
-              ],
+                ],
+              },
             });
           }
         })(),
@@ -86,21 +86,21 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
               slackUserId: authorSlackId,
               message: {
                 text: `💬 ${await getSlackUserName(event.sender.login, args)} commented on your PR`,
-              },
-              attachments: [
-                getDmAttachment(
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: event.pull_request.title,
+                      number: event.pull_request.number,
+                      html_url: event.pull_request.html_url,
+                    },
+                    "gray",
+                  ),
                   {
-                    title: event.pull_request.title,
-                    number: event.pull_request.number,
-                    html_url: event.pull_request.html_url,
+                    text: event.comment.body,
+                    color: COLOURS.gray,
                   },
-                  "gray",
-                ),
-                {
-                  text: event.comment.body,
-                  color: COLOURS.gray,
-                },
-              ],
+                ],
+              },
             });
           }
         })(),

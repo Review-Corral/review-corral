@@ -10,7 +10,6 @@ import {
   ChatPostMessageArguments,
   ChatPostMessageResponse,
   ChatUpdateArguments,
-  MessageAttachment,
   WebClient,
 } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
@@ -146,11 +145,9 @@ export class SlackClient {
   async postDirectMessage({
     slackUserId,
     message,
-    attachments,
   }: {
     slackUserId: string;
     message: Omit<ChatPostMessageArguments, "token" | "channel">;
-    attachments?: MessageAttachment[];
   }): Promise<ChatPostMessageResponse | undefined> {
     const conversationId = await this.openDirectMessage(slackUserId);
     if (!conversationId) {
@@ -163,7 +160,6 @@ export class SlackClient {
       channel: conversationId,
       token: this.slackToken,
       mrkdwn: true,
-      attachments,
     };
 
     const result = await tryCatch(this.client.chat.postMessage(payload));

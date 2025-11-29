@@ -62,20 +62,20 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
               slackUserId: mentionedUserSlackId,
               message: {
                 text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment`,
-              },
-              attachments: [
-                getDmAttachment(
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: event.issue.title,
+                      number: event.issue.number,
+                      html_url: prInfo.html_url,
+                    },
+                    "gray",
+                  ),
                   {
-                    title: event.issue.title,
-                    number: event.issue.number,
-                    html_url: prInfo.html_url,
+                    text: event.comment.body,
                   },
-                  "gray",
-                ),
-                {
-                  text: event.comment.body,
-                },
-              ],
+                ],
+              },
             });
           }
         })(),
@@ -93,24 +93,24 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
               slackUserId: authorSlackId,
               message: {
                 text: `💬 ${await getSlackUserName(event.sender.login, props)} commented on your PR`,
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: event.issue.title,
+                      number: event.issue.number,
+                      html_url: prInfo.html_url,
+                    },
+                    "gray",
+                  ),
+                  ...(event.comment.body
+                    ? [
+                        {
+                          text: event.comment.body,
+                        },
+                      ]
+                    : []),
+                ],
               },
-              attachments: [
-                getDmAttachment(
-                  {
-                    title: event.issue.title,
-                    number: event.issue.number,
-                    html_url: prInfo.html_url,
-                  },
-                  "gray",
-                ),
-                ...(event.comment.body
-                  ? [
-                      {
-                        text: event.comment.body,
-                      },
-                    ]
-                  : []),
-              ],
             });
           }
         })(),

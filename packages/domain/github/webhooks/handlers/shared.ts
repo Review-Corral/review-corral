@@ -1,7 +1,5 @@
-import { PullRequestEvent } from "@octokit/webhooks-types";
 import { getOrgMemberByUsername } from "../../../postgres/fetchers/members";
 import { BaseGithubWebhookEventHanderArgs } from "../types";
-import { Attachment } from "@slack/web-api/dist/response/ChannelsHistoryResponse";
 import { MessageAttachment } from "@slack/web-api";
 import { COLOURS } from "@core/slack/const";
 

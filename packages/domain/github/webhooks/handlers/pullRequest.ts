@@ -69,17 +69,17 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
               slackUserId: authorSlackId,
               message: {
                 text: "✅ Your PR was merged",
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: payload.pull_request.title,
+                      number: payload.pull_request.number,
+                      html_url: payload.pull_request.html_url,
+                    },
+                    "green",
+                  ),
+                ],
               },
-              attachments: [
-                getDmAttachment(
-                  {
-                    title: payload.pull_request.title,
-                    number: payload.pull_request.number,
-                    html_url: payload.pull_request.html_url,
-                  },
-                  "green",
-                ),
-              ],
             });
           }
           return;
@@ -110,17 +110,17 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
               slackUserId: authorSlackId,
               message: {
                 text: `❌ Your PR was closed by ${getSlackUserName(payload.sender.login, props)}`,
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: payload.pull_request.title,
+                      number: payload.pull_request.number,
+                      html_url: payload.pull_request.html_url,
+                    },
+                    "red",
+                  ),
+                ],
               },
-              attachments: [
-                getDmAttachment(
-                  {
-                    title: payload.pull_request.title,
-                    number: payload.pull_request.number,
-                    html_url: payload.pull_request.html_url,
-                  },
-                  "red",
-                ),
-              ],
             });
           }
           return;
@@ -161,7 +161,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             await props.slackClient.postDirectMessage({
               slackUserId: reviewerSlackId,
               message: {
-                text: "Your review request was cancelled",
+                text: "Your review request was removed from this PR",
                 attachments: [
                   getDmAttachment(
                     {
@@ -320,7 +320,7 @@ const handleNewPr = async (
 
     if (threadTs) {
       if (wasCreated) {
-        await postAllCommentsForNewPrThread(threadTs, payload, props);
+        await postAllCommentsForNewPrThread(payload, props);
       } else {
         // This then means that it was posted before and we just need to post
         // that it's now ready for review
@@ -345,13 +345,12 @@ const handleNewPr = async (
   }
 
   async function postAllCommentsForNewPrThread(
-    threadTs: string,
     body: PullRequestEventOpenedOrReadyForReview,
     baseProps: BaseGithubWebhookEventHanderArgs,
   ) {
     const accessToken = await getInstallationAccessToken(baseProps.installationId);
 
-    await postCommentsForNewPR(body, accessToken, threadTs, baseProps);
+    await postCommentsForNewPR(body, accessToken, baseProps);
 
     // Send DMs to all requested reviewers
     if (body.pull_request.requested_reviewers) {
@@ -368,17 +367,17 @@ const handleNewPr = async (
                 slackUserId: reviewerSlackId,
                 message: {
                   text: `🔍 You've been requested to review`,
+                  attachments: [
+                    getDmAttachment(
+                      {
+                        title: body.pull_request.title,
+                        number: body.pull_request.number,
+                        html_url: body.pull_request.html_url,
+                      },
+                      "blue",
+                    ),
+                  ],
                 },
-                attachments: [
-                  getDmAttachment(
-                    {
-                      title: body.pull_request.title,
-                      number: body.pull_request.number,
-                      html_url: body.pull_request.html_url,
-                    },
-                    "blue",
-                  ),
-                ],
               });
             }
           }
