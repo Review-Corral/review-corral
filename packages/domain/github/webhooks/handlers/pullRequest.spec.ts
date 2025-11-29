@@ -18,6 +18,8 @@ vi.mock("@domain/postgres/client", () => ({
 // Mock dependencies
 vi.mock("./shared", () => ({
   getSlackUserName: vi.fn(),
+  getSlackUserId: vi.fn(),
+  getDmAttachment: vi.fn(),
 }));
 
 vi.mock("@domain/postgres/fetchers/pull-requests", () => ({
@@ -34,7 +36,7 @@ import {
 } from "@domain/postgres/fetchers/pull-requests";
 import { SlackClient } from "@domain/slack/SlackClient";
 import { handlePullRequestEvent } from "./pullRequest";
-import { getSlackUserName } from "./shared";
+import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
 import { convertPrEventToBaseProps } from "./utils";
 
 describe("handlePullRequestEvent", () => {
@@ -79,13 +81,20 @@ describe("handlePullRequestEvent", () => {
     });
 
     vi.mocked(getSlackUserName).mockResolvedValue("@testuser");
+    vi.mocked(getSlackUserId).mockResolvedValue("U123456");
+    vi.mocked(getDmAttachment).mockReturnValue({ color: "#0066ff" });
     vi.mocked(fetchPrItem).mockResolvedValue(prItem);
   });
 
-  it("should call slackClient.postMessage when review_request_removed", async () => {
+  it("should call slackClient.postDirectMessage when review_request_removed", async () => {
+    const mockSlackClientWithDm = {
+      ...mockSlackClient,
+      postDirectMessage: vi.fn(),
+    } as unknown as SlackClient;
+
     await handlePullRequestEvent({
       event: mockEvent,
-      slackClient: mockSlackClient,
+      slackClient: mockSlackClientWithDm,
       organizationId: 789,
       installationId: 101112,
     });
@@ -95,13 +104,14 @@ describe("handlePullRequestEvent", () => {
       repoId: 456,
     });
 
-    expect(getSlackUserName).toHaveBeenCalledWith("testuser", expect.any(Object));
+    expect(getSlackUserId).toHaveBeenCalledWith("testuser", expect.any(Object));
 
-    expect(mockSlackClient.postMessage).toHaveBeenCalledWith({
+    expect(mockSlackClientWithDm.postDirectMessage).toHaveBeenCalledWith({
+      slackUserId: "U123456",
       message: {
-        text: "Review request for @testuser removed",
+        text: "Your review request was removed from this PR",
+        attachments: [{ color: "#0066ff" }],
       },
-      threadTs: "thread-ts-123",
     });
   });
 
@@ -239,7 +249,7 @@ describe("handlePullRequestEvent", () => {
   });
 
   describe("merge events", () => {
-    it("should clear queue status when PR is merged", async () => {
+    it("should clear queue status and send DM when PR is merged", async () => {
       const queuedPrItem = mock<PullRequestWithAlias>({
         ...prItem,
         isQueuedToMerge: true,
@@ -248,7 +258,7 @@ describe("handlePullRequestEvent", () => {
 
       const mockSlackClientWithMerged = {
         ...mockSlackClient,
-        postPrMerged: vi.fn(),
+        postDirectMessage: vi.fn(),
       } as unknown as SlackClient;
 
       const mergedEvent = {
@@ -257,6 +267,9 @@ describe("handlePullRequestEvent", () => {
         pull_request: {
           ...mockEvent.pull_request,
           merged: true,
+          title: "I'm a PR title",
+          number: 42,
+          html_url: "https://github.com/test/repo/pull/42",
         },
         sender: {
           login: "testuser",
@@ -276,22 +289,31 @@ describe("handlePullRequestEvent", () => {
         isQueuedToMerge: false,
       });
 
-      expect(mockSlackClientWithMerged.postPrMerged).toHaveBeenCalledWith(
-        {
-          body: mergedEvent,
-          threadTs: "thread-ts-123",
-          slackUsername: "@testuser",
-          pullRequestItem: { ...queuedPrItem, isQueuedToMerge: false },
-          requiredApprovals: null,
+      expect(mockSlackClientWithMerged.postDirectMessage).toHaveBeenCalledWith({
+        slackUserId: "U123456",
+        message: {
+          text: "✅ Your PR was merged",
+          attachments: [{ color: "#0066ff" }],
         },
-        "@testuser",
-      );
+      });
     });
 
-    it("should handle closed PR without clearing queue status when not merged", async () => {
+    it("should handle closed PR and send DM when closed by someone else", async () => {
+      vi.mocked(getSlackUserId).mockImplementation(async (login) => {
+        if (login === "testuser") return "U123456";
+        if (login === "otheruser") return "U654321";
+        return null;
+      });
+      vi.mocked(getSlackUserName).mockImplementation(async (login) => {
+        if (login === "testuser") return "<@U123456>";
+        if (login === "otheruser") return "<@U654321>";
+        return login;
+      });
+
       const mockSlackClientWithClosed = {
         ...mockSlackClient,
         postPrClosed: vi.fn(),
+        postDirectMessage: vi.fn(),
       } as unknown as SlackClient;
 
       const closedEvent = {
@@ -300,9 +322,12 @@ describe("handlePullRequestEvent", () => {
         pull_request: {
           ...mockEvent.pull_request,
           merged: false,
+          title: "I'm a PR title",
+          number: 42,
+          html_url: "https://github.com/test/repo/pull/42",
         },
         sender: {
-          login: "testuser",
+          login: "otheruser",
         },
       };
 
@@ -319,11 +344,11 @@ describe("handlePullRequestEvent", () => {
         {
           body: closedEvent,
           threadTs: "thread-ts-123",
-          slackUsername: "@testuser",
+          slackUsername: "<@U123456>",
           pullRequestItem: prItem,
           requiredApprovals: null,
         },
-        "@testuser",
+        "<@U654321>",
       );
     });
   });
