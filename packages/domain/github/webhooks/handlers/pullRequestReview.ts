@@ -1,3 +1,4 @@
+import { COLOURS } from "@core/slack/const";
 import {
   getInstallationAccessToken,
   getNumberOfApprovals,
@@ -14,7 +15,6 @@ import slackifyMarkdown from "slackify-markdown";
 import { GithubWebhookEventHander } from "../types";
 import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
 import { convertPullRequestInfoToBaseProps } from "./utils";
-import { COLOURS } from "@core/slack/const";
 
 const LOGGER = new Logger("github.handlers.pullRequestReview");
 
