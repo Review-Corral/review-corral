@@ -1,6 +1,8 @@
 import { getJwt } from "@core/utils/jwt/createGithubJwt";
 import ky from "ky";
 import { Logger } from "../logging";
+import { type CommentType } from "../postgres/schema";
+import { type GitHubReaction } from "../slack/reactions/emojiMapping";
 import {
   BranchProtectionResponse,
   InstallationAccessTokenResponse,
@@ -208,4 +210,40 @@ export const getPrRequiredApprovalsCount = async (
   return (
     branchProtection.required_pull_request_reviews?.required_approving_review_count ?? 0
   );
+};
+
+/**
+ * Creates a reaction on a GitHub comment.
+ * GitHub API is idempotent - calling this multiple times with the same reaction
+ * will not create duplicates.
+ *
+ * Uses the user's access token so the reaction appears from them.
+ */
+export const createGitHubReaction = async ({
+  owner,
+  repo,
+  commentId,
+  commentType,
+  reaction,
+  userAccessToken,
+}: {
+  owner: string;
+  repo: string;
+  commentId: number;
+  commentType: CommentType;
+  reaction: GitHubReaction;
+  userAccessToken: string;
+}): Promise<void> => {
+  const endpoint =
+    commentType === "review_comment"
+      ? `https://api.github.com/repos/${owner}/${repo}/pulls/comments/${commentId}/reactions`
+      : `https://api.github.com/repos/${owner}/${repo}/issues/comments/${commentId}/reactions`;
+
+  await ky.post(endpoint, {
+    headers: {
+      ...defaultHeaders,
+      Authorization: `Bearer ${userAccessToken}`,
+    },
+    json: { content: reaction },
+  });
 };

@@ -149,3 +149,28 @@ export async function updateOrgMemberSlackId({
       and(eq(organizationMembers.orgId, orgId), eq(organizationMembers.userId, userId)),
     );
 }
+
+/**
+ * Get a member's GitHub access token by their Slack ID and organization.
+ * Used for reaction sync to act on behalf of the user.
+ */
+export async function getGitHubTokenBySlackId({
+  orgId,
+  slackId,
+}: {
+  orgId: number;
+  slackId: string;
+}): Promise<string | null> {
+  const result = await db
+    .select({
+      ghAccessToken: users.ghAccessToken,
+    })
+    .from(organizationMembers)
+    .innerJoin(users, eq(organizationMembers.userId, users.id))
+    .where(
+      and(eq(organizationMembers.orgId, orgId), eq(organizationMembers.slackId, slackId)),
+    )
+    .limit(1);
+
+  return result[0]?.ghAccessToken ?? null;
+}

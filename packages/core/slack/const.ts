@@ -1,5 +1,5 @@
 export const LATEST_SLACK_SCOPES =
-  "channels:join,chat:write,chat:write.public,im:write,users:read,commands,channels:history";
+  "channels:join,chat:write,chat:write.public,im:write,users:read,commands,channels:history,reactions:read";
 
 // For some reason, Slack will give us these instead of the above which we put in the request
 const expectedScopes = [
@@ -11,6 +11,7 @@ const expectedScopes = [
   "chat:write.public",
   "channels:join",
   "im:write",
+  "reactions:read",
 ];
 
 /**

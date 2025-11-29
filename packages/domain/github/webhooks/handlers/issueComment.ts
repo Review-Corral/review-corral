@@ -2,6 +2,7 @@ import {
   getInstallationAccessToken,
   getPullRequestInfo,
 } from "@domain/github/fetchers";
+import { trackDmForReactions } from "@domain/slack/dmTracking";
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
@@ -48,6 +49,15 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
     const mentions = extractMentions(event.comment.body);
     const dmPromises: Promise<void>[] = [];
 
+    // Context for tracking DMs for reaction sync
+    const trackingContext = {
+      githubCommentId: event.comment.id,
+      commentType: "issue_comment" as const,
+      repoOwner: event.repository.owner.login,
+      repoName: event.repository.name,
+      orgId: props.organizationId,
+    };
+
     for (const githubUsername of mentions) {
       // Skip if the commenter mentioned themselves
       if (githubUsername === event.sender.login) {
@@ -58,7 +68,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
         (async () => {
           const mentionedUserSlackId = await getSlackUserId(githubUsername, props);
           if (mentionedUserSlackId) {
-            await slackClient.postDirectMessage({
+            const dmResponse = await slackClient.postDirectMessage({
               slackUserId: mentionedUserSlackId,
               message: {
                 text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment`,
@@ -77,6 +87,9 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
                 ],
               },
             });
+            if (dmResponse) {
+              await trackDmForReactions(dmResponse, trackingContext);
+            }
           }
         })(),
       );
@@ -89,7 +102,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
         (async () => {
           const authorSlackId = await getSlackUserId(prInfo.user.login, props);
           if (authorSlackId) {
-            await slackClient.postDirectMessage({
+            const dmResponse = await slackClient.postDirectMessage({
               slackUserId: authorSlackId,
               message: {
                 text: `💬 ${await getSlackUserName(event.sender.login, props)} commented on your PR`,
@@ -112,6 +125,9 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
                 ],
               },
             });
+            if (dmResponse) {
+              await trackDmForReactions(dmResponse, trackingContext);
+            }
           }
         })(),
       );

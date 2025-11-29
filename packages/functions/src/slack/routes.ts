@@ -9,6 +9,11 @@ import {
   updateSlackIntegrationScopes,
 } from "@domain/postgres/fetchers/slack-integrations";
 import { areScopesOutdated } from "@domain/slack/checkScopesOutdated";
+import {
+  handleReactionEvent,
+  type SlackReactionEvent,
+} from "@domain/slack/webhooks/reactionHandler";
+import { verifySlackRequest } from "@domain/slack/webhooks/verifySlackRequest";
 import { Hono } from "hono";
 import ky from "ky";
 import { Resource } from "sst";
@@ -73,6 +78,53 @@ const orgIdSchema = z.object({
 
 const deleteIntegrationSchema = z.object({
   slackTeamId: z.string(),
+});
+
+// Slack Events API endpoint - no auth required, verified by signing secret
+app.post("/events", async (c) => {
+  const body = await c.req.text();
+  const signature = c.req.header("x-slack-signature");
+  const timestamp = c.req.header("x-slack-request-timestamp");
+
+  if (!signature || !timestamp) {
+    LOGGER.warn("Missing Slack signature headers");
+    return c.json({ error: "Missing signature headers" }, 401);
+  }
+
+  const verified = verifySlackRequest({
+    signingSecret: Resource.SLACK_SIGNING_SECRET.value,
+    signature,
+    timestamp,
+    body,
+  });
+
+  if (!verified) {
+    LOGGER.warn("Slack signature verification failed");
+    return c.json({ error: "Invalid signature" }, 401);
+  }
+
+  const payload = JSON.parse(body);
+
+  // Handle URL verification challenge (required for Slack app setup)
+  if (payload.type === "url_verification") {
+    LOGGER.info("Handling Slack URL verification challenge");
+    return c.json({ challenge: payload.challenge });
+  }
+
+  // Handle event callbacks
+  if (payload.type === "event_callback") {
+    const event = payload.event;
+
+    if (event.type === "reaction_added") {
+      // Process async - don't block the response (Slack requires 200 within 3 seconds)
+      handleReactionEvent(event as SlackReactionEvent).catch((error) => {
+        LOGGER.error("Error handling reaction event", { error, event });
+      });
+    }
+  }
+
+  // Slack requires 200 OK within 3 seconds
+  return c.json({ ok: true });
 });
 
 // OAuth route - no auth required
