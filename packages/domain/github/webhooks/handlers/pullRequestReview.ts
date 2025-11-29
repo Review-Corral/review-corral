@@ -55,25 +55,25 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
           slackUserId: authorSlackId,
           message: {
             text: `✅ ${await getSlackUserName(event.sender.login, args)} approved your PR`,
+            attachments: [
+              getDmAttachment(
+                {
+                  title: event.pull_request.title,
+                  number: event.pull_request.number,
+                  html_url: event.pull_request.html_url,
+                },
+                "green",
+              ),
+              ...(event.review.body
+                ? [
+                    {
+                      text: slackifyMarkdown(event.review.body),
+                      color: "green",
+                    },
+                  ]
+                : []),
+            ],
           },
-          attachments: [
-            getDmAttachment(
-              {
-                title: event.pull_request.title,
-                number: event.pull_request.number,
-                html_url: event.pull_request.html_url,
-              },
-              "green",
-            ),
-            ...(event.review.body
-              ? [
-                  {
-                    text: slackifyMarkdown(event.review.body),
-                    color: "green",
-                  },
-                ]
-              : []),
-          ],
         });
       }
 
@@ -129,25 +129,25 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
             slackUserId: authorSlackId,
             message: {
               text: `${reviewParams.emoji} ${await getSlackUserName(event.sender.login, args)} ${reviewParams.text}`,
+              attachments: [
+                getDmAttachment(
+                  {
+                    title: event.pull_request.title,
+                    number: event.pull_request.number,
+                    html_url: event.pull_request.html_url,
+                  },
+                  reviewParams.color,
+                ),
+                ...(event.review.body
+                  ? [
+                      {
+                        text: slackifyMarkdown(event.review.body),
+                        color: reviewParams.color,
+                      },
+                    ]
+                  : []),
+              ],
             },
-            attachments: [
-              getDmAttachment(
-                {
-                  title: event.pull_request.title,
-                  number: event.pull_request.number,
-                  html_url: event.pull_request.html_url,
-                },
-                reviewParams.color,
-              ),
-              ...(event.review.body
-                ? [
-                    {
-                      text: slackifyMarkdown(event.review.body),
-                      color: reviewParams.color,
-                    },
-                  ]
-                : []),
-            ],
           });
         }
       }
