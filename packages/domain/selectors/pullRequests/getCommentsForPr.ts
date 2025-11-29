@@ -1,3 +1,4 @@
+import { COLOURS } from "@core/slack/const";
 import { PullRequestReviewCommentsResponse } from "@domain/github/endpointTypes";
 import { getInstallationAccessToken } from "@domain/github/fetchers";
 import { LOGGER } from "@domain/github/webhooks/handlers/pullRequest";
@@ -9,7 +10,6 @@ import {
 } from "@domain/github/webhooks/handlers/shared";
 import { BaseGithubWebhookEventHanderArgs } from "@domain/github/webhooks/types";
 import { PullRequestEventOpenedOrReadyForReview } from "@domain/slack/SlackClient";
-import { COLOURS } from "@core/slack/const";
 import ky from "ky";
 
 // TODO: this shouldn't be in selectors...

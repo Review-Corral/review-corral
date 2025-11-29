@@ -1,3 +1,4 @@
+import { COLOURS } from "@core/slack/const";
 import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import { PullRequestReviewCommentCreatedEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
@@ -8,7 +9,6 @@ import {
   getSlackUserId,
   getSlackUserName,
 } from "./shared";
-import { COLOURS } from "@core/slack/const";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 

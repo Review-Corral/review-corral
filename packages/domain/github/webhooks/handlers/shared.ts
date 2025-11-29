@@ -1,7 +1,7 @@
+import { COLOURS } from "@core/slack/const";
+import { MessageAttachment } from "@slack/web-api";
 import { getOrgMemberByUsername } from "../../../postgres/fetchers/members";
 import { BaseGithubWebhookEventHanderArgs } from "../types";
-import { MessageAttachment } from "@slack/web-api";
-import { COLOURS } from "@core/slack/const";
 
 export async function getSlackUserName(
   githubLogin: string,
