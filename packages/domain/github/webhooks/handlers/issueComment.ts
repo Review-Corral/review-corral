@@ -2,6 +2,10 @@ import {
   getInstallationAccessToken,
   getPullRequestInfo,
 } from "@domain/github/fetchers";
+import {
+  addPrCommentParticipant,
+  getPrCommentParticipants,
+} from "@domain/postgres/fetchers/pr-comment-participants";
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
@@ -42,6 +46,17 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
     const prInfo = await getPullRequestInfo({
       url: event.issue.pull_request.url,
       accessToken: accessToken.token,
+    });
+
+    // Get previous participants before adding the current commenter
+    const previousParticipants = await getPrCommentParticipants({
+      prId: prInfo.id,
+    });
+
+    // Record this commenter as a participant
+    await addPrCommentParticipant({
+      prId: prInfo.id,
+      githubUsername: event.sender.login,
     });
 
     // Send DMs to mentioned users and PR author
@@ -99,6 +114,49 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
                       title: event.issue.title,
                       number: event.issue.number,
                       html_url: prInfo.html_url,
+                    },
+                    "gray",
+                  ),
+                  ...(event.comment.body
+                    ? [
+                        {
+                          text: event.comment.body,
+                        },
+                      ]
+                    : []),
+                ],
+              },
+            });
+          }
+        })(),
+      );
+    }
+
+    // Notify all previous participants (except commenter, PR author, and @mentioned)
+    for (const participantUsername of previousParticipants) {
+      // Skip: self, PR author (already notified above), @mentioned (already notified above)
+      if (
+        participantUsername === event.sender.login ||
+        participantUsername === prInfo.user.login ||
+        mentions.includes(participantUsername)
+      ) {
+        continue;
+      }
+
+      dmPromises.push(
+        (async () => {
+          const participantSlackId = await getSlackUserId(participantUsername, props);
+          if (participantSlackId) {
+            await slackClient.postDirectMessage({
+              slackUserId: participantSlackId,
+              message: {
+                text: `↩️ ${await getSlackUserName(event.sender.login, props)} replied in a thread you're in`,
+                attachments: [
+                  getDmAttachment(
+                    {
+                      title: event.issue.title,
+                      number: event.issue.number,
+                      html_url: event.comment.html_url,
                     },
                     "gray",
                   ),
