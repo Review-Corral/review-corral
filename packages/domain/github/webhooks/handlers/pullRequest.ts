@@ -76,7 +76,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
                       number: payload.pull_request.number,
                       html_url: payload.pull_request.html_url,
                     },
-                    "green",
+                    "purple",
                   ),
                 ],
               },
