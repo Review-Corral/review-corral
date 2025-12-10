@@ -74,9 +74,12 @@ export async function updatePullRequest({
 }: Partial<Omit<NewPullRequest, "id" | "repoId">> & {
   pullRequestId: number;
   repoId: number;
-}): Promise<void> {
-  await db
+}): Promise<PullRequestWithAlias | null> {
+  const result = await db
     .update(pullRequests)
     .set(updates)
-    .where(and(eq(pullRequests.repoId, repoId), eq(pullRequests.id, pullRequestId)));
+    .where(and(eq(pullRequests.repoId, repoId), eq(pullRequests.id, pullRequestId)))
+    .returning();
+
+  return result[0] ? toPullRequestWithAlias(result[0]) : null;
 }

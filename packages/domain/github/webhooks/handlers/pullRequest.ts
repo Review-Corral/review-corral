@@ -151,20 +151,14 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           }
         }
 
-        // Update database with new reviewer list
+        // Update database with new reviewer list and get updated record
         const reviewerLogins = extractReviewerLogins(
           payload.pull_request.requested_reviewers,
         );
-        await updatePullRequest({
+        const updatedPrItem = await updatePullRequest({
           pullRequestId: pullRequestItem.id,
           repoId: pullRequestItem.repoId,
           requestedReviewers: reviewerLogins,
-        });
-
-        // Update main message with new reviewer list
-        const updatedPrItem = await fetchPrItem({
-          pullRequestId: pullRequestItem.id,
-          repoId: pullRequestItem.repoId,
         });
 
         if (updatedPrItem?.threadTs) {
@@ -209,20 +203,14 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           }
         }
 
-        // Update database with new reviewer list
+        // Update database with new reviewer list and get updated record
         const removedReviewerLogins = extractReviewerLogins(
           payload.pull_request.requested_reviewers,
         );
-        await updatePullRequest({
+        const updatedPrItemAfterRemoval = await updatePullRequest({
           pullRequestId: pullRequestItem.id,
           repoId: pullRequestItem.repoId,
           requestedReviewers: removedReviewerLogins,
-        });
-
-        // Update main message with new reviewer list
-        const updatedPrItemAfterRemoval = await fetchPrItem({
-          pullRequestId: pullRequestItem.id,
-          repoId: pullRequestItem.repoId,
         });
 
         if (updatedPrItemAfterRemoval?.threadTs) {
