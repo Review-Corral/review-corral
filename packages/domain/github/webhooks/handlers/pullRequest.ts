@@ -125,7 +125,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           }
           return;
         }
-      case "review_requested":
+      case "review_requested": {
         if ("requested_reviewer" in payload) {
           const reviewerSlackId = await getSlackUserId(
             payload.requested_reviewer.login,
@@ -177,7 +177,8 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           );
         }
         return;
-      case "review_request_removed":
+      }
+      case "review_request_removed": {
         if ("requested_reviewer" in payload) {
           const reviewerSlackId = await getSlackUserId(
             payload.requested_reviewer.login,
@@ -229,6 +230,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           );
         }
         return;
+      }
       case "edited":
         return await handleEdited(
           pullRequestItem.threadTs,
