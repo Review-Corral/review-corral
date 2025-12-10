@@ -1,7 +1,13 @@
 import { COLOURS } from "@core/slack/const";
 import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
+import {
+  addReviewThreadParticipant,
+  getReviewThreadParticipants,
+} from "@domain/postgres/fetchers/review-thread-participants";
 import { PullRequestReviewCommentCreatedEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
+import { SlackClient } from "../../../slack/SlackClient";
+import { BaseGithubWebhookEventHanderArgs } from "../types";
 import { GithubWebhookEventHander } from "../types";
 import {
   extractMentions,
@@ -107,8 +113,81 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
       );
     }
 
+    // Notify other thread participants if this is a reply
+    if (event.comment.in_reply_to_id) {
+      dmPromises.push(
+        notifyThreadParticipants({
+          threadId: event.comment.in_reply_to_id,
+          senderLogin: event.sender.login,
+          pullRequest: event.pull_request,
+          comment: event.comment,
+          slackClient,
+          args,
+        }),
+      );
+    }
+
     await Promise.all(dmPromises);
+
+    // Record this commenter as a thread participant
+    // Use in_reply_to_id as thread ID if it's a reply, otherwise use the comment's own ID
+    const threadId = event.comment.in_reply_to_id ?? event.comment.id;
+    await addReviewThreadParticipant({
+      threadId,
+      githubUsername: event.sender.login,
+    });
 
     return;
   }
 };
+
+/**
+ * Notifies all previous participants in a review comment thread (except the sender).
+ */
+async function notifyThreadParticipants({
+  threadId,
+  senderLogin,
+  pullRequest,
+  comment,
+  slackClient,
+  args,
+}: {
+  threadId: number;
+  senderLogin: string;
+  pullRequest: { title: string; number: number };
+  comment: { html_url: string; body: string };
+  slackClient: SlackClient;
+  args: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">;
+}): Promise<void> {
+  const participants = await getReviewThreadParticipants({ threadId });
+
+  const notifyPromises = participants
+    .filter((username) => username !== senderLogin)
+    .map(async (username) => {
+      const slackId = await getSlackUserId(username, args);
+      if (slackId) {
+        await slackClient.postDirectMessage({
+          slackUserId: slackId,
+          message: {
+            text: `↩️ ${await getSlackUserName(senderLogin, args)} replied to a thread you're in`,
+            attachments: [
+              getDmAttachment(
+                {
+                  title: pullRequest.title,
+                  number: pullRequest.number,
+                  html_url: comment.html_url,
+                },
+                "gray",
+              ),
+              {
+                text: comment.body,
+                color: COLOURS.gray,
+              },
+            ],
+          },
+        });
+      }
+    });
+
+  await Promise.all(notifyPromises);
+}
