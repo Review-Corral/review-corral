@@ -293,7 +293,7 @@ describe("handlePullRequestEvent", () => {
       expect(mockSlackClientWithMerged.postDirectMessage).toHaveBeenCalledWith({
         slackUserId: "U123456",
         message: {
-          text: "✅ Your PR was merged",
+          text: "🟣 Your PR was merged",
           attachments: [{ color: "#0066ff" }],
         },
       });

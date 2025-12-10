@@ -68,7 +68,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             await props.slackClient.postDirectMessage({
               slackUserId: authorSlackId,
               message: {
-                text: "✅ Your PR was merged",
+                text: "🟣 Your PR was merged",
                 attachments: [
                   getDmAttachment(
                     {
