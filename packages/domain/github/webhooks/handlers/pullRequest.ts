@@ -16,7 +16,7 @@ import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClie
 import { getInstallationAccessToken } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
 import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
-import { convertPrEventToBaseProps } from "./utils";
+import { convertPrEventToBaseProps, extractReviewerLogins } from "./utils";
 
 export const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
@@ -150,6 +150,38 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             });
           }
         }
+
+        // Update database with new reviewer list
+        const reviewerLogins = extractReviewerLogins(
+          payload.pull_request.requested_reviewers,
+        );
+        await updatePullRequest({
+          pullRequestId: pullRequestItem.id,
+          repoId: pullRequestItem.repoId,
+          requestedReviewers: reviewerLogins,
+        });
+
+        // Update main message with new reviewer list
+        const updatedPrItem = await fetchPrItem({
+          pullRequestId: pullRequestItem.id,
+          repoId: pullRequestItem.repoId,
+        });
+
+        if (updatedPrItem?.threadTs) {
+          await props.slackClient.updateMainMessage(
+            {
+              body: convertPrEventToBaseProps(payload),
+              threadTs: updatedPrItem.threadTs,
+              slackUsername: await getSlackUserName(
+                payload.pull_request.user.login,
+                props,
+              ),
+              pullRequestItem: updatedPrItem,
+              requiredApprovals: null,
+            },
+            "review-requested",
+          );
+        }
         return;
       case "review_request_removed":
         if ("requested_reviewer" in payload) {
@@ -175,6 +207,38 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
               },
             });
           }
+        }
+
+        // Update database with new reviewer list
+        const removedReviewerLogins = extractReviewerLogins(
+          payload.pull_request.requested_reviewers,
+        );
+        await updatePullRequest({
+          pullRequestId: pullRequestItem.id,
+          repoId: pullRequestItem.repoId,
+          requestedReviewers: removedReviewerLogins,
+        });
+
+        // Update main message with new reviewer list
+        const updatedPrItemAfterRemoval = await fetchPrItem({
+          pullRequestId: pullRequestItem.id,
+          repoId: pullRequestItem.repoId,
+        });
+
+        if (updatedPrItemAfterRemoval?.threadTs) {
+          await props.slackClient.updateMainMessage(
+            {
+              body: convertPrEventToBaseProps(payload),
+              threadTs: updatedPrItemAfterRemoval.threadTs,
+              slackUsername: await getSlackUserName(
+                payload.pull_request.user.login,
+                props,
+              ),
+              pullRequestItem: updatedPrItemAfterRemoval,
+              requiredApprovals: null,
+            },
+            "review-request-removed",
+          );
         }
         return;
       case "edited":
@@ -298,12 +362,16 @@ const handleNewPr = async (
   // but don't post it
   if (payload.pull_request.draft) {
     LOGGER.debug("Handling draft PR");
+    const reviewerLogins = extractReviewerLogins(
+      payload.pull_request.requested_reviewers,
+    );
     await insertPullRequest({
       id: payload.pull_request.id,
       repoId: payload.repository.id,
       prNumber: payload.pull_request.number,
       isDraft: true,
       threadTs: null,
+      requestedReviewers: reviewerLogins,
     });
   } else {
     const { threadTs, wasCreated } = await getThreadTsForNewPr(
@@ -475,6 +543,9 @@ const handleNewPr = async (
         });
         if (existingPullRequest) {
           LOGGER.debug(`Updating existing PR record of id ${existingPullRequest.id}}`);
+          const reviewerLogins = extractReviewerLogins(
+            body.pull_request.requested_reviewers,
+          );
           await updatePullRequest({
             pullRequestId: existingPullRequest.id,
             repoId: body.repository.id,
@@ -482,15 +553,20 @@ const handleNewPr = async (
             requiredApprovals:
               requiredApprovals?.count ?? existingPullRequest.requiredApprovals,
             threadTs: response.ts,
+            requestedReviewers: reviewerLogins,
           });
         } else {
           LOGGER.debug("Creating new PR record");
+          const reviewerLogins = extractReviewerLogins(
+            body.pull_request.requested_reviewers,
+          );
           await insertPullRequest({
             id: body.pull_request.id,
             repoId: body.repository.id,
             prNumber: body.pull_request.number,
             requiredApprovals: requiredApprovals?.count ?? 0,
             threadTs: response.ts,
+            requestedReviewers: reviewerLogins,
           });
         }
 

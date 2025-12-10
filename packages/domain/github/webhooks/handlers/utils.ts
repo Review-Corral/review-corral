@@ -46,3 +46,20 @@ export const convertPrEventToBaseProps = (
     },
   };
 };
+
+/**
+ * Extracts user reviewer logins from requested_reviewers array.
+ * Filters out teams (which don't have a login field).
+ */
+export function extractReviewerLogins(
+  requestedReviewers: Array<{ login?: string }> | undefined,
+): string[] {
+  if (!requestedReviewers) return [];
+
+  return requestedReviewers
+    .filter(
+      (reviewer): reviewer is { login: string } =>
+        "login" in reviewer && !!reviewer.login,
+    )
+    .map((reviewer) => reviewer.login);
+}

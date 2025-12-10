@@ -69,6 +69,7 @@ export const buidMainMessageAttachements = ({
   const base = [
     getPrOpenedBaseAttachment(body, slackUsername),
     ...buildRequiredApprovalsAttachment({ pullRequestItem, requiredApprovals }),
+    ...buildRequestedReviewersAttachment(pullRequestItem?.requestedReviewers ?? []),
   ];
 
   if (body.pull_request.draft) {
@@ -176,6 +177,29 @@ const buildRequiredApprovalsAttachment = ({
   }
 
   return [];
+};
+
+const buildRequestedReviewersAttachment = (
+  reviewerLogins: string[],
+): MessageAttachment[] => {
+  if (reviewerLogins.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      color: "#0366d6",
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `:eyes: Requested reviewers: ${reviewerLogins.join(", ")}`,
+          },
+        },
+      ],
+    },
+  ];
 };
 
 const getRequiredApprovalsAttatchment = ({

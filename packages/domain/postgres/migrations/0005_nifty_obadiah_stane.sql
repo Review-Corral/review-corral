@@ -1,0 +1,1 @@
+ALTER TABLE "pull_requests" ADD COLUMN "requested_reviewers" jsonb DEFAULT '[]'::jsonb NOT NULL;

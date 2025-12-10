@@ -72,7 +72,6 @@ export class SlackClient {
     this.client = new WebClient(this.slackToken);
   }
 
-  // TODO: Ideally this is private
   async postMessage({
     message,
     threadTs,
