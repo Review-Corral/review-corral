@@ -4,6 +4,7 @@ import {
   boolean,
   index,
   integer,
+  jsonb,
   pgTable,
   text,
   timestamp,
@@ -24,6 +25,10 @@ export const pullRequests = pgTable(
     requiredApprovals: integer("required_approvals").notNull().default(0),
     approvalCount: integer("approval_count").notNull().default(0),
     isQueuedToMerge: boolean("is_queued_to_merge").notNull().default(false),
+    requestedReviewers: jsonb("requested_reviewers")
+      .$type<string[]>()
+      .notNull()
+      .default([]),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

@@ -78,6 +78,7 @@ describe("handlePullRequestEvent", () => {
       requiredApprovals: 0,
       approvalCount: 0,
       isQueuedToMerge: false,
+      requestedReviewers: [],
     });
 
     vi.mocked(getSlackUserName).mockResolvedValue("@testuser");
@@ -350,6 +351,170 @@ describe("handlePullRequestEvent", () => {
         },
         "<@U654321>",
       );
+    });
+  });
+
+  describe("review_requested event", () => {
+    beforeEach(() => {
+      mockEvent = {
+        action: "review_requested",
+        pull_request: {
+          id: 123,
+          title: "Test PR",
+          user: {
+            login: "prauthor",
+          },
+          requested_reviewers: [
+            {
+              login: "newreviewer",
+            },
+          ],
+        },
+        repository: {
+          id: 456,
+        },
+        requested_reviewer: {
+          login: "newreviewer",
+        },
+      };
+    });
+
+    it("should send DM and update main message when reviewer is added", async () => {
+      const mockSlackClientWithDm = {
+        ...mockSlackClient,
+        postDirectMessage: vi.fn(),
+        updateMainMessage: vi.fn(),
+      } as unknown as SlackClient;
+
+      // Mock the second fetchPrItem call after update to return updated reviewers
+      const updatedPrItem = {
+        ...prItem,
+        requestedReviewers: ["newreviewer"],
+      };
+      vi.mocked(fetchPrItem).mockClear();
+      vi.mocked(fetchPrItem).mockResolvedValueOnce(prItem);
+      vi.mocked(fetchPrItem).mockResolvedValueOnce(updatedPrItem);
+
+      await handlePullRequestEvent({
+        event: mockEvent,
+        slackClient: mockSlackClientWithDm,
+        organizationId: 789,
+        installationId: 101112,
+      });
+
+      // Should send DM
+      expect(mockSlackClientWithDm.postDirectMessage).toHaveBeenCalledWith({
+        slackUserId: "U123456",
+        message: {
+          text: "🔍 You've been requested to review",
+          attachments: expect.any(Array),
+        },
+      });
+
+      // Should update main message
+      expect(mockSlackClientWithDm.updateMainMessage).toHaveBeenCalledWith(
+        {
+          body: expect.objectContaining({
+            pull_request: expect.objectContaining({
+              title: "Test PR",
+            }),
+          }),
+          threadTs: "thread-ts-123",
+          slackUsername: "@testuser",
+          pullRequestItem: expect.objectContaining({
+            requestedReviewers: ["newreviewer"],
+          }),
+          requiredApprovals: null,
+        },
+        "review-requested",
+      );
+
+      // Should update database with reviewer logins
+      expect(updatePullRequest).toHaveBeenCalledWith({
+        pullRequestId: prItem.id,
+        repoId: prItem.repoId,
+        requestedReviewers: ["newreviewer"],
+      });
+    });
+  });
+
+  describe("review_request_removed event", () => {
+    beforeEach(() => {
+      mockEvent = {
+        action: "review_request_removed",
+        pull_request: {
+          id: 123,
+          title: "Test PR",
+          user: {
+            login: "prauthor",
+          },
+          requested_reviewers: [],
+        },
+        repository: {
+          id: 456,
+        },
+        requested_reviewer: {
+          login: "removedreviewer",
+        },
+      };
+    });
+
+    it("should send DM and update main message when reviewer is removed", async () => {
+      const mockSlackClientWithDm = {
+        ...mockSlackClient,
+        postDirectMessage: vi.fn(),
+        updateMainMessage: vi.fn(),
+      } as unknown as SlackClient;
+
+      // Mock the second fetchPrItem call after update to return updated (empty) reviewers
+      const updatedPrItem = {
+        ...prItem,
+        requestedReviewers: [],
+      };
+      vi.mocked(fetchPrItem).mockClear();
+      vi.mocked(fetchPrItem).mockResolvedValueOnce(prItem);
+      vi.mocked(fetchPrItem).mockResolvedValueOnce(updatedPrItem);
+
+      await handlePullRequestEvent({
+        event: mockEvent,
+        slackClient: mockSlackClientWithDm,
+        organizationId: 789,
+        installationId: 101112,
+      });
+
+      // Should send DM
+      expect(mockSlackClientWithDm.postDirectMessage).toHaveBeenCalledWith({
+        slackUserId: "U123456",
+        message: {
+          text: "Your review request was removed from this PR",
+          attachments: expect.any(Array),
+        },
+      });
+
+      // Should update main message with empty reviewers
+      expect(mockSlackClientWithDm.updateMainMessage).toHaveBeenCalledWith(
+        {
+          body: expect.objectContaining({
+            pull_request: expect.objectContaining({
+              title: "Test PR",
+            }),
+          }),
+          threadTs: "thread-ts-123",
+          slackUsername: "@testuser",
+          pullRequestItem: expect.objectContaining({
+            requestedReviewers: [],
+          }),
+          requiredApprovals: null,
+        },
+        "review-request-removed",
+      );
+
+      // Should update database with empty reviewer list
+      expect(updatePullRequest).toHaveBeenCalledWith({
+        pullRequestId: prItem.id,
+        repoId: prItem.repoId,
+        requestedReviewers: [],
+      });
     });
   });
 });

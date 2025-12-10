@@ -21,6 +21,7 @@ describe("mainMessage", () => {
       isQueuedToMerge: false,
       requiredApprovals: 2,
       approvalCount: 1,
+      requestedReviewers: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -245,6 +246,138 @@ describe("mainMessage", () => {
           },
         ],
       });
+    });
+
+    it("should not include reviewer attachment when no reviewers requested", () => {
+      const attachments = buidMainMessageAttachements({
+        body: mockBody,
+        slackUsername: "@testuser",
+        pullRequestItem: mockPullRequestItem,
+        requiredApprovals: null,
+      });
+
+      const reviewerAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Requested reviewers"),
+        ),
+      );
+
+      expect(reviewerAttachment).toBeUndefined();
+    });
+
+    it("should include single reviewer in attachment", () => {
+      const prWithReviewer = {
+        ...mockPullRequestItem,
+        requestedReviewers: ["reviewer1"],
+      };
+
+      const attachments = buidMainMessageAttachements({
+        body: mockBody,
+        slackUsername: "@testuser",
+        pullRequestItem: prWithReviewer,
+        requiredApprovals: null,
+      });
+
+      const reviewerAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Requested reviewers"),
+        ),
+      );
+
+      expect(reviewerAttachment).toBeDefined();
+      expect(reviewerAttachment?.color).toBe("#0366d6");
+      expect(reviewerAttachment?.blocks?.[0]).toMatchObject({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: ":eyes: Requested reviewers: reviewer1",
+        },
+      });
+    });
+
+    it("should include multiple reviewers comma-separated", () => {
+      const prWithReviewers = {
+        ...mockPullRequestItem,
+        requestedReviewers: ["reviewer1", "reviewer2", "reviewer3"],
+      };
+
+      const attachments = buidMainMessageAttachements({
+        body: mockBody,
+        slackUsername: "@testuser",
+        pullRequestItem: prWithReviewers,
+        requiredApprovals: null,
+      });
+
+      const reviewerAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Requested reviewers"),
+        ),
+      );
+
+      expect(reviewerAttachment).toBeDefined();
+      expect(reviewerAttachment?.blocks?.[0]).toMatchObject({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: ":eyes: Requested reviewers: reviewer1, reviewer2, reviewer3",
+        },
+      });
+    });
+
+    it("should position reviewer attachment between approvals and status", () => {
+      const prWithReviewers = {
+        ...mockPullRequestItem,
+        requestedReviewers: ["reviewer1"],
+        isDraft: true,
+      };
+
+      const attachments = buidMainMessageAttachements({
+        body: { ...mockBody, pull_request: { ...mockBody.pull_request, draft: true } },
+        slackUsername: "@testuser",
+        pullRequestItem: prWithReviewers,
+        requiredApprovals: { count: 2 },
+      });
+
+      expect(attachments).toHaveLength(4); // base + approvals + reviewers + draft
+
+      const reviewerIndex = attachments.findIndex((att) =>
+        att.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Requested reviewers"),
+        ),
+      );
+
+      const approvalsIndex = attachments.findIndex((att) =>
+        att.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("approvals met"),
+        ),
+      );
+
+      const draftIndex = attachments.findIndex((att) =>
+        att.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("draft"),
+        ),
+      );
+
+      expect(approvalsIndex).toBeLessThan(reviewerIndex);
+      expect(reviewerIndex).toBeLessThan(draftIndex);
     });
   });
 });
