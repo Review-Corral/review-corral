@@ -386,14 +386,12 @@ describe("handlePullRequestEvent", () => {
         updateMainMessage: vi.fn(),
       } as unknown as SlackClient;
 
-      // Mock the second fetchPrItem call after update to return updated reviewers
+      // Mock updatePullRequest to return the updated item
       const updatedPrItem = {
         ...prItem,
         requestedReviewers: ["newreviewer"],
       };
-      vi.mocked(fetchPrItem).mockClear();
-      vi.mocked(fetchPrItem).mockResolvedValueOnce(prItem);
-      vi.mocked(fetchPrItem).mockResolvedValueOnce(updatedPrItem);
+      vi.mocked(updatePullRequest).mockResolvedValueOnce(updatedPrItem);
 
       await handlePullRequestEvent({
         event: mockEvent,
@@ -466,14 +464,12 @@ describe("handlePullRequestEvent", () => {
         updateMainMessage: vi.fn(),
       } as unknown as SlackClient;
 
-      // Mock the second fetchPrItem call after update to return updated (empty) reviewers
+      // Mock updatePullRequest to return the updated item with empty reviewers
       const updatedPrItem = {
         ...prItem,
         requestedReviewers: [],
       };
-      vi.mocked(fetchPrItem).mockClear();
-      vi.mocked(fetchPrItem).mockResolvedValueOnce(prItem);
-      vi.mocked(fetchPrItem).mockResolvedValueOnce(updatedPrItem);
+      vi.mocked(updatePullRequest).mockResolvedValueOnce(updatedPrItem);
 
       await handlePullRequestEvent({
         event: mockEvent,

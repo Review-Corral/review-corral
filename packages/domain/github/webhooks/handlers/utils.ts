@@ -1,6 +1,6 @@
 import { PullRequestInfoResponse } from "@domain/github/endpointTypes";
 import { BasePullRequestProperties } from "@domain/slack/SlackClient";
-import { PullRequestEvent } from "@octokit/webhooks-types";
+import { PullRequestEvent, Team, User } from "@octokit/webhooks-types";
 
 export const convertPullRequestInfoToBaseProps = (
   response: PullRequestInfoResponse,
@@ -52,14 +52,11 @@ export const convertPrEventToBaseProps = (
  * Filters out teams (which don't have a login field).
  */
 export function extractReviewerLogins(
-  requestedReviewers: Array<{ login?: string }> | undefined,
+  requestedReviewers: (User | Team)[] | undefined,
 ): string[] {
   if (!requestedReviewers) return [];
 
   return requestedReviewers
-    .filter(
-      (reviewer): reviewer is { login: string } =>
-        "login" in reviewer && !!reviewer.login,
-    )
+    .filter((reviewer): reviewer is User => "login" in reviewer)
     .map((reviewer) => reviewer.login);
 }
