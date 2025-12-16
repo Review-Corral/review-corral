@@ -3,7 +3,7 @@ import { MessageAttachment, SectionBlock } from "@slack/web-api";
 import { ContextBlock, ImageElement } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
 import { BasePullRequestProperties } from "./SlackClient";
-import { extractImagesFromHtml, imagesToSlackBlocks } from "./imageExtractor";
+import { convertImagesToLinks } from "./imageExtractor";
 
 /**
  * Wrapping in it's own type just so that this ins't confused as being the same thing
@@ -243,12 +243,11 @@ const getPrOpenedBaseAttachment = (
   body: BasePullRequestProperties,
   slackUsername: string,
 ): MessageAttachment => {
-  // Extract images from PR body if it exists
-  const { cleanedBody, images } = body.pull_request?.body
-    ? extractImagesFromHtml(body.pull_request.body)
-    : { cleanedBody: null, images: [] };
-
-  const imageBlocks = imagesToSlackBlocks(images);
+  // Convert <img> tags to markdown links (GitHub image URLs aren't publicly
+  // accessible, so we can't render them as Slack image blocks)
+  const processedBody = body.pull_request?.body
+    ? convertImagesToLinks(body.pull_request.body)
+    : null;
 
   return {
     blocks: [
@@ -273,7 +272,7 @@ const getPrOpenedBaseAttachment = (
           },
         ],
       },
-      ...(cleanedBody
+      ...(processedBody
         ? [
             {
               type: "divider",
@@ -282,12 +281,11 @@ const getPrOpenedBaseAttachment = (
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: slackifyMarkdown(cleanedBody),
+                text: slackifyMarkdown(processedBody),
               },
             } as SectionBlock,
           ]
         : []),
-      ...imageBlocks,
       {
         type: "context",
         elements: [
