@@ -230,40 +230,13 @@ describe("mainMessage", () => {
     });
   });
 
-  describe("image extraction from PR body", () => {
-    it("should include image blocks when PR body contains images", () => {
+  describe("image handling in PR body", () => {
+    it("should convert img tags to clickable links", () => {
       const bodyWithImage = {
         ...mockBody,
         pull_request: {
           ...mockBody.pull_request,
-          body: `Works properly now\n\n<img width="2522" height="2776" alt="Screenshot" src="https://github.com/user-attachments/assets/abc123" />`,
-        },
-      };
-
-      const attachments = buidMainMessageAttachements({
-        body: bodyWithImage,
-        slackUsername: "@testuser",
-        pullRequestItem: mockPullRequestItem,
-        requiredApprovals: null,
-      });
-
-      const baseAttachment = attachments[0];
-      const imageBlock = baseAttachment.blocks?.find((block) => block.type === "image");
-
-      expect(imageBlock).toBeDefined();
-      expect(imageBlock).toMatchObject({
-        type: "image",
-        image_url: "https://github.com/user-attachments/assets/abc123",
-        alt_text: "Screenshot",
-      });
-    });
-
-    it("should not include raw img tags in description text", () => {
-      const bodyWithImage = {
-        ...mockBody,
-        pull_request: {
-          ...mockBody.pull_request,
-          body: `Description text\n\n<img src="https://github.com/user-attachments/assets/abc123" alt="test" />`,
+          body: `Description\n\n<img src="https://github.com/user-attachments/assets/abc123" alt="Screenshot" />`,
         },
       };
 
@@ -285,7 +258,10 @@ describe("mainMessage", () => {
           typeof sectionBlock.text === "string"
             ? sectionBlock.text
             : sectionBlock.text.text;
+        // Should not contain raw img tags
         expect(textContent).not.toContain("<img");
+        // slackifyMarkdown converts [text](url) to <url|text>
+        expect(textContent).toContain("Screenshot");
       }
     });
   });

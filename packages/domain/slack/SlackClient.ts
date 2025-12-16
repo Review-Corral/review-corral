@@ -10,6 +10,8 @@ import {
   ChatPostMessageArguments,
   ChatPostMessageResponse,
   ChatUpdateArguments,
+  CodedError,
+  ErrorCode,
   WebClient,
 } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
@@ -89,14 +91,75 @@ export class SlackClient {
     try {
       return await this.client.chat.postMessage(payload);
     } catch (error) {
-      LOGGER.error(
-        "Error posting message: ",
-        {
-          error,
-          payload,
-        },
-        { depth: 10 },
-      );
+      this.logSlackError("Error posting message", error, payload);
+    }
+  }
+
+  /**
+   * Logs detailed Slack API error information based on error type.
+   */
+  private logSlackError(
+    context: string,
+    error: unknown,
+    payload?: Record<string, unknown>,
+  ): void {
+    const isCodedError = (err: unknown): err is CodedError =>
+      err instanceof Error && "code" in err;
+
+    if (isCodedError(error)) {
+      switch (error.code) {
+        case ErrorCode.PlatformError:
+          // Platform errors contain the Slack API error message (e.g., "invalid_blocks")
+          LOGGER.error(context, {
+            errorType: "PlatformError",
+            code: error.code,
+            slackError: (error as { data?: { error?: string } }).data?.error,
+            message: error.message,
+            payload,
+          });
+          break;
+
+        case ErrorCode.HTTPError:
+          LOGGER.error(context, {
+            errorType: "HTTPError",
+            code: error.code,
+            statusCode: (error as { statusCode?: number }).statusCode,
+            statusMessage: (error as { statusMessage?: string }).statusMessage,
+            message: error.message,
+            payload,
+          });
+          break;
+
+        case ErrorCode.RateLimitedError:
+          LOGGER.error(context, {
+            errorType: "RateLimitedError",
+            code: error.code,
+            retryAfter: (error as { retryAfter?: number }).retryAfter,
+            message: error.message,
+          });
+          break;
+
+        case ErrorCode.RequestError:
+          LOGGER.error(context, {
+            errorType: "RequestError",
+            code: error.code,
+            originalError: (error as { original?: Error }).original?.message,
+            message: error.message,
+            payload,
+          });
+          break;
+
+        default:
+          LOGGER.error(context, {
+            errorType: "UnknownCodedError",
+            code: error.code,
+            message: error.message,
+            error,
+            payload,
+          });
+      }
+    } else {
+      LOGGER.error(context, { error, payload }, { depth: 10 });
     }
   }
 

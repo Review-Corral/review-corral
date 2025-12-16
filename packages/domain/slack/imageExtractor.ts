@@ -1,28 +1,4 @@
-export interface ExtractedImage {
-  url: string;
-  altText: string;
-}
-
-export interface ImageExtractionResult {
-  cleanedBody: string;
-  images: ExtractedImage[];
-}
-
-/**
- * Represents a Slack image block. This is a simplified type matching
- * Slack's Block Kit image block structure.
- */
-export interface SlackImageBlock {
-  type: "image";
-  image_url: string;
-  alt_text: string;
-}
-
-const MAX_IMAGES = 3;
-const DEFAULT_ALT_TEXT = "PR description image";
-
-// Regex to capture src and alt attributes from img tags (handles attributes in any
-// order). Note: GitHub generates img tags with predictable structure.
+// Regex to match img tags
 const IMG_TAG_REGEX = /<img\s+[^>]*>/gi;
 
 /**
@@ -42,39 +18,20 @@ function extractAlt(imgTag: string): string | null {
 }
 
 /**
- * Extracts `<img>` tags from HTML content and returns both the cleaned text
- * and the extracted image information. Images are limited to MAX_IMAGES.
+ * Converts `<img>` tags in HTML content to markdown-style links.
+ * GitHub user-attachment URLs are not publicly accessible, so we convert
+ * images to clickable links instead of trying to render them as Slack
+ * image blocks.
+ *
+ * Example: `<img src="https://..." alt="Screenshot" />` becomes
+ *          `[Screenshot](https://...)`
  */
-export function extractImagesFromHtml(body: string): ImageExtractionResult {
-  const images: ExtractedImage[] = [];
-  const imgTags = body.match(IMG_TAG_REGEX) || [];
-
-  for (const imgTag of imgTags) {
-    if (images.length >= MAX_IMAGES) break;
-
+export function convertImagesToLinks(body: string): string {
+  return body.replace(IMG_TAG_REGEX, (imgTag) => {
     const url = extractSrc(imgTag);
-    if (!url) continue;
+    if (!url) return "";
 
-    // Only include HTTPS URLs (Slack requirement)
-    if (!url.startsWith("https://")) continue;
-
-    const altText = extractAlt(imgTag)?.trim() || DEFAULT_ALT_TEXT;
-    images.push({ url, altText });
-  }
-
-  // Remove all img tags from the body (including ones beyond the limit)
-  const cleanedBody = body.replace(IMG_TAG_REGEX, "").trim();
-
-  return { cleanedBody, images };
-}
-
-/**
- * Converts extracted images to Slack image block format.
- */
-export function imagesToSlackBlocks(images: ExtractedImage[]): SlackImageBlock[] {
-  return images.map((image) => ({
-    type: "image" as const,
-    image_url: image.url,
-    alt_text: image.altText.slice(0, 2000), // Slack limit
-  }));
+    const alt = extractAlt(imgTag)?.trim() || "Image";
+    return `[${alt}](${url})`;
+  });
 }
