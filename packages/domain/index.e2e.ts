@@ -1,10 +1,26 @@
 require("dotenv").config({ path: ".env.e2e" });
+import { vi } from "vitest";
+
+// Mock SST Resources before any imports that use it
+vi.mock("sst", () => ({
+  Resource: {
+    NEON_DATABASE_URL: {
+      value: "postgresql://test:test@localhost:5432/test",
+    },
+  },
+}));
+
+// Mock Postgres client to prevent actual database connections
+vi.mock("@domain/postgres/client", () => ({
+  db: {},
+}));
+
 import {
   Organization,
-  PullRequestItem,
   Repository,
   SlackIntegration,
-} from "@core/dynamodb/entities/types";
+} from "@domain/postgres/schema";
+import { PullRequestWithAlias } from "@domain/postgres/fetchers/pull-requests";
 import {
   IssueCommentCreatedEvent,
   IssueCommentEvent,
@@ -14,12 +30,15 @@ import {
   PullRequestReviewRequestedEvent,
   PullRequestReviewSubmittedEvent,
 } from "@octokit/webhooks-types";
-import { describe, it, vi } from "vitest";
+import { describe, it } from "vitest";
 import { mock } from "vitest-mock-extended";
-import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
-import { fetchPrItem, insertPullRequest } from "./dynamodb/fetchers/pullRequests";
-import { safeFetchRepository } from "./dynamodb/fetchers/repositories";
-import { getSlackInstallationsForOrganization } from "./dynamodb/fetchers/slack";
+import { getOrganization } from "./postgres/fetchers/organizations";
+import {
+  fetchPrItem,
+  insertPullRequest,
+} from "./postgres/fetchers/pull-requests";
+import { safeFetchRepository } from "./postgres/fetchers/repositories";
+import { getSlackInstallationsForOrganization } from "./postgres/fetchers/slack-integrations";
 import {
   InstallationAccessTokenResponse,
   PullRequestInfoResponse,
@@ -30,7 +49,14 @@ import {
   getPullRequestInfo,
 } from "./github/fetchers";
 import { handleGithubWebhookEvent } from "./github/webhooks";
-import { getSlackUserName } from "./github/webhooks/handlers/shared";
+import {
+  extractMentions,
+  getDmAttachment,
+  getSlackUserId,
+  getSlackUserName,
+} from "./github/webhooks/handlers/shared";
+import { getPrCommentParticipants } from "./postgres/fetchers/pr-comment-participants";
+import { getReviewThreadParticipants } from "./postgres/fetchers/review-thread-participants";
 import { BaseGithubWebhookEventHanderArgs } from "./github/webhooks/types";
 import { postCommentsForNewPR } from "./selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "./selectors/pullRequests/getRequiredApprovals";
@@ -62,15 +88,33 @@ if (!slackAccessToken) {
 const mockedSlackIntegration = mock<SlackIntegration>({
   channelId: slackChannelId,
   accessToken: slackAccessToken,
+  scopes: "chat:write,channels:history,commands,users:read,chat:write.public,channels:join,im:write",
 });
 
 vi.mock("@domain/github/webhooks/handlers/shared", () => {
   return {
     getSlackUserName: vi.fn(),
+    getSlackUserId: vi.fn(),
+    getDmAttachment: vi.fn(),
+    extractMentions: vi.fn(),
   };
 });
 
-vi.mock("@domain/dynamodb/fetchers/pullRequests", () => {
+vi.mock("@domain/postgres/fetchers/pr-comment-participants", () => {
+  return {
+    getPrCommentParticipants: vi.fn(),
+    addPrCommentParticipant: vi.fn(),
+  };
+});
+
+vi.mock("@domain/postgres/fetchers/review-thread-participants", () => {
+  return {
+    getReviewThreadParticipants: vi.fn(),
+    addReviewThreadParticipant: vi.fn(),
+  };
+});
+
+vi.mock("@domain/postgres/fetchers/pull-requests", () => {
   return {
     fetchPrItem: vi.fn(),
     insertPullRequest: vi.fn(),
@@ -88,8 +132,27 @@ vi.mocked(insertPullRequest).mockImplementation((args) => {
 });
 
 vi.mocked(getSlackUserName).mockImplementation(getSlackUserNameMocked);
+vi.mocked(getSlackUserId).mockImplementation(async (githubLogin) => {
+  switch (githubLogin) {
+    case "michael":
+      return "U081WKT1AUQ";
+    case "jim":
+      return "U07GB8TBX53";
+    case "dwight":
+      return "U07J1FWJUQ0";
+    default:
+      return null;
+  }
+});
+vi.mocked(getDmAttachment).mockReturnValue({
+  color: "#fff",
+  blocks: [],
+});
+vi.mocked(extractMentions).mockReturnValue([]);
+vi.mocked(getPrCommentParticipants).mockResolvedValue([]);
+vi.mocked(getReviewThreadParticipants).mockResolvedValue([]);
 vi.mocked(fetchPrItem).mockResolvedValue(
-  mock<PullRequestItem>({
+  mock<PullRequestWithAlias>({
     threadTs: THREAD_TS,
   }),
 );
@@ -119,25 +182,24 @@ const mockedInstallationAccessToken = mock<InstallationAccessTokenResponse>({
 });
 vi.mocked(getInstallationAccessToken).mockResolvedValue(mockedInstallationAccessToken);
 
-vi.mock("@domain/dynamodb/fetchers/repositories", () => {
+vi.mock("@domain/postgres/fetchers/repositories", () => {
   return {
     safeFetchRepository: vi.fn(),
   };
 });
 vi.mocked(safeFetchRepository).mockResolvedValue(mockRepo);
 
-vi.mock("@domain/dynamodb/fetchers/organizations", () => {
+vi.mock("@domain/postgres/fetchers/organizations", () => {
   return {
-    fetchOrganizationById: vi.fn(),
+    getOrganization: vi.fn(),
   };
 });
-vi.mocked(fetchOrganizationById).mockResolvedValue(mockedOrg);
+vi.mocked(getOrganization).mockResolvedValue(mockedOrg);
 
-// todo: return mocked org
-
-vi.mock("@domain/dynamodb/fetchers/slack", () => {
+vi.mock("@domain/postgres/fetchers/slack-integrations", () => {
   return {
     getSlackInstallationsForOrganization: vi.fn(),
+    updateLastChecked: vi.fn(),
   };
 });
 vi.mocked(getSlackInstallationsForOrganization).mockResolvedValue([
@@ -247,7 +309,7 @@ describe("chained e2e events", () => {
       },
       () => {
         vi.mocked(fetchPrItem).mockResolvedValue(
-          mock<PullRequestItem>({
+          mock<PullRequestWithAlias>({
             threadTs: THREAD_TS,
             requiredApprovals: 2,
           }),
@@ -265,9 +327,6 @@ describe("chained e2e events", () => {
       () => {
         vi.mocked(getNumberOfApprovals).mockResolvedValue(1);
       },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
-      },
       {
         event: mock<PullRequestReviewSubmittedEvent>({
           action: "submitted",
@@ -284,9 +343,6 @@ describe("chained e2e events", () => {
           repository: repositoryMock,
         }),
         eventName: "pull_request_review",
-      },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
       },
       {
         event: mock<PullRequestReviewSubmittedEvent>({
