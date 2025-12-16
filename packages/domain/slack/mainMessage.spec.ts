@@ -248,9 +248,7 @@ describe("mainMessage", () => {
       });
 
       const baseAttachment = attachments[0];
-      const imageBlock = baseAttachment.blocks?.find(
-        (block) => block.type === "image",
-      );
+      const imageBlock = baseAttachment.blocks?.find((block) => block.type === "image");
 
       expect(imageBlock).toBeDefined();
       expect(imageBlock).toMatchObject({

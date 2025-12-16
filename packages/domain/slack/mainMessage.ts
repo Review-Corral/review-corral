@@ -2,8 +2,8 @@ import { type PullRequest } from "@domain/postgres/schema";
 import { MessageAttachment, SectionBlock } from "@slack/web-api";
 import { ContextBlock, ImageElement } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
-import { extractImagesFromHtml, imagesToSlackBlocks } from "./imageExtractor";
 import { BasePullRequestProperties } from "./SlackClient";
+import { extractImagesFromHtml, imagesToSlackBlocks } from "./imageExtractor";
 
 /**
  * Wrapping in it's own type just so that this ins't confused as being the same thing
