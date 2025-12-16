@@ -2,6 +2,7 @@ import { type PullRequest } from "@domain/postgres/schema";
 import { MessageAttachment, SectionBlock } from "@slack/web-api";
 import { ContextBlock, ImageElement } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
+import { extractImagesFromHtml, imagesToSlackBlocks } from "./imageExtractor";
 import { BasePullRequestProperties } from "./SlackClient";
 
 /**
@@ -242,6 +243,13 @@ const getPrOpenedBaseAttachment = (
   body: BasePullRequestProperties,
   slackUsername: string,
 ): MessageAttachment => {
+  // Extract images from PR body if it exists
+  const { cleanedBody, images } = body.pull_request?.body
+    ? extractImagesFromHtml(body.pull_request.body)
+    : { cleanedBody: null, images: [] };
+
+  const imageBlocks = imagesToSlackBlocks(images);
+
   return {
     blocks: [
       {
@@ -265,7 +273,7 @@ const getPrOpenedBaseAttachment = (
           },
         ],
       },
-      ...(body.pull_request?.body
+      ...(cleanedBody
         ? [
             {
               type: "divider",
@@ -274,11 +282,12 @@ const getPrOpenedBaseAttachment = (
               type: "section",
               text: {
                 type: "mrkdwn",
-                text: slackifyMarkdown(body.pull_request.body),
+                text: slackifyMarkdown(cleanedBody),
               },
             } as SectionBlock,
           ]
         : []),
+      ...imageBlocks,
       {
         type: "context",
         elements: [
