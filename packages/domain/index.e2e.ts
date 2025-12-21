@@ -327,9 +327,6 @@ describe("chained e2e events", () => {
       () => {
         vi.mocked(getNumberOfApprovals).mockResolvedValue(1);
       },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
-      },
       {
         event: mock<PullRequestReviewSubmittedEvent>({
           action: "submitted",
@@ -346,9 +343,6 @@ describe("chained e2e events", () => {
           repository: repositoryMock,
         }),
         eventName: "pull_request_review",
-      },
-      async () => {
-        await new Promise((resolve) => setTimeout(resolve, 1000 * 60 * 2));
       },
       {
         event: mock<PullRequestReviewSubmittedEvent>({
