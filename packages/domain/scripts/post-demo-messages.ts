@@ -5,8 +5,8 @@
  */
 require("dotenv").config({ path: ".env.e2e" });
 
-import { SlackClient } from "../slack/SlackClient";
 import { PullRequestOpenedEvent } from "@octokit/webhooks-types";
+import { SlackClient } from "../slack/SlackClient";
 
 const slackChannelId = process.env.SLACK_CHANNEL_ID;
 if (!slackChannelId) {
@@ -170,20 +170,18 @@ function createPullRequestUser(user: { login: string; avatar_url: string }) {
   };
 }
 
-function createPrEvent(
-  prData: {
-    id: number;
-    number: number;
-    title: string;
-    body: string;
-    user: { login: string; avatar_url: string };
-    additions: number;
-    deletions: number;
-    draft: boolean;
-    merged: boolean;
-    closed_at: string | null;
-  },
-): PullRequestOpenedEvent {
+function createPrEvent(prData: {
+  id: number;
+  number: number;
+  title: string;
+  body: string;
+  user: { login: string; avatar_url: string };
+  additions: number;
+  deletions: number;
+  draft: boolean;
+  merged: boolean;
+  closed_at: string | null;
+}): PullRequestOpenedEvent {
   return {
     action: "opened",
     number: prData.number,
