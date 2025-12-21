@@ -1,10 +1,10 @@
 require("dotenv").config({ path: ".env.e2e" });
 import {
   Organization,
-  PullRequestItem,
   Repository,
   SlackIntegration,
-} from "@core/dynamodb/entities/types";
+} from "./postgres/schema";
+import { RepositoryWithAlias } from "./postgres/fetchers/repositories";
 import {
   IssueCommentCreatedEvent,
   IssueCommentEvent,
@@ -16,10 +16,15 @@ import {
 } from "@octokit/webhooks-types";
 import { describe, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
-import { fetchOrganizationById } from "./dynamodb/fetchers/organizations";
-import { fetchPrItem, insertPullRequest } from "./dynamodb/fetchers/pullRequests";
-import { safeFetchRepository } from "./dynamodb/fetchers/repositories";
-import { getSlackInstallationsForOrganization } from "./dynamodb/fetchers/slack";
+import {
+  fetchPrItem,
+  insertPullRequest,
+  PullRequestWithAlias,
+  updatePullRequest,
+} from "./postgres/fetchers/pull-requests";
+import { getOrganization } from "./postgres/fetchers/organizations";
+import { safeFetchRepository } from "./postgres/fetchers/repositories";
+import { getSlackInstallationsForOrganization } from "./postgres/fetchers/slack-integrations";
 import {
   InstallationAccessTokenResponse,
   PullRequestInfoResponse,
@@ -30,8 +35,16 @@ import {
   getPullRequestInfo,
 } from "./github/fetchers";
 import { handleGithubWebhookEvent } from "./github/webhooks";
-import { getSlackUserName } from "./github/webhooks/handlers/shared";
+import { getSlackUserId, getSlackUserName } from "./github/webhooks/handlers/shared";
 import { BaseGithubWebhookEventHanderArgs } from "./github/webhooks/types";
+import {
+  addPrCommentParticipant,
+  getPrCommentParticipants,
+} from "./postgres/fetchers/pr-comment-participants";
+import {
+  addReviewThreadParticipant,
+  getReviewThreadParticipants,
+} from "./postgres/fetchers/review-thread-participants";
 import { postCommentsForNewPR } from "./selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "./selectors/pullRequests/getRequiredApprovals";
 
@@ -40,11 +53,13 @@ import { tryGetPrRequiredApprovalsCount } from "./selectors/pullRequests/getRequ
 let THREAD_TS = "1731871427.369019";
 
 const mockedOrg = mock<Organization>({
-  orgId: 123,
+  id: 123,
+  installationId: 789,
 });
 
-const mockRepo = mock<Repository>({
-  orgId: mockedOrg.orgId,
+const mockRepo = mock<RepositoryWithAlias>({
+  id: 456,
+  orgId: mockedOrg.id,
   repoId: 456,
   isEnabled: true,
 });
@@ -62,15 +77,21 @@ if (!slackAccessToken) {
 const mockedSlackIntegration = mock<SlackIntegration>({
   channelId: slackChannelId,
   accessToken: slackAccessToken,
+  scopes: "chat:write,im:write,users:read",
 });
 
-vi.mock("@domain/github/webhooks/handlers/shared", () => {
+vi.mock("@domain/github/webhooks/handlers/shared", async (importOriginal) => {
+  const original = await importOriginal<
+    typeof import("./github/webhooks/handlers/shared")
+  >();
   return {
+    ...original,
     getSlackUserName: vi.fn(),
+    getSlackUserId: vi.fn(),
   };
 });
 
-vi.mock("@domain/dynamodb/fetchers/pullRequests", () => {
+vi.mock("@domain/postgres/fetchers/pull-requests", () => {
   return {
     fetchPrItem: vi.fn(),
     insertPullRequest: vi.fn(),
@@ -88,8 +109,9 @@ vi.mocked(insertPullRequest).mockImplementation((args) => {
 });
 
 vi.mocked(getSlackUserName).mockImplementation(getSlackUserNameMocked);
+vi.mocked(getSlackUserId).mockImplementation(getSlackUserIdMocked);
 vi.mocked(fetchPrItem).mockResolvedValue(
-  mock<PullRequestItem>({
+  mock<PullRequestWithAlias>({
     threadTs: THREAD_TS,
   }),
 );
@@ -106,6 +128,11 @@ vi.mock("@domain/dynamodb/client", () => {
     Db: vi.fn(),
   };
 });
+vi.mock("@domain/postgres/client", () => {
+  return {
+    db: vi.fn(),
+  };
+});
 vi.mock("@domain/github/fetchers", () => {
   return {
     getInstallationAccessToken: vi.fn(),
@@ -119,25 +146,24 @@ const mockedInstallationAccessToken = mock<InstallationAccessTokenResponse>({
 });
 vi.mocked(getInstallationAccessToken).mockResolvedValue(mockedInstallationAccessToken);
 
-vi.mock("@domain/dynamodb/fetchers/repositories", () => {
+vi.mock("@domain/postgres/fetchers/repositories", () => {
   return {
     safeFetchRepository: vi.fn(),
   };
 });
 vi.mocked(safeFetchRepository).mockResolvedValue(mockRepo);
 
-vi.mock("@domain/dynamodb/fetchers/organizations", () => {
+vi.mock("@domain/postgres/fetchers/organizations", () => {
   return {
-    fetchOrganizationById: vi.fn(),
+    getOrganization: vi.fn(),
   };
 });
-vi.mocked(fetchOrganizationById).mockResolvedValue(mockedOrg);
+vi.mocked(getOrganization).mockResolvedValue(mockedOrg);
 
-// todo: return mocked org
-
-vi.mock("@domain/dynamodb/fetchers/slack", () => {
+vi.mock("@domain/postgres/fetchers/slack-integrations", () => {
   return {
     getSlackInstallationsForOrganization: vi.fn(),
+    updateLastChecked: vi.fn(),
   };
 });
 vi.mocked(getSlackInstallationsForOrganization).mockResolvedValue([
@@ -151,29 +177,65 @@ vi.mock("@domain/selectors/pullRequests/getRequiredApprovals", () => {
 });
 vi.mocked(tryGetPrRequiredApprovalsCount).mockResolvedValue({ count: 2 });
 
+vi.mock("@domain/postgres/fetchers/pr-comment-participants", () => {
+  return {
+    getPrCommentParticipants: vi.fn(),
+    addPrCommentParticipant: vi.fn(),
+  };
+});
+vi.mocked(getPrCommentParticipants).mockResolvedValue(["michael", "dwight"]);
+vi.mocked(addPrCommentParticipant).mockResolvedValue();
+
+vi.mock("@domain/postgres/fetchers/review-thread-participants", () => {
+  return {
+    getReviewThreadParticipants: vi.fn(),
+    addReviewThreadParticipant: vi.fn(),
+  };
+});
+vi.mocked(getReviewThreadParticipants).mockResolvedValue(["michael", "dwight"]);
+vi.mocked(addReviewThreadParticipant).mockResolvedValue();
+
+// Map of GitHub usernames to Slack user IDs. These IDs are used for both:
+// 1. Formatting Slack mentions in channel messages (e.g., <@U081WKT1AUQ>)
+// 2. Sending DMs to users during e2e tests
+// To add a new user, find their Slack user ID in the Slack workspace
+const slackUserIds: Record<string, string> = {
+  michael: "U081WKT1AUQ",
+  jim: "U07GB8TBX53",
+  dwight: "U07J1FWJUQ0",
+};
+
 async function getSlackUserNameMocked(
   githubLogin: string,
   _props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">,
 ): Promise<string> {
-  switch (githubLogin) {
-    case "michael":
-      return "<@U081WKT1AUQ>";
-    case "jim":
-      return "<@U07GB8TBX53>";
-    case "dwight":
-      return "<@U07J1FWJUQ0>";
-    default:
-      console.error(`getSlackUserNameMocked not implemented for ${githubLogin}`);
+  const slackId = slackUserIds[githubLogin];
+  if (slackId) {
+    return `<@${slackId}>`;
   }
 
+  console.error(`getSlackUserNameMocked not implemented for ${githubLogin}`);
   return githubLogin;
+}
+
+async function getSlackUserIdMocked(
+  githubLogin: string,
+  _props: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">,
+): Promise<string | null> {
+  const slackId = slackUserIds[githubLogin];
+  if (slackId) {
+    return slackId;
+  }
+
+  console.error(`getSlackUserIdMocked not implemented for ${githubLogin}`);
+  return null;
 }
 
 const repositoryMock = mock<PullRequestOpenedEvent["repository"]>({
   id: mockRepo.repoId,
   full_name: "Dunder Mifflin",
   owner: {
-    id: mockedOrg.orgId,
+    id: mockedOrg.id,
     avatar_url:
       "https://logos-world.net/wp-content/uploads/2022/02/Dunder-Mifflin-Logo.png",
   },
@@ -204,7 +266,7 @@ const basePrData = {
   number: 340,
   additions: 432,
   deletions: 12,
-  user: users.michael,
+  user: users.jim,
   title: "Add 'Dundie Awards' recepients to marketing site",
   body: "Adds a new page to the marketing site showcasing the 2024 Dundie Award winners, at `/about/dundie-awards`",
   html_url: "https://github.com/test/test/pull/340",
@@ -247,7 +309,7 @@ describe("chained e2e events", () => {
       },
       () => {
         vi.mocked(fetchPrItem).mockResolvedValue(
-          mock<PullRequestItem>({
+          mock<PullRequestWithAlias>({
             threadTs: THREAD_TS,
             requiredApprovals: 2,
           }),
