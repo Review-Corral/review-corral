@@ -1,11 +1,5 @@
 require("dotenv").config({ path: ".env.e2e" });
 import {
-  Organization,
-  Repository,
-  SlackIntegration,
-} from "./postgres/schema";
-import { RepositoryWithAlias } from "./postgres/fetchers/repositories";
-import {
   IssueCommentCreatedEvent,
   IssueCommentEvent,
   PullRequestClosedEvent,
@@ -16,15 +10,6 @@ import {
 } from "@octokit/webhooks-types";
 import { describe, it, vi } from "vitest";
 import { mock } from "vitest-mock-extended";
-import {
-  fetchPrItem,
-  insertPullRequest,
-  PullRequestWithAlias,
-  updatePullRequest,
-} from "./postgres/fetchers/pull-requests";
-import { getOrganization } from "./postgres/fetchers/organizations";
-import { safeFetchRepository } from "./postgres/fetchers/repositories";
-import { getSlackInstallationsForOrganization } from "./postgres/fetchers/slack-integrations";
 import {
   InstallationAccessTokenResponse,
   PullRequestInfoResponse,
@@ -37,14 +22,24 @@ import {
 import { handleGithubWebhookEvent } from "./github/webhooks";
 import { getSlackUserId, getSlackUserName } from "./github/webhooks/handlers/shared";
 import { BaseGithubWebhookEventHanderArgs } from "./github/webhooks/types";
+import { getOrganization } from "./postgres/fetchers/organizations";
 import {
   addPrCommentParticipant,
   getPrCommentParticipants,
 } from "./postgres/fetchers/pr-comment-participants";
 import {
+  PullRequestWithAlias,
+  fetchPrItem,
+  insertPullRequest,
+} from "./postgres/fetchers/pull-requests";
+import { RepositoryWithAlias } from "./postgres/fetchers/repositories";
+import { safeFetchRepository } from "./postgres/fetchers/repositories";
+import {
   addReviewThreadParticipant,
   getReviewThreadParticipants,
 } from "./postgres/fetchers/review-thread-participants";
+import { getSlackInstallationsForOrganization } from "./postgres/fetchers/slack-integrations";
+import { Organization, SlackIntegration } from "./postgres/schema";
 import { postCommentsForNewPR } from "./selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "./selectors/pullRequests/getRequiredApprovals";
 
@@ -81,9 +76,8 @@ const mockedSlackIntegration = mock<SlackIntegration>({
 });
 
 vi.mock("@domain/github/webhooks/handlers/shared", async (importOriginal) => {
-  const original = await importOriginal<
-    typeof import("./github/webhooks/handlers/shared")
-  >();
+  const original =
+    await importOriginal<typeof import("./github/webhooks/handlers/shared")>();
   return {
     ...original,
     getSlackUserName: vi.fn(),
