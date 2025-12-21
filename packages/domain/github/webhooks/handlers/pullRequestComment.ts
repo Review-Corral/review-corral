@@ -79,8 +79,11 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
       );
     }
 
-    // DM the PR author (if they weren't the commenter)
-    if (event.pull_request.user.login !== event.sender.login) {
+    // DM the PR author (if they weren't the commenter and weren't already mentioned)
+    if (
+      event.pull_request.user.login !== event.sender.login &&
+      !mentions.includes(event.pull_request.user.login)
+    ) {
       dmPromises.push(
         (async () => {
           const authorSlackId = await getSlackUserId(

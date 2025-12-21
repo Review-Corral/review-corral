@@ -270,6 +270,41 @@ const basePrData = {
   title: "Add 'Dundie Awards' recepients to marketing site",
   body: "Adds a new page to the marketing site showcasing the 2024 Dundie Award winners, at `/about/dundie-awards`",
   html_url: "https://github.com/test/test/pull/340",
+  url: "https://api.github.com/repos/test/test/pulls/340",
+  requested_reviewers: [],
+};
+
+// Michael's PR (id: 456) - WIP/draft PR
+const michaelPrData = {
+  id: 456,
+  draft: true,
+  merged: false,
+  closed_at: null,
+  number: 341,
+  additions: 200,
+  deletions: 50,
+  user: users.michael,
+  title: "Update Regional Manager Guidelines",
+  body: "Updates the guidelines document with new Scranton branch policies",
+  html_url: "https://github.com/test/test/pull/341",
+  url: "https://api.github.com/repos/test/test/pulls/341",
+  requested_reviewers: [],
+};
+
+// Dwight's PR (id: 789) - for closed scenario
+const dwightPrData = {
+  id: 789,
+  draft: false,
+  merged: false,
+  closed_at: null,
+  number: 342,
+  additions: 100,
+  deletions: 25,
+  user: users.dwight,
+  title: "Add beet farming integration",
+  body: "Integrates Schrute Farms beet inventory with the main system",
+  html_url: "https://github.com/test/test/pull/342",
+  url: "https://api.github.com/repos/test/test/pulls/342",
   requested_reviewers: [],
 };
 
@@ -318,7 +353,7 @@ describe("chained e2e events", () => {
       {
         event: mock<PullRequestReviewRequestedEvent>({
           action: "review_requested",
-          requested_reviewer: users.jim,
+          requested_reviewer: users.michael,
           repository: repositoryMock,
           pull_request: pullRequestMock,
         }),
@@ -349,14 +384,14 @@ describe("chained e2e events", () => {
           action: "submitted",
           sender: users.dwight,
           review: mock<PullRequestReviewSubmittedEvent["review"]>({
-            id: 123,
+            id: 124,
             body: "Yes!",
             user: users.dwight,
             state: "approved",
           }),
           pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
             id: 123,
-            user: users.michael,
+            user: users.jim,
           }),
           repository: repositoryMock,
         }),
@@ -383,15 +418,164 @@ describe("chained e2e events", () => {
  * with some minimal data and see it in Slack.
  */
 describe("end-to-end tests", () => {
-  it("should post messages to slack", async () => {
-    const prOpenedMessage = mock<PullRequestOpenedEvent>({
-      action: "opened",
-      pull_request: pullRequestMock,
-      repository: repositoryMock,
+  it("should post three PRs with different approval states", async () => {
+    // Track thread timestamps for each PR
+    const threadTsMap: Record<number, string> = {};
+
+    vi.mocked(tryGetPrRequiredApprovalsCount).mockResolvedValue({ count: 2 });
+
+    // Smart insertPullRequest mock that tracks threadTs by PR id
+    vi.mocked(insertPullRequest).mockImplementation((args) => {
+      if (args.threadTs && args.id) {
+        threadTsMap[args.id] = args.threadTs;
+      }
+      return Promise.resolve(args as any);
     });
 
+    // Smart fetchPrItem mock that returns correct threadTs for each PR
+    vi.mocked(fetchPrItem).mockImplementation(async ({ pullRequestId }) => {
+      return mock<PullRequestWithAlias>({
+        threadTs: threadTsMap[pullRequestId] || "",
+        requiredApprovals: 2,
+      });
+    });
+
+    // Smart getPullRequestInfo mock that returns correct PR data based on URL
+    vi.mocked(getPullRequestInfo).mockImplementation(async ({ url }) => {
+      const baseResponse = {
+        base: {
+          repo: {
+            full_name: "Dunder Mifflin",
+            owner: {
+              avatar_url:
+                "https://logos-world.net/wp-content/uploads/2022/02/Dunder-Mifflin-Logo.png",
+            },
+          },
+          ref: "main",
+        },
+      };
+
+      if (url.includes("341")) {
+        return mock<PullRequestInfoResponse>({ ...michaelPrData, ...baseResponse });
+      }
+      if (url.includes("342")) {
+        return mock<PullRequestInfoResponse>({ ...dwightPrData, ...baseResponse });
+      }
+      // Default to Jim's PR #340
+      return mock<PullRequestInfoResponse>({ ...basePrData, ...baseResponse });
+    });
+
+    // === PR #340 by Jim - will end up with 2/2 approvals ===
+    vi.mocked(getNumberOfApprovals).mockResolvedValue(0);
+
     await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
+      event: mock<PullRequestOpenedEvent>({
+        action: "opened",
+        pull_request: mock<PullRequestOpenedEvent["pull_request"]>({
+          ...basePrData,
+          base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+            ref: "main",
+          }),
+        }),
+        repository: repositoryMock,
+      }) as any,
+      eventName: "pull_request",
+    });
+
+    // First approval for Jim's PR
+    vi.mocked(getNumberOfApprovals).mockResolvedValue(1);
+    await handleGithubWebhookEvent({
+      event: mock<PullRequestReviewSubmittedEvent>({
+        action: "submitted",
+        sender: users.michael,
+        review: mock<PullRequestReviewSubmittedEvent["review"]>({
+          id: 1001,
+          body: "Looks good!",
+          user: users.michael,
+          state: "approved",
+        }),
+        pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
+          id: basePrData.id,
+          user: users.jim,
+        }),
+        repository: repositoryMock,
+      }) as any,
+      eventName: "pull_request_review",
+    });
+
+    // Second approval for Jim's PR - now 2/2
+    vi.mocked(getNumberOfApprovals).mockResolvedValue(2);
+    await handleGithubWebhookEvent({
+      event: mock<PullRequestReviewSubmittedEvent>({
+        action: "submitted",
+        sender: users.dwight,
+        review: mock<PullRequestReviewSubmittedEvent["review"]>({
+          id: 1002,
+          body: "LGTM!",
+          user: users.dwight,
+          state: "approved",
+        }),
+        pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
+          id: basePrData.id,
+          user: users.jim,
+        }),
+        repository: repositoryMock,
+      }) as any,
+      eventName: "pull_request_review",
+    });
+
+    // === PR #341 by Michael (WIP) - will end up with 1/2 approvals ===
+    vi.mocked(getNumberOfApprovals).mockResolvedValue(0);
+
+    await handleGithubWebhookEvent({
+      event: mock<PullRequestOpenedEvent>({
+        action: "opened",
+        pull_request: mock<PullRequestOpenedEvent["pull_request"]>({
+          ...michaelPrData,
+          base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+            ref: "main",
+          }),
+        }),
+        repository: repositoryMock,
+      }) as any,
+      eventName: "pull_request",
+    });
+
+    // One approval for Michael's PR - 1/2
+    vi.mocked(getNumberOfApprovals).mockResolvedValue(1);
+    await handleGithubWebhookEvent({
+      event: mock<PullRequestReviewSubmittedEvent>({
+        action: "submitted",
+        sender: users.jim,
+        review: mock<PullRequestReviewSubmittedEvent["review"]>({
+          id: 1003,
+          body: "Nice work!",
+          user: users.jim,
+          state: "approved",
+        }),
+        pull_request: mock<PullRequestReviewSubmittedEvent["pull_request"]>({
+          id: michaelPrData.id,
+          user: users.michael,
+        }),
+        repository: repositoryMock,
+      }) as any,
+      eventName: "pull_request_review",
+    });
+
+    // === PR #342 by Dwight - stays at 0/2 approvals ===
+    vi.mocked(getNumberOfApprovals).mockResolvedValue(0);
+
+    await handleGithubWebhookEvent({
+      event: mock<PullRequestOpenedEvent>({
+        action: "opened",
+        pull_request: mock<PullRequestOpenedEvent["pull_request"]>({
+          ...dwightPrData,
+          base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+            ref: "main",
+          }),
+        }),
+        repository: repositoryMock,
+      }) as any,
       eventName: "pull_request",
     });
   });
@@ -414,6 +598,33 @@ describe("end-to-end tests", () => {
 
     await handleGithubWebhookEvent({
       event: prOpenedMessage as any,
+      eventName: "issue_comment",
+    });
+  });
+
+  it("should post a DM when mentioned in a comment", async () => {
+    // Dwight mentions Jim in a comment - Jim should get a DM
+    const commentWithMention = mock<IssueCommentCreatedEvent>({
+      action: "created",
+      sender: users.dwight,
+      comment: mock<IssueCommentCreatedEvent["comment"]>({
+        id: 2,
+        body: "Hey @jim, can you take a look at this section? I think we need your input.",
+        html_url: "https://github.com/test/test/pull/340#issuecomment-2",
+      }),
+      issue: mock<IssueCommentCreatedEvent["issue"]>({
+        title: basePrData.title,
+        number: basePrData.number,
+        pull_request: mock<IssueCommentCreatedEvent["issue"]["pull_request"]>({
+          ...basePrData,
+          url: "https://api.github.com/repos/test/test/pulls/340",
+        }),
+      }),
+      repository: repositoryMock,
+    });
+
+    await handleGithubWebhookEvent({
+      event: commentWithMention as any,
       eventName: "issue_comment",
     });
   });
@@ -486,16 +697,10 @@ describe("end-to-end tests", () => {
   });
 
   it("should post pull request merged", async () => {
-    const prOpenedMessage = mock<PullRequestClosedEvent>({
+    const prMergedEvent = mock<PullRequestClosedEvent>({
       action: "closed",
       pull_request: mock<PullRequestClosedEvent["pull_request"]>({
-        ...basePrData,
-        additions: 432,
-        deletions: 123,
-        user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
-          login: "jim",
-          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-        }),
+        ...michaelPrData,
         base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
           ref: "main",
         }),
@@ -506,22 +711,18 @@ describe("end-to-end tests", () => {
     });
 
     await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
+      event: prMergedEvent as any,
       eventName: "pull_request",
     });
   });
 
   it("should post pull request closed", async () => {
-    const prOpenedMessage = mock<PullRequestClosedEvent>({
+    // Michael closes Dwight's PR - Dwight should get a DM
+    const prClosedEvent = mock<PullRequestClosedEvent>({
       action: "closed",
+      sender: users.michael,
       pull_request: mock<PullRequestClosedEvent["pull_request"]>({
-        ...basePrData,
-        additions: 432,
-        deletions: 123,
-        user: mock<PullRequestOpenedEvent["pull_request"]["user"]>({
-          login: "jim",
-          avatar_url: "https://cdn.mos.cms.futurecdn.net/ojTtHYLoiqG2riWm7fB9Gn.jpg",
-        }),
+        ...dwightPrData,
         base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
           ref: "main",
         }),
@@ -532,7 +733,48 @@ describe("end-to-end tests", () => {
     });
 
     await handleGithubWebhookEvent({
-      event: prOpenedMessage as any,
+      event: prClosedEvent as any,
+      eventName: "pull_request",
+    });
+  });
+
+  it("should DM Jim when his PR is merged", async () => {
+    // Jim's PR gets merged - Jim should get a DM
+    const prMergedEvent = mock<PullRequestClosedEvent>({
+      action: "closed",
+      pull_request: mock<PullRequestClosedEvent["pull_request"]>({
+        ...basePrData,
+        base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+          ref: "main",
+        }),
+        merged: true,
+        closed_at: "2024-11-17T15:00:00Z",
+      }),
+      repository: repositoryMock,
+    });
+
+    await handleGithubWebhookEvent({
+      event: prMergedEvent as any,
+      eventName: "pull_request",
+    });
+  });
+
+  it("should DM Jim when requested to review Dwight's PR", async () => {
+    // Jim is requested to review Dwight's PR - Jim should get a DM
+    const reviewRequestedEvent = mock<PullRequestReviewRequestedEvent>({
+      action: "review_requested",
+      requested_reviewer: users.jim,
+      pull_request: mock<PullRequestReviewRequestedEvent["pull_request"]>({
+        ...dwightPrData,
+        base: mock<PullRequestOpenedEvent["pull_request"]["base"]>({
+          ref: "main",
+        }),
+      }),
+      repository: repositoryMock,
+    });
+
+    await handleGithubWebhookEvent({
+      event: reviewRequestedEvent as any,
       eventName: "pull_request",
     });
   });

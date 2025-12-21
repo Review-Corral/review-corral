@@ -97,9 +97,11 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
       );
     }
 
-    // TODO: and they weren't messaged about this already
-    // DM the PR author (if they weren't the commenter)
-    if (prInfo.user.login !== event.sender.login) {
+    // DM the PR author (if they weren't the commenter and weren't already mentioned)
+    if (
+      prInfo.user.login !== event.sender.login &&
+      !mentions.includes(prInfo.user.login)
+    ) {
       dmPromises.push(
         (async () => {
           const authorSlackId = await getSlackUserId(prInfo.user.login, props);
