@@ -1,4 +1,5 @@
 import { Button } from "@components/shadcn/button";
+import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { Link, createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_landing/")({
@@ -29,7 +30,7 @@ function LandingPage() {
 
           <div className="md:w-1/2 flex justify-center">
             <img
-              src="/rc_example_1.png"
+              src="/rc-main-example.png"
               alt="Review Corral threaded notifications example"
               className="rounded-lg shadow-lg max-w-full h-auto"
             />
@@ -43,6 +44,60 @@ function LandingPage() {
             </Link>
           </div>
         </div>
+
+        {/* Features Section */}
+        <section className="py-16 border-t border-gray-200">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
+            Features
+          </h2>
+
+          <TabGroup vertical className="flex flex-col md:flex-row gap-8">
+            <TabList className="flex flex-col gap-2 md:w-1/3">
+              <Tab className="text-left px-6 py-4 rounded-lg transition-colors data-[selected]:bg-gray-100 data-[selected]:font-semibold hover:bg-gray-50 focus:outline-none">
+                <div className="text-lg font-medium">Personal Notifications</div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Get DMs for events that matter to you
+                </p>
+              </Tab>
+              <Tab className="text-left px-6 py-4 rounded-lg transition-colors data-[selected]:bg-gray-100 data-[selected]:font-semibold hover:bg-gray-50 focus:outline-none">
+                <div className="text-lg font-medium">Repository Mappings</div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Connect repositories to Slack channels
+                </p>
+              </Tab>
+              <Tab className="text-left px-6 py-4 rounded-lg transition-colors data-[selected]:bg-gray-100 data-[selected]:font-semibold hover:bg-gray-50 focus:outline-none">
+                <div className="text-lg font-medium">User Mappings</div>
+                <p className="text-sm text-gray-600 mt-1">
+                  Map GitHub users to Slack users
+                </p>
+              </Tab>
+            </TabList>
+
+            <TabPanels className="md:w-2/3">
+              <TabPanel>
+                <img
+                  src="/rc-dm-example.png"
+                  alt="Personal DM notifications example"
+                  className="rounded-lg shadow-lg max-w-full h-auto"
+                />
+              </TabPanel>
+              <TabPanel>
+                <img
+                  src="/repository-mappings.png"
+                  alt="Repository to Slack channel mappings"
+                  className="rounded-lg shadow-lg max-w-full h-auto"
+                />
+              </TabPanel>
+              <TabPanel>
+                <img
+                  src="/user-mappings.png"
+                  alt="GitHub to Slack user mappings"
+                  className="rounded-lg shadow-lg max-w-full h-auto"
+                />
+              </TabPanel>
+            </TabPanels>
+          </TabGroup>
+        </section>
       </main>
     </div>
   );
