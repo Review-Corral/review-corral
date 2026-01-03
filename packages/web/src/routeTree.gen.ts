@@ -18,6 +18,7 @@ import { Route as LoginSetTokenRouteImport } from './routes/login/set-token'
 import { Route as LoginErrorRouteImport } from './routes/login/error'
 import { Route as AppDashboardRouteImport } from './routes/app/_dashboard'
 import { Route as LandingPrivacyRouteImport } from './routes/_landing/privacy'
+import { Route as LandingAnimationsRouteImport } from './routes/_landing/animations'
 import { Route as LandingAboutRouteImport } from './routes/_landing/about'
 import { Route as AppDashboardIndexRouteImport } from './routes/app/_dashboard/index'
 import { Route as AppSlackInstallSuccessRouteImport } from './routes/app/slack/install/success'
@@ -70,6 +71,11 @@ const LandingPrivacyRoute = LandingPrivacyRouteImport.update({
   path: '/privacy',
   getParentRoute: () => LandingRoute,
 } as any)
+const LandingAnimationsRoute = LandingAnimationsRouteImport.update({
+  id: '/animations',
+  path: '/animations',
+  getParentRoute: () => LandingRoute,
+} as any)
 const LandingAboutRoute = LandingAboutRouteImport.update({
   id: '/about',
   path: '/about',
@@ -118,6 +124,7 @@ export interface FileRoutesByFullPath {
   '/app': typeof AppDashboardRouteWithChildren
   '/logout': typeof LogoutRoute
   '/about': typeof LandingAboutRoute
+  '/animations': typeof LandingAnimationsRoute
   '/privacy': typeof LandingPrivacyRoute
   '/login/error': typeof LoginErrorRoute
   '/login/set-token': typeof LoginSetTokenRoute
@@ -135,6 +142,7 @@ export interface FileRoutesByTo {
   '/app': typeof AppDashboardIndexRoute
   '/logout': typeof LogoutRoute
   '/about': typeof LandingAboutRoute
+  '/animations': typeof LandingAnimationsRoute
   '/privacy': typeof LandingPrivacyRoute
   '/login/error': typeof LoginErrorRoute
   '/login/set-token': typeof LoginSetTokenRoute
@@ -152,6 +160,7 @@ export interface FileRoutesById {
   '/app': typeof AppRouteWithChildren
   '/logout': typeof LogoutRoute
   '/_landing/about': typeof LandingAboutRoute
+  '/_landing/animations': typeof LandingAnimationsRoute
   '/_landing/privacy': typeof LandingPrivacyRoute
   '/app/_dashboard': typeof AppDashboardRouteWithChildren
   '/login/error': typeof LoginErrorRoute
@@ -172,6 +181,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/logout'
     | '/about'
+    | '/animations'
     | '/privacy'
     | '/login/error'
     | '/login/set-token'
@@ -189,6 +199,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/logout'
     | '/about'
+    | '/animations'
     | '/privacy'
     | '/login/error'
     | '/login/set-token'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/app'
     | '/logout'
     | '/_landing/about'
+    | '/_landing/animations'
     | '/_landing/privacy'
     | '/app/_dashboard'
     | '/login/error'
@@ -294,6 +306,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LandingPrivacyRouteImport
       parentRoute: typeof LandingRoute
     }
+    '/_landing/animations': {
+      id: '/_landing/animations'
+      path: '/animations'
+      fullPath: '/animations'
+      preLoaderRoute: typeof LandingAnimationsRouteImport
+      parentRoute: typeof LandingRoute
+    }
     '/_landing/about': {
       id: '/_landing/about'
       path: '/about'
@@ -355,12 +374,14 @@ declare module '@tanstack/react-router' {
 
 interface LandingRouteChildren {
   LandingAboutRoute: typeof LandingAboutRoute
+  LandingAnimationsRoute: typeof LandingAnimationsRoute
   LandingPrivacyRoute: typeof LandingPrivacyRoute
   LandingIndexRoute: typeof LandingIndexRoute
 }
 
 const LandingRouteChildren: LandingRouteChildren = {
   LandingAboutRoute: LandingAboutRoute,
+  LandingAnimationsRoute: LandingAnimationsRoute,
   LandingPrivacyRoute: LandingPrivacyRoute,
   LandingIndexRoute: LandingIndexRoute,
 }
