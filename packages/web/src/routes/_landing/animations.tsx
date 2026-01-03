@@ -7,95 +7,112 @@ export const Route = createFileRoute("/_landing/animations")({
   component: RouteComponent,
 });
 
+// Timing configuration (in seconds)
+const CAROUSEL_DURATION = 0.5;
+const COMET_DURATION = 0.8;
+const PAUSE_AFTER_COMET = 0.3;
+const TOTAL_CYCLE = CAROUSEL_DURATION + COMET_DURATION + PAUSE_AFTER_COMET;
+
+// Maps carousel item index to which paths should have comets
+const pathMapping: Record<number, number[]> = {
+  0: [0, 1], // Item 1 → Paths 1 & 2
+  1: [1, 3], // Item 2 → Paths 2 & 4
+  2: [2], // Item 3 → Path 3 only
+  3: [0, 2], // Item 4 → Paths 1 & 2
+};
+
+const items = ["First Item", "Second Item", "Third Item", "Fourth Item"];
+
 function RouteComponent() {
-  const [phase, setPhase] = useState<"carousel" | "comet">("carousel");
+  const [cycle, setCycle] = useState(0);
 
-  const handleCarouselComplete = () => {
-    setPhase("comet");
-  };
+  // Advance cycle on a fixed interval
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCycle((prev) => prev + 1);
+    }, TOTAL_CYCLE * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
-  const handleCometComplete = () => {
-    setTimeout(() => {
-      setPhase("carousel");
-    }, 500);
-  };
+  const currentIndex = cycle % items.length;
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-950">
       <div className="flex items-center gap-4">
-        <VerticalCarousel
-          items={["First Item", "Second Item", "Third Item", "Fourth Item"]}
-          isActive={phase === "carousel"}
-          onComplete={handleCarouselComplete}
-        />
-        <LineTrailAnimation
-          isActive={phase === "comet"}
-          onComplete={handleCometComplete}
-        />
+        <VerticalCarousel currentIndex={currentIndex} cycle={cycle} />
+        <LineTrailAnimation activeItem={currentIndex} cycle={cycle} />
       </div>
     </div>
   );
 }
 
 interface LineTrailAnimationProps {
-  isActive: boolean;
-  onComplete: () => void;
+  activeItem: number;
+  cycle: number;
 }
 
-function LineTrailAnimation({ isActive, onComplete }: LineTrailAnimationProps) {
+function LineTrailAnimation({ activeItem, cycle }: LineTrailAnimationProps) {
   const strokeWidth = 6;
-  const duration = 0.8;
+  const svgWidth = 300;
+  const svgHeight = 160 + strokeWidth;
 
-  // Path: right 150px, down 100px, right 150px
-  const radius = 5;
-  const path = `M 0 ${strokeWidth / 2}
-                H ${150 - radius}
-                Q ${150} ${strokeWidth / 2} ${150} ${strokeWidth / 2 + radius}
-                V ${100 - radius}
-                Q ${150} ${100} ${150 + radius} ${100}
-                H 300`;
+  // Define 4 forking paths
+  const branchX = 100;
+  const radius = 8;
+  const startY = 80 + strokeWidth / 2;
+  const endYPositions = [20, 60, 100, 140];
 
-  // Create comet particles - each slightly delayed to form a trail
-  const particleCount = 20;
-  const particles = Array.from({ length: particleCount }, (_, i) => {
-    const progress = i / particleCount;
-    // Interpolate from white (head) through pink to purple (tail)
-    const color = progress < 0.2 ? "#ffffff" : progress < 0.5 ? "#ec4899" : "#a855f7";
-    const opacity = 1 - progress * 0.9;
-    const delay = i * 0.02; // Stagger each particle
-    return { id: `particle-${i}`, color, opacity, delay };
+  const paths = endYPositions.map((endY) => {
+    const yDiff = endY - startY + strokeWidth / 2;
+    const curveDirection = yDiff < 0 ? -1 : yDiff > 0 ? 1 : 0;
+    const absYDiff = Math.abs(yDiff);
+
+    if (curveDirection === 0) {
+      return `M 0 ${startY} H ${svgWidth}`;
+    }
+
+    const curveRadius = Math.min(radius, absYDiff / 2);
+    const endYWithOffset = endY + strokeWidth / 2;
+    return `M 0 ${startY} H ${branchX - curveRadius} Q ${branchX} ${startY} ${branchX} ${startY + curveDirection * curveRadius} L ${branchX} ${endYWithOffset - curveDirection * curveRadius} Q ${branchX} ${endYWithOffset} ${branchX + curveRadius} ${endYWithOffset} H ${svgWidth}`;
   });
 
-  // Trigger onComplete when animation finishes
-  useEffect(() => {
-    if (!isActive) return;
-    const lastParticleDelay = particles[particles.length - 1].delay;
-    const timeout = setTimeout(() => {
-      onComplete();
-    }, (duration + lastParticleDelay) * 1000);
-    return () => clearTimeout(timeout);
-  }, [isActive, onComplete, duration, particles]);
+  // Create comet particles
+  const particleCount = 20;
+  const createParticles = (pathIndex: number) =>
+    Array.from({ length: particleCount }, (_, i) => {
+      const progress = i / particleCount;
+      const color = progress < 0.2 ? "#ffffff" : progress < 0.5 ? "#ec4899" : "#a855f7";
+      const opacity = 1 - progress * 0.9;
+      const delay = CAROUSEL_DURATION + i * 0.02; // Start after carousel
+      return { id: `path-${pathIndex}-particle-${i}`, color, opacity, delay };
+    });
+
+  const activePaths = pathMapping[activeItem] ?? [];
 
   return (
-    <div className="relative" style={{ width: 300, height: 100 + strokeWidth }}>
-      <svg
-        width="300"
-        height={100 + strokeWidth}
-        className="absolute inset-0"
-        fill="none"
-      >
-        {/* Background pipe */}
-        <path
-          d={path}
-          stroke="#374151"
-          strokeWidth={strokeWidth}
-          strokeLinecap="round"
-        />
+    <div className="relative" style={{ width: svgWidth, height: svgHeight }}>
+      <svg width={svgWidth} height={svgHeight} className="absolute inset-0" fill="none">
+        {/* Background pipes */}
+        {paths.map((path, i) => (
+          <path
+            key={`pipe-${endYPositions[i]}`}
+            d={path}
+            stroke="#374151"
+            strokeWidth={strokeWidth}
+            strokeLinecap="round"
+          />
+        ))}
 
-        {/* Comet particles - using foreignObject to enable CSS offset-path */}
-        {isActive &&
-          particles.map((particle) => (
-            <foreignObject key={particle.id} x="0" y="0" width="300" height={100 + strokeWidth}>
+        {/* Comet particles - keyed by cycle to restart animation */}
+        {activePaths.map((pathIndex) =>
+          createParticles(pathIndex).map((particle) => (
+            <foreignObject
+              key={`${cycle}-${particle.id}`}
+              x="0"
+              y="0"
+              width={svgWidth}
+              height={svgHeight}
+            >
               <motion.div
                 style={{
                   width: strokeWidth,
@@ -103,45 +120,31 @@ function LineTrailAnimation({ isActive, onComplete }: LineTrailAnimationProps) {
                   borderRadius: "50%",
                   backgroundColor: particle.color,
                   opacity: particle.opacity,
-                  offsetPath: `path('${path.replace(/\s+/g, " ")}')`,
+                  offsetPath: `path('${paths[pathIndex]}')`,
                   offsetRotate: "0deg",
                 }}
                 initial={{ offsetDistance: "0%" }}
                 animate={{ offsetDistance: "100%" }}
                 transition={{
-                  duration,
+                  duration: COMET_DURATION,
                   ease: "easeInOut",
                   delay: particle.delay,
                 }}
               />
             </foreignObject>
-          ))}
+          )),
+        )}
       </svg>
     </div>
   );
 }
 
 interface VerticalCarouselProps {
-  items: string[];
-  isActive: boolean;
-  onComplete: () => void;
+  currentIndex: number;
+  cycle: number;
 }
 
-function VerticalCarousel({ items, isActive, onComplete }: VerticalCarouselProps) {
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const transitionDuration = 0.5;
-
-  useEffect(() => {
-    if (!isActive) return;
-    // Advance to next item
-    setCurrentIndex((prev) => (prev + 1) % items.length);
-    // Call onComplete after transition finishes
-    const timeout = setTimeout(() => {
-      onComplete();
-    }, transitionDuration * 1000);
-    return () => clearTimeout(timeout);
-  }, [isActive, items.length, onComplete]);
-
+function VerticalCarousel({ currentIndex }: VerticalCarouselProps) {
   const itemHeight = 48;
 
   return (
@@ -168,7 +171,7 @@ function VerticalCarousel({ items, isActive, onComplete }: VerticalCarouselProps
           initial={{ y: -itemHeight * 1.5 }}
           animate={{ y: itemHeight }}
           exit={{ y: itemHeight * 3.5 }}
-          transition={{ duration: transitionDuration, ease: "easeInOut" }}
+          transition={{ duration: CAROUSEL_DURATION, ease: "easeInOut" }}
           className="absolute left-0 right-0 flex items-center justify-center text-sm font-semibold border-2"
           style={{
             height: itemHeight,
