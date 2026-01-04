@@ -13,10 +13,6 @@ const COMET_DURATION = 0.8;
 const PAUSE_AFTER_COMET = 0.3;
 const TOTAL_CYCLE = CAROUSEL_DURATION + COMET_DURATION + PAUSE_AFTER_COMET;
 
-// GitHub mark path (original 98x96, will be scaled)
-// This is a closed path that traces the Octocat outline
-const GITHUB_MARK_PATH = "M48.854 0C21.839 0 0 22 0 49.217c0 21.756 13.993 40.172 33.405 46.69 2.427.49 3.316-1.059 3.316-2.362 0-1.141-.08-5.052-.08-9.127-13.59 2.934-16.42-5.867-16.42-5.867-2.184-5.704-5.42-7.17-5.42-7.17-4.448-3.015.324-3.015.324-3.015 4.934.326 7.523 5.052 7.523 5.052 4.367 7.496 11.404 5.378 14.235 4.074.404-3.178 1.699-5.378 3.074-6.6-10.839-1.141-22.243-5.378-22.243-24.283 0-5.378 1.94-9.778 5.014-13.2-.485-1.222-2.184-6.275.486-13.038 0 0 4.125-1.304 13.426 5.052a46.97 46.97 0 0 1 12.214-1.63c4.125 0 8.33.571 12.213 1.63 9.302-6.356 13.427-5.052 13.427-5.052 2.67 6.763.97 11.816.485 13.038 3.155 3.422 5.015 7.822 5.015 13.2 0 18.905-11.404 23.06-22.324 24.283 1.78 1.548 3.316 4.481 3.316 9.126 0 6.6-.08 11.897-.08 13.526 0 1.304.89 2.853 3.316 2.364 19.412-6.52 33.405-24.935 33.405-46.691C97.707 22 75.788 0 48.854 0z";
-
 // Maps carousel item index to which paths should have comets
 const pathMapping: Record<number, number[]> = {
   0: [0, 1], // Item 1 → Paths 1 & 2
@@ -61,10 +57,8 @@ function LineTrailAnimation({ activeItem, cycle }: LineTrailAnimationProps) {
   const svgHeight = 160 + strokeWidth;
 
   // Layout constants
-  const githubScale = 0.5;
-  const githubWidth = 98 * githubScale;
-  const githubHeight = 96 * githubScale;
-  const githubX = 20;
+  const logoSize = 50;
+  const logoX = 20;
   const branchX = 150;
   const startY = 80 + strokeWidth / 2;
   const endYPositions = [20, 60, 100, 140];
@@ -98,10 +92,9 @@ function LineTrailAnimation({ activeItem, cycle }: LineTrailAnimationProps) {
 
   const activePaths = pathMapping[activeItem] ?? [];
 
-  // Calculate when comet passes through GitHub logo area (for gradient timing)
-  const githubStartPercent = githubX / svgWidth;
-  const githubEndPercent = (githubX + githubWidth) / svgWidth;
-  const githubPassDelay = CAROUSEL_DURATION + COMET_DURATION * githubStartPercent;
+  // Calculate when comet passes through logo area (for gradient timing)
+  const logoStartPercent = logoX / svgWidth;
+  const logoPassDelay = CAROUSEL_DURATION + COMET_DURATION * logoStartPercent;
 
   return (
     <div className="relative" style={{ width: svgWidth, height: svgHeight }}>
@@ -117,52 +110,57 @@ function LineTrailAnimation({ activeItem, cycle }: LineTrailAnimationProps) {
           />
         ))}
 
-        {/* GitHub mark with animated gradient */}
-        <defs>
-          <linearGradient id="github-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <motion.stop
-              key={`stop0-${cycle}`}
-              offset="0%"
-              initial={{ stopColor: "#374151" }}
-              animate={{ stopColor: ["#374151", "#a855f7", "#ec4899", "#ffffff", "#374151"] }}
+        {/* Logo with animated background */}
+        <foreignObject
+          x={logoX}
+          y={startY - logoSize / 2}
+          width={logoSize}
+          height={logoSize}
+        >
+          <div
+            style={{
+              width: logoSize,
+              height: logoSize,
+              borderRadius: 8,
+              overflow: "hidden",
+              position: "relative",
+              background: "#ffffff",
+            }}
+          >
+            {/* Animated gradient swipe */}
+            <motion.div
+              key={`logo-gradient-${cycle}`}
+              style={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: logoSize * 2,
+                height: logoSize * 2,
+                background:
+                  "linear-gradient(135deg, transparent 30%, #a855f7 40%, #ec4899 50%, #ffffff 60%, transparent 70%)",
+              }}
+              initial={{ x: -logoSize * 2, y: -logoSize * 2 }}
+              animate={{ x: logoSize, y: logoSize }}
               transition={{
-                duration: 0.5,
-                delay: githubPassDelay,
-                ease: "easeInOut",
+                duration: 0.7,
+                delay: logoPassDelay,
+                ease: "easeOut",
               }}
             />
-            <motion.stop
-              key={`stop50-${cycle}`}
-              offset="50%"
-              initial={{ stopColor: "#374151" }}
-              animate={{ stopColor: ["#374151", "#374151", "#a855f7", "#ec4899", "#374151"] }}
-              transition={{
-                duration: 0.5,
-                delay: githubPassDelay,
-                ease: "easeInOut",
+            <img
+              src="/review_corral_logo-min.png"
+              alt="Review Corral"
+              style={{
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                padding: 4,
+                position: "relative",
+                zIndex: 1,
               }}
             />
-            <motion.stop
-              key={`stop100-${cycle}`}
-              offset="100%"
-              initial={{ stopColor: "#374151" }}
-              animate={{ stopColor: ["#374151", "#374151", "#374151", "#a855f7", "#374151"] }}
-              transition={{
-                duration: 0.5,
-                delay: githubPassDelay,
-                ease: "easeInOut",
-              }}
-            />
-          </linearGradient>
-        </defs>
-        <g transform={`translate(${githubX}, ${startY - githubHeight / 2}) scale(${githubScale})`}>
-          <path
-            d={GITHUB_MARK_PATH}
-            stroke="url(#github-gradient)"
-            strokeWidth={strokeWidth / githubScale}
-            fill="none"
-          />
-        </g>
+          </div>
+        </foreignObject>
 
         {/* Comet particles */}
         {activePaths.map((pathIndex) =>
