@@ -21,7 +21,12 @@ const pathMapping: Record<number, number[]> = {
   3: [0, 2], // Item 4 → Paths 1 & 2
 };
 
-const items = ["First Item", "Second Item", "Third Item", "Fourth Item"];
+const items = [
+  "Pull Request Opened",
+  "Review Requested",
+  "Pull Request Approved",
+  "Pull Request Reopened",
+];
 
 function RouteComponent() {
   const [cycle, setCycle] = useState(0);
@@ -110,7 +115,39 @@ function LineTrailAnimation({ activeItem, cycle }: LineTrailAnimationProps) {
           />
         ))}
 
-        {/* Logo with animated background */}
+        {/* Comet particles */}
+        {activePaths.map((pathIndex) =>
+          createParticles(pathIndex).map((particle) => (
+            <foreignObject
+              key={`${cycle}-${particle.id}`}
+              x="0"
+              y="0"
+              width={svgWidth}
+              height={svgHeight}
+            >
+              <motion.div
+                style={{
+                  width: strokeWidth,
+                  height: strokeWidth,
+                  borderRadius: "50%",
+                  backgroundColor: particle.color,
+                  opacity: particle.opacity,
+                  offsetPath: `path('${paths[pathIndex]}')`,
+                  offsetRotate: "0deg",
+                }}
+                initial={{ offsetDistance: "0%" }}
+                animate={{ offsetDistance: "100%" }}
+                transition={{
+                  duration: COMET_DURATION,
+                  ease: "easeInOut",
+                  delay: particle.delay,
+                }}
+              />
+            </foreignObject>
+          )),
+        )}
+
+        {/* Logo with animated background - rendered last to be on top */}
         <foreignObject
           x={logoX}
           y={startY - logoSize / 2}
@@ -161,38 +198,6 @@ function LineTrailAnimation({ activeItem, cycle }: LineTrailAnimationProps) {
             />
           </div>
         </foreignObject>
-
-        {/* Comet particles */}
-        {activePaths.map((pathIndex) =>
-          createParticles(pathIndex).map((particle) => (
-            <foreignObject
-              key={`${cycle}-${particle.id}`}
-              x="0"
-              y="0"
-              width={svgWidth}
-              height={svgHeight}
-            >
-              <motion.div
-                style={{
-                  width: strokeWidth,
-                  height: strokeWidth,
-                  borderRadius: "50%",
-                  backgroundColor: particle.color,
-                  opacity: particle.opacity,
-                  offsetPath: `path('${paths[pathIndex]}')`,
-                  offsetRotate: "0deg",
-                }}
-                initial={{ offsetDistance: "0%" }}
-                animate={{ offsetDistance: "100%" }}
-                transition={{
-                  duration: COMET_DURATION,
-                  ease: "easeInOut",
-                  delay: particle.delay,
-                }}
-              />
-            </foreignObject>
-          )),
-        )}
       </svg>
     </div>
   );
