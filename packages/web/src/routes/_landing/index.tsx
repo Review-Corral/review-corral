@@ -13,18 +13,24 @@ function LandingPage() {
         <div className="flex flex-col md:flex-row items-center text-center md:text-left justify-between mb-10">
           <div className="md:w-1/2 mb-8 md:mb-0 pr-8">
             <h1 className="text-3xl md:text-5xl font-extrabold text-gray-900 mb-6">
-              Threaded Slack Notifications for GitHub Pull Requests
+              Linear-like notifications for Github PRs
             </h1>
             <p className="text-lg md:text-xl text-gray-600 mb-2 md:mb-8">
-              Review Corral threads your Github pull requests notifications in Slack,
-              keeping notifications relevant and reducing noise.
+              Review Corral organizes Github PR notifications in Slack for all of the
+              users in your organization to minimize noise while keeping the
+              notifications relevant.
             </p>
-            <div className="hidden md:flex">
+            <div className="hidden md:flex gap-4">
               <Link to="/app">
                 <Button size="lg" className="bg-black hover:bg-gray-800 text-white">
                   Get Started
                 </Button>
               </Link>
+              <a href="#features">
+                <Button size="lg" variant="outline">
+                  See how it works
+                </Button>
+              </a>
             </div>
           </div>
 
@@ -36,20 +42,23 @@ function LandingPage() {
             />
           </div>
 
-          <div className="md:hidden mt-8">
+          <div className="md:hidden mt-8 flex flex-col gap-4">
             <Link to="/app">
-              <Button size="lg" className="bg-black hover:bg-gray-800 text-white">
+              <Button size="lg" className="bg-black hover:bg-gray-800 text-white w-full">
                 Get Started
               </Button>
             </Link>
+            <a href="#features">
+              <Button size="lg" variant="outline" className="w-full">
+                See how it works
+              </Button>
+            </a>
           </div>
         </div>
 
         {/* Features Section */}
-        <section className="py-16 border-t border-gray-200">
-          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">
-            Features
-          </h2>
+        <section id="features" className="py-16 border-t border-gray-200">
+          <h2 className="text-2xl md:text-3xl font-bold text-center mb-12">Features</h2>
 
           <TabGroup vertical className="flex flex-col md:flex-row gap-8">
             <TabList className="flex flex-col gap-2 md:w-1/3">
