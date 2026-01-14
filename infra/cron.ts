@@ -9,5 +9,3 @@ new sst.aws.Cron("PrReminderCron", {
     link: [table],
   },
 });
-
-export {};
