@@ -1,5 +1,5 @@
 {
-  "id": "a18166f0-c302-4285-b52e-0945f9e84ca8",
+  "id": "52374952-e850-4e3a-9e03-70e72d1fd5b9",
   "prevId": "1fff744d-6b61-4028-a239-502f186a3339",
   "version": "7",
   "dialect": "postgresql",
@@ -606,6 +606,24 @@
         "deletions": {
           "name": "deletions",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "author_login": {
+          "name": "author_login",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "author_avatar_url": {
+          "name": "author_avatar_url",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "target_branch": {
+          "name": "target_branch",
+          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
