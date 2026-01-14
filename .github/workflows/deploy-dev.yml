@@ -8,6 +8,7 @@ on:
 jobs:
   migrate-and-deploy:
     runs-on: ubuntu-latest
+    environment: dev
 
     permissions:
       contents: read
