@@ -14,10 +14,7 @@ vi.mock("@domain/postgres/client", () => ({
   db: {},
 }));
 
-import {
-  groupPrsByOrgAndSlack,
-  type OutstandingPrWithContext,
-} from "./pr-reminders";
+import { type OutstandingPrWithContext, groupPrsByOrgAndSlack } from "./pr-reminders";
 
 const ORG_1 = {
   id: 100,
