@@ -362,6 +362,11 @@ const handleNewPr = async (
       isDraft: true,
       threadTs: null,
       requestedReviewers: reviewerLogins,
+      additions: payload.pull_request.additions,
+      deletions: payload.pull_request.deletions,
+      authorLogin: payload.pull_request.user.login,
+      authorAvatarUrl: payload.pull_request.user.avatar_url,
+      targetBranch: payload.pull_request.base.ref,
     });
   } else {
     const { threadTs, wasCreated } = await getThreadTsForNewPr(
@@ -544,6 +549,11 @@ const handleNewPr = async (
               requiredApprovals?.count ?? existingPullRequest.requiredApprovals,
             threadTs: response.ts,
             requestedReviewers: reviewerLogins,
+            additions: body.pull_request.additions,
+            deletions: body.pull_request.deletions,
+            authorLogin: body.pull_request.user.login,
+            authorAvatarUrl: body.pull_request.user.avatar_url,
+            targetBranch: body.pull_request.base.ref,
           });
         } else {
           LOGGER.debug("Creating new PR record");
@@ -557,6 +567,11 @@ const handleNewPr = async (
             requiredApprovals: requiredApprovals?.count ?? 0,
             threadTs: response.ts,
             requestedReviewers: reviewerLogins,
+            additions: body.pull_request.additions,
+            deletions: body.pull_request.deletions,
+            authorLogin: body.pull_request.user.login,
+            authorAvatarUrl: body.pull_request.user.avatar_url,
+            targetBranch: body.pull_request.base.ref,
           });
         }
 

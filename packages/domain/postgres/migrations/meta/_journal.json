@@ -50,6 +50,20 @@
       "when": 1765336371253,
       "tag": "0006_daffy_pride",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1768360857491,
+      "tag": "0007_nice_norman_osborn",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1768361336846,
+      "tag": "0008_absent_shinko_yamashiro",
+      "breakpoints": true
     }
   ]
 }

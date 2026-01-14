@@ -29,6 +29,11 @@ export const pullRequests = pgTable(
       .$type<string[]>()
       .notNull()
       .default([]),
+    additions: integer("additions"),
+    deletions: integer("deletions"),
+    authorLogin: text("author_login"),
+    authorAvatarUrl: text("author_avatar_url"),
+    targetBranch: text("target_branch"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
