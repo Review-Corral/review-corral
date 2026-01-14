@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --prefer-offline
 
+      - name: Clear Pulumi plugins cache
+        run: rm -rf ~/.pulumi/plugins
+
       - name: Install sst
         run: pnpm sst install
 
