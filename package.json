@@ -35,7 +35,7 @@
     "electro-viewer": "^0.1.14",
     "nitro": "3.0.1-alpha.0",
     "node-fetch": "^3.3.2",
-    "sst": "3.17.14",
+    "sst": "3.17.25",
     "typescript": "^5.9.3",
     "vite-node": "^3.2.4",
     "vitest": "^4.0.8"

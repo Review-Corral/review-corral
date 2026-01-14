@@ -6,6 +6,6 @@
   "dependencies": {
     "@review-corral/core": "workspace:*",
     "@review-corral/domain": "workspace:*",
-    "sst": "3.17.14"
+    "sst": "3.17.25"
   }
 }
