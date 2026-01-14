@@ -132,9 +132,7 @@ function buildSlackThreadLink(channelId: string, threadTs: string): string {
  * Converts a timestamp to a human-readable age string (e.g., "5h", "2d")
  */
 function getHumanReadableAge(createdAt: Date): string {
-  const hoursAgo = Math.floor(
-    (Date.now() - createdAt.getTime()) / (1000 * 60 * 60),
-  );
+  const hoursAgo = Math.floor((Date.now() - createdAt.getTime()) / (1000 * 60 * 60));
 
   if (hoursAgo < 24) {
     return `${hoursAgo}h`;

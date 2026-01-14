@@ -41,10 +41,7 @@ export async function handler(event: ScheduledEvent): Promise<void> {
         orgReminders.accessToken,
       );
 
-      const message = buildPrReminderMessage(
-        orgReminders.prs,
-        orgReminders.channelId,
-      );
+      const message = buildPrReminderMessage(orgReminders.prs, orgReminders.channelId);
 
       LOGGER.debug("Posting reminder to Slack", {
         orgId: orgReminders.orgId,

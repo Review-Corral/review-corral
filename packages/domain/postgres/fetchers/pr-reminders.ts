@@ -2,12 +2,12 @@ import { and, eq, lt, sql } from "drizzle-orm";
 import { db } from "../client";
 import {
   type Organization,
-  organizations,
   type PullRequest,
-  pullRequests,
   type Repository,
-  repositories,
   type SlackIntegration,
+  organizations,
+  pullRequests,
+  repositories,
   slackIntegrations,
 } from "../schema";
 
