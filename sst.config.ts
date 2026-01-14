@@ -82,6 +82,7 @@ export default $config({
     const { table } = await import("./infra/storage");
     await import("./infra/api");
     await import("./infra/alerts");
+    await import("./infra/cron");
 
     const { frontend } = await import("./infra/frontend");
 
