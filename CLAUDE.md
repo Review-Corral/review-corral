@@ -159,6 +159,15 @@ In general, existing coding styles (e.g. the module you're working in) take prec
 - Use specialized collections: `CountMap`, `BoundedQueue`, `FIFOQueue`, `Cache` when appropriate
 - Collections provide functional methods (filter, map, reduce) - prefer these over manual iteration
 
+### Database Schema (Drizzle)
+
+- Schema files are located in `packages/domain/postgres/schema/`
+- Each table has its own file exporting the table definition and inferred types
+- **NEVER manually create migration files** - only edit the Drizzle schema files
+- After schema changes, inform the user they need to generate migrations (the user will run the migration generation command themselves)
+- Use `Pick<TableType, "field1" | "field2">` to derive types from schema instead of manually duplicating field types
+- Export both the table and inferred types: `export type Foo = typeof fooTable.$inferSelect;`
+
 ### Schema Validation (Zod)
 
 - Use Zod transformers for data conversion
