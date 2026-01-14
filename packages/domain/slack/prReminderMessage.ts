@@ -14,7 +14,7 @@ export function buildPrReminderMessage(
   attachments: MessageAttachment[];
 } {
   const prCount = prs.length;
-  const text = `${prCount} PR${prCount === 1 ? "" : "s"} awaiting review`;
+  const text = `Good morning, ${prCount} PR${prCount === 1 ? "" : "s"} awaiting review`;
 
   const blocks: KnownBlock[] = [
     {
