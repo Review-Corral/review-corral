@@ -57,6 +57,13 @@
       "when": 1768362402331,
       "tag": "0007_foamy_morbius",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1768456699713,
+      "tag": "0008_chunky_molecule_man",
+      "breakpoints": true
     }
   ]
 }
