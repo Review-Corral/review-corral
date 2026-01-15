@@ -1,4 +1,4 @@
-import { and, eq } from "drizzle-orm";
+import { and, desc, eq } from "drizzle-orm";
 import { db } from "../client";
 import {
   type NewReviewRequestDm,
@@ -7,29 +7,19 @@ import {
 } from "../schema";
 
 /**
- * Insert or update a review request DM record.
- * Uses upsert to handle re-requesting review on the same PR.
+ * Insert a new review request DM record.
+ * Always creates a new record to support re-requesting reviewers.
  */
-export async function upsertReviewRequestDm(
+export async function insertReviewRequestDm(
   data: NewReviewRequestDm,
 ): Promise<ReviewRequestDm> {
-  const result = await db
-    .insert(reviewRequestDms)
-    .values(data)
-    .onConflictDoUpdate({
-      target: [reviewRequestDms.pullRequestId, reviewRequestDms.reviewerGithubUsername],
-      set: {
-        slackChannelId: data.slackChannelId,
-        slackMessageTs: data.slackMessageTs,
-      },
-    })
-    .returning();
+  const result = await db.insert(reviewRequestDms).values(data).returning();
   return result[0];
 }
 
 /**
- * Find a review request DM by PR ID and reviewer username.
- * Used when a review is submitted to find the DM to update.
+ * Find the latest review request DM by PR ID and reviewer username.
+ * Returns the most recent record by createdAt for updating when a review is submitted.
  */
 export async function findReviewRequestDm({
   pullRequestId,
@@ -47,27 +37,8 @@ export async function findReviewRequestDm({
         eq(reviewRequestDms.reviewerGithubUsername, reviewerGithubUsername),
       ),
     )
+    .orderBy(desc(reviewRequestDms.createdAt))
     .limit(1);
 
   return result[0] ?? null;
-}
-
-/**
- * Delete a review request DM record after the review is submitted.
- */
-export async function deleteReviewRequestDm({
-  pullRequestId,
-  reviewerGithubUsername,
-}: {
-  pullRequestId: number;
-  reviewerGithubUsername: string;
-}): Promise<void> {
-  await db
-    .delete(reviewRequestDms)
-    .where(
-      and(
-        eq(reviewRequestDms.pullRequestId, pullRequestId),
-        eq(reviewRequestDms.reviewerGithubUsername, reviewerGithubUsername),
-      ),
-    );
 }
