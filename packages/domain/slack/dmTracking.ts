@@ -1,6 +1,6 @@
-import { ChatPostMessageResponse } from "@slack/web-api";
 import { insertDmMessageLink } from "@domain/postgres/fetchers/dm-message-links";
 import { type CommentType } from "@domain/postgres/schema";
+import { ChatPostMessageResponse } from "@slack/web-api";
 import { Logger } from "../logging";
 
 const LOGGER = new Logger("slack.dmTracking");

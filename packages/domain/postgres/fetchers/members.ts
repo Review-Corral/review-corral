@@ -168,7 +168,10 @@ export async function getGitHubTokenBySlackId({
     .from(organizationMembers)
     .innerJoin(users, eq(organizationMembers.userId, users.id))
     .where(
-      and(eq(organizationMembers.orgId, orgId), eq(organizationMembers.slackId, slackId)),
+      and(
+        eq(organizationMembers.orgId, orgId),
+        eq(organizationMembers.slackId, slackId),
+      ),
     )
     .limit(1);
 

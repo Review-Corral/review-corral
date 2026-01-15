@@ -10,8 +10,8 @@ import {
 } from "@domain/postgres/fetchers/slack-integrations";
 import { areScopesOutdated } from "@domain/slack/checkScopesOutdated";
 import {
-  handleReactionEvent,
   type SlackReactionEvent,
+  handleReactionEvent,
 } from "@domain/slack/webhooks/reactionHandler";
 import { verifySlackRequest } from "@domain/slack/webhooks/verifySlackRequest";
 import { Hono } from "hono";

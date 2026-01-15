@@ -27,9 +27,7 @@ export interface SlackReactionEvent {
  * If the reaction is on a tracked DM message, syncs it to the corresponding
  * GitHub comment.
  */
-export async function handleReactionEvent(
-  event: SlackReactionEvent,
-): Promise<void> {
+export async function handleReactionEvent(event: SlackReactionEvent): Promise<void> {
   LOGGER.debug("Handling reaction event", { event });
 
   // Only handle reactions on messages

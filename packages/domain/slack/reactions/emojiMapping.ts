@@ -74,12 +74,8 @@ const SLACK_TO_GITHUB_MAP: Record<string, GitHubReaction> = {
  *
  * @param slackEmoji - The Slack emoji name (may include colons)
  */
-export function mapSlackEmojiToGitHub(
-  slackEmoji: string,
-): GitHubReaction | null {
+export function mapSlackEmojiToGitHub(slackEmoji: string): GitHubReaction | null {
   // Remove colons and skin tone modifiers (e.g., ":+1::skin-tone-2:" -> "+1")
-  const cleaned = slackEmoji
-    .replace(/:/g, "")
-    .replace(/::skin-tone-\d/g, "");
+  const cleaned = slackEmoji.replace(/:/g, "").replace(/::skin-tone-\d/g, "");
   return SLACK_TO_GITHUB_MAP[cleaned] ?? null;
 }

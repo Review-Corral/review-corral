@@ -17,7 +17,7 @@ export function verifySlackRequest({
 }): boolean {
   // Check timestamp to prevent replay attacks (5 minutes tolerance)
   const fiveMinutesAgo = Math.floor(Date.now() / 1000) - 60 * 5;
-  if (parseInt(timestamp, 10) < fiveMinutesAgo) {
+  if (Number.parseInt(timestamp, 10) < fiveMinutesAgo) {
     return false;
   }
 
@@ -28,10 +28,7 @@ export function verifySlackRequest({
 
   // Use timing-safe comparison to prevent timing attacks
   try {
-    return timingSafeEqual(
-      Buffer.from(signature),
-      Buffer.from(expectedSignature),
-    );
+    return timingSafeEqual(Buffer.from(signature), Buffer.from(expectedSignature));
   } catch {
     // timingSafeEqual throws if buffers have different lengths
     return false;

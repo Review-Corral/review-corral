@@ -1,10 +1,6 @@
 import { and, eq } from "drizzle-orm";
 import { db } from "../client";
-import {
-  type DmMessageLink,
-  type NewDmMessageLink,
-  dmMessageLinks,
-} from "../schema";
+import { type DmMessageLink, type NewDmMessageLink, dmMessageLinks } from "../schema";
 
 /**
  * Insert a new DM message link for reaction tracking
