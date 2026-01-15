@@ -20,12 +20,17 @@ vi.mock("./shared", () => ({
   getSlackUserName: vi.fn(),
   getSlackUserId: vi.fn(),
   getDmAttachment: vi.fn(),
+  getReviewRequestDmAttachment: vi.fn(),
 }));
 
 vi.mock("@domain/postgres/fetchers/pull-requests", () => ({
   fetchPrItem: vi.fn(),
   updatePullRequest: vi.fn(),
   insertPullRequest: vi.fn(),
+}));
+
+vi.mock("@domain/postgres/fetchers/review-request-dms", () => ({
+  insertReviewRequestDm: vi.fn(),
 }));
 
 // Import after mocks are set up
@@ -36,7 +41,12 @@ import {
 } from "@domain/postgres/fetchers/pull-requests";
 import { SlackClient } from "@domain/slack/SlackClient";
 import { handlePullRequestEvent } from "./pullRequest";
-import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
+import {
+  getDmAttachment,
+  getReviewRequestDmAttachment,
+  getSlackUserId,
+  getSlackUserName,
+} from "./shared";
 import { convertPrEventToBaseProps } from "./utils";
 
 describe("handlePullRequestEvent", () => {
@@ -84,6 +94,7 @@ describe("handlePullRequestEvent", () => {
     vi.mocked(getSlackUserName).mockResolvedValue("@testuser");
     vi.mocked(getSlackUserId).mockResolvedValue("U123456");
     vi.mocked(getDmAttachment).mockReturnValue({ color: "#0066ff" });
+    vi.mocked(getReviewRequestDmAttachment).mockReturnValue({ color: "#0066ff" });
     vi.mocked(fetchPrItem).mockResolvedValue(prItem);
   });
 
