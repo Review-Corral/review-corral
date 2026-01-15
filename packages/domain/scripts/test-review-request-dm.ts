@@ -67,12 +67,7 @@ async function main() {
     channel: dmChannel.channel.id,
     text: "🔍 You've been requested to review",
     attachments: [
-      getReviewRequestDmAttachment(
-        pr,
-        repository,
-        `<@${slackUserIds.dwight}>`,
-        "blue",
-      ),
+      getReviewRequestDmAttachment(pr, repository, `<@${slackUserIds.dwight}>`, "blue"),
     ],
   });
 
