@@ -238,6 +238,36 @@ export class SlackClient {
     return result.data;
   }
 
+  /**
+   * Updates an existing direct message.
+   * Returns true if successful, false otherwise.
+   */
+  async updateDirectMessage({
+    channelId,
+    messageTs,
+    message,
+  }: {
+    channelId: string;
+    messageTs: string;
+    message: Omit<ChatPostMessageArguments, "token" | "channel">;
+  }): Promise<boolean> {
+    const payload = {
+      ...message,
+      channel: channelId,
+      ts: messageTs,
+      token: this.slackToken,
+    };
+
+    const result = await tryCatch(this.client.chat.update(payload));
+
+    if (!result.ok) {
+      this.logSlackError("Error updating DM", result.error, payload);
+      return false;
+    }
+
+    return true;
+  }
+
   async postPrMerged(
     args: MainMessageArgs<BasePullRequestProperties>,
     actionPerformerUsername: string,
