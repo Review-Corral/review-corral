@@ -2,7 +2,10 @@ import { getOrgMemberByUsername } from "../../../postgres/fetchers/members";
 import { BaseGithubWebhookEventHanderArgs } from "../types";
 
 // Re-export attachment functions from their dedicated module
-export { getDmAttachment, getReviewRequestDmAttachment } from "../../../slack/dmAttachments";
+export {
+  getDmAttachment,
+  getReviewRequestDmAttachment,
+} from "../../../slack/dmAttachments";
 
 export async function getSlackUserName(
   githubLogin: string,
