@@ -9,3 +9,4 @@ export * from "./slack-integrations";
 export * from "./slack-users";
 export * from "./subscriptions";
 export * from "./dm-message-links";
+export * from "./review-request-dms";

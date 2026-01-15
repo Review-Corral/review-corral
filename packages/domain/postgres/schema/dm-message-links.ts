@@ -1,12 +1,5 @@
 import { relations } from "drizzle-orm";
-import {
-  bigint,
-  index,
-  pgTable,
-  text,
-  timestamp,
-  unique,
-} from "drizzle-orm/pg-core";
+import { bigint, index, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
 import { organizations } from "./organizations";
 
 export type CommentType = "review_comment" | "issue_comment";
@@ -31,9 +24,7 @@ export const dmMessageLinks = pgTable(
       .notNull()
       .references(() => organizations.id, { onDelete: "cascade" }),
 
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     // Primary lookup: find by Slack message
