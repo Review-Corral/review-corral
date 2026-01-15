@@ -9,11 +9,17 @@ import {
   fetchPrItem,
   updatePullRequest,
 } from "@domain/postgres/fetchers/pull-requests";
-import {} from "@domain/slack/SlackClient";
+import { findReviewRequestDm } from "@domain/postgres/fetchers/review-request-dms";
+import { SlackClient } from "@domain/slack/SlackClient";
 import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-types";
 import slackifyMarkdown from "slackify-markdown";
 import { GithubWebhookEventHander } from "../types";
-import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
+import {
+  getDmAttachment,
+  getReviewRequestDmAttachment,
+  getSlackUserId,
+  getSlackUserName,
+} from "./shared";
 import { convertPullRequestInfoToBaseProps } from "./utils";
 
 const LOGGER = new Logger("github.handlers.pullRequestReview");
@@ -46,6 +52,13 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
 
       return;
     }
+
+    // Update the reviewer's DM to show they submitted their review
+    await updateReviewerDm({
+      event,
+      slackClient,
+      organizationId: args.organizationId,
+    });
 
     if (event.review.state === "approved") {
       // Send DM to PR author
@@ -182,3 +195,85 @@ const getReviewParams = (
     }
   }
 };
+
+/**
+ * Updates the reviewer's DM to show they submitted their review.
+ * Finds the latest review request DM for this reviewer and updates its attachment.
+ */
+async function updateReviewerDm({
+  event,
+  slackClient,
+  organizationId,
+}: {
+  event: PullRequestReviewEvent;
+  slackClient: SlackClient;
+  organizationId: number;
+}): Promise<void> {
+  const reviewerLogin = event.review.user.login;
+
+  const dmRecord = await findReviewRequestDm({
+    pullRequestId: event.pull_request.id,
+    reviewerGithubUsername: reviewerLogin,
+  });
+
+  if (!dmRecord) {
+    LOGGER.warn("No review request DM found to update", {
+      pullRequestId: event.pull_request.id,
+      reviewerLogin,
+    });
+    return;
+  }
+
+  const dmParams = getReviewerDmParams(event.review.state);
+  if (!dmParams) {
+    return;
+  }
+
+  const authorSlackUsername = await getSlackUserName(event.pull_request.user.login, {
+    organizationId,
+  });
+
+  await slackClient.updateDirectMessage({
+    channelId: dmRecord.slackChannelId,
+    messageTs: dmRecord.slackMessageTs,
+    message: {
+      text: dmParams.text,
+      attachments: [
+        getReviewRequestDmAttachment(
+          {
+            title: event.pull_request.title,
+            number: event.pull_request.number,
+            html_url: event.pull_request.html_url,
+            body: event.pull_request.body,
+            additions: 0,
+            deletions: 0,
+            base: event.pull_request.base,
+            user: event.pull_request.user,
+          },
+          {
+            full_name: event.repository.full_name,
+            owner: event.repository.owner,
+          },
+          authorSlackUsername,
+          dmParams.color,
+        ),
+      ],
+    },
+  });
+}
+
+/**
+ * Gets display parameters for updating a reviewer's DM based on their review state.
+ */
+function getReviewerDmParams(
+  state: PullRequestReview["state"],
+): { text: string; color: keyof typeof COLOURS } | undefined {
+  switch (state) {
+    case "approved":
+      return { text: "✅ You approved this PR", color: "green" };
+    case "changes_requested":
+      return { text: "⚠️ You requested changes on this PR", color: "yellow" };
+    case "commented":
+      return { text: "💬 You reviewed this PR", color: "white" };
+  }
+}
