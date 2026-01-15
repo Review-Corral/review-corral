@@ -1,0 +1,1 @@
+ALTER TABLE "review_request_dms" DROP CONSTRAINT "review_request_dms_pr_reviewer_unique";

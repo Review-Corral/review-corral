@@ -1,5 +1,5 @@
 import { relations } from "drizzle-orm";
-import { bigint, index, pgTable, text, timestamp, unique } from "drizzle-orm/pg-core";
+import { bigint, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 import { organizations } from "./organizations";
 
 /**
@@ -25,12 +25,7 @@ export const reviewRequestDms = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
-    // Unique: one DM per PR per reviewer
-    prReviewerUnique: unique("review_request_dms_pr_reviewer_unique").on(
-      table.pullRequestId,
-      table.reviewerGithubUsername,
-    ),
-    // Index for lookup when review is submitted
+    // Index for lookup when review is submitted (find latest by PR+reviewer)
     prReviewerIdx: index("idx_review_request_dms_pr_reviewer").on(
       table.pullRequestId,
       table.reviewerGithubUsername,
