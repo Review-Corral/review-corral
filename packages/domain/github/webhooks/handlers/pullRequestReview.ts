@@ -9,11 +9,16 @@ import {
   fetchPrItem,
   updatePullRequest,
 } from "@domain/postgres/fetchers/pull-requests";
-import {} from "@domain/slack/SlackClient";
+import { findReviewRequestDm } from "@domain/postgres/fetchers/review-request-dms";
 import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-types";
 import slackifyMarkdown from "slackify-markdown";
 import { GithubWebhookEventHander } from "../types";
-import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
+import {
+  getDmAttachment,
+  getReviewRequestDmAttachment,
+  getSlackUserId,
+  getSlackUserName,
+} from "./shared";
 import { convertPullRequestInfoToBaseProps } from "./utils";
 
 const LOGGER = new Logger("github.handlers.pullRequestReview");
@@ -46,6 +51,17 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
 
       return;
     }
+
+    // Update the reviewer's DM to show they've submitted their review
+    await updateReviewerDm({
+      pullRequestId: event.pull_request.id,
+      reviewerGithubUsername: event.sender.login,
+      reviewState: event.review.state,
+      pullRequest: event.pull_request,
+      repository: event.repository,
+      slackClient,
+      args,
+    });
 
     if (event.review.state === "approved") {
       // Send DM to PR author
@@ -182,3 +198,96 @@ const getReviewParams = (
     }
   }
 };
+
+/**
+ * Returns the message text and color for updating a reviewer's DM
+ * based on their review state.
+ */
+const getReviewerDmParams = (
+  reviewState: PullRequestReview["state"],
+): { text: string; color: keyof typeof COLOURS } | undefined => {
+  switch (reviewState) {
+    case "approved":
+      return { text: "✅ You approved this PR", color: "green" };
+    case "changes_requested":
+      return { text: "⚠️ You requested changes", color: "yellow" };
+    case "commented":
+      return { text: "💬 You left a review comment", color: "gray" };
+  }
+};
+
+/**
+ * Updates the reviewer's original review request DM to show they've submitted their review.
+ * This helps reviewers scan their DM history to see which PRs still need their attention.
+ */
+async function updateReviewerDm({
+  pullRequestId,
+  reviewerGithubUsername,
+  reviewState,
+  pullRequest,
+  repository,
+  slackClient,
+  args,
+}: {
+  pullRequestId: number;
+  reviewerGithubUsername: string;
+  reviewState: PullRequestReview["state"];
+  pullRequest: {
+    title: string;
+    number: number;
+    html_url: string;
+    body: string | null;
+    additions?: number;
+    deletions?: number;
+    base: { ref: string };
+    user: { avatar_url: string; login: string };
+  };
+  repository: {
+    full_name: string;
+    owner: { avatar_url: string };
+  };
+  slackClient: import("@domain/slack/SlackClient").SlackClient;
+  args: { organizationId: number };
+}): Promise<void> {
+  const reviewRequestDm = await findReviewRequestDm({
+    pullRequestId,
+    reviewerGithubUsername,
+  });
+
+  if (!reviewRequestDm) {
+    // No tracked DM found - reviewer may not have been explicitly requested
+    return;
+  }
+
+  const reviewerDmParams = getReviewerDmParams(reviewState);
+  if (!reviewerDmParams) {
+    return;
+  }
+
+  const authorSlackUsername = await getSlackUserName(pullRequest.user.login, args);
+
+  await slackClient.updateDirectMessage({
+    channelId: reviewRequestDm.slackChannelId,
+    messageTs: reviewRequestDm.slackMessageTs,
+    message: {
+      text: reviewerDmParams.text,
+      attachments: [
+        getReviewRequestDmAttachment(
+          {
+            title: pullRequest.title,
+            number: pullRequest.number,
+            html_url: pullRequest.html_url,
+            body: pullRequest.body,
+            additions: pullRequest.additions ?? 0,
+            deletions: pullRequest.deletions ?? 0,
+            base: pullRequest.base,
+            user: pullRequest.user,
+          },
+          repository,
+          authorSlackUsername,
+          reviewerDmParams.color,
+        ),
+      ],
+    },
+  });
+}
