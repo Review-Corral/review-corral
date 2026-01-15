@@ -11,11 +11,17 @@ import {
   insertPullRequest,
   updatePullRequest,
 } from "../../../postgres/fetchers/pull-requests";
+import { insertReviewRequestDm } from "../../../postgres/fetchers/review-request-dms";
 import { type PullRequest } from "../../../postgres/schema";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
 import { getInstallationAccessToken } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
-import { getDmAttachment, getSlackUserId, getSlackUserName } from "./shared";
+import {
+  getDmAttachment,
+  getReviewRequestDmAttachment,
+  getSlackUserId,
+  getSlackUserName,
+} from "./shared";
 import { convertPrEventToBaseProps, extractReviewerLogins } from "./utils";
 
 export const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
@@ -132,22 +138,35 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             props,
           );
           if (reviewerSlackId) {
-            await props.slackClient.postDirectMessage({
+            const authorSlackUsername = await getSlackUserName(
+              payload.pull_request.user.login,
+              props,
+            );
+            const dmResponse = await props.slackClient.postDirectMessage({
               slackUserId: reviewerSlackId,
               message: {
                 text: "🔍 You've been requested to review",
                 attachments: [
-                  getDmAttachment(
-                    {
-                      title: payload.pull_request.title,
-                      number: payload.pull_request.number,
-                      html_url: payload.pull_request.html_url,
-                    },
+                  getReviewRequestDmAttachment(
+                    payload.pull_request,
+                    payload.repository,
+                    authorSlackUsername,
                     "blue",
                   ),
                 ],
               },
             });
+
+            // Track the DM for later update when review is submitted
+            if (dmResponse?.channel && dmResponse?.ts) {
+              await insertReviewRequestDm({
+                slackChannelId: dmResponse.channel,
+                slackMessageTs: dmResponse.ts,
+                pullRequestId: payload.pull_request.id,
+                reviewerGithubUsername: payload.requested_reviewer.login,
+                orgId: props.organizationId,
+              });
+            }
           }
         }
 
@@ -407,6 +426,10 @@ const handleNewPr = async (
     }
   }
 
+  /**
+   * This is used when the user had requested reviews or made comments on a draft PR,
+   * then they opened it
+   */
   async function postAllCommentsForNewPrThread(
     body: PullRequestEventOpenedOrReadyForReview,
     baseProps: BaseGithubWebhookEventHanderArgs,
@@ -417,6 +440,11 @@ const handleNewPr = async (
 
     // Send DMs to all requested reviewers
     if (body.pull_request.requested_reviewers) {
+      const authorSlackUsername = await getSlackUserName(
+        body.pull_request.user.login,
+        baseProps,
+      );
+
       await Promise.all(
         body.pull_request.requested_reviewers.map(async (requested_reviewer) => {
           // The requested reviewer could be a 'Team' and not a 'User'
@@ -426,22 +454,31 @@ const handleNewPr = async (
               baseProps,
             );
             if (reviewerSlackId) {
-              await baseProps.slackClient.postDirectMessage({
+              const dmResponse = await baseProps.slackClient.postDirectMessage({
                 slackUserId: reviewerSlackId,
                 message: {
                   text: `🔍 You've been requested to review`,
                   attachments: [
-                    getDmAttachment(
-                      {
-                        title: body.pull_request.title,
-                        number: body.pull_request.number,
-                        html_url: body.pull_request.html_url,
-                      },
+                    getReviewRequestDmAttachment(
+                      body.pull_request,
+                      body.repository,
+                      authorSlackUsername,
                       "blue",
                     ),
                   ],
                 },
               });
+
+              // Track the DM for later update when review is submitted
+              if (dmResponse?.channel && dmResponse?.ts) {
+                await insertReviewRequestDm({
+                  slackChannelId: dmResponse.channel,
+                  slackMessageTs: dmResponse.ts,
+                  pullRequestId: body.pull_request.id,
+                  reviewerGithubUsername: requested_reviewer.login,
+                  orgId: baseProps.organizationId,
+                });
+              }
             }
           }
         }),
