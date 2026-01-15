@@ -62,7 +62,7 @@ This is a TypeScript-first monorepo with a domain-driven architecture designed f
   - If type errors are only required from a few files, prefer using file-level diagnostics and tools for better performance and specificity
 - Typecheck Go only: `pnpm go:checks`
 - Lint: `pnpm lint` (fixes issues) or `pnpm check:ci` (reports only)
-- Format: `pnpm format` (fixes issues). Use this to fix formatting issues
+- Format: `pnpm check:write` (fixes issues). Use this to fix formatting issues
 - If you're running a standalone JS or TS script (e.g. a script to test and log something), run it using `bun` which will be available globally
 
 ### Testing
