@@ -176,6 +176,40 @@ export class SlackClient {
     return result.data;
   }
 
+  /**
+   * Updates an existing direct message.
+   * Used to update review request DMs when the reviewer submits their review.
+   */
+  async updateDirectMessage({
+    channelId,
+    messageTs,
+    message,
+  }: {
+    channelId: string;
+    messageTs: string;
+    message: Omit<ChatPostMessageArguments, "token" | "channel">;
+  }): Promise<boolean> {
+    const result = await tryCatch(
+      this.client.chat.update({
+        ...message,
+        channel: channelId,
+        ts: messageTs,
+        token: this.slackToken,
+      }),
+    );
+
+    if (!result.ok) {
+      LOGGER.error("Error updating DM", {
+        error: result.error,
+        channelId,
+        messageTs,
+      });
+      return false;
+    }
+
+    return true;
+  }
+
   async postPrMerged(
     args: MainMessageArgs<BasePullRequestProperties>,
     actionPerformerUsername: string,
