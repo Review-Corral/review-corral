@@ -5,13 +5,23 @@ import {
   updateOrganization,
 } from "@domain/postgres/fetchers/organizations";
 import {
-  updateSubscription,
+  updateSubscriptionStatus,
   upsertSubscription,
 } from "@domain/postgres/fetchers/subscriptions";
+import { StripeClient } from "./Stripe";
 import Stripe from "stripe";
 
 const LOGGER = new Logger("stripe.handleEvent");
 
+/**
+ * Handles customer.subscription.updated webhook event. This handles status changes
+ * (active, past_due, canceled, etc.) for existing subscriptions.
+ *
+ * Note: Stripe does NOT copy checkout session metadata to subscription metadata,
+ * so this handler usually won't have orgId. The subscription should already exist
+ * from handleSessionCompleted(). If it doesn't exist yet, we log and wait for that
+ * handler to create it.
+ */
 export const handleSubUpdated = async (
   event: Stripe.CustomerSubscriptionUpdatedEvent,
 ) => {
@@ -27,7 +37,7 @@ export const handleSubUpdated = async (
   const priceId = actualEvent.items.data[0].price?.id;
 
   if (!priceId) {
-    LOGGER.warn("Recieved subCreated event without priceId", {
+    LOGGER.warn("Recieved subUpdated event without priceId", {
       actualEvent: event,
       priceId,
     });
@@ -47,36 +57,60 @@ export const handleSubUpdated = async (
   );
 
   if (parsedMetadata.success) {
+    // Rare case: subscription has orgId in metadata - do full upsert
     const args = {
       orgId: parsedMetadata.data.orgId,
-      customerId: actualEvent.customer.toString(),
+      customerId: actualEvent.customer,
       status: actualEvent.status,
       subscriptionId: actualEvent.id,
       priceId: priceId,
     };
 
-    LOGGER.info("Going to upsert subscription with args:", { args }, { depth: 3 });
+    LOGGER.info("Upserting subscription with orgId from metadata", { args });
     await upsertSubscription(args);
-    LOGGER.info("Finshed upserting subscription", { depth: 3 });
 
-    // Update the organization with the new info for quicker access
-    LOGGER.info("Updating org stripe sub status...");
     await updateOrganization(parsedMetadata.data.orgId, {
       stripeCustomerId: actualEvent.customer,
       stripeSubscriptionStatus: actualEvent.status,
     });
   } else {
-    LOGGER.warn("Subscription update event does not have orgId metadata", {
-      input: actualEvent.metadata,
-      zodParseError: parsedMetadata.error,
+    // Common case: no orgId in metadata - try to update existing subscription
+    LOGGER.info("Updating subscription status (no orgId in metadata)", {
+      customerId: actualEvent.customer,
+      subscriptionId: actualEvent.id,
+      status: actualEvent.status,
     });
+
+    const updated = await updateSubscriptionStatus({
+      customerId: actualEvent.customer,
+      subscriptionId: actualEvent.id,
+      status: actualEvent.status,
+      priceId: priceId,
+    });
+
+    if (updated) {
+      // Also update organization status if we can find it via the subscription
+      await updateOrganization(updated.orgId, {
+        stripeSubscriptionStatus: actualEvent.status,
+      });
+    } else {
+      // Subscription doesn't exist yet - checkout.session.completed will create it
+      LOGGER.info(
+        "Subscription not found for update - waiting for checkout.session.completed",
+        {
+          customerId: actualEvent.customer,
+          subscriptionId: actualEvent.id,
+        },
+      );
+    }
   }
 };
 
 /**
- * The metadata sent to the checkout session (annoyingly) wont be attached to
- * the subscription events, so we use this event to set these properties which we can
- * then use later
+ * Handles checkout.session.completed webhook event. This is the primary handler for
+ * creating subscriptions since it has access to orgId via checkout session metadata.
+ * Stripe does NOT copy checkout session metadata to subscription metadata, so we must
+ * create the subscription record here.
  */
 export const handleSessionCompleted = async (
   event: Stripe.CheckoutSessionCompletedEvent,
@@ -124,16 +158,39 @@ export const handleSessionCompleted = async (
     return;
   }
 
-  // Update the subscription with the OrgId for future use
-  const newSub = await updateSubscription({
-    subscriptionId: actualEvent.subscription,
-    customerId: actualEvent.customer,
+  // Fetch subscription details from Stripe to get status and priceId
+  const stripeSubscription = await StripeClient.subscriptions.retrieve(
+    actualEvent.subscription,
+  );
+
+  const priceId = stripeSubscription.items.data[0]?.price?.id;
+
+  if (!priceId) {
+    LOGGER.error("Subscription has no price ID", {
+      subscriptionId: actualEvent.subscription,
+      stripeSubscription,
+    });
+    return;
+  }
+
+  // Create or update the subscription with full data including orgId
+  await upsertSubscription({
     orgId: org.id,
+    customerId: actualEvent.customer,
+    subscriptionId: actualEvent.subscription,
+    status: stripeSubscription.status,
+    priceId: priceId,
+  });
+
+  LOGGER.info("Created/updated subscription from checkout session", {
+    orgId: org.id,
+    subscriptionId: actualEvent.subscription,
+    status: stripeSubscription.status,
   });
 
   // Update the organization with the new info for quicker access
   await updateOrganization(org.id, {
     stripeCustomerId: actualEvent.customer,
-    stripeSubscriptionStatus: newSub.status ?? null,
+    stripeSubscriptionStatus: stripeSubscription.status,
   });
 };

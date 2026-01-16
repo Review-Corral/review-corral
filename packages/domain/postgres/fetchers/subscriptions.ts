@@ -58,19 +58,24 @@ export async function insertSubscription(data: NewSubscription): Promise<Subscri
 }
 
 /**
- * Update a subscription
+ * Update subscription status and priceId by customerId + subscriptionId.
+ * Returns the updated subscription if found, or null if subscription doesn't exist.
+ * This is used by webhook handlers that don't have orgId available.
  */
-export async function updateSubscription({
+export async function updateSubscriptionStatus({
   customerId,
   subscriptionId,
-  ...updates
-}: Partial<Omit<NewSubscription, "customerId" | "subscriptionId">> & {
+  status,
+  priceId,
+}: {
   customerId: string;
   subscriptionId: string;
-}): Promise<Subscription> {
+  status: string;
+  priceId: string;
+}): Promise<Subscription | null> {
   const result = await db
     .update(subscriptions)
-    .set(updates)
+    .set({ status, priceId, updatedAt: new Date() })
     .where(
       and(
         eq(subscriptions.customerId, customerId),
@@ -79,13 +84,7 @@ export async function updateSubscription({
     )
     .returning();
 
-  if (!result[0]) {
-    throw new Error(
-      `Subscription not found for customerId: ${customerId} and subscriptionId: ${subscriptionId}`,
-    );
-  }
-
-  return result[0];
+  return result[0] ?? null;
 }
 
 /**
