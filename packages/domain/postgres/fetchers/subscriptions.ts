@@ -15,6 +15,18 @@ export async function fetchSubscriptionsByCustomerId(
 }
 
 /**
+ * Get all subscriptions for an organization
+ */
+export async function fetchSubscriptionsByOrgId(
+  orgId: number,
+): Promise<Subscription[]> {
+  return await db
+    .select()
+    .from(subscriptions)
+    .where(eq(subscriptions.orgId, orgId));
+}
+
+/**
  * Get a specific subscription by customer ID and subscription ID
  */
 export async function fetchSubscription({

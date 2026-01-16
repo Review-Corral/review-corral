@@ -1,6 +1,6 @@
 import { BillingDetailsResponse } from "@core/selectorTypes/organization";
 import { Logger } from "@domain/logging";
-import { fetchSubscriptionsByCustomerId } from "@domain/postgres/fetchers/subscriptions";
+import { fetchSubscriptionsByOrgId } from "@domain/postgres/fetchers/subscriptions";
 import { Organization } from "@domain/postgres/schema";
 
 const LOGGER = new Logger("organization:getBillingDetails");
@@ -10,18 +10,9 @@ export const getBillingDetails = async (
 ): Promise<BillingDetailsResponse> => {
   LOGGER.info("Querying subscription details for organization", {
     id: organization.id,
-    stripeCustomerId: organization.stripeCustomerId,
   });
 
-  if (!organization.stripeCustomerId) {
-    return {
-      subscriptions: [],
-    };
-  }
-
-  const subscriptions = await fetchSubscriptionsByCustomerId(
-    organization.stripeCustomerId,
-  );
+  const subscriptions = await fetchSubscriptionsByOrgId(organization.id);
 
   LOGGER.info("Found subscriptions", { subscriptions });
 

@@ -4,11 +4,11 @@ import {
   createCheckoutSessionBodySchema,
 } from "@core/stripe/types";
 import { assertVarExists } from "@core/utils/assert";
-import {
-  fetchOrganizationById,
-  updateOrganization,
-} from "@domain/dynamodb/fetchers/organizations";
 import { Logger } from "@domain/logging";
+import {
+  getOrganization,
+  updateOrganization,
+} from "@domain/postgres/fetchers/organizations";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { handleSessionCompleted, handleSubUpdated } from "@domain/stripe/handleEvent";
 import { Hono } from "hono";
@@ -42,7 +42,7 @@ authRoutes.post("/checkout-session", async (c) => {
       return c.json({ message: "Invalid request body" }, 400);
     }
 
-    const organization = await fetchOrganizationById(parsedBody.data.orgId);
+    const organization = await getOrganization(parsedBody.data.orgId);
 
     if (!organization) {
       return c.json({ message: "Organization not found" }, 404);
@@ -50,9 +50,9 @@ authRoutes.post("/checkout-session", async (c) => {
 
     let customerId: string;
 
-    if (!organization.customerId) {
+    if (!organization.stripeCustomerId) {
       const customer = await StripeClient.customers.create({
-        email: organization.billingEmail,
+        email: organization.billingEmail ?? undefined,
         name: organization.name,
         metadata: {
           userId: user.id,
@@ -60,14 +60,13 @@ authRoutes.post("/checkout-session", async (c) => {
         },
       });
 
-      await updateOrganization({
-        orgId: parsedBody.data.orgId,
-        customerId: customer.id,
+      await updateOrganization(parsedBody.data.orgId, {
+        stripeCustomerId: customer.id,
       });
 
       customerId = customer.id;
     } else {
-      customerId = organization.customerId;
+      customerId = organization.stripeCustomerId;
     }
 
     const metaData: StripeCheckoutCreatedMetadata = {
@@ -90,7 +89,7 @@ authRoutes.post("/checkout-session", async (c) => {
       ],
       mode: "subscription",
       metadata: metaData,
-      customer_email: organization.billingEmail,
+      customer_email: organization.billingEmail ?? undefined,
       success_url: `${frontendUrl}/app/org/${parsedBody.data.orgId}/payment/success`,
       cancel_url: `${frontendUrl}/app/org/${parsedBody.data.orgId}/payment/failure`,
     });
@@ -182,10 +181,10 @@ app.post("/webhook-event", async (c) => {
         });
         break;
       case "customer.subscription.updated":
-        handleSubUpdated(stripeEvent);
+        await handleSubUpdated(stripeEvent);
         break;
       case "checkout.session.completed":
-        handleSessionCompleted(stripeEvent);
+        await handleSessionCompleted(stripeEvent);
         break;
       default:
         LOGGER.warn(
