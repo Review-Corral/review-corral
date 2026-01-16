@@ -8,8 +8,8 @@ import {
   updateSubscriptionStatus,
   upsertSubscription,
 } from "@domain/postgres/fetchers/subscriptions";
-import { StripeClient } from "./Stripe";
 import Stripe from "stripe";
+import { StripeClient } from "./Stripe";
 
 const LOGGER = new Logger("stripe.handleEvent");
 

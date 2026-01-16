@@ -20,10 +20,7 @@ export async function fetchSubscriptionsByCustomerId(
 export async function fetchSubscriptionsByOrgId(
   orgId: number,
 ): Promise<Subscription[]> {
-  return await db
-    .select()
-    .from(subscriptions)
-    .where(eq(subscriptions.orgId, orgId));
+  return await db.select().from(subscriptions).where(eq(subscriptions.orgId, orgId));
 }
 
 /**
