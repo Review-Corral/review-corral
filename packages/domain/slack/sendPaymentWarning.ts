@@ -1,14 +1,40 @@
+import type { MessageAttachment } from "@slack/web-api";
 import { Logger } from "../logging";
 import type { SlackClient } from "./SlackClient";
 
 const LOGGER = new Logger("domain.slack.sendPaymentWarning");
 
+export type PaymentWarningMessage = {
+  text: string;
+  attachments: MessageAttachment[];
+};
+
+/**
+ * Builds the payment warning message content.
+ */
+export function buildPaymentWarningMessage(
+  orgId: number,
+  frontendUrl: string,
+  daysRemaining: number,
+): PaymentWarningMessage {
+  const billingUrl = `${frontendUrl}/app/org/${orgId}?page=billing`;
+
+  return {
+    text: "⚠️ WARN: Payment Issue Detected",
+    attachments: [
+      {
+        color: "#FFD700",
+        text:
+          `Your payment method needs to be updated. You have *${daysRemaining} day${daysRemaining !== 1 ? "s" : ""}* ` +
+          `remaining before Slack notifications are paused. ` +
+          `Please update your billing information <${billingUrl}|here>.`,
+      },
+    ],
+  };
+}
+
 /**
  * Sends a warning message to the configured Slack channel about payment issues.
- *
- * The message includes:
- * - A warning emoji and header text
- * - A yellow-colored attachment with days remaining and a link to update billing
  *
  * @param slackClient - The SlackClient instance to use for sending the message
  * @param orgId - The organization ID to use in the billing link
@@ -22,22 +48,11 @@ export async function sendPaymentWarning(
   frontendUrl: string,
   daysRemaining: number,
 ): Promise<boolean> {
-  const billingUrl = `${frontendUrl}/app/org/${orgId}?page=billing`;
+  const message = buildPaymentWarningMessage(orgId, frontendUrl, daysRemaining);
 
   try {
     const response = await slackClient.postMessage({
-      message: {
-        text: "⚠️ WARN: Payment Issue Detected",
-        attachments: [
-          {
-            color: "#FFD700",
-            text:
-              `Your payment method needs to be updated. You have *${daysRemaining} day${daysRemaining !== 1 ? "s" : ""}* ` +
-              `remaining before Slack notifications are paused. ` +
-              `Please update your billing information <${billingUrl}|here>.`,
-          },
-        ],
-      },
+      message,
       threadTs: undefined,
     });
 
