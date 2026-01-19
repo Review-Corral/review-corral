@@ -23,10 +23,7 @@ export function buildServicePausedMessage(
     attachments: [
       {
         color: "#DC3545",
-        text:
-          `Your Slack notifications have been paused due to payment issues. ` +
-          `Please update your payment method <${billingUrl}|here> to resume ` +
-          `receiving PR notifications.`,
+        text: `Your Slack notifications have been paused due to payment issues. Please update your payment method <${billingUrl}|here> to resume receiving PR notifications.`,
       },
     ],
   };
@@ -55,10 +52,9 @@ export async function sendServicePausedMessage(
     });
 
     if (!response) {
-      LOGGER.error(
-        "Failed to send service paused message - no response received",
-        { orgId },
-      );
+      LOGGER.error("Failed to send service paused message - no response received", {
+        orgId,
+      });
       return false;
     }
 

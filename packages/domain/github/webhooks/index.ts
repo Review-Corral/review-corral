@@ -5,11 +5,11 @@ import { getOrganization } from "@domain/postgres/fetchers/organizations";
 import { safeFetchRepository } from "@domain/postgres/fetchers/repositories";
 import { getSlackInstallationsForOrganization } from "@domain/postgres/fetchers/slack-integrations";
 import { SlackClient } from "@domain/slack/SlackClient";
+import { checkSubscriptionStatus } from "./checkSubscriptionStatus";
 import { handleIssueCommentEvent } from "./handlers/issueComment";
 import { handlePullRequestEvent } from "./handlers/pullRequest";
 import { handlePullRequestCommentEvent } from "./handlers/pullRequestComment";
 import { handlePullRequestReviewEvent } from "./handlers/pullRequestReview";
-import { checkSubscriptionStatus } from "./checkSubscriptionStatus";
 import { GithubWebhookEventHander, handledEventNames } from "./types";
 
 const LOGGER = new Logger("core.github.events");

@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { BillingStatus } from "@core/dynamodb/entities/types";
+import { describe, expect, it } from "vitest";
 import {
   checkSubscriptionStatus,
   getDaysRemainingInGracePeriod,

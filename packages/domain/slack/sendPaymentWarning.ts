@@ -24,10 +24,7 @@ export function buildPaymentWarningMessage(
     attachments: [
       {
         color: "#FFD700",
-        text:
-          `Your payment method needs to be updated. You have *${daysRemaining} day${daysRemaining !== 1 ? "s" : ""}* ` +
-          `remaining before Slack notifications are paused. ` +
-          `Please update your billing information <${billingUrl}|here>.`,
+        text: `Your payment method needs to be updated. You have *${daysRemaining} day${daysRemaining !== 1 ? "s" : ""}* remaining before Slack notifications are paused. Please update your billing information <${billingUrl}|here>.`,
       },
     ],
   };
