@@ -3,17 +3,13 @@ import * as z from "zod";
 import { Logger } from "@domain/logging";
 import { getOrganization } from "@domain/postgres/fetchers/organizations";
 import { safeFetchRepository } from "@domain/postgres/fetchers/repositories";
-import {
-  getSlackInstallationsForOrganization,
-  updateLastChecked,
-} from "@domain/postgres/fetchers/slack-integrations";
+import { getSlackInstallationsForOrganization } from "@domain/postgres/fetchers/slack-integrations";
 import { SlackClient } from "@domain/slack/SlackClient";
-import { shouldWarnAboutScopes } from "@domain/slack/checkScopesOutdated";
-import { sendScopeWarning } from "@domain/slack/sendScopeWarning";
 import { handleIssueCommentEvent } from "./handlers/issueComment";
 import { handlePullRequestEvent } from "./handlers/pullRequest";
 import { handlePullRequestCommentEvent } from "./handlers/pullRequestComment";
 import { handlePullRequestReviewEvent } from "./handlers/pullRequestReview";
+import { checkSubscriptionStatus } from "./checkSubscriptionStatus";
 import { GithubWebhookEventHander, handledEventNames } from "./types";
 
 const LOGGER = new Logger("core.github.events");
@@ -117,27 +113,14 @@ export const handleGithubWebhookEvent = async ({
       return;
     }
 
-    // Check if we need to warn about outdated scopes
-    if (shouldWarnAboutScopes(slackIntegration)) {
-      const frontendUrl = process.env.BASE_FE_URL;
-      if (!frontendUrl) {
-        LOGGER.error("BASE_FE_URL environment variable not set");
-      } else {
-        const tempSlackClient = new SlackClient(
-          slackIntegration.channelId,
-          slackIntegration.accessToken,
-        );
+    const shouldContinue = await checkSubscriptionStatus(organization, {
+      ...slackIntegration,
+      channelId: slackIntegration.channelId,
+      accessToken: slackIntegration.accessToken,
+    });
 
-        const warningSuccess = await sendScopeWarning(
-          tempSlackClient,
-          repository.orgId,
-          frontendUrl,
-        );
-
-        if (warningSuccess) {
-          await updateLastChecked(slackIntegration.id, new Date());
-        }
-      }
+    if (!shouldContinue) {
+      return;
     }
 
     const slackClient = new SlackClient(
