@@ -1,6 +1,7 @@
 export * as Dynamo from "./client";
 
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { BillingStatusEntity } from "@core/dynamodb/entities/billingStatus";
 import { BranchEntity } from "@core/dynamodb/entities/branch";
 import { MemberEntity } from "@core/dynamodb/entities/member";
 import { OrganizationEntity } from "@core/dynamodb/entities/organization";
@@ -33,6 +34,7 @@ export const Db = new Service(
     slackUsers: SlackUserEntity,
     slackApiThrottle: SlackApiThrottleEntity,
     branch: BranchEntity,
+    billingStatus: BillingStatusEntity,
   },
   Configuration,
 );

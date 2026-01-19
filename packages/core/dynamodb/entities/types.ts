@@ -1,4 +1,5 @@
 import { CreateEntityItem, EntityItem, UpdateEntityItem } from "electrodb";
+import { BillingStatusEntity } from "./billingStatus";
 import { BranchEntity } from "./branch";
 import { MemberEntity } from "./member";
 import { OrganizationEntity } from "./organization";
@@ -20,6 +21,7 @@ export type SlackUser = EntityItem<typeof SlackUserEntity>;
 export type SlackApiThrottle = EntityItem<typeof SlackApiThrottleEntity>;
 export type Subscription = EntityItem<typeof SubscriptionEntity>;
 export type Branch = EntityItem<typeof BranchEntity>;
+export type BillingStatus = EntityItem<typeof BillingStatusEntity>;
 
 export type OrganizationInsertArgs = CreateEntityItem<typeof OrganizationEntity>;
 export type UserInsertArgs = CreateEntityItem<typeof UserEntity>;
@@ -33,6 +35,7 @@ export type SlackApiThrottleInsertArgs = CreateEntityItem<
 export type RepositoryInsertArgs = CreateEntityItem<typeof RepositoryEntity>;
 export type SubscriptionInsertArgs = CreateEntityItem<typeof SubscriptionEntity>;
 export type SubscriptionUpdateArgs = UpdateEntityItem<typeof SubscriptionEntity>;
+export type BillingStatusInsertArgs = CreateEntityItem<typeof BillingStatusEntity>;
 
 export type PullRequestUpdateArgs = UpdateEntityItem<typeof PullRequestEntity>;
 export type OrganizationUpdateArgs = UpdateEntityItem<typeof OrganizationEntity>;
