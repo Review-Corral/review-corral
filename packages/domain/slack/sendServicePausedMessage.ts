@@ -1,16 +1,40 @@
+import type { MessageAttachment } from "@slack/web-api";
 import { Logger } from "../logging";
 import type { SlackClient } from "./SlackClient";
 
 const LOGGER = new Logger("domain.slack.sendServicePausedMessage");
 
+export type ServicePausedMessage = {
+  text: string;
+  attachments: MessageAttachment[];
+};
+
+/**
+ * Builds the service paused message content.
+ */
+export function buildServicePausedMessage(
+  orgId: number,
+  frontendUrl: string,
+): ServicePausedMessage {
+  const billingUrl = `${frontendUrl}/app/org/${orgId}?page=billing`;
+
+  return {
+    text: "🚫 Slack Notifications Paused",
+    attachments: [
+      {
+        color: "#DC3545",
+        text:
+          `Your Slack notifications have been paused due to payment issues. ` +
+          `Please update your payment method <${billingUrl}|here> to resume ` +
+          `receiving PR notifications.`,
+      },
+    ],
+  };
+}
+
 /**
  * Sends a message to Slack indicating that notifications are paused due to payment
  * issues.
- *
- * This message is sent once when the 7-day grace period expires, and includes:
- * - A red warning color indicating service interruption
- * - A message explaining that notifications are paused
- * - A link to update billing information
  *
  * @param slackClient - The SlackClient instance to use for sending the message
  * @param orgId - The organization ID to use in the billing link
@@ -22,22 +46,11 @@ export async function sendServicePausedMessage(
   orgId: number,
   frontendUrl: string,
 ): Promise<boolean> {
-  const billingUrl = `${frontendUrl}/app/org/${orgId}?page=billing`;
+  const message = buildServicePausedMessage(orgId, frontendUrl);
 
   try {
     const response = await slackClient.postMessage({
-      message: {
-        text: "🚫 Slack Notifications Paused",
-        attachments: [
-          {
-            color: "#DC3545",
-            text:
-              `Your Slack notifications have been paused due to payment issues. ` +
-              `Please update your payment method <${billingUrl}|here> to resume ` +
-              `receiving PR notifications.`,
-          },
-        ],
-      },
+      message,
       threadTs: undefined,
     });
 
