@@ -6,6 +6,7 @@ import {
 } from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
 import {
+  type PullRequestWithAlias,
   fetchPrItem,
   updatePullRequest,
 } from "@domain/postgres/fetchers/pull-requests";
@@ -58,6 +59,7 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
       event,
       slackClient,
       organizationId: args.organizationId,
+      pullRequestItem,
     });
 
     if (event.review.state === "approved") {
@@ -204,10 +206,12 @@ async function updateReviewerDm({
   event,
   slackClient,
   organizationId,
+  pullRequestItem,
 }: {
   event: PullRequestReviewEvent;
   slackClient: SlackClient;
   organizationId: number;
+  pullRequestItem: PullRequestWithAlias;
 }): Promise<void> {
   const reviewerLogin = event.review.user.login;
 
@@ -245,8 +249,8 @@ async function updateReviewerDm({
             number: event.pull_request.number,
             html_url: event.pull_request.html_url,
             body: event.pull_request.body,
-            additions: 0,
-            deletions: 0,
+            additions: pullRequestItem.additions ?? 0,
+            deletions: pullRequestItem.deletions ?? 0,
             base: event.pull_request.base,
             user: event.pull_request.user,
           },
