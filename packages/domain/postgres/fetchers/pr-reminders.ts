@@ -1,4 +1,4 @@
-import { and, eq, lt, sql } from "drizzle-orm";
+import { and, eq, gte, lt, sql } from "drizzle-orm";
 import { db } from "../client";
 import {
   type Organization,
@@ -77,6 +77,13 @@ export type OrgSlackReminders = Pick<
  * - approvalCount < requiredApprovals
  * - From organizations with Slack integrations
  */
+/**
+ * Cutoff date for PR reminders - only PRs created on or after this date will be
+ * included. This is when we started tracking PR status (open/closed/merged) in the
+ * database.
+ */
+export const PR_TRACKING_START_DATE = new Date("2026-01-21T00:00:00Z");
+
 export async function fetchOutstandingPrsForReminders(): Promise<
   OutstandingPrWithContext[]
 > {
@@ -123,6 +130,7 @@ export async function fetchOutstandingPrsForReminders(): Promise<
         eq(pullRequests.isDraft, false),
         eq(pullRequests.status, PullRequestStatus.OPEN),
         eq(repositories.isEnabled, true),
+        gte(pullRequests.createdAt, PR_TRACKING_START_DATE),
         lt(pullRequests.createdAt, fourHoursAgo),
         sql`${pullRequests.approvalCount} < ${pullRequests.requiredApprovals}`,
       ),
