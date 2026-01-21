@@ -3,6 +3,7 @@ import { db } from "../client";
 import {
   type Organization,
   type PullRequest,
+  PullRequestStatus,
   type Repository,
   type SlackIntegration,
   organizations,
@@ -28,6 +29,7 @@ export type OutstandingPrWithContext = {
     | "authorLogin"
     | "authorAvatarUrl"
     | "targetBranch"
+    | "status"
     | "createdAt"
   >;
   repo: Pick<Repository, "id" | "name">;
@@ -94,6 +96,7 @@ export async function fetchOutstandingPrsForReminders(): Promise<
         authorLogin: pullRequests.authorLogin,
         authorAvatarUrl: pullRequests.authorAvatarUrl,
         targetBranch: pullRequests.targetBranch,
+        status: pullRequests.status,
         createdAt: pullRequests.createdAt,
       },
       repo: {
@@ -118,6 +121,7 @@ export async function fetchOutstandingPrsForReminders(): Promise<
     .where(
       and(
         eq(pullRequests.isDraft, false),
+        eq(pullRequests.status, PullRequestStatus.OPEN),
         eq(repositories.isEnabled, true),
         lt(pullRequests.createdAt, fourHoursAgo),
         sql`${pullRequests.approvalCount} < ${pullRequests.requiredApprovals}`,
