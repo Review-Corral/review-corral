@@ -61,6 +61,7 @@ function createPrWithContext(
       authorLogin: "author",
       authorAvatarUrl: "https://example.com/author.png",
       targetBranch: "main",
+      status: "open",
       createdAt: new Date("2024-01-01"),
     },
     repo: { id: repoId, name: repoName },

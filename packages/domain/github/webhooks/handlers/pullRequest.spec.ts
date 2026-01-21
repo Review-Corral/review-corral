@@ -299,6 +299,9 @@ describe("handlePullRequestEvent", () => {
         pullRequestId: queuedPrItem.id,
         repoId: queuedPrItem.repoId,
         isQueuedToMerge: false,
+        status: "merged",
+        mergedAt: expect.any(Date),
+        closedAt: expect.any(Date),
       });
 
       expect(mockSlackClientWithMerged.postDirectMessage).toHaveBeenCalledWith({
@@ -350,7 +353,12 @@ describe("handlePullRequestEvent", () => {
         installationId: 101112,
       });
 
-      expect(updatePullRequest).not.toHaveBeenCalled();
+      expect(updatePullRequest).toHaveBeenCalledWith({
+        pullRequestId: prItem.id,
+        repoId: prItem.repoId,
+        status: "closed",
+        closedAt: expect.any(Date),
+      });
 
       expect(mockSlackClientWithClosed.postPrClosed).toHaveBeenCalledWith(
         {

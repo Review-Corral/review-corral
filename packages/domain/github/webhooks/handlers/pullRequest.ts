@@ -12,7 +12,7 @@ import {
   updatePullRequest,
 } from "../../../postgres/fetchers/pull-requests";
 import { insertReviewRequestDm } from "../../../postgres/fetchers/review-request-dms";
-import { type PullRequest } from "../../../postgres/schema";
+import { type PullRequest, PullRequestStatus } from "../../../postgres/schema";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
 import { getInstallationAccessToken } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
@@ -63,6 +63,13 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
             pullRequestId: pullRequestItem.id,
             repoId: pullRequestItem.repoId,
             isQueuedToMerge: false,
+            status: PullRequestStatus.MERGED,
+            mergedAt: payload.pull_request.merged_at
+              ? new Date(payload.pull_request.merged_at)
+              : new Date(),
+            closedAt: payload.pull_request.closed_at
+              ? new Date(payload.pull_request.closed_at)
+              : new Date(),
           });
 
           // Send DM to PR author
@@ -90,6 +97,16 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           }
           return;
         } else {
+          // Update status to closed
+          await updatePullRequest({
+            pullRequestId: pullRequestItem.id,
+            repoId: pullRequestItem.repoId,
+            status: PullRequestStatus.CLOSED,
+            closedAt: payload.pull_request.closed_at
+              ? new Date(payload.pull_request.closed_at)
+              : new Date(),
+          });
+
           await props.slackClient.postPrClosed(
             {
               body: payload,
@@ -273,6 +290,15 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           pullRequestItem,
           false,
         );
+      case "reopened":
+        // Update status to open when PR is reopened
+        await updatePullRequest({
+          pullRequestId: pullRequestItem.id,
+          repoId: pullRequestItem.repoId,
+          status: PullRequestStatus.OPEN,
+          closedAt: null,
+        });
+        return;
       default:
         LOGGER.debug("Got unhandled pull_request event", {
           action: payload.action,
@@ -386,6 +412,7 @@ const handleNewPr = async (
       authorLogin: payload.pull_request.user.login,
       authorAvatarUrl: payload.pull_request.user.avatar_url,
       targetBranch: payload.pull_request.base.ref,
+      status: PullRequestStatus.OPEN,
     });
   } else {
     const { threadTs, wasCreated } = await getThreadTsForNewPr(
@@ -591,6 +618,7 @@ const handleNewPr = async (
             authorLogin: body.pull_request.user.login,
             authorAvatarUrl: body.pull_request.user.avatar_url,
             targetBranch: body.pull_request.base.ref,
+            status: PullRequestStatus.OPEN,
           });
         } else {
           LOGGER.debug("Creating new PR record");
@@ -609,6 +637,7 @@ const handleNewPr = async (
             authorLogin: body.pull_request.user.login,
             authorAvatarUrl: body.pull_request.user.avatar_url,
             targetBranch: body.pull_request.base.ref,
+            status: PullRequestStatus.OPEN,
           });
         }
 

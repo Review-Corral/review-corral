@@ -12,6 +12,15 @@ import {
 } from "drizzle-orm/pg-core";
 import { repositories } from "./repositories";
 
+export const PullRequestStatus = {
+  OPEN: "open",
+  MERGED: "merged",
+  CLOSED: "closed",
+} as const;
+
+export type PullRequestStatusType =
+  (typeof PullRequestStatus)[keyof typeof PullRequestStatus];
+
 export const pullRequests = pgTable(
   "pull_requests",
   {
@@ -34,6 +43,9 @@ export const pullRequests = pgTable(
     authorLogin: text("author_login"),
     authorAvatarUrl: text("author_avatar_url"),
     targetBranch: text("target_branch"),
+    status: text("status").$type<PullRequestStatusType>(),
+    closedAt: timestamp("closed_at", { withTimezone: true }),
+    mergedAt: timestamp("merged_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -41,6 +53,11 @@ export const pullRequests = pgTable(
     repoIdx: index("idx_pull_requests_repo").on(table.repoId),
     threadIdx: index("idx_pull_requests_thread").on(table.threadTs),
     queueIdx: index("idx_pull_requests_queue").on(table.isQueuedToMerge),
+    statusIdx: index("idx_pull_requests_status").on(
+      table.status,
+      table.isDraft,
+      table.createdAt,
+    ),
     repoPrUnique: unique("pull_requests_repo_pr_unique").on(
       table.repoId,
       table.prNumber,
