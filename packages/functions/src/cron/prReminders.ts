@@ -37,11 +37,6 @@ export async function handler(event: ScheduledEvent): Promise<void> {
     }
   }
 
-  if (grouped.size === 0) {
-    LOGGER.info("All org/slack groups exceeded PR limit, no reminders sent");
-    return;
-  }
-
   // Send reminders to each org/slack group
   for (const [key, orgReminders] of grouped) {
     LOGGER.info("Sending PR reminder", {
