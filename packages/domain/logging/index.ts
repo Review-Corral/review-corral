@@ -19,7 +19,8 @@ const DEFAULT_LOG_OUTPUT_OPTIONS: LogOutputOptions = {
 };
 
 function createDefaultOutput(): LogOutput {
-  const console = new ConsoleOutput(Logger.colorize);
+  const colorize = !!process.env.COLORIZE_LOGS;
+  const console = new ConsoleOutput(colorize);
   try {
     if (initOTel()) {
       return new CompositeOutput([console, new OTelOutput()]);
