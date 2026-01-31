@@ -71,6 +71,13 @@
       "when": 1768964303739,
       "tag": "0009_plain_blockbuster",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1769891007044,
+      "tag": "0010_big_karen_page",
+      "breakpoints": true
     }
   ]
 }

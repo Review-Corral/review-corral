@@ -14,14 +14,11 @@ export const organizations = pgTable(
     billingEmail: text("billing_email"),
     installationId: bigint("installation_id", { mode: "number" }).unique().notNull(),
     type: text("type").notNull(),
-    stripeCustomerId: text("stripe_customer_id").unique(),
-    stripeSubscriptionStatus: text("stripe_subscription_status"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     installationIdx: index("idx_organizations_installation").on(table.installationId),
-    customerIdx: index("idx_organizations_customer").on(table.stripeCustomerId),
   }),
 );
 
