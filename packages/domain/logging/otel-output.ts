@@ -9,9 +9,7 @@ const SEVERITY_MAP: Record<LogLevel, SeverityNumber> = {
   [LogLevel.ERROR]: SeverityNumber.ERROR,
 };
 
-function flattenAttributes(
-  data: unknown,
-): Record<string, string | number | boolean> {
+function flattenAttributes(data: unknown): Record<string, string | number | boolean> {
   if (data == null) return {};
   if (typeof data !== "object") return { value: String(data) };
 
@@ -31,12 +29,7 @@ function flattenAttributes(
 }
 
 export class OTelOutput implements LogOutput {
-  log(
-    level: LogLevel,
-    text: string,
-    data: any,
-    _options?: LogOutputOptions,
-  ): void {
+  log(level: LogLevel, text: string, data: any, _options?: LogOutputOptions): void {
     try {
       const logger = logs.getLogger("review-corral");
       logger.emit({
