@@ -41,6 +41,8 @@ export default $config({
       stripeSecretKey,
       stripeWebhookSecret,
       neonDatabaseUrl,
+      posthogKey,
+      posthogHost,
     } = await import("./infra/secrets");
 
     const { getUrl } = await import("./infra/dns");
@@ -75,6 +77,8 @@ export default $config({
           stripeSecretKey,
           stripeWebhookSecret,
           neonDatabaseUrl,
+          posthogKey,
+          posthogHost,
         ];
       }
     });
