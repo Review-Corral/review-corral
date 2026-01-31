@@ -7,6 +7,7 @@ import {
 } from "@domain/dynamodb/fetchers/billingStatus";
 import { Logger } from "@domain/logging";
 import { updateLastChecked } from "@domain/postgres/fetchers/slack-integrations";
+import { fetchSubscriptionsByOrgId } from "@domain/postgres/fetchers/subscriptions";
 import type { Organization } from "@domain/postgres/schema/organizations";
 import type { SlackIntegration } from "@domain/postgres/schema/slack-integrations";
 import { SlackClient } from "@domain/slack/SlackClient";
@@ -34,9 +35,11 @@ export async function checkSubscriptionStatus(
   const frontendUrl = process.env.BASE_FE_URL;
 
   // Check subscription status for payment issues
+  const orgSubscriptions = await fetchSubscriptionsByOrgId(organization.id);
+  const subscriptionStatus = orgSubscriptions[0]?.status ?? null;
   const billingStatus = await getBillingStatus(organization.id);
   const subscriptionCheck = getSubscriptionCheckResult(
-    organization.stripeSubscriptionStatus,
+    subscriptionStatus,
     billingStatus,
   );
 
