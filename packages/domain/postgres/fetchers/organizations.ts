@@ -3,8 +3,10 @@ import { db } from "../client";
 import {
   type NewOrganization,
   type Organization,
+  type Subscription,
   organizationMembers,
   organizations,
+  subscriptions,
 } from "../schema";
 
 export async function getOrganization(
@@ -17,6 +19,31 @@ export async function getOrganization(
   return result[0];
 }
 
+export async function getOrganizationWithSubscription(
+  orgId: number,
+): Promise<
+  | { organization: Organization; subscription: Subscription | null }
+  | undefined
+> {
+  const result = await db
+    .select({
+      organization: organizations,
+      subscription: subscriptions,
+    })
+    .from(organizations)
+    .leftJoin(
+      subscriptions,
+      eq(organizations.id, subscriptions.orgId),
+    )
+    .where(eq(organizations.id, orgId));
+
+  if (!result[0]) return undefined;
+  return {
+    organization: result[0].organization,
+    subscription: result[0].subscription,
+  };
+}
+
 export async function getOrganizationsByUser(userId: number): Promise<Organization[]> {
   const result = await db
     .select({
@@ -26,8 +53,6 @@ export async function getOrganizationsByUser(userId: number): Promise<Organizati
       billingEmail: organizations.billingEmail,
       installationId: organizations.installationId,
       type: organizations.type,
-      stripeCustomerId: organizations.stripeCustomerId,
-      stripeSubscriptionStatus: organizations.stripeSubscriptionStatus,
       createdAt: organizations.createdAt,
       updatedAt: organizations.updatedAt,
     })
@@ -70,22 +95,6 @@ export async function updateOrgInstallationId(
   const result = await db
     .update(organizations)
     .set({ installationId })
-    .where(eq(organizations.id, orgId))
-    .returning();
-  return result[0];
-}
-
-export async function updateOrgBillingDetails(
-  orgId: number,
-  billingEmail: string,
-  customerId: string,
-): Promise<Organization> {
-  const result = await db
-    .update(organizations)
-    .set({
-      billingEmail,
-      stripeCustomerId: customerId,
-    })
     .where(eq(organizations.id, orgId))
     .returning();
   return result[0];
