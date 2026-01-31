@@ -73,7 +73,6 @@ export async function checkSubscriptionStatus(
   if (!subscriptionCheck.shouldContinueProcessing) {
     LOGGER.info("Stopping webhook processing - subscription grace period expired", {
       organizationId: organization.id,
-      subscriptionStatus: organization.stripeSubscriptionStatus,
     });
     return false;
   }

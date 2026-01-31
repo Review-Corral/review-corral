@@ -5,10 +5,7 @@ import {
 } from "@core/stripe/types";
 import { assertVarExists } from "@core/utils/assert";
 import { Logger } from "@domain/logging";
-import {
-  getOrganization,
-  updateOrganization,
-} from "@domain/postgres/fetchers/organizations";
+import { getOrganizationWithSubscription } from "@domain/postgres/fetchers/organizations";
 import { StripeClient } from "@domain/stripe/Stripe";
 import { handleSessionCompleted, handleSubUpdated } from "@domain/stripe/handleEvent";
 import { Hono } from "hono";
@@ -42,15 +39,19 @@ authRoutes.post("/checkout-session", async (c) => {
       return c.json({ message: "Invalid request body" }, 400);
     }
 
-    const organization = await getOrganization(parsedBody.data.orgId);
+    const result = await getOrganizationWithSubscription(
+      parsedBody.data.orgId,
+    );
 
-    if (!organization) {
+    if (!result) {
       return c.json({ message: "Organization not found" }, 404);
     }
 
+    const { organization, subscription } = result;
+
     let customerId: string;
 
-    if (!organization.stripeCustomerId) {
+    if (!subscription?.customerId) {
       const customer = await StripeClient.customers.create({
         email: organization.billingEmail ?? undefined,
         name: organization.name,
@@ -60,13 +61,9 @@ authRoutes.post("/checkout-session", async (c) => {
         },
       });
 
-      await updateOrganization(parsedBody.data.orgId, {
-        stripeCustomerId: customer.id,
-      });
-
       customerId = customer.id;
     } else {
-      customerId = organization.stripeCustomerId;
+      customerId = subscription.customerId;
     }
 
     const metaData: StripeCheckoutCreatedMetadata = {

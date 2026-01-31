@@ -1,9 +1,6 @@
 import { stripeCheckoutCreatedMetadataSchema } from "@core/stripe/types";
 import { Logger } from "@domain/logging";
-import {
-  getOrganization,
-  updateOrganization,
-} from "@domain/postgres/fetchers/organizations";
+import { getOrganization } from "@domain/postgres/fetchers/organizations";
 import {
   updateSubscriptionStatus,
   upsertSubscription,
@@ -68,11 +65,6 @@ export const handleSubUpdated = async (
 
     LOGGER.info("Upserting subscription with orgId from metadata", { args });
     await upsertSubscription(args);
-
-    await updateOrganization(parsedMetadata.data.orgId, {
-      stripeCustomerId: actualEvent.customer,
-      stripeSubscriptionStatus: actualEvent.status,
-    });
   } else {
     // Common case: no orgId in metadata - try to update existing subscription
     LOGGER.info("Updating subscription status (no orgId in metadata)", {
@@ -88,12 +80,7 @@ export const handleSubUpdated = async (
       priceId: priceId,
     });
 
-    if (updated) {
-      // Also update organization status if we can find it via the subscription
-      await updateOrganization(updated.orgId, {
-        stripeSubscriptionStatus: actualEvent.status,
-      });
-    } else {
+    if (!updated) {
       // Subscription doesn't exist yet - checkout.session.completed will create it
       LOGGER.info(
         "Subscription not found for update - waiting for checkout.session.completed",
@@ -186,11 +173,5 @@ export const handleSessionCompleted = async (
     orgId: org.id,
     subscriptionId: actualEvent.subscription,
     status: stripeSubscription.status,
-  });
-
-  // Update the organization with the new info for quicker access
-  await updateOrganization(org.id, {
-    stripeCustomerId: actualEvent.customer,
-    stripeSubscriptionStatus: stripeSubscription.status,
   });
 };
