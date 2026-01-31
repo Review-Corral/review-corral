@@ -22,8 +22,7 @@ export async function getOrganization(
 export async function getOrganizationWithSubscription(
   orgId: number,
 ): Promise<
-  | { organization: Organization; subscription: Subscription | null }
-  | undefined
+  { organization: Organization; subscription: Subscription | null } | undefined
 > {
   const result = await db
     .select({
@@ -31,10 +30,7 @@ export async function getOrganizationWithSubscription(
       subscription: subscriptions,
     })
     .from(organizations)
-    .leftJoin(
-      subscriptions,
-      eq(organizations.id, subscriptions.orgId),
-    )
+    .leftJoin(subscriptions, eq(organizations.id, subscriptions.orgId))
     .where(eq(organizations.id, orgId));
 
   if (!result[0]) return undefined;

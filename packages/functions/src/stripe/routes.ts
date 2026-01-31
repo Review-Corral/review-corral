@@ -39,9 +39,7 @@ authRoutes.post("/checkout-session", async (c) => {
       return c.json({ message: "Invalid request body" }, 400);
     }
 
-    const result = await getOrganizationWithSubscription(
-      parsedBody.data.orgId,
-    );
+    const result = await getOrganizationWithSubscription(parsedBody.data.orgId);
 
     if (!result) {
       return c.json({ message: "Organization not found" }, 404);

@@ -1,10 +1,8 @@
-import { NodeSDK } from "@opentelemetry/sdk-node";
-import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
 import { OTLPLogExporter } from "@opentelemetry/exporter-logs-otlp-http";
 import { Resource } from "@opentelemetry/resources";
-import {
-  ATTR_SERVICE_NAME,
-} from "@opentelemetry/semantic-conventions";
+import { BatchLogRecordProcessor } from "@opentelemetry/sdk-logs";
+import { NodeSDK } from "@opentelemetry/sdk-node";
+import { ATTR_SERVICE_NAME } from "@opentelemetry/semantic-conventions";
 import { Resource as SSTResource } from "sst";
 import config from "../utils/config";
 
@@ -28,16 +26,13 @@ export function initOTel(): boolean {
       },
     });
 
-    const serviceName =
-      `${config.appName}.${config.functionName}`;
+    const serviceName = `${config.appName}.${config.functionName}`;
 
     sdk = new NodeSDK({
       resource: new Resource({
         [ATTR_SERVICE_NAME]: serviceName,
       }),
-      logRecordProcessors: [
-        new BatchLogRecordProcessor(exporter),
-      ],
+      logRecordProcessors: [new BatchLogRecordProcessor(exporter)],
     });
 
     sdk.start();
