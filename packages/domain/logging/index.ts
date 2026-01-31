@@ -1,5 +1,8 @@
 import { z } from "zod";
 import config from "../utils/config";
+import { CompositeOutput } from "./composite-output";
+import { OTelOutput } from "./otel-output";
+import { initOTel } from "./otel-setup";
 import { ConsoleOutput, FileOutput, serializeData } from "./outputs";
 import { LogLevel, LogOutput, LogOutputOptions, LoggerMethods } from "./types";
 
@@ -15,10 +18,22 @@ const DEFAULT_LOG_OUTPUT_OPTIONS: LogOutputOptions = {
   depth: 2,
 };
 
+function createDefaultOutput(): LogOutput {
+  const console = new ConsoleOutput(Logger.colorize);
+  try {
+    if (initOTel()) {
+      return new CompositeOutput([console, new OTelOutput()]);
+    }
+  } catch {
+    // Fall back to console-only
+  }
+  return console;
+}
+
 export class Logger implements LoggerMethods {
   private static readonly level: LogLevel = Logger.getLevelFromEnv();
   public static readonly colorize: boolean = !!process.env.COLORIZE_LOGS;
-  private static logOutput: LogOutput = new ConsoleOutput(Logger.colorize);
+  private static logOutput: LogOutput = createDefaultOutput();
 
   private readonly names: string[] = [];
   private readonly logOutputOverride?: LogOutput;
