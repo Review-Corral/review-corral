@@ -54,11 +54,18 @@ jobs:
 
       - name: Upload sourcemaps to Sentry
         run: |
-          npx @sentry/cli sourcemaps upload \
-            --org alex-mclean \
-            --project review-corral-node \
-            --release ${{ github.sha }} \
-            .sst/artifacts \
-            packages
+          # Upload each function's sourcemap with the correct /var/task prefix
+          for dir in .sst/artifacts/*-src; do
+            if [ -f "$dir/bundle.mjs.map" ]; then
+              echo "Uploading sourcemap from $dir"
+              npx @sentry/cli sourcemaps upload \
+                --org alex-mclean \
+                --project review-corral-node \
+                --release ${{ github.sha }} \
+                --url-prefix '/var/task' \
+                --strip-common-prefix \
+                "$dir"
+            fi
+          done
         env:
           SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
