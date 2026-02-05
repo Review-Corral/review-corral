@@ -59,3 +59,15 @@ jobs:
 
       - name: Deploy to production
         run: pnpm sst deploy --stage prod
+        env:
+          SENTRY_RELEASE: ${{ github.event.release.tag_name }}
+
+      - name: Upload sourcemaps to Sentry
+        run: |
+          npx @sentry/cli sourcemaps upload \
+            --org alex-mclean \
+            --project node-awslambda \
+            --release ${{ github.event.release.tag_name }} \
+            .sst/artifacts
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}

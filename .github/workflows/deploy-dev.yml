@@ -49,3 +49,15 @@ jobs:
 
       - name: Deploy to dev
         run: pnpm sst deploy --stage dev
+        env:
+          SENTRY_RELEASE: ${{ github.sha }}
+
+      - name: Upload sourcemaps to Sentry
+        run: |
+          npx @sentry/cli sourcemaps upload \
+            --org alex-mclean \
+            --project node-awslambda \
+            --release ${{ github.sha }} \
+            .sst/artifacts
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
