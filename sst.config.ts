@@ -73,8 +73,16 @@ export default $config({
             SENTRY_RELEASE: process.env.SENTRY_RELEASE,
           }),
         };
+        // Ensure @sentry/aws-serverless is bundled (needed for NODE_OPTIONS --import)
+        args.nodejs = {
+          ...args.nodejs,
+          install: [
+            ...(args.nodejs?.install ?? []),
+            "@sentry/aws-serverless",
+          ],
+        };
         args.link = [
-          ...(Array.isArray(args.link) ? args.link : [args.link]),
+          ...(args.link ? (Array.isArray(args.link) ? args.link : [args.link]) : []),
           jwtSecret,
           ghAppId,
           ghClientId,

@@ -45,6 +45,10 @@ declare module "sst" {
       "type": "sst.sst.Secret"
       "value": string
     }
+    "SENTRY_DSN": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "SLACK_BOT_ID": {
       "type": "sst.sst.Secret"
       "value": string
@@ -68,6 +72,10 @@ declare module "sst" {
     "STRIPE_WEBHOOK_SECRET": {
       "type": "sst.sst.Secret"
       "value": string
+    }
+    "TestSentry": {
+      "name": string
+      "type": "sst.aws.Function"
     }
     "api": {
       "type": "sst.aws.ApiGatewayV2"
