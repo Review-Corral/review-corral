@@ -56,7 +56,7 @@ jobs:
         run: |
           npx @sentry/cli sourcemaps upload \
             --org alex-mclean \
-            --project node-awslambda \
+            --project review-corral-node \
             --release ${{ github.sha }} \
             .sst/artifacts
         env:

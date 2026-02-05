@@ -66,7 +66,7 @@ jobs:
         run: |
           npx @sentry/cli sourcemaps upload \
             --org alex-mclean \
-            --project node-awslambda \
+            --project review-corral-node \
             --release ${{ github.event.release.tag_name }} \
             .sst/artifacts
         env:
