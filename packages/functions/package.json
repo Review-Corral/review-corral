@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-sqs": "^3.929.0",
+    "@sentry/aws-serverless": "^10.38.0",
     "aws-lambda": "^1.0.7",
     "date-fns": "^4.1.0",
     "hono": "^4.11.4",

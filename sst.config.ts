@@ -43,6 +43,7 @@ export default $config({
       neonDatabaseUrl,
       posthogKey,
       posthogHost,
+      sentryDsn,
     } = await import("./infra/secrets");
 
     const { getUrl } = await import("./infra/dns");
@@ -65,6 +66,8 @@ export default $config({
           BASE_FE_URL: getUrl("frontend"),
           BASE_API_URL: getUrl("api"),
           LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
+          NODE_OPTIONS: "--import @sentry/aws-serverless/awslambda-auto",
+          SENTRY_DSN: sentryDsn.value,
         };
         args.link = [
           ...(Array.isArray(args.link) ? args.link : [args.link]),

@@ -17,6 +17,8 @@ export const slackSigningSecret = new sst.Secret("SLACK_SIGNING_SECRET");
 export const posthogKey = new sst.Secret("POSTHOG_KEY");
 export const posthogHost = new sst.Secret("POSTHOG_HOST");
 
+export const sentryDsn = new sst.Secret("SENTRY_DSN");
+
 export const neonDatabaseUrl = new sst.Secret("NEON_DATABASE_URL");
 
 export const allSecrets = [
@@ -34,5 +36,6 @@ export const allSecrets = [
   slackSigningSecret,
   posthogKey,
   posthogHost,
+  sentryDsn,
   neonDatabaseUrl,
 ];
