@@ -77,6 +77,15 @@ export default $config({
         args.nodejs = {
           install: ["@sentry/aws-serverless"],
         };
+        // Inject Sentry debug IDs after build, before deploy
+        args.hook = {
+          async postbuild(dir) {
+            const { execSync } = await import("child_process");
+            execSync(`npx @sentry/cli sourcemaps inject ${dir}`, {
+              stdio: "inherit",
+            });
+          },
+        };
         args.link = [
           ...(args.link ? (Array.isArray(args.link) ? args.link : [args.link]) : []),
           jwtSecret,
