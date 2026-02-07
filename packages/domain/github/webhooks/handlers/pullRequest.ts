@@ -72,6 +72,21 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
               : new Date(),
           });
 
+          // Update the main Slack message to show merged status
+          await props.slackClient.updateMainMessage(
+            {
+              body: convertPrEventToBaseProps(payload),
+              threadTs: pullRequestItem.threadTs,
+              slackUsername: await getSlackUserName(
+                payload.pull_request.user.login,
+                props,
+              ),
+              pullRequestItem: { ...pullRequestItem, isQueuedToMerge: false },
+              requiredApprovals: null,
+            },
+            "pr-merged",
+          );
+
           // Send DM to PR author
           const authorSlackId = await getSlackUserId(
             payload.pull_request.user.login,

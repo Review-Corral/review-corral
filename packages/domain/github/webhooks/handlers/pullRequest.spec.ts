@@ -261,7 +261,7 @@ describe("handlePullRequestEvent", () => {
   });
 
   describe("merge events", () => {
-    it("should clear queue status and send DM when PR is merged", async () => {
+    it("should clear queue status, update main message, and send DM when PR is merged", async () => {
       const queuedPrItem = mock<PullRequestWithAlias>({
         ...prItem,
         isQueuedToMerge: true,
@@ -271,6 +271,7 @@ describe("handlePullRequestEvent", () => {
       const mockSlackClientWithMerged = {
         ...mockSlackClient,
         postDirectMessage: vi.fn(),
+        updateMainMessage: vi.fn(),
       } as unknown as SlackClient;
 
       const mergedEvent = {
@@ -303,6 +304,17 @@ describe("handlePullRequestEvent", () => {
         mergedAt: expect.any(Date),
         closedAt: expect.any(Date),
       });
+
+      expect(mockSlackClientWithMerged.updateMainMessage).toHaveBeenCalledWith(
+        {
+          body: convertPrEventToBaseProps(mergedEvent),
+          threadTs: "thread-ts-123",
+          slackUsername: "@testuser",
+          pullRequestItem: { ...queuedPrItem, isQueuedToMerge: false },
+          requiredApprovals: null,
+        },
+        "pr-merged",
+      );
 
       expect(mockSlackClientWithMerged.postDirectMessage).toHaveBeenCalledWith({
         slackUserId: "U123456",
