@@ -261,7 +261,7 @@ describe("handlePullRequestEvent", () => {
   });
 
   describe("merge events", () => {
-    it("should clear queue status, update main message, and send DM when PR is merged", async () => {
+    it("should clear queue status, post merged message, and send DM when PR is merged", async () => {
       const queuedPrItem = mock<PullRequestWithAlias>({
         ...prItem,
         isQueuedToMerge: true,
@@ -271,7 +271,7 @@ describe("handlePullRequestEvent", () => {
       const mockSlackClientWithMerged = {
         ...mockSlackClient,
         postDirectMessage: vi.fn(),
-        updateMainMessage: vi.fn(),
+        postPrMerged: vi.fn(),
       } as unknown as SlackClient;
 
       const mergedEvent = {
@@ -305,7 +305,7 @@ describe("handlePullRequestEvent", () => {
         closedAt: expect.any(Date),
       });
 
-      expect(mockSlackClientWithMerged.updateMainMessage).toHaveBeenCalledWith(
+      expect(mockSlackClientWithMerged.postPrMerged).toHaveBeenCalledWith(
         {
           body: convertPrEventToBaseProps(mergedEvent),
           threadTs: "thread-ts-123",
@@ -313,7 +313,7 @@ describe("handlePullRequestEvent", () => {
           pullRequestItem: { ...queuedPrItem, isQueuedToMerge: false },
           requiredApprovals: null,
         },
-        "pr-merged",
+        "testuser",
       );
 
       expect(mockSlackClientWithMerged.postDirectMessage).toHaveBeenCalledWith({
@@ -380,7 +380,7 @@ describe("handlePullRequestEvent", () => {
           pullRequestItem: prItem,
           requiredApprovals: null,
         },
-        "<@U654321>",
+        "otheruser",
       );
     });
   });
@@ -542,6 +542,92 @@ describe("handlePullRequestEvent", () => {
         repoId: prItem.repoId,
         requestedReviewers: [],
       });
+    });
+  });
+
+  describe("converted_to_draft event", () => {
+    it("should update database and post converted to draft message", async () => {
+      const mockSlackClientWithDraft = {
+        ...mockSlackClient,
+        postConvertedToDraft: vi.fn(),
+      } as unknown as SlackClient;
+
+      const convertedToDraftEvent = {
+        ...mockEvent,
+        action: "converted_to_draft",
+        sender: {
+          login: "testuser",
+        },
+      };
+
+      await handlePullRequestEvent({
+        event: convertedToDraftEvent,
+        slackClient: mockSlackClientWithDraft,
+        organizationId: 789,
+        installationId: 101112,
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledWith({
+        pullRequestId: prItem.id,
+        repoId: prItem.repoId,
+        isDraft: true,
+      });
+
+      expect(mockSlackClientWithDraft.postConvertedToDraft).toHaveBeenCalledWith({
+        body: convertedToDraftEvent,
+        threadTs: "thread-ts-123",
+        slackUsername: "@testuser",
+        pullRequestItem: { ...prItem, isDraft: true },
+        requiredApprovals: null,
+      });
+    });
+  });
+
+  describe("reopened event", () => {
+    it("should update database and post reopened message", async () => {
+      const mockSlackClientWithReopened = {
+        ...mockSlackClient,
+        postPrReopened: vi.fn(),
+      } as unknown as SlackClient;
+
+      const reopenedEvent = {
+        ...mockEvent,
+        action: "reopened",
+        sender: {
+          login: "otheruser",
+        },
+      };
+
+      vi.mocked(getSlackUserName).mockImplementation(async (login) => {
+        if (login === "testuser") return "@testuser";
+        if (login === "otheruser") return "@otheruser";
+        return login;
+      });
+
+      await handlePullRequestEvent({
+        event: reopenedEvent,
+        slackClient: mockSlackClientWithReopened,
+        organizationId: 789,
+        installationId: 101112,
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledWith({
+        pullRequestId: prItem.id,
+        repoId: prItem.repoId,
+        status: "open",
+        closedAt: null,
+      });
+
+      expect(mockSlackClientWithReopened.postPrReopened).toHaveBeenCalledWith(
+        {
+          body: convertPrEventToBaseProps(reopenedEvent),
+          threadTs: "thread-ts-123",
+          slackUsername: "@testuser",
+          pullRequestItem: { ...prItem, status: "open" },
+          requiredApprovals: null,
+        },
+        "otheruser",
+      );
     });
   });
 });

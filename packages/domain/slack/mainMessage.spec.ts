@@ -199,7 +199,7 @@ describe("mainMessage", () => {
           (block) =>
             block.type === "section" &&
             "text" in block &&
-            block.text?.text?.includes("Pull request closed by @testuser"),
+            block.text?.text?.includes("Pull request closed"),
         ),
       );
 

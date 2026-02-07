@@ -72,8 +72,8 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
               : new Date(),
           });
 
-          // Update the main Slack message to show merged status
-          await props.slackClient.updateMainMessage(
+          // Post thread message and update main message to show merged status
+          await props.slackClient.postPrMerged(
             {
               body: convertPrEventToBaseProps(payload),
               threadTs: pullRequestItem.threadTs,
@@ -84,7 +84,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
               pullRequestItem: { ...pullRequestItem, isQueuedToMerge: false },
               requiredApprovals: null,
             },
-            "pr-merged",
+            payload.sender.login,
           );
 
           // Send DM to PR author
@@ -134,7 +134,7 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
               // Default to getting this from the PR item
               requiredApprovals: null,
             },
-            await getSlackUserName(payload.sender.login, props),
+            payload.sender.login,
           );
 
           // Send DM to PR author if closed by someone else
@@ -313,6 +313,21 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           status: PullRequestStatus.OPEN,
           closedAt: null,
         });
+
+        // Post thread message and update main message to show reopened status
+        await props.slackClient.postPrReopened(
+          {
+            body: convertPrEventToBaseProps(payload),
+            threadTs: pullRequestItem.threadTs,
+            slackUsername: await getSlackUserName(
+              payload.pull_request.user.login,
+              props,
+            ),
+            pullRequestItem: { ...pullRequestItem, status: PullRequestStatus.OPEN },
+            requiredApprovals: null,
+          },
+          payload.sender.login,
+        );
         return;
       default:
         LOGGER.debug("Got unhandled pull_request event", {
@@ -329,11 +344,18 @@ const handleConvertedToDraft = async (
   props: BaseGithubWebhookEventHanderArgs,
   pullRequestItem: PullRequest,
 ) => {
+  // Update database to mark PR as draft
+  await updatePullRequest({
+    pullRequestId: pullRequestItem.id,
+    repoId: pullRequestItem.repoId,
+    isDraft: true,
+  });
+
   await props.slackClient.postConvertedToDraft({
     body: event,
     threadTs,
     slackUsername: await getSlackUserName(event.sender.login, props),
-    pullRequestItem,
+    pullRequestItem: { ...pullRequestItem, isDraft: true },
     // Default to getting this from the PR item
     requiredApprovals: null,
   });

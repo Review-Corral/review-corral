@@ -24,6 +24,7 @@ import {
   getConvertedToDraftAttachment,
   getMergedAttachment,
   getPrClosedAttatchment,
+  getPrReopenedAttachment,
 } from "./mainMessage";
 
 export type PullRequestEventOpenedOrReadyForReview =
@@ -270,17 +271,17 @@ export class SlackClient {
 
   async postPrMerged(
     args: MainMessageArgs<BasePullRequestProperties>,
-    actionPerformerUsername: string,
+    actionPerformerName: string,
   ) {
     await this.postMessage({
       message: {
-        text: `Pull request merged by ${actionPerformerUsername}`,
+        text: `Pull request merged by ${actionPerformerName}`,
         attachments: [getMergedAttachment()],
       },
       threadTs: args.threadTs,
     });
 
-    await this.updateMainMessage(args, "pr-merged", actionPerformerUsername);
+    await this.updateMainMessage(args, "pr-merged");
   }
 
   async postConvertedToDraft(args: MainMessageArgs<BasePullRequestProperties>) {
@@ -324,38 +325,48 @@ export class SlackClient {
 
   async getBaseMessageArgsWithToken(
     args: MainMessageArgs<BasePullRequestProperties>,
-    actionPerformerUsername?: string,
   ): Promise<ChatUpdateArguments> {
     return {
       token: this.slackToken,
       channel: this.channelId,
-      ...(await getBaseChatUpdateArguments(args, actionPerformerUsername)),
+      ...(await getBaseChatUpdateArguments(args)),
     };
   }
 
   async postPrClosed(
     args: MainMessageArgs<PullRequestClosedEvent>,
-    actionPerformerUsername: string,
+    actionPerformerName: string,
   ) {
     await this.postMessage({
       message: {
-        attachments: [getPrClosedAttatchment(actionPerformerUsername)],
+        attachments: [getPrClosedAttatchment(actionPerformerName)],
       },
       threadTs: args.threadTs,
     });
 
-    await this.updateMainMessage(args, "pr-closed", actionPerformerUsername);
+    await this.updateMainMessage(args, "pr-closed");
+  }
+
+  async postPrReopened(
+    args: MainMessageArgs<BasePullRequestProperties>,
+    actionPerformerName: string,
+  ) {
+    await this.postMessage({
+      message: {
+        attachments: [getPrReopenedAttachment(actionPerformerName)],
+      },
+      threadTs: args.threadTs,
+    });
+
+    await this.updateMainMessage(args, "pr-reopened");
   }
 
   async updateMainMessage(
     args: MainMessageArgs<BasePullRequestProperties>,
     eventName: string,
-    actionPerformerUsername?: string,
   ) {
     try {
-      await this.client.chat.update(
-        await this.getBaseMessageArgsWithToken(args, actionPerformerUsername),
-      );
+      await this.client.chat.update(await this.getBaseMessageArgsWithToken(args));
       LOGGER.debug(`Succesfully updated main message for ${eventName}`);
     } catch (error) {
       LOGGER.error(`Got error updating main message for ${eventName}: `, error);

@@ -27,16 +27,13 @@ export type MainMessageArgs<T extends BasePullRequestProperties> = {
  * include the same base attachments (updating without an attachment that existed
  * before will remove it)
  */
-export const getBaseChatUpdateArguments = async (
-  {
-    body,
-    threadTs,
-    slackUsername,
-    pullRequestItem,
-    requiredApprovals,
-  }: MainMessageArgs<BasePullRequestProperties>,
-  actionPerformerUsername?: string,
-): Promise<{
+export const getBaseChatUpdateArguments = async ({
+  body,
+  threadTs,
+  slackUsername,
+  pullRequestItem,
+  requiredApprovals,
+}: MainMessageArgs<BasePullRequestProperties>): Promise<{
   ts: string;
   text: string;
   attachments: MessageAttachment[];
@@ -49,7 +46,6 @@ export const getBaseChatUpdateArguments = async (
       slackUsername,
       pullRequestItem,
       requiredApprovals,
-      actionPerformerUsername,
     }),
   };
 };
@@ -59,13 +55,11 @@ export const buidMainMessageAttachements = ({
   slackUsername,
   pullRequestItem,
   requiredApprovals,
-  actionPerformerUsername,
 }: {
   body: BasePullRequestProperties;
   slackUsername: string;
   pullRequestItem: PullRequest | null;
   requiredApprovals: RequiredApprovalsQueryPayloadArg;
-  actionPerformerUsername?: string;
 }) => {
   const base = [
     getPrOpenedBaseAttachment(body, slackUsername),
@@ -82,7 +76,7 @@ export const buidMainMessageAttachements = ({
   }
 
   if (body.pull_request.closed_at) {
-    return [...base, getPrClosedAttatchment(actionPerformerUsername ?? slackUsername)];
+    return [...base, getPrClosedAttatchment()];
   }
 
   if (pullRequestItem?.isQueuedToMerge) {
@@ -139,7 +133,10 @@ export function getConvertedToDraftAttachment(
   };
 }
 
-export function getPrClosedAttatchment(slackUsername: string): MessageAttachment {
+export function getPrClosedAttatchment(actionPerformerName?: string): MessageAttachment {
+  const text = actionPerformerName
+    ? `:red_circle: Pull request closed by ${actionPerformerName}`
+    : `:red_circle: Pull request closed`;
   return {
     color: "#FB0909",
     blocks: [
@@ -147,7 +144,22 @@ export function getPrClosedAttatchment(slackUsername: string): MessageAttachment
         type: "section",
         text: {
           type: "mrkdwn",
-          text: `:red_circle: Pull request closed by ${slackUsername}`,
+          text,
+        },
+      },
+    ],
+  };
+}
+
+export function getPrReopenedAttachment(actionPerformerName: string): MessageAttachment {
+  return {
+    color: "#02A101",
+    blocks: [
+      {
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: `:large_green_circle: Pull request reopened by ${actionPerformerName}`,
         },
       },
     ],
