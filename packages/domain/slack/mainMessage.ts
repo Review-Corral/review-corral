@@ -133,10 +133,12 @@ export function getConvertedToDraftAttachment(
   };
 }
 
-export function getPrClosedAttatchment(actionPerformerName?: string): MessageAttachment {
+export function getPrClosedAttatchment(
+  actionPerformerName?: string,
+): MessageAttachment {
   const text = actionPerformerName
     ? `:red_circle: Pull request closed by ${actionPerformerName}`
-    : `:red_circle: Pull request closed`;
+    : ":red_circle: Pull request closed";
   return {
     color: "#FB0909",
     blocks: [
@@ -151,7 +153,9 @@ export function getPrClosedAttatchment(actionPerformerName?: string): MessageAtt
   };
 }
 
-export function getPrReopenedAttachment(actionPerformerName: string): MessageAttachment {
+export function getPrReopenedAttachment(
+  actionPerformerName: string,
+): MessageAttachment {
   return {
     color: "#02A101",
     blocks: [
