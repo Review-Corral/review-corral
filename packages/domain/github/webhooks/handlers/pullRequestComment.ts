@@ -40,6 +40,12 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
       return;
     }
 
+    const replyThreadId = event.comment.in_reply_to_id;
+    const isReply = replyThreadId != null;
+    const threadParticipants = isReply
+      ? await getReviewThreadParticipants({ threadId: replyThreadId })
+      : [];
+
     // Send DMs to mentioned users and PR author
     const mentions = extractMentions(event.comment.body);
     const dmPromises: Promise<void>[] = [];
@@ -80,9 +86,12 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
     }
 
     // DM the PR author (if they weren't the commenter and weren't already mentioned)
+    // For replies, avoid duplicating the thread reply notification if the author
+    // is already a thread participant.
     if (
       event.pull_request.user.login !== event.sender.login &&
-      !mentions.includes(event.pull_request.user.login)
+      !mentions.includes(event.pull_request.user.login) &&
+      (!isReply || !threadParticipants.includes(event.pull_request.user.login))
     ) {
       dmPromises.push(
         (async () => {
@@ -117,10 +126,10 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
     }
 
     // Notify other thread participants if this is a reply
-    if (event.comment.in_reply_to_id) {
+    if (isReply) {
       dmPromises.push(
         notifyThreadParticipants({
-          threadId: event.comment.in_reply_to_id,
+          participants: threadParticipants,
           senderLogin: event.sender.login,
           pullRequest: event.pull_request,
           comment: event.comment,
@@ -148,22 +157,20 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
  * Notifies all previous participants in a review comment thread (except the sender).
  */
 async function notifyThreadParticipants({
-  threadId,
+  participants,
   senderLogin,
   pullRequest,
   comment,
   slackClient,
   args,
 }: {
-  threadId: number;
+  participants: string[];
   senderLogin: string;
   pullRequest: { title: string; number: number };
   comment: { html_url: string; body: string };
   slackClient: SlackClient;
   args: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">;
 }): Promise<void> {
-  const participants = await getReviewThreadParticipants({ threadId });
-
   const notifyPromises = participants
     .filter((username) => username !== senderLogin)
     .map(async (username) => {
