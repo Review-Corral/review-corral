@@ -25,6 +25,12 @@ export type PullRequestReviewsResponse =
 export type BranchProtectionResponse =
   Endpoints["GET /repos/{owner}/{repo}/branches/{branch}/protection"]["response"]["data"];
 
+export type IssueCommentReactionResponse =
+  Endpoints["POST /repos/{owner}/{repo}/issues/comments/{comment_id}/reactions"]["response"]["data"];
+
+export type PullRequestReviewCommentReactionResponse =
+  Endpoints["POST /repos/{owner}/{repo}/pulls/comments/{comment_id}/reactions"]["response"]["data"];
+
 // For some of these types, I'm manually creating the types instead of using Octokit
 // because it's currently giving me the wrong result even though it was just installed
 // at the day of writing.

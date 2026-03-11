@@ -11,3 +11,6 @@ export * from "./slack-integrations";
 export * from "./slack-users";
 export * from "./subscriptions";
 export * from "./review-request-dms";
+export * from "./slack-comment-dm-mappings";
+export * from "./slack-processed-events";
+export * from "./slack-reaction-mirrors";

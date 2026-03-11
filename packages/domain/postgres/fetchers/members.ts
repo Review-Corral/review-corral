@@ -15,6 +15,10 @@ export type MemberWithUser = {
   updatedAt: Date;
 };
 
+export type MemberWithUserAuth = MemberWithUser & {
+  ghAccessToken: string | null;
+};
+
 /**
  * Get all members for an organization with their user details
  */
@@ -101,6 +105,43 @@ export async function getOrgMemberByUsername({
     .from(organizationMembers)
     .innerJoin(users, eq(organizationMembers.userId, users.id))
     .where(and(eq(organizationMembers.orgId, orgId), eq(users.name, githubUsername)));
+
+  if (!result[0]) return undefined;
+
+  return {
+    ...result[0],
+    memberId: result[0].userId,
+    name: result[0].name ?? "",
+  };
+}
+
+/**
+ * Get a member by orgId and Slack user ID including GitHub auth token.
+ */
+export async function getOrgMemberBySlackId({
+  orgId,
+  slackId,
+}: {
+  orgId: number;
+  slackId: string;
+}): Promise<MemberWithUserAuth | undefined> {
+  const result = await db
+    .select({
+      orgId: organizationMembers.orgId,
+      userId: organizationMembers.userId,
+      slackId: organizationMembers.slackId,
+      createdAt: organizationMembers.createdAt,
+      updatedAt: organizationMembers.updatedAt,
+      name: users.name,
+      email: users.email,
+      avatarUrl: users.avatarUrl,
+      ghAccessToken: users.ghAccessToken,
+    })
+    .from(organizationMembers)
+    .innerJoin(users, eq(organizationMembers.userId, users.id))
+    .where(
+      and(eq(organizationMembers.orgId, orgId), eq(organizationMembers.slackId, slackId)),
+    );
 
   if (!result[0]) return undefined;
 

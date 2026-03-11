@@ -9,6 +9,8 @@ import {
   updateSlackIntegrationScopes,
 } from "@domain/postgres/fetchers/slack-integrations";
 import { areScopesOutdated } from "@domain/slack/checkScopesOutdated";
+import { handleSlackReactionEvent } from "@domain/slack/handlers/reactionEvent";
+import { verifySlackEventSignature } from "@domain/slack/verifyEvent";
 import { Hono } from "hono";
 import ky from "ky";
 import { Resource } from "sst";
@@ -73,6 +75,31 @@ const orgIdSchema = z.object({
 
 const deleteIntegrationSchema = z.object({
   slackTeamId: z.string(),
+});
+
+const slackUrlVerificationSchema = z.object({
+  type: z.literal("url_verification"),
+  challenge: z.string(),
+});
+
+const slackReactionEventSchema = z.object({
+  type: z.enum(["reaction_added", "reaction_removed"]),
+  user: z.string(),
+  reaction: z.string(),
+  item_user: z.string().optional(),
+  item: z.object({
+    type: z.literal("message"),
+    channel: z.string(),
+    ts: z.string(),
+  }),
+});
+
+const slackEventCallbackSchema = z.object({
+  type: z.literal("event_callback"),
+  team_id: z.string(),
+  event_id: z.string(),
+  event_time: z.number(),
+  event: slackReactionEventSchema,
 });
 
 // OAuth route - no auth required
@@ -181,6 +208,65 @@ app.get("/oauth", async (c) => {
     // Fallback to JSON error if we can't determine orgId
     return c.json({ message: "Error in Slack OAuth" }, 400);
   }
+});
+
+app.post("/events", async (c) => {
+  const signature = c.req.header("x-slack-signature");
+  const timestamp = c.req.header("x-slack-request-timestamp");
+
+  if (!signature || !timestamp) {
+    return c.json({ message: "Unauthorized" }, 401);
+  }
+
+  const rawBody = await c.req.text();
+
+  const isValid = verifySlackEventSignature({
+    rawBody,
+    timestamp,
+    signature,
+    signingSecret: Resource.SLACK_SIGNING_SECRET.value,
+  });
+
+  if (!isValid) {
+    return c.json({ message: "Unauthorized" }, 401);
+  }
+
+  const parsedRawBody = (() => {
+    try {
+      return JSON.parse(rawBody);
+    } catch {
+      return null;
+    }
+  })();
+
+  if (!parsedRawBody) {
+    return c.json({ message: "Invalid event body" }, 400);
+  }
+
+  const urlVerification = slackUrlVerificationSchema.safeParse(parsedRawBody);
+  if (urlVerification.success) {
+    return c.json({ challenge: urlVerification.data.challenge }, 200);
+  }
+
+  const callbackEvent = slackEventCallbackSchema.safeParse(parsedRawBody);
+  if (!callbackEvent.success) {
+    return c.json({ message: "Ignored event" }, 200);
+  }
+
+  try {
+    await handleSlackReactionEvent({
+      eventId: callbackEvent.data.event_id,
+      event: callbackEvent.data.event,
+    });
+  } catch (error) {
+    LOGGER.error("Error handling Slack reaction event", {
+      error,
+      eventId: callbackEvent.data.event_id,
+      eventType: callbackEvent.data.event.type,
+    });
+  }
+
+  return c.json({ message: "Success" }, 200);
 });
 
 // Create a group for protected routes
