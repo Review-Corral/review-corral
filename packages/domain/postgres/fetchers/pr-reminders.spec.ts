@@ -20,12 +20,14 @@ const ORG_1 = {
   id: 100,
   name: "org-one",
   avatarUrl: "https://example.com/org1.png",
+  installationId: 1010,
 };
 
 const ORG_2 = {
   id: 200,
   name: "org-two",
   avatarUrl: "https://example.com/org2.png",
+  installationId: 2020,
 };
 
 const SLACK_1 = {
@@ -89,12 +91,14 @@ describe("groupPrsByOrgAndSlack", () => {
 
     // Org 1 should only have its own PRs
     expect(org1Group!.orgId).toBe(ORG_1.id);
+    expect(org1Group!.installationId).toBe(ORG_1.installationId);
     expect(org1Group!.channelId).toBe(SLACK_1.channelId);
     expect(org1Group!.prs).toHaveLength(2);
     expect(org1Group!.prs.map((p) => p.prId)).toEqual([1, 2]);
 
     // Org 2 should only have its own PRs
     expect(org2Group!.orgId).toBe(ORG_2.id);
+    expect(org2Group!.installationId).toBe(ORG_2.installationId);
     expect(org2Group!.channelId).toBe(SLACK_2.channelId);
     expect(org2Group!.prs).toHaveLength(2);
     expect(org2Group!.prs.map((p) => p.prId)).toEqual([3, 4]);
@@ -166,6 +170,7 @@ describe("groupPrsByOrgAndSlack", () => {
       prId: 42,
       prNumber: 123,
       repoName: "my-repo",
+      repoId: 10,
       additions: 500,
       deletions: 50,
       authorLogin: "test-author",
