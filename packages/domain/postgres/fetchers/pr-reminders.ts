@@ -33,7 +33,7 @@ export type OutstandingPrWithContext = {
     | "createdAt"
   >;
   repo: Pick<Repository, "id" | "name">;
-  org: Pick<Organization, "id" | "name" | "avatarUrl">;
+  org: Pick<Organization, "id" | "name" | "avatarUrl" | "installationId">;
   slack: Pick<SlackIntegration, "channelId" | "accessToken" | "slackTeamId">;
 };
 
@@ -56,6 +56,7 @@ export type PrReminder = Pick<
 > & {
   prId: number;
   repoName: string;
+  repoId: number;
   orgName: string;
   orgAvatarUrl: string;
 };
@@ -66,6 +67,7 @@ export type OrgSlackReminders = Pick<
 > & {
   orgId: number;
   orgName: string;
+  installationId: number;
   prs: PrReminder[];
 };
 
@@ -114,6 +116,7 @@ export async function fetchOutstandingPrsForReminders(): Promise<
         id: organizations.id,
         name: organizations.name,
         avatarUrl: organizations.avatarUrl,
+        installationId: organizations.installationId,
       },
       slack: {
         channelId: slackIntegrations.channelId,
@@ -155,6 +158,7 @@ export function groupPrsByOrgAndSlack(
       grouped.set(key, {
         orgId: item.org.id,
         orgName: item.org.name,
+        installationId: item.org.installationId,
         channelId: item.slack.channelId,
         accessToken: item.slack.accessToken,
         slackTeamId: item.slack.slackTeamId,
@@ -166,6 +170,7 @@ export function groupPrsByOrgAndSlack(
       prNumber: item.pr.prNumber,
       prId: item.pr.id,
       repoName: item.repo.name,
+      repoId: item.repo.id,
       threadTs: item.pr.threadTs,
       approvalCount: item.pr.approvalCount,
       requiredApprovals: item.pr.requiredApprovals,
