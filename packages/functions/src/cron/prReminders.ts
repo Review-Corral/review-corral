@@ -31,8 +31,7 @@ export async function handler(event: ScheduledEvent): Promise<void> {
   }
 
   const grouped = groupPrsByOrgAndSlack(outstandingPrs);
-  const groupsToProcess = Array.from(grouped.entries()).filter(
-    ([, orgReminders]) => {
+  const groupsToProcess = Array.from(grouped.entries()).filter(([, orgReminders]) => {
     if (orgReminders.prs.length > MAX_PRS_PER_GROUP) {
       LOGGER.error("Too many pending PRs for org/slack group, skipping reminder", {
         orgId: orgReminders.orgId,
@@ -42,9 +41,8 @@ export async function handler(event: ScheduledEvent): Promise<void> {
       });
       return false;
     }
-      return true;
-    },
-  );
+    return true;
+  });
 
   // Send reminders to each org/slack group
   for (const [key, orgReminders] of groupsToProcess) {
@@ -100,9 +98,8 @@ async function confirmOpenPrsForGroup(
   orgReminders: OrgSlackReminders,
   key: string,
 ): Promise<PrReminder[]> {
-  const accessToken = (
-    await getInstallationAccessToken(orgReminders.installationId)
-  ).token;
+  const accessToken = (await getInstallationAccessToken(orgReminders.installationId))
+    .token;
   const confirmed: PrReminder[] = [];
 
   // TODO: we need to throttle this

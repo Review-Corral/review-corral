@@ -125,7 +125,10 @@ function makeOutstandingPr({
   };
 }
 
-function makeGroupedReminder(prId: number, overrides?: Partial<ReturnType<typeof makeOutstandingPr>>) {
+function makeGroupedReminder(
+  prId: number,
+  overrides?: Partial<ReturnType<typeof makeOutstandingPr>>,
+) {
   const outstanding = {
     ...makeOutstandingPr({ prId }),
     ...overrides,
