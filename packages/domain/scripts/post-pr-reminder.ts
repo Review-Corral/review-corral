@@ -39,6 +39,7 @@ const mockPrs: PrReminder[] = [
     prNumber: 340,
     prId: 123,
     repoName: "sales-portal",
+    repoId: 1,
     threadTs: "1234567890.123456", // Example threadTs - replace with real one to test
     approvalCount: 1,
     requiredApprovals: 2,
@@ -56,6 +57,7 @@ const mockPrs: PrReminder[] = [
     prNumber: 341,
     prId: 456,
     repoName: "sales-portal",
+    repoId: 1,
     threadTs: null, // No thread - won't be linked
     approvalCount: 0,
     requiredApprovals: 2,
@@ -73,6 +75,7 @@ const mockPrs: PrReminder[] = [
     prNumber: 42,
     prId: 789,
     repoName: "hr-system",
+    repoId: 2,
     threadTs: "1234567890.654321", // Example threadTs
     approvalCount: 1,
     requiredApprovals: 3,

@@ -311,4 +311,144 @@ describe("cron/prReminders", () => {
       threadTs: undefined,
     });
   });
+
+  it("continues processing later groups when an installation token fetch fails", async () => {
+    const firstOutstandingPr = makeOutstandingPr({
+      prId: 1,
+      prNumber: 101,
+      orgId: 1,
+      orgName: "acme",
+      installationId: 77,
+      channelId: "C123",
+      slackTeamId: "T123",
+    });
+    const secondOutstandingPr = makeOutstandingPr({
+      prId: 2,
+      prNumber: 202,
+      orgId: 2,
+      orgName: "beta",
+      installationId: 88,
+      channelId: "C456",
+      slackTeamId: "T456",
+    });
+    const firstGroupedPr = makeGroupedReminder(1, firstOutstandingPr);
+    const secondGroupedPr = makeGroupedReminder(2, secondOutstandingPr);
+
+    fetchOutstandingPrsForRemindersMock.mockResolvedValue([
+      firstOutstandingPr,
+      secondOutstandingPr,
+    ]);
+    groupPrsByOrgAndSlackMock.mockReturnValue(
+      new Map([
+        [
+          "1-T123",
+          {
+            orgId: 1,
+            orgName: "acme",
+            installationId: 77,
+            channelId: "C123",
+            accessToken: "xoxb-slack-token",
+            slackTeamId: "T123",
+            prs: [firstGroupedPr],
+          },
+        ],
+        [
+          "2-T456",
+          {
+            orgId: 2,
+            orgName: "beta",
+            installationId: 88,
+            channelId: "C456",
+            accessToken: "xoxb-slack-token-2",
+            slackTeamId: "T456",
+            prs: [secondGroupedPr],
+          },
+        ],
+      ]),
+    );
+    getInstallationAccessTokenMock
+      .mockRejectedValueOnce(new Error("installation unavailable"))
+      .mockResolvedValueOnce({ token: "gh-install-token-2" });
+    getPullRequestInfoMock.mockResolvedValue({
+      state: "open",
+      merged_at: null,
+      closed_at: null,
+    });
+
+    await handler(scheduledEvent as any);
+
+    expect(loggerErrorMock).toHaveBeenCalledWith(
+      "Failed to confirm PRs for org/slack group, skipping reminder",
+      expect.objectContaining({
+        key: "1-T123",
+        orgId: 1,
+        channelId: "C123",
+        installationId: 77,
+      }),
+    );
+    expect(getInstallationAccessTokenMock).toHaveBeenNthCalledWith(1, 77);
+    expect(getInstallationAccessTokenMock).toHaveBeenNthCalledWith(2, 88);
+    expect(getPullRequestInfoMock).toHaveBeenCalledTimes(1);
+    expect(getPullRequestInfoMock).toHaveBeenCalledWith({
+      url: "https://api.github.com/repos/beta/api/pulls/202",
+      accessToken: "gh-install-token-2",
+    });
+    expect(buildPrReminderMessageMock).toHaveBeenCalledWith([secondGroupedPr], "C456");
+    expect(slackClientConstructorMock).toHaveBeenCalledWith(
+      "C456",
+      "xoxb-slack-token-2",
+    );
+    expect(slackPostMessageMock).toHaveBeenCalledOnce();
+  });
+
+  it("keeps reminders when GitHub lookup for an individual PR fails", async () => {
+    const outstandingPrs = [
+      makeOutstandingPr({ prId: 1, prNumber: 101, repoId: 201, repoName: "frontend" }),
+      makeOutstandingPr({ prId: 2, prNumber: 102, repoId: 202, repoName: "backend" }),
+    ];
+    const groupedPrs = [
+      makeGroupedReminder(1, outstandingPrs[0]),
+      makeGroupedReminder(2, outstandingPrs[1]),
+    ];
+
+    fetchOutstandingPrsForRemindersMock.mockResolvedValue(outstandingPrs);
+    groupPrsByOrgAndSlackMock.mockReturnValue(
+      new Map([
+        [
+          "1-T123",
+          {
+            orgId: 1,
+            orgName: "acme",
+            installationId: 77,
+            channelId: "C123",
+            accessToken: "xoxb-slack-token",
+            slackTeamId: "T123",
+            prs: groupedPrs,
+          },
+        ],
+      ]),
+    );
+    getPullRequestInfoMock
+      .mockRejectedValueOnce(new Error("github timeout"))
+      .mockResolvedValueOnce({
+        state: "open",
+        merged_at: null,
+        closed_at: null,
+      });
+
+    await handler(scheduledEvent as any);
+
+    expect(loggerErrorMock).toHaveBeenCalledWith(
+      "Failed to confirm PR status with GitHub, keeping reminder",
+      expect.objectContaining({
+        key: "1-T123",
+        prId: 1,
+        repoName: "frontend",
+        prNumber: 101,
+      }),
+    );
+    expect(updatePullRequestMock).not.toHaveBeenCalled();
+    expect(buildPrReminderMessageMock).toHaveBeenCalledWith(groupedPrs, "C123");
+    expect(slackPostMessageMock).toHaveBeenCalledOnce();
+  });
 });

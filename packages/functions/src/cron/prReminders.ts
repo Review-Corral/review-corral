@@ -46,7 +46,21 @@ export async function handler(event: ScheduledEvent): Promise<void> {
 
   // Send reminders to each org/slack group
   for (const [key, orgReminders] of groupsToProcess) {
-    const confirmedOpenPrs = await confirmOpenPrsForGroup(orgReminders, key);
+    let confirmedOpenPrs: PrReminder[];
+
+    try {
+      confirmedOpenPrs = await confirmOpenPrsForGroup(orgReminders, key);
+    } catch (error) {
+      LOGGER.error("Failed to confirm PRs for org/slack group, skipping reminder", {
+        key,
+        orgId: orgReminders.orgId,
+        channelId: orgReminders.channelId,
+        installationId: orgReminders.installationId,
+        error,
+      });
+      continue;
+    }
+
     if (confirmedOpenPrs.length === 0) {
       LOGGER.info("No open PRs after GitHub check, skipping reminder", {
         key,
@@ -124,13 +138,14 @@ async function confirmOpenPrsForGroup(
         confirmed.push(pr);
       }
     } catch (error) {
-      LOGGER.error("Failed to confirm PR status with GitHub, skipping reminder", {
+      LOGGER.error("Failed to confirm PR status with GitHub, keeping reminder", {
         key,
         prId: pr.prId,
         repoName: pr.repoName,
         prNumber: pr.prNumber,
         error,
       });
+      confirmed.push(pr);
     }
   }
 
