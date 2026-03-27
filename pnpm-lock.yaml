@@ -31,7 +31,7 @@ importers:
         version: 0.30.6
       electro-viewer:
         specifier: ^0.1.19
-        version: 0.1.19(@babel/runtime@7.29.2)(@types/node@22.19.15)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(aws-crt@1.21.3)(crossws@0.4.4(srvx@0.8.16))(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)
+        version: 0.1.19(@babel/runtime@7.29.2)(@types/node@22.19.15)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(aws-crt@1.21.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)
       nitro:
         specifier: 3.0.1-alpha.0
         version: 3.0.1-alpha.0(chokidar@4.0.3)(drizzle-orm@0.40.1(@aws-sdk/client-rds-data@3.616.0(aws-crt@1.21.3))(@neondatabase/serverless@0.10.4)(@opentelemetry/api@1.9.0)(@types/pg@8.18.0)(gel@2.2.0)(kysely@0.25.0)(pg@8.20.0))(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))(xml2js@0.6.2)
@@ -334,7 +334,7 @@ importers:
         version: 1.167.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/react-start':
         specifier: ^1.166.16
-        version: 1.166.16(crossws@0.4.4(srvx@0.11.12))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
+        version: 1.166.16(crossws@0.4.4(srvx@0.8.16))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
       '@tanstack/react-table':
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -3878,6 +3878,7 @@ packages:
   aws-sdk@2.1692.0:
     resolution: {integrity: sha512-x511uiJ/57FIsbgUe5csJ13k3uzu25uWQE+XqfBis/sB0SFoiElJWXRkgEAUh0U6n40eT3ay5Ue4oPkRMu1LYw==}
     engines: {node: '>= 10.0.0'}
+    deprecated: The AWS SDK for JavaScript (v2) has reached end-of-support, and no longer receives updates. Please migrate your code to use AWS SDK for JavaScript (v3). More info https://a.co/cUPnyil
 
   aws-sdk@2.1693.0:
     resolution: {integrity: sha512-cJmb8xEnVLT+R6fBS5sn/EFJiX7tUnDaPtOPZ1vFbOJtd0fnZn/Ky2XGgsvvoeliWeH7mL3TWSX5zXXGSQV6gQ==}
@@ -3928,8 +3929,8 @@ packages:
   bowser@2.14.1:
     resolution: {integrity: sha512-tzPjzCxygAKWFOJP011oxFHs57HzIhOEracIgAePE4pqB3LikALKnSzUyU4MGs9/iCEUuHlAJTjTc5M+u7YEGg==}
 
-  brace-expansion@1.1.12:
-    resolution: {integrity: sha512-9T9UjW3r0UW5c1Q7GTwllptXwhvYmEzFhzMfZ9H7FQWt+uZePjZPjBP/W1ZEyZ1twGWom5/56TF4lPcqjnDHcg==}
+  brace-expansion@1.1.13:
+    resolution: {integrity: sha512-9ZLprWS6EENmhEOpjCYW2c8VkmOvckIJZfkr7rBW6dObmfgJ/L1GpSYW5Hpo9lDz4D1+n0Ckz8rU7FwHDQiG/w==}
 
   brace-expansion@5.0.4:
     resolution: {integrity: sha512-h+DEnpVvxmfVefa4jFbCf5HdH5YMDXRsmKflpf1pILZWRFlTbJpxeU55nJl4Smt5HQaGzg1o6RHFPJaOqnmBDg==}
@@ -5766,6 +5767,11 @@ packages:
     engines: {node: '>=20.16.0'}
     hasBin: true
 
+  srvx@0.11.13:
+    resolution: {integrity: sha512-oknN6qduuMPafxKtHucUeG32Q963pjriA5g3/Bl05cwEsUe5VVbIU4qR9LrALHbipSCyBe+VmfDGGydqazDRkw==}
+    engines: {node: '>=20.16.0'}
+    hasBin: true
+
   srvx@0.8.16:
     resolution: {integrity: sha512-hmcGW4CgroeSmzgF1Ihwgl+Ths0JqAJ7HwjP2X7e3JzY7u4IydLMcdnlqGQiQGUswz+PO9oh/KtCpOISIvs9QQ==}
     engines: {node: '>=20.16.0'}
@@ -6301,8 +6307,8 @@ packages:
       utf-8-validate:
         optional: true
 
-  ws@8.19.0:
-    resolution: {integrity: sha512-blAT2mjOEIi0ZzruJfIhb3nps74PRWTCz1IjglWEEpQl5XS/UNama6u2/rjFkDDouqr4L67ry+1aGIALViWjDg==}
+  ws@8.20.0:
+    resolution: {integrity: sha512-sAt8BhgNbzCtgGbt2OxmpuryO63ZoDk/sqaB/znQm94T4fCEsy/yV+7CdC1kJhOU9lboAEU7R3kquuycDoibVA==}
     engines: {node: '>=10.0.0'}
     peerDependencies:
       bufferutil: ^4.0.1
@@ -7868,10 +7874,10 @@ snapshots:
       '@types/ws': 8.18.1
       duplexify: 3.7.1
       inherits: 2.0.4
-      isomorphic-ws: 4.0.1(ws@8.19.0)
+      isomorphic-ws: 4.0.1(ws@8.20.0)
       readable-stream: 2.3.8
       safe-buffer: 5.2.1
-      ws: 8.19.0
+      ws: 8.20.0
       xtend: 4.0.2
     transitivePeerDependencies:
       - bufferutil
@@ -10244,7 +10250,7 @@ snapshots:
 
   '@tanstack/query-devtools@5.93.0': {}
 
-  '@tanstack/react-form@1.28.5(@tanstack/react-start@1.166.16(crossws@0.4.4(srvx@0.8.16))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
+  '@tanstack/react-form@1.28.5(@tanstack/react-start@1.166.16(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@tanstack/form-core': 1.28.5
       '@tanstack/react-store': 0.9.2(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -10286,18 +10292,6 @@ snapshots:
       tiny-invariant: 1.3.3
       tiny-warning: 1.0.3
 
-  '@tanstack/react-start-server@1.166.13(crossws@0.4.4(srvx@0.11.12))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
-    dependencies:
-      '@tanstack/history': 1.161.6
-      '@tanstack/react-router': 1.167.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@tanstack/router-core': 1.167.4
-      '@tanstack/start-client-core': 1.166.12
-      '@tanstack/start-server-core': 1.166.12(crossws@0.4.4(srvx@0.11.12))
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-    transitivePeerDependencies:
-      - crossws
-
   '@tanstack/react-start-server@1.166.13(crossws@0.4.4(srvx@0.8.16))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)':
     dependencies:
       '@tanstack/history': 1.161.6
@@ -10309,26 +10303,6 @@ snapshots:
       react-dom: 19.2.4(react@19.2.4)
     transitivePeerDependencies:
       - crossws
-
-  '@tanstack/react-start@1.166.16(crossws@0.4.4(srvx@0.11.12))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))':
-    dependencies:
-      '@tanstack/react-router': 1.167.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@tanstack/react-start-client': 1.166.13(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@tanstack/react-start-server': 1.166.13(crossws@0.4.4(srvx@0.11.12))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
-      '@tanstack/router-utils': 1.161.6
-      '@tanstack/start-client-core': 1.166.12
-      '@tanstack/start-plugin-core': 1.167.0(@tanstack/react-router@1.167.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(crossws@0.4.4(srvx@0.11.12))(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
-      '@tanstack/start-server-core': 1.166.12(crossws@0.4.4(srvx@0.11.12))
-      pathe: 2.0.3
-      react: 19.2.4
-      react-dom: 19.2.4(react@19.2.4)
-      vite: 7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)
-    transitivePeerDependencies:
-      - '@rsbuild/core'
-      - crossws
-      - supports-color
-      - vite-plugin-solid
-      - webpack
 
   '@tanstack/react-start@1.166.16(crossws@0.4.4(srvx@0.8.16))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))':
     dependencies:
@@ -10438,38 +10412,6 @@ snapshots:
 
   '@tanstack/start-fn-stubs@1.161.6': {}
 
-  '@tanstack/start-plugin-core@1.167.0(@tanstack/react-router@1.167.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(crossws@0.4.4(srvx@0.11.12))(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))':
-    dependencies:
-      '@babel/code-frame': 7.27.1
-      '@babel/core': 7.29.0
-      '@babel/types': 7.29.0
-      '@rolldown/pluginutils': 1.0.0-beta.40
-      '@tanstack/router-core': 1.167.4
-      '@tanstack/router-generator': 1.166.12
-      '@tanstack/router-plugin': 1.166.13(@tanstack/react-router@1.167.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
-      '@tanstack/router-utils': 1.161.6
-      '@tanstack/start-client-core': 1.166.12
-      '@tanstack/start-server-core': 1.166.12(crossws@0.4.4(srvx@0.11.12))
-      cheerio: 1.2.0
-      exsolve: 1.0.8
-      pathe: 2.0.3
-      picomatch: 4.0.3
-      source-map: 0.7.6
-      srvx: 0.11.12
-      tinyglobby: 0.2.15
-      ufo: 1.6.3
-      vite: 7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)
-      vitefu: 1.1.2(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
-      xmlbuilder2: 4.0.3
-      zod: 3.25.76
-    transitivePeerDependencies:
-      - '@rsbuild/core'
-      - '@tanstack/react-router'
-      - crossws
-      - supports-color
-      - vite-plugin-solid
-      - webpack
-
   '@tanstack/start-plugin-core@1.167.0(@tanstack/react-router@1.167.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4))(crossws@0.4.4(srvx@0.8.16))(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))':
     dependencies:
       '@babel/code-frame': 7.27.1
@@ -10501,18 +10443,6 @@ snapshots:
       - supports-color
       - vite-plugin-solid
       - webpack
-
-  '@tanstack/start-server-core@1.166.12(crossws@0.4.4(srvx@0.11.12))':
-    dependencies:
-      '@tanstack/history': 1.161.6
-      '@tanstack/router-core': 1.167.4
-      '@tanstack/start-client-core': 1.166.12
-      '@tanstack/start-storage-context': 1.166.12
-      h3-v2: h3@2.0.1-rc.16(crossws@0.4.4(srvx@0.11.12))
-      seroval: 1.5.1
-      tiny-invariant: 1.3.3
-    transitivePeerDependencies:
-      - crossws
 
   '@tanstack/start-server-core@1.166.12(crossws@0.4.4(srvx@0.8.16))':
     dependencies:
@@ -10892,7 +10822,7 @@ snapshots:
 
   bowser@2.14.1: {}
 
-  brace-expansion@1.1.12:
+  brace-expansion@1.1.13:
     dependencies:
       balanced-match: 1.0.2
       concat-map: 0.0.1
@@ -11092,11 +11022,6 @@ snapshots:
       shebang-command: 2.0.0
       which: 2.0.2
 
-  crossws@0.4.4(srvx@0.11.12):
-    optionalDependencies:
-      srvx: 0.11.12
-    optional: true
-
   crossws@0.4.4(srvx@0.8.16):
     optionalDependencies:
       srvx: 0.8.16
@@ -11228,7 +11153,7 @@ snapshots:
 
   ee-first@1.1.1: {}
 
-  electro-viewer@0.1.19(@babel/runtime@7.29.2)(@types/node@22.19.15)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(aws-crt@1.21.3)(crossws@0.4.4(srvx@0.8.16))(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1):
+  electro-viewer@0.1.19(@babel/runtime@7.29.2)(@types/node@22.19.15)(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(aws-crt@1.21.3)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1):
     dependencies:
       '@aws-sdk/client-dynamodb': 3.1011.0(aws-crt@1.21.3)
       '@aws-sdk/credential-providers': 3.1011.0(aws-crt@1.21.3)
@@ -11241,7 +11166,7 @@ snapshots:
       '@radix-ui/react-slot': 1.2.4(@types/react@19.2.14)(react@19.2.4)
       '@radix-ui/react-tabs': 1.1.13(@types/react-dom@19.2.3(@types/react@19.2.14))(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tailwindcss/vite': 4.2.1(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
-      '@tanstack/react-form': 1.28.5(@tanstack/react-start@1.166.16(crossws@0.4.4(srvx@0.8.16))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@tanstack/react-form': 1.28.5(@tanstack/react-start@1.166.16(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1)))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/react-router': 1.167.4(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       '@tanstack/react-start': 1.166.16(crossws@0.4.4(srvx@0.8.16))(react-dom@19.2.4(react@19.2.4))(react@19.2.4)(vite@7.3.1(@types/node@22.19.15)(jiti@2.6.1)(lightningcss@1.31.1)(terser@5.44.1)(tsx@4.21.0)(yaml@2.8.1))
       '@tanstack/react-table': 8.21.3(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -11694,17 +11619,10 @@ snapshots:
 
   graceful-fs@4.2.11: {}
 
-  h3@2.0.1-rc.16(crossws@0.4.4(srvx@0.11.12)):
-    dependencies:
-      rou3: 0.8.1
-      srvx: 0.11.12
-    optionalDependencies:
-      crossws: 0.4.4(srvx@0.11.12)
-
   h3@2.0.1-rc.16(crossws@0.4.4(srvx@0.8.16)):
     dependencies:
       rou3: 0.8.1
-      srvx: 0.11.12
+      srvx: 0.11.13
     optionalDependencies:
       crossws: 0.4.4(srvx@0.8.16)
 
@@ -11883,9 +11801,9 @@ snapshots:
 
   isexe@3.1.5: {}
 
-  isomorphic-ws@4.0.1(ws@8.19.0):
+  isomorphic-ws@4.0.1(ws@8.20.0):
     dependencies:
-      ws: 8.19.0
+      ws: 8.20.0
     optional: true
 
   jiti@2.6.1: {}
@@ -12202,7 +12120,7 @@ snapshots:
 
   minimatch@3.1.5:
     dependencies:
-      brace-expansion: 1.1.12
+      brace-expansion: 1.1.13
     optional: true
 
   minimist@1.2.8:
@@ -13009,6 +12927,8 @@ snapshots:
 
   srvx@0.11.12: {}
 
+  srvx@0.11.13: {}
+
   srvx@0.8.16: {}
 
   sst-darwin-arm64@3.17.25:
@@ -13436,7 +13356,7 @@ snapshots:
   ws@7.5.10:
     optional: true
 
-  ws@8.19.0:
+  ws@8.20.0:
     optional: true
 
   xml2js@0.6.2:
