@@ -3,10 +3,6 @@
 Review Corral is a lightweight Slack & Github bot designed to handle Github pull request notifications
 in a more elegant manner to minimize noise for your Engineering team.
 
-## Self Hosting
-
-Coming soon... email me at alex.mclean25@gmail.com if you're interested in setting this up
-
 ## The differences between Organizations and Installations
 
 Organizations are the collections in GitHub that can have multiple repositories
