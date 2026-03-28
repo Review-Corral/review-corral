@@ -422,6 +422,33 @@ const handleQueueStatusChange = async (
     },
     `pr-${action}`,
   );
+
+  // This branch only runs for GitHub's `pull_request` `dequeued` action because
+  // the caller passes `isEnqueued = false` exclusively from that switch case.
+  // It does not prove our stored PR state was previously queued, so duplicate
+  // deliveries or missed prior events would still send this DM.
+  if (!isEnqueued) {
+    const authorSlackId = await getSlackUserId(event.pull_request.user.login, props);
+
+    if (authorSlackId) {
+      await props.slackClient.postDirectMessage({
+        slackUserId: authorSlackId,
+        message: {
+          text: "Your pull request was removed from the merge queue",
+          attachments: [
+            getDmAttachment(
+              {
+                title: event.pull_request.title,
+                number: event.pull_request.number,
+                html_url: event.pull_request.html_url,
+              },
+              "orange",
+            ),
+          ],
+        },
+      });
+    }
+  }
 };
 
 const handleNewPr = async (
