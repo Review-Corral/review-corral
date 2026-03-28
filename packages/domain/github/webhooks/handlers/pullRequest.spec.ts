@@ -226,9 +226,19 @@ describe("handlePullRequestEvent", () => {
     });
 
     it("should handle dequeued event", async () => {
+      const mockSlackClientWithDm = {
+        ...mockSlackClient,
+        postDirectMessage: vi.fn(),
+      } as unknown as SlackClient;
+
       const dequeuedEvent = {
         ...mockEvent,
         action: "dequeued",
+        pull_request: {
+          ...mockEvent.pull_request,
+          number: 42,
+          html_url: "https://github.com/test/repo/pull/42",
+        },
         sender: {
           login: "testuser",
         },
@@ -236,7 +246,7 @@ describe("handlePullRequestEvent", () => {
 
       await handlePullRequestEvent({
         event: dequeuedEvent,
-        slackClient: mockSlackClient,
+        slackClient: mockSlackClientWithDm,
         organizationId: 789,
         installationId: 101112,
       });
@@ -247,7 +257,7 @@ describe("handlePullRequestEvent", () => {
         isQueuedToMerge: false,
       });
 
-      expect(mockSlackClient.updateMainMessage).toHaveBeenCalledWith(
+      expect(mockSlackClientWithDm.updateMainMessage).toHaveBeenCalledWith(
         {
           body: convertPrEventToBaseProps(dequeuedEvent),
           threadTs: "thread-ts-123",
@@ -257,6 +267,14 @@ describe("handlePullRequestEvent", () => {
         },
         "pr-dequeued",
       );
+
+      expect(mockSlackClientWithDm.postDirectMessage).toHaveBeenCalledWith({
+        slackUserId: "U123456",
+        message: {
+          text: "Your pull request was removed from the merge queue",
+          attachments: [{ color: "#0066ff" }],
+        },
+      });
     });
   });
 
