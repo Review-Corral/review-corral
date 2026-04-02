@@ -21,6 +21,23 @@ export const PullRequestStatus = {
 export type PullRequestStatusType =
   (typeof PullRequestStatus)[keyof typeof PullRequestStatus];
 
+export const ReviewerStatusState = {
+  PENDING: "pending",
+  COMMENTED: "commented",
+  CHANGES_REQUESTED: "changes_requested",
+  APPROVED: "approved",
+} as const;
+
+export type ReviewerStatusStateType =
+  (typeof ReviewerStatusState)[keyof typeof ReviewerStatusState];
+
+export type PullRequestReviewerStatus = {
+  login: string;
+  lastReviewState: ReviewerStatusStateType;
+  isCurrentlyRequested: boolean;
+  isReRequested: boolean;
+};
+
 export const pullRequests = pgTable(
   "pull_requests",
   {
@@ -36,6 +53,10 @@ export const pullRequests = pgTable(
     isQueuedToMerge: boolean("is_queued_to_merge").notNull().default(false),
     requestedReviewers: jsonb("requested_reviewers")
       .$type<string[]>()
+      .notNull()
+      .default([]),
+    reviewerStatuses: jsonb("reviewer_statuses")
+      .$type<PullRequestReviewerStatus[]>()
       .notNull()
       .default([]),
     additions: integer("additions"),

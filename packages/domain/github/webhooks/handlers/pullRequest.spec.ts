@@ -89,6 +89,7 @@ describe("handlePullRequestEvent", () => {
       approvalCount: 0,
       isQueuedToMerge: false,
       requestedReviewers: [],
+      reviewerStatuses: [],
     });
 
     vi.mocked(getSlackUserName).mockResolvedValue("@testuser");
@@ -439,6 +440,14 @@ describe("handlePullRequestEvent", () => {
       const updatedPrItem = {
         ...prItem,
         requestedReviewers: ["newreviewer"],
+        reviewerStatuses: [
+          {
+            login: "newreviewer",
+            lastReviewState: "pending" as const,
+            isCurrentlyRequested: true,
+            isReRequested: false,
+          },
+        ],
       };
       vi.mocked(updatePullRequest).mockResolvedValueOnce(updatedPrItem);
 
@@ -481,6 +490,14 @@ describe("handlePullRequestEvent", () => {
         pullRequestId: prItem.id,
         repoId: prItem.repoId,
         requestedReviewers: ["newreviewer"],
+        reviewerStatuses: [
+          {
+            login: "newreviewer",
+            lastReviewState: "pending",
+            isCurrentlyRequested: true,
+            isReRequested: false,
+          },
+        ],
       });
     });
   });
@@ -559,6 +576,7 @@ describe("handlePullRequestEvent", () => {
         pullRequestId: prItem.id,
         repoId: prItem.repoId,
         requestedReviewers: [],
+        reviewerStatuses: [],
       });
     });
   });

@@ -22,6 +22,7 @@ describe("mainMessage", () => {
       requiredApprovals: 2,
       approvalCount: 1,
       requestedReviewers: [],
+      reviewerStatuses: [],
       createdAt: new Date(),
       updatedAt: new Date(),
     });
@@ -214,7 +215,7 @@ describe("mainMessage", () => {
         body: mockBody,
         slackUsername: "@testuser",
         pullRequestItem: mockPullRequestItem,
-        requiredApprovals: requiredApprovals,
+        requiredApprovals,
       });
 
       const approvalAttachment = attachments.find((attachment) =>
@@ -308,6 +309,14 @@ describe("mainMessage", () => {
       const prWithReviewer = {
         ...mockPullRequestItem,
         requestedReviewers: ["reviewer1"],
+        reviewerStatuses: [
+          {
+            login: "reviewer1",
+            lastReviewState: "pending" as const,
+            isCurrentlyRequested: true,
+            isReRequested: false,
+          },
+        ],
       };
 
       const attachments = buidMainMessageAttachements({
@@ -332,15 +341,35 @@ describe("mainMessage", () => {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: ":eyes: Requested reviewers: reviewer1",
+          text: ":eyes: Requested reviewers:\n• :hourglass_flowing_sand: [pending] reviewer1",
         },
       });
     });
 
-    it("should include multiple reviewers comma-separated", () => {
+    it("should include multiple reviewer statuses in first-request order", () => {
       const prWithReviewers = {
         ...mockPullRequestItem,
         requestedReviewers: ["reviewer1", "reviewer2", "reviewer3"],
+        reviewerStatuses: [
+          {
+            login: "reviewer1",
+            lastReviewState: "approved" as const,
+            isCurrentlyRequested: false,
+            isReRequested: false,
+          },
+          {
+            login: "reviewer2",
+            lastReviewState: "commented" as const,
+            isCurrentlyRequested: false,
+            isReRequested: false,
+          },
+          {
+            login: "reviewer3",
+            lastReviewState: "changes_requested" as const,
+            isCurrentlyRequested: false,
+            isReRequested: false,
+          },
+        ],
       };
 
       const attachments = buidMainMessageAttachements({
@@ -364,15 +393,62 @@ describe("mainMessage", () => {
         type: "section",
         text: {
           type: "mrkdwn",
-          text: ":eyes: Requested reviewers: reviewer1, reviewer2, reviewer3",
+          text: ":eyes: Requested reviewers:\n• :white_check_mark: reviewer1\n• :speech_balloon: reviewer2\n• :warning: reviewer3",
         },
       });
     });
 
-    it("should position reviewer attachment between approvals and status", () => {
+    it("should render a re-requested reviewer as pending re-review", () => {
+      const prWithReRequestedReviewer = {
+        ...mockPullRequestItem,
+        requestedReviewers: ["reviewer1"],
+        reviewerStatuses: [
+          {
+            login: "reviewer1",
+            lastReviewState: "commented" as const,
+            isCurrentlyRequested: true,
+            isReRequested: true,
+          },
+        ],
+      };
+
+      const attachments = buidMainMessageAttachements({
+        body: mockBody,
+        slackUsername: "@testuser",
+        pullRequestItem: prWithReRequestedReviewer,
+        requiredApprovals: null,
+      });
+
+      const reviewerAttachment = attachments.find((attachment) =>
+        attachment.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Requested reviewers"),
+        ),
+      );
+
+      expect(reviewerAttachment?.blocks?.[0]).toMatchObject({
+        type: "section",
+        text: {
+          type: "mrkdwn",
+          text: ":eyes: Requested reviewers:\n• :speech_balloon: :repeat: [pending] reviewer1",
+        },
+      });
+    });
+
+    it("should position reviewer attachment between base content and status", () => {
       const prWithReviewers = {
         ...mockPullRequestItem,
         requestedReviewers: ["reviewer1"],
+        reviewerStatuses: [
+          {
+            login: "reviewer1",
+            lastReviewState: "pending" as const,
+            isCurrentlyRequested: true,
+            isReRequested: false,
+          },
+        ],
         isDraft: true,
       };
 
@@ -385,21 +461,21 @@ describe("mainMessage", () => {
 
       expect(attachments).toHaveLength(4); // base + approvals + reviewers + draft
 
-      const reviewerIndex = attachments.findIndex((att) =>
-        att.blocks?.some(
-          (block) =>
-            block.type === "section" &&
-            "text" in block &&
-            block.text?.text?.includes("Requested reviewers"),
-        ),
-      );
-
       const approvalsIndex = attachments.findIndex((att) =>
         att.blocks?.some(
           (block) =>
             block.type === "section" &&
             "text" in block &&
             block.text?.text?.includes("approvals met"),
+        ),
+      );
+
+      const reviewerIndex = attachments.findIndex((att) =>
+        att.blocks?.some(
+          (block) =>
+            block.type === "section" &&
+            "text" in block &&
+            block.text?.text?.includes("Requested reviewers"),
         ),
       );
 
@@ -412,6 +488,8 @@ describe("mainMessage", () => {
         ),
       );
 
+      expect(approvalsIndex).toBe(1);
+      expect(reviewerIndex).toBe(2);
       expect(approvalsIndex).toBeLessThan(reviewerIndex);
       expect(reviewerIndex).toBeLessThan(draftIndex);
     });

@@ -16,6 +16,11 @@ import { PullRequestReview, PullRequestReviewEvent } from "@octokit/webhooks-typ
 import slackifyMarkdown from "slackify-markdown";
 import { GithubWebhookEventHander } from "../types";
 import {
+  applySubmittedReviewToReviewerStatuses,
+  removeReviewerFromReviewerStatuses,
+  syncReviewerStatusesWithRequestedReviewers,
+} from "./reviewerStatuses";
+import {
   getDmAttachment,
   getReviewRequestDmAttachment,
   getSlackUserId,
@@ -33,142 +38,201 @@ export const handlePullRequestReviewEvent: GithubWebhookEventHander<
     return;
   }
 
-  if (event.action === "submitted") {
-    if (event.review.state === "commented" && event.review.body === null) {
-      // This means they left a comment on the PR, not an actual review comment
-      return;
-    }
+  if (event.action !== "submitted" && event.action !== "dismissed") {
+    return;
+  }
 
-    const pullRequestItem = await fetchPrItem({
+  const pullRequestItem = await fetchPrItem({
+    pullRequestId: event.pull_request.id,
+    repoId: event.repository.id,
+  });
+
+  if (!pullRequestItem?.threadTs) {
+    LOGGER.warn("Got a review event but couldn't find the thread", {
+      action: event.action,
+      prId: event.pull_request.id,
+    });
+
+    return;
+  }
+
+  const reviewerStatuses =
+    event.action === "dismissed"
+      ? syncReviewerStatusesWithRequestedReviewers({
+          currentStatuses: removeReviewerFromReviewerStatuses({
+            currentStatuses: pullRequestItem.reviewerStatuses ?? [],
+            reviewerLogin: event.review.user.login,
+          }),
+          requestedReviewerLogins: pullRequestItem.requestedReviewers ?? [],
+        })
+      : await handleSubmittedReview({
+          event,
+          slackClient,
+          pullRequestItem,
+          organizationId: args.organizationId,
+        });
+
+  if (!reviewerStatuses) {
+    return;
+  }
+
+  try {
+    const accessToken = await getInstallationAccessToken(args.installationId);
+
+    const numberOfApprovals = await getNumberOfApprovals({
+      pullRequest: event.pull_request,
+      accessToken: accessToken.token,
+    });
+
+    await updatePullRequest({
       pullRequestId: event.pull_request.id,
       repoId: event.repository.id,
+      approvalCount: numberOfApprovals,
+      reviewerStatuses,
     });
 
-    if (!pullRequestItem?.threadTs) {
-      // write error log
-      LOGGER.warn("Got a comment event but couldn't find the thread", {
-        action: event.action,
-        prId: event.pull_request.id,
-      });
-
-      return;
-    }
-
-    // Update the reviewer's DM to show they submitted their review
-    await updateReviewerDm({
-      event,
-      slackClient,
-      organizationId: args.organizationId,
-      pullRequestItem,
+    const pullRequestInfo = await getPullRequestInfo({
+      url: event.pull_request.url,
+      accessToken: accessToken.token,
     });
 
-    if (event.review.state === "approved") {
-      // Send DM to PR author
-      const authorSlackId = await getSlackUserId(event.pull_request.user.login, args);
-      if (authorSlackId) {
-        await slackClient.postDirectMessage({
-          slackUserId: authorSlackId,
-          message: {
-            text: `✅ ${await getSlackUserName(event.sender.login, args)} approved your PR`,
-            attachments: [
-              getDmAttachment(
-                {
-                  title: event.pull_request.title,
-                  number: event.pull_request.number,
-                  html_url: event.pull_request.html_url,
-                },
-                "green",
-              ),
-              ...(event.review.body
-                ? [
-                    {
-                      text: slackifyMarkdown(event.review.body),
-                      color: "green",
-                    },
-                  ]
-                : []),
-            ],
-          },
-        });
-      }
-
-      try {
-        const accessToken = await getInstallationAccessToken(args.installationId);
-
-        const numberOfApprovals = await getNumberOfApprovals({
-          pullRequest: event.pull_request,
-          accessToken: accessToken.token,
-        });
-
-        await updatePullRequest({
-          pullRequestId: event.pull_request.id,
-          repoId: event.repository.id,
+    await slackClient.updateMainMessage(
+      {
+        body: convertPullRequestInfoToBaseProps(pullRequestInfo),
+        threadTs: pullRequestItem.threadTs,
+        slackUsername: await getSlackUserName(event.pull_request.user.login, args),
+        pullRequestItem: {
+          ...pullRequestItem,
           approvalCount: numberOfApprovals,
-        });
-
-        // We have to fetch PR info because there's no enough in this payload to reconstruct
-        // the original message
-        const pullRequestInfo = await getPullRequestInfo({
-          url: event.pull_request.url,
-          accessToken: accessToken.token,
-        });
-
-        await slackClient.updateMainMessage(
-          {
-            body: convertPullRequestInfoToBaseProps(pullRequestInfo),
-            threadTs: pullRequestItem.threadTs,
-            slackUsername: await getSlackUserName(event.pull_request.user.login, args),
-            pullRequestItem: {
-              ...pullRequestItem,
-              // It's vital we pass this in so it updates the number of approvals
-              // on the main message
-              approvalCount: numberOfApprovals,
-            },
-            // Default to getting this from the PR item
-            requiredApprovals: null,
-          },
-          "pr-approved",
-        );
-      } catch (error) {
-        LOGGER.error("Error updating main PR message with number of approvals", {
-          error,
-        });
-      }
-    } else {
-      // Send DM to PR author
-      const authorSlackId = await getSlackUserId(event.pull_request.user.login, args);
-      if (authorSlackId) {
-        const reviewParams = getReviewParams(event.review);
-        if (reviewParams) {
-          await slackClient.postDirectMessage({
-            slackUserId: authorSlackId,
-            message: {
-              text: `${reviewParams.emoji} ${await getSlackUserName(event.sender.login, args)} ${reviewParams.text}`,
-              attachments: [
-                getDmAttachment(
-                  {
-                    title: event.pull_request.title,
-                    number: event.pull_request.number,
-                    html_url: event.pull_request.html_url,
-                  },
-                  reviewParams.color,
-                ),
-                ...(event.review.body
-                  ? [
-                      {
-                        text: slackifyMarkdown(event.review.body),
-                        color: reviewParams.color,
-                      },
-                    ]
-                  : []),
-              ],
-            },
-          });
-        }
-      }
-    }
+          reviewerStatuses,
+        },
+        requiredApprovals: null,
+      },
+      event.action === "dismissed" ? "pr-review-dismissed" : "pr-review-submitted",
+    );
+  } catch (error) {
+    LOGGER.error("Error updating main PR message after review change", {
+      error,
+    });
   }
 };
+
+async function handleSubmittedReview({
+  event,
+  slackClient,
+  organizationId,
+  pullRequestItem,
+}: {
+  event: Extract<PullRequestReviewEvent, { action: "submitted" }>;
+  slackClient: SlackClient;
+  organizationId: number;
+  pullRequestItem: PullRequestWithAlias;
+}) {
+  if (event.review.state === "dismissed") {
+    LOGGER.debug("Pull request review was submitted with dismissed state--skipping");
+    return null;
+  }
+
+  if (event.review.state === "commented" && event.review.body === null) {
+    // This means they left a comment on the PR, not an actual review comment
+    return null;
+  }
+
+  await updateReviewerDm({
+    event,
+    slackClient,
+    organizationId,
+    pullRequestItem,
+  });
+
+  await notifyPrAuthorOfSubmittedReview({
+    event,
+    slackClient,
+    organizationId,
+  });
+
+  return applySubmittedReviewToReviewerStatuses({
+    currentStatuses: pullRequestItem.reviewerStatuses ?? [],
+    reviewerLogin: event.review.user.login,
+    reviewState: event.review.state,
+  });
+}
+
+async function notifyPrAuthorOfSubmittedReview({
+  event,
+  slackClient,
+  organizationId,
+}: {
+  event: Extract<PullRequestReviewEvent, { action: "submitted" }>;
+  slackClient: SlackClient;
+  organizationId: number;
+}) {
+  const authorSlackId = await getSlackUserId(event.pull_request.user.login, {
+    organizationId,
+  });
+
+  if (!authorSlackId) {
+    return;
+  }
+
+  if (event.review.state === "approved") {
+    await slackClient.postDirectMessage({
+      slackUserId: authorSlackId,
+      message: {
+        text: `✅ ${await getSlackUserName(event.sender.login, { organizationId })} approved your PR`,
+        attachments: [
+          getDmAttachment(
+            {
+              title: event.pull_request.title,
+              number: event.pull_request.number,
+              html_url: event.pull_request.html_url,
+            },
+            "green",
+          ),
+          ...(event.review.body
+            ? [
+                {
+                  text: slackifyMarkdown(event.review.body),
+                  color: "green",
+                },
+              ]
+            : []),
+        ],
+      },
+    });
+    return;
+  }
+
+  const reviewParams = getReviewParams(event.review);
+  if (!reviewParams) {
+    return;
+  }
+
+  await slackClient.postDirectMessage({
+    slackUserId: authorSlackId,
+    message: {
+      text: `${reviewParams.emoji} ${await getSlackUserName(event.sender.login, { organizationId })} ${reviewParams.text}`,
+      attachments: [
+        getDmAttachment(
+          {
+            title: event.pull_request.title,
+            number: event.pull_request.number,
+            html_url: event.pull_request.html_url,
+          },
+          reviewParams.color,
+        ),
+        ...(event.review.body
+          ? [
+              {
+                text: slackifyMarkdown(event.review.body),
+                color: reviewParams.color,
+              },
+            ]
+          : []),
+      ],
+    },
+  });
+}
 
 const getReviewParams = (
   review: PullRequestReview,

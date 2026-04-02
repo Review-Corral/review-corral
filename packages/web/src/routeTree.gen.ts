@@ -115,14 +115,14 @@ const AppDashboardOrgOrgIdPaymentFailureRoute =
   } as any)
 
 export interface FileRoutesByFullPath {
+  '/': typeof LandingIndexRoute
   '/app': typeof AppDashboardRouteWithChildren
   '/logout': typeof LogoutRoute
   '/about': typeof LandingAboutRoute
   '/privacy': typeof LandingPrivacyRoute
   '/login/error': typeof LoginErrorRoute
   '/login/set-token': typeof LoginSetTokenRoute
-  '/': typeof LandingIndexRoute
-  '/login': typeof LoginIndexRoute
+  '/login/': typeof LoginIndexRoute
   '/app/': typeof AppDashboardIndexRoute
   '/app/org/$orgId': typeof AppDashboardOrgOrgIdRouteWithChildren
   '/app/slack/install/failure': typeof AppSlackInstallFailureRoute
@@ -169,14 +169,14 @@ export interface FileRoutesById {
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/app'
     | '/logout'
     | '/about'
     | '/privacy'
     | '/login/error'
     | '/login/set-token'
-    | '/'
-    | '/login'
+    | '/login/'
     | '/app/'
     | '/app/org/$orgId'
     | '/app/slack/install/failure'
@@ -248,14 +248,14 @@ declare module '@tanstack/react-router' {
     '/_landing': {
       id: '/_landing'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof LandingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login/': {
       id: '/login/'
       path: '/login'
-      fullPath: '/login'
+      fullPath: '/login/'
       preLoaderRoute: typeof LoginIndexRouteImport
       parentRoute: typeof rootRouteImport
     }

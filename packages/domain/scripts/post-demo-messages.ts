@@ -1,3 +1,4 @@
+#!/usr/bin/env bun
 /**
  * Script to post demo PR messages to Slack for screenshots.
  *
@@ -263,8 +264,8 @@ function createPrEvent(prData: {
 async function main() {
   console.log("Posting demo messages to Slack...\n");
 
-  // PR #340 by Jim - 2/2 approvals (queued to merge)
-  console.log("Posting PR #340 by Jim (2/2 approvals)...");
+  // PR #340 by Jim - queued to merge with a pending reviewer.
+  console.log("Posting PR #340 by Jim (queued, pending reviewer)...");
   const jim340 = await slackClient.postPrReady({
     body: createPrEvent({
       id: 123,
@@ -287,7 +288,15 @@ async function main() {
       approvalCount: 2,
       requiredApprovals: 2,
       isQueuedToMerge: true,
-      requestedReviewers: [],
+      requestedReviewers: ["dwight"],
+      reviewerStatuses: [
+        {
+          login: "dwight",
+          lastReviewState: "pending",
+          isCurrentlyRequested: true,
+          isReRequested: false,
+        },
+      ],
       additions: 432,
       deletions: 12,
       authorLogin: "jim",
@@ -304,8 +313,8 @@ async function main() {
   });
   console.log(`  Posted! threadTs: ${jim340?.ts}\n`);
 
-  // PR #341 by Michael (WIP) - 1/2 approvals
-  console.log("Posting PR #341 by Michael (WIP, 1/2 approvals)...");
+  // PR #341 by Michael - draft with a re-requested reviewer.
+  console.log("Posting PR #341 by Michael (draft, re-requested reviewer)...");
   const michael341 = await slackClient.postPrReady({
     body: createPrEvent({
       id: 456,
@@ -328,7 +337,15 @@ async function main() {
       approvalCount: 1,
       requiredApprovals: 2,
       isQueuedToMerge: false,
-      requestedReviewers: [],
+      requestedReviewers: ["jim"],
+      reviewerStatuses: [
+        {
+          login: "jim",
+          lastReviewState: "commented",
+          isCurrentlyRequested: true,
+          isReRequested: true,
+        },
+      ],
       additions: 200,
       deletions: 50,
       authorLogin: "michael",
@@ -345,8 +362,8 @@ async function main() {
   });
   console.log(`  Posted! threadTs: ${michael341?.ts}\n`);
 
-  // PR #342 by Dwight - 0/2 approvals
-  console.log("Posting PR #342 by Dwight (0/2 approvals)...");
+  // PR #342 by Dwight - open with mixed reviewer outcomes.
+  console.log("Posting PR #342 by Dwight (reviewer status mix)...");
   const dwight342 = await slackClient.postPrReady({
     body: createPrEvent({
       id: 789,
@@ -369,7 +386,27 @@ async function main() {
       approvalCount: 0,
       requiredApprovals: 2,
       isQueuedToMerge: false,
-      requestedReviewers: [],
+      requestedReviewers: ["jim", "michael", "dwight"],
+      reviewerStatuses: [
+        {
+          login: "jim",
+          lastReviewState: "approved",
+          isCurrentlyRequested: false,
+          isReRequested: false,
+        },
+        {
+          login: "michael",
+          lastReviewState: "commented",
+          isCurrentlyRequested: false,
+          isReRequested: false,
+        },
+        {
+          login: "dwight",
+          lastReviewState: "changes_requested",
+          isCurrentlyRequested: false,
+          isReRequested: false,
+        },
+      ],
       additions: 100,
       deletions: 25,
       authorLogin: "dwight",

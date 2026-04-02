@@ -1,4 +1,9 @@
-import { type PullRequest } from "@domain/postgres/schema";
+import { getReviewerStatusesForDisplay } from "@domain/github/webhooks/handlers/reviewerStatuses";
+import {
+  type PullRequest,
+  type PullRequestReviewerStatus,
+  ReviewerStatusState,
+} from "@domain/postgres/schema";
 import { MessageAttachment, SectionBlock } from "@slack/web-api";
 import { ContextBlock, ImageElement } from "@slack/web-api";
 import slackifyMarkdown from "slackify-markdown";
@@ -64,7 +69,10 @@ export const buidMainMessageAttachements = ({
   const base = [
     getPrOpenedBaseAttachment(body, slackUsername),
     ...buildRequiredApprovalsAttachment({ pullRequestItem, requiredApprovals }),
-    ...buildRequestedReviewersAttachment(pullRequestItem?.requestedReviewers ?? []),
+    ...buildRequestedReviewersAttachment({
+      reviewerStatuses: pullRequestItem?.reviewerStatuses ?? [],
+      reviewerLogins: pullRequestItem?.requestedReviewers ?? [],
+    }),
   ];
 
   if (body.pull_request.draft) {
@@ -170,6 +178,40 @@ export function getPrReopenedAttachment(
   };
 }
 
+const buildRequestedReviewersAttachment = ({
+  reviewerStatuses,
+  reviewerLogins,
+}: {
+  reviewerStatuses: PullRequestReviewerStatus[];
+  reviewerLogins: string[];
+}): MessageAttachment[] => {
+  const statuses = getReviewerStatusesForDisplay({
+    reviewerStatuses,
+    requestedReviewerLogins: reviewerLogins,
+  });
+
+  if (statuses.length === 0) {
+    return [];
+  }
+
+  return [
+    {
+      color: "#0366d6",
+      blocks: [
+        {
+          type: "section",
+          text: {
+            type: "mrkdwn",
+            text: `:eyes: Requested reviewers:\n${statuses
+              .map((status) => `• ${formatReviewerStatusLine(status)}`)
+              .join("\n")}`,
+          },
+        },
+      ],
+    },
+  ];
+};
+
 const buildRequiredApprovalsAttachment = ({
   pullRequestItem,
   requiredApprovals,
@@ -184,7 +226,9 @@ const buildRequiredApprovalsAttachment = ({
         approvalCount: pullRequestItem.approvalCount ?? 0,
       }),
     ];
-  } else if (requiredApprovals) {
+  }
+
+  if (requiredApprovals) {
     return [
       getRequiredApprovalsAttatchment({
         requiredApprovals: requiredApprovals.count,
@@ -196,28 +240,57 @@ const buildRequiredApprovalsAttachment = ({
   return [];
 };
 
-const buildRequestedReviewersAttachment = (
-  reviewerLogins: string[],
-): MessageAttachment[] => {
-  if (reviewerLogins.length === 0) {
-    return [];
+function formatReviewerStatusLine(status: PullRequestReviewerStatus): string {
+  const { statusEmoji, shouldShowPending, shouldShowRepeat } =
+    getReviewerStatusDisplayParts(status);
+
+  return `${statusEmoji}${shouldShowRepeat ? " :repeat:" : ""} ${
+    shouldShowPending ? "[pending] " : ""
+  }${status.login}`;
+}
+
+function getReviewerStatusDisplayParts(status: PullRequestReviewerStatus): {
+  statusEmoji: string;
+  shouldShowPending: boolean;
+  shouldShowRepeat: boolean;
+} {
+  if (status.lastReviewState === ReviewerStatusState.PENDING) {
+    return {
+      statusEmoji: ":hourglass_flowing_sand:",
+      shouldShowPending: true,
+      shouldShowRepeat: false,
+    };
   }
 
-  return [
-    {
-      color: "#0366d6",
-      blocks: [
-        {
-          type: "section",
-          text: {
-            type: "mrkdwn",
-            text: `:eyes: Requested reviewers: ${reviewerLogins.join(", ")}`,
-          },
-        },
-      ],
-    },
-  ];
-};
+  if (status.isReRequested) {
+    return {
+      statusEmoji: getStatusEmoji(status.lastReviewState),
+      shouldShowPending: true,
+      shouldShowRepeat: true,
+    };
+  }
+
+  return {
+    statusEmoji: getStatusEmoji(status.lastReviewState),
+    shouldShowPending: false,
+    shouldShowRepeat: false,
+  };
+}
+
+function getStatusEmoji(
+  reviewState: PullRequestReviewerStatus["lastReviewState"],
+): string {
+  switch (reviewState) {
+    case ReviewerStatusState.APPROVED:
+      return ":white_check_mark:";
+    case ReviewerStatusState.CHANGES_REQUESTED:
+      return ":warning:";
+    case ReviewerStatusState.COMMENTED:
+      return ":speech_balloon:";
+    case ReviewerStatusState.PENDING:
+      return ":hourglass_flowing_sand:";
+  }
+}
 
 const getRequiredApprovalsAttatchment = ({
   requiredApprovals,

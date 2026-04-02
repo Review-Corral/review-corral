@@ -17,6 +17,10 @@ import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClie
 import { getInstallationAccessToken } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
 import {
+  markReviewerRequested,
+  syncReviewerStatusesWithRequestedReviewers,
+} from "./reviewerStatuses";
+import {
   getDmAttachment,
   getReviewRequestDmAttachment,
   getSlackUserId,
@@ -164,6 +168,9 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
           return;
         }
       case "review_requested": {
+        const requestedReviewerLogin =
+          "requested_reviewer" in payload ? payload.requested_reviewer.login : null;
+
         if ("requested_reviewer" in payload) {
           const reviewerSlackId = await getSlackUserId(
             payload.requested_reviewer.login,
@@ -206,10 +213,20 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
         const reviewerLogins = extractReviewerLogins(
           payload.pull_request.requested_reviewers,
         );
+        const reviewerStatuses = syncReviewerStatusesWithRequestedReviewers({
+          currentStatuses: requestedReviewerLogin
+            ? markReviewerRequested({
+                currentStatuses: pullRequestItem.reviewerStatuses ?? [],
+                reviewerLogin: requestedReviewerLogin,
+              })
+            : (pullRequestItem.reviewerStatuses ?? []),
+          requestedReviewerLogins: reviewerLogins,
+        });
         const updatedPrItem = await updatePullRequest({
           pullRequestId: pullRequestItem.id,
           repoId: pullRequestItem.repoId,
           requestedReviewers: reviewerLogins,
+          reviewerStatuses,
         });
 
         if (updatedPrItem?.threadTs) {
@@ -259,10 +276,15 @@ export const handlePullRequestEvent: GithubWebhookEventHander<
         const removedReviewerLogins = extractReviewerLogins(
           payload.pull_request.requested_reviewers,
         );
+        const reviewerStatuses = syncReviewerStatusesWithRequestedReviewers({
+          currentStatuses: pullRequestItem.reviewerStatuses ?? [],
+          requestedReviewerLogins: removedReviewerLogins,
+        });
         const updatedPrItemAfterRemoval = await updatePullRequest({
           pullRequestId: pullRequestItem.id,
           repoId: pullRequestItem.repoId,
           requestedReviewers: removedReviewerLogins,
+          reviewerStatuses,
         });
 
         if (updatedPrItemAfterRemoval?.threadTs) {
@@ -464,6 +486,10 @@ const handleNewPr = async (
     const reviewerLogins = extractReviewerLogins(
       payload.pull_request.requested_reviewers,
     );
+    const reviewerStatuses = syncReviewerStatusesWithRequestedReviewers({
+      currentStatuses: [],
+      requestedReviewerLogins: reviewerLogins,
+    });
     await insertPullRequest({
       id: payload.pull_request.id,
       repoId: payload.repository.id,
@@ -471,6 +497,7 @@ const handleNewPr = async (
       isDraft: true,
       threadTs: null,
       requestedReviewers: reviewerLogins,
+      reviewerStatuses,
       additions: payload.pull_request.additions,
       deletions: payload.pull_request.deletions,
       authorLogin: payload.pull_request.user.login,
@@ -669,6 +696,10 @@ const handleNewPr = async (
           const reviewerLogins = extractReviewerLogins(
             body.pull_request.requested_reviewers,
           );
+          const reviewerStatuses = syncReviewerStatusesWithRequestedReviewers({
+            currentStatuses: existingPullRequest.reviewerStatuses ?? [],
+            requestedReviewerLogins: reviewerLogins,
+          });
           await updatePullRequest({
             pullRequestId: existingPullRequest.id,
             repoId: body.repository.id,
@@ -677,6 +708,7 @@ const handleNewPr = async (
               requiredApprovals?.count ?? existingPullRequest.requiredApprovals,
             threadTs: response.ts,
             requestedReviewers: reviewerLogins,
+            reviewerStatuses,
             additions: body.pull_request.additions,
             deletions: body.pull_request.deletions,
             authorLogin: body.pull_request.user.login,
@@ -689,6 +721,10 @@ const handleNewPr = async (
           const reviewerLogins = extractReviewerLogins(
             body.pull_request.requested_reviewers,
           );
+          const reviewerStatuses = syncReviewerStatusesWithRequestedReviewers({
+            currentStatuses: [],
+            requestedReviewerLogins: reviewerLogins,
+          });
           await insertPullRequest({
             id: body.pull_request.id,
             repoId: body.repository.id,
@@ -696,6 +732,7 @@ const handleNewPr = async (
             requiredApprovals: requiredApprovals?.count ?? 0,
             threadTs: response.ts,
             requestedReviewers: reviewerLogins,
+            reviewerStatuses,
             additions: body.pull_request.additions,
             deletions: body.pull_request.deletions,
             authorLogin: body.pull_request.user.login,
