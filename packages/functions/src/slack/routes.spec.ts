@@ -94,6 +94,7 @@ describe("slack /events", () => {
       eventId: "Ev1",
       event: expect.objectContaining({
         type: "reaction_added",
+        team_id: "T1",
       }),
     });
   });

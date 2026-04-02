@@ -6,15 +6,21 @@ import {
   deletePullRequestReviewCommentReaction,
 } from "@domain/github/fetchers";
 import { Logger } from "@domain/logging";
-import { getOrgMemberBySlackId, getOrgMemberByUsername } from "@domain/postgres/fetchers/members";
+import {
+  getOrgMemberBySlackId,
+  getOrgMemberByUsername,
+} from "@domain/postgres/fetchers/members";
 import { findSlackCommentDmMapping } from "@domain/postgres/fetchers/slack-comment-dm-mappings";
-import { markSlackEventProcessed } from "@domain/postgres/fetchers/slack-processed-events";
+import { getSlackInstallationsForOrganization } from "@domain/postgres/fetchers/slack-integrations";
+import {
+  hasSlackEventBeenProcessed,
+  markSlackEventProcessed,
+} from "@domain/postgres/fetchers/slack-processed-events";
 import {
   deleteSlackReactionMirror,
   findSlackReactionMirror,
   upsertSlackReactionMirror,
 } from "@domain/postgres/fetchers/slack-reaction-mirrors";
-import { getSlackInstallationsForOrganization } from "@domain/postgres/fetchers/slack-integrations";
 import { SlackClient } from "../SlackClient";
 import { getDmAttachment } from "../dmAttachments";
 
@@ -60,6 +66,7 @@ const githubReactionToEmoji: Record<GithubReactionContent, string> = {
 
 type SlackReactionEvent = {
   type: "reaction_added" | "reaction_removed";
+  team_id: string;
   user: string;
   reaction: string;
   item_user?: string;
@@ -77,16 +84,35 @@ export async function handleSlackReactionEvent({
   eventId: string;
   event: SlackReactionEvent;
 }): Promise<void> {
+  const wasProcessed = await hasSlackEventBeenProcessed(eventId);
+
+  if (wasProcessed) {
+    LOGGER.debug("Skipping duplicate Slack event", { eventId, eventType: event.type });
+    return;
+  }
+
+  await syncSlackReactionEvent({ eventId, event });
+
   const wasFirstProcess = await markSlackEventProcessed({
     slackEventId: eventId,
     eventType: event.type,
   });
 
   if (!wasFirstProcess) {
-    LOGGER.debug("Skipping duplicate Slack event", { eventId, eventType: event.type });
-    return;
+    LOGGER.warn("Slack event was processed concurrently", {
+      eventId,
+      eventType: event.type,
+    });
   }
+}
 
+async function syncSlackReactionEvent({
+  eventId,
+  event,
+}: {
+  eventId: string;
+  event: SlackReactionEvent;
+}): Promise<void> {
   if (event.item.type !== "message") {
     LOGGER.debug("Ignoring non-message reaction item", { eventId });
     return;
@@ -107,6 +133,7 @@ export async function handleSlackReactionEvent({
   }
 
   const mapping = await findSlackCommentDmMapping({
+    slackTeamId: event.team_id,
     slackChannelId: event.item.channel,
     slackMessageTs: event.item.ts,
   });
@@ -152,6 +179,18 @@ export async function handleSlackReactionEvent({
             accessToken: reactorMember.ghAccessToken,
           });
 
+    if (!reactionResponse.wasCreated) {
+      LOGGER.info("gh_sync_existing_reaction", {
+        eventId,
+        reaction: githubReaction,
+        targetType: mapping.targetType,
+        owner: mapping.owner,
+        repo: mapping.repo,
+        githubCommentId: mapping.githubCommentId,
+      });
+      return;
+    }
+
     await upsertSlackReactionMirror({
       slackChannelId: event.item.channel,
       slackMessageTs: event.item.ts,
@@ -161,7 +200,7 @@ export async function handleSlackReactionEvent({
       owner: mapping.owner,
       repo: mapping.repo,
       githubCommentId: String(mapping.githubCommentId),
-      githubReactionId: String(reactionResponse.id),
+      githubReactionId: String(reactionResponse.reaction.id),
     });
 
     const commentAuthor = await getOrgMemberByUsername({
@@ -179,11 +218,14 @@ export async function handleSlackReactionEvent({
     );
 
     if (!slackIntegration?.accessToken || !slackIntegration.channelId) {
-      LOGGER.warn("Unable to send reaction author DM due to missing integration fields", {
-        eventId,
-        orgId: mapping.orgId,
-        slackTeamId: mapping.slackTeamId,
-      });
+      LOGGER.warn(
+        "Unable to send reaction author DM due to missing integration fields",
+        {
+          eventId,
+          orgId: mapping.orgId,
+          slackTeamId: mapping.slackTeamId,
+        },
+      );
       return;
     }
 

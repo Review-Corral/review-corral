@@ -5,8 +5,8 @@ import {
   BranchProtectionResponse,
   InstallationAccessTokenResponse,
   InstallationRespositoriesResponse,
-  IssueCommentReactionResponse,
   InstallationsData,
+  IssueCommentReactionResponse,
   OrgMembers,
   PullRequestInfoResponse,
   PullRequestReviewCommentReactionResponse,
@@ -24,6 +24,11 @@ const defaultHeaders = {
 // Temporary type for user with ghAccessToken - will be replaced with Postgres User once migration is complete
 type UserWithAccessToken = {
   ghAccessToken?: string | null;
+};
+
+type CreateReactionResult<TReaction> = {
+  reaction: TReaction;
+  wasCreated: boolean;
 };
 
 export const getUserInstallations = async (
@@ -223,26 +228,24 @@ export const createIssueCommentReaction = async ({
   owner: string;
   repo: string;
   commentId: string;
-  content:
-    | "+1"
-    | "-1"
-    | "laugh"
-    | "confused"
-    | "heart"
-    | "hooray"
-    | "rocket"
-    | "eyes";
+  content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
   accessToken: string;
-}): Promise<IssueCommentReactionResponse> => {
-  return await ky
-    .post(`https://api.github.com/repos/${owner}/${repo}/issues/comments/${commentId}/reactions`, {
+}): Promise<CreateReactionResult<IssueCommentReactionResponse>> => {
+  const response = await ky.post(
+    `https://api.github.com/repos/${owner}/${repo}/issues/comments/${commentId}/reactions`,
+    {
       headers: {
         ...defaultHeaders,
         Authorization: `token ${accessToken}`,
       },
       json: { content },
-    })
-    .json<IssueCommentReactionResponse>();
+    },
+  );
+
+  return {
+    reaction: await response.json<IssueCommentReactionResponse>(),
+    wasCreated: response.status === 201,
+  };
 };
 
 export const deleteIssueCommentReaction = async ({
@@ -279,26 +282,24 @@ export const createPullRequestReviewCommentReaction = async ({
   owner: string;
   repo: string;
   commentId: string;
-  content:
-    | "+1"
-    | "-1"
-    | "laugh"
-    | "confused"
-    | "heart"
-    | "hooray"
-    | "rocket"
-    | "eyes";
+  content: "+1" | "-1" | "laugh" | "confused" | "heart" | "hooray" | "rocket" | "eyes";
   accessToken: string;
-}): Promise<PullRequestReviewCommentReactionResponse> => {
-  return await ky
-    .post(`https://api.github.com/repos/${owner}/${repo}/pulls/comments/${commentId}/reactions`, {
+}): Promise<CreateReactionResult<PullRequestReviewCommentReactionResponse>> => {
+  const response = await ky.post(
+    `https://api.github.com/repos/${owner}/${repo}/pulls/comments/${commentId}/reactions`,
+    {
       headers: {
         ...defaultHeaders,
         Authorization: `token ${accessToken}`,
       },
       json: { content },
-    })
-    .json<PullRequestReviewCommentReactionResponse>();
+    },
+  );
+
+  return {
+    reaction: await response.json<PullRequestReviewCommentReactionResponse>(),
+    wasCreated: response.status === 201,
+  };
 };
 
 export const deletePullRequestReviewCommentReaction = async ({

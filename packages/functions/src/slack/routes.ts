@@ -256,7 +256,10 @@ app.post("/events", async (c) => {
   try {
     await handleSlackReactionEvent({
       eventId: callbackEvent.data.event_id,
-      event: callbackEvent.data.event,
+      event: {
+        ...callbackEvent.data.event,
+        team_id: callbackEvent.data.team_id,
+      },
     });
   } catch (error) {
     LOGGER.error("Error handling Slack reaction event", {

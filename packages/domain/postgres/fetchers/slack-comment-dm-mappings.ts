@@ -19,9 +19,11 @@ export async function insertSlackCommentDmMapping(
 }
 
 export async function findSlackCommentDmMapping({
+  slackTeamId,
   slackChannelId,
   slackMessageTs,
 }: {
+  slackTeamId: string;
   slackChannelId: string;
   slackMessageTs: string;
 }): Promise<SlackCommentDmMapping | null> {
@@ -30,6 +32,7 @@ export async function findSlackCommentDmMapping({
     .from(slackCommentDmMappings)
     .where(
       and(
+        eq(slackCommentDmMappings.slackTeamId, slackTeamId),
         eq(slackCommentDmMappings.slackChannelId, slackChannelId),
         eq(slackCommentDmMappings.slackMessageTs, slackMessageTs),
       ),

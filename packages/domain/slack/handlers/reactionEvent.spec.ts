@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 vi.mock("@domain/postgres/fetchers/slack-processed-events", () => ({
+  hasSlackEventBeenProcessed: vi.fn(),
   markSlackEventProcessed: vi.fn(),
 }));
 vi.mock("@domain/postgres/fetchers/slack-comment-dm-mappings", () => ({
@@ -36,10 +37,16 @@ import {
   createIssueCommentReaction,
   deleteIssueCommentReaction,
 } from "@domain/github/fetchers";
-import { getOrgMemberBySlackId, getOrgMemberByUsername } from "@domain/postgres/fetchers/members";
+import {
+  getOrgMemberBySlackId,
+  getOrgMemberByUsername,
+} from "@domain/postgres/fetchers/members";
 import { findSlackCommentDmMapping } from "@domain/postgres/fetchers/slack-comment-dm-mappings";
-import { markSlackEventProcessed } from "@domain/postgres/fetchers/slack-processed-events";
 import { getSlackInstallationsForOrganization } from "@domain/postgres/fetchers/slack-integrations";
+import {
+  hasSlackEventBeenProcessed,
+  markSlackEventProcessed,
+} from "@domain/postgres/fetchers/slack-processed-events";
 import {
   deleteSlackReactionMirror,
   findSlackReactionMirror,
@@ -50,6 +57,7 @@ import { handleSlackReactionEvent } from "./reactionEvent";
 describe("handleSlackReactionEvent", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    vi.mocked(hasSlackEventBeenProcessed).mockResolvedValue(false);
     vi.mocked(markSlackEventProcessed).mockResolvedValue(true);
   });
 
@@ -70,7 +78,10 @@ describe("handleSlackReactionEvent", () => {
     vi.mocked(getOrgMemberBySlackId).mockResolvedValue({
       ghAccessToken: "gh-token",
     } as any);
-    vi.mocked(createIssueCommentReaction).mockResolvedValue({ id: 555 } as any);
+    vi.mocked(createIssueCommentReaction).mockResolvedValue({
+      reaction: { id: 555 },
+      wasCreated: true,
+    } as any);
     vi.mocked(getOrgMemberByUsername).mockResolvedValue({
       slackId: "U_AUTHOR",
     } as any);
@@ -82,6 +93,7 @@ describe("handleSlackReactionEvent", () => {
       eventId: "Ev1",
       event: {
         type: "reaction_added",
+        team_id: "T1",
         user: "U_REACTOR",
         reaction: "thumbsup",
         item: {
@@ -93,11 +105,19 @@ describe("handleSlackReactionEvent", () => {
     });
 
     expect(createIssueCommentReaction).toHaveBeenCalled();
+    expect(findSlackCommentDmMapping).toHaveBeenCalledWith({
+      slackTeamId: "T1",
+      slackChannelId: "D123",
+      slackMessageTs: "111.222",
+    });
     expect(upsertSlackReactionMirror).toHaveBeenCalled();
     expect(postDirectMessage).toHaveBeenCalledWith(
       expect.objectContaining({
         slackUserId: "U_AUTHOR",
       }),
+    );
+    expect(createIssueCommentReaction.mock.invocationCallOrder[0]).toBeLessThan(
+      markSlackEventProcessed.mock.invocationCallOrder[0],
     );
   });
 
@@ -113,6 +133,7 @@ describe("handleSlackReactionEvent", () => {
       eventId: "Ev2",
       event: {
         type: "reaction_added",
+        team_id: "T1",
         user: "U_REACTOR",
         reaction: "thumbsup",
         item: {
@@ -124,6 +145,83 @@ describe("handleSlackReactionEvent", () => {
     });
 
     expect(createIssueCommentReaction).not.toHaveBeenCalled();
+    expect(postDirectMessage).not.toHaveBeenCalled();
+  });
+
+  it("does not mark the event processed if syncing the reaction fails", async () => {
+    vi.mocked(findSlackCommentDmMapping).mockResolvedValue({
+      orgId: 1,
+      slackTeamId: "T1",
+      targetType: "issue_comment",
+      owner: "acme",
+      repo: "repo",
+      githubCommentId: 123,
+    } as any);
+    vi.mocked(getOrgMemberBySlackId).mockResolvedValue({
+      ghAccessToken: "gh-token",
+    } as any);
+    vi.mocked(createIssueCommentReaction).mockRejectedValue(
+      new Error("github failure"),
+    );
+
+    await expect(
+      handleSlackReactionEvent({
+        eventId: "Ev2b",
+        event: {
+          type: "reaction_added",
+          team_id: "T1",
+          user: "U_REACTOR",
+          reaction: "thumbsup",
+          item: {
+            type: "message",
+            channel: "D123",
+            ts: "111.334",
+          },
+        },
+      }),
+    ).rejects.toThrow("github failure");
+
+    expect(markSlackEventProcessed).not.toHaveBeenCalled();
+  });
+
+  it("does not mirror or DM when GitHub returns an existing reaction", async () => {
+    vi.mocked(findSlackCommentDmMapping).mockResolvedValue({
+      orgId: 1,
+      slackTeamId: "T1",
+      targetType: "issue_comment",
+      owner: "acme",
+      repo: "repo",
+      githubCommentId: 123,
+      commentAuthorGithubUsername: "author",
+      prTitle: "A PR",
+      prNumber: 12,
+      commentUrl: "https://github.com/acme/repo/pull/12#issuecomment-1",
+      commentBody: "Looks good",
+    } as any);
+    vi.mocked(getOrgMemberBySlackId).mockResolvedValue({
+      ghAccessToken: "gh-token",
+    } as any);
+    vi.mocked(createIssueCommentReaction).mockResolvedValue({
+      reaction: { id: 555 },
+      wasCreated: false,
+    } as any);
+
+    await handleSlackReactionEvent({
+      eventId: "Ev2c",
+      event: {
+        type: "reaction_added",
+        team_id: "T1",
+        user: "U_REACTOR",
+        reaction: "thumbsup",
+        item: {
+          type: "message",
+          channel: "D123",
+          ts: "111.335",
+        },
+      },
+    });
+
+    expect(upsertSlackReactionMirror).not.toHaveBeenCalled();
     expect(postDirectMessage).not.toHaveBeenCalled();
   });
 
@@ -148,6 +246,7 @@ describe("handleSlackReactionEvent", () => {
       eventId: "Ev3",
       event: {
         type: "reaction_removed",
+        team_id: "T1",
         user: "U_REACTOR",
         reaction: "thumbsup",
         item: {
@@ -163,12 +262,13 @@ describe("handleSlackReactionEvent", () => {
   });
 
   it("ignores duplicate event IDs", async () => {
-    vi.mocked(markSlackEventProcessed).mockResolvedValue(false);
+    vi.mocked(hasSlackEventBeenProcessed).mockResolvedValue(true);
 
     await handleSlackReactionEvent({
       eventId: "Ev4",
       event: {
         type: "reaction_added",
+        team_id: "T1",
         user: "U_REACTOR",
         reaction: "thumbsup",
         item: {
@@ -180,5 +280,6 @@ describe("handleSlackReactionEvent", () => {
     });
 
     expect(findSlackCommentDmMapping).not.toHaveBeenCalled();
+    expect(markSlackEventProcessed).not.toHaveBeenCalled();
   });
 });
