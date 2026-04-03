@@ -25,8 +25,8 @@ function createDefaultOutput(): LogOutput {
     if (initOTel()) {
       return new CompositeOutput([console, new OTelOutput()]);
     }
-  } catch {
-    // Fall back to console-only
+  } catch (error) {
+    console.error("Failed to create OpenTelemetry log output, falling back to console logging", error);
   }
   return console;
 }
@@ -150,3 +150,5 @@ export class Logger implements LoggerMethods {
     return LOG_LEVEL_SEVERITY[level] >= LOG_LEVEL_SEVERITY[Logger.level];
   }
 }
+
+export { flushOTel } from "./otel-setup";

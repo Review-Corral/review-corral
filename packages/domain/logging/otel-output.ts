@@ -38,8 +38,8 @@ export class OTelOutput implements LogOutput {
         body: text,
         attributes: flattenAttributes(data),
       });
-    } catch {
-      // Silently swallow to avoid breaking application logging
+    } catch (error) {
+      console.error("Failed to emit OpenTelemetry log record", error);
     }
   }
 }
