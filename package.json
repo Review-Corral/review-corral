@@ -28,6 +28,7 @@
     "@biomejs/biome": "^1.9.4",
     "@octokit/webhooks-types": "^7.6.1",
     "@tsconfig/node18": "^18.2.6",
+    "@types/node": "20.19.0",
     "@types/aws-lambda": "8.10.147",
     "aws-cdk-lib": "2.184.0",
     "constructs": "10.4.2",

@@ -4,6 +4,7 @@
   "compilerOptions": {
     "baseUrl": ".",
     "experimentalDecorators": true,
+    "types": ["node"],
     "preserveSymlinks": false,
     "module": "ESNext",
     "moduleResolution": "Bundler"
