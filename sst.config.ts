@@ -68,6 +68,7 @@ export default $config({
           LOG_LEVEL: process.env.LOG_LEVEL ?? "INFO",
           NODE_OPTIONS: "--import @sentry/aws-serverless/awslambda-auto",
           SENTRY_DSN: sentryDsn.value,
+          SENTRY_ENVIRONMENT: $app.stage,
           // Set by GitHub Actions: release tag for prod, commit SHA for dev
           ...(process.env.SENTRY_RELEASE && {
             SENTRY_RELEASE: process.env.SENTRY_RELEASE,
