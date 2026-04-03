@@ -1,5 +1,5 @@
 import path from "node:path";
-import { Logger } from "@domain/logging";
+import { flushOTel, Logger } from "@domain/logging";
 import config from "@domain/utils/config";
 import { format } from "date-fns";
 import { Context, MiddlewareHandler } from "hono";
@@ -52,20 +52,25 @@ export const loggerMiddleware: MiddlewareHandler = async (c, next) => {
 
   try {
     await next();
+
+    LOGGER.info("end request", {
+      requestId,
+      status: c.res.status,
+    });
   } catch (error) {
     // Log error but let it propagate for Hono's error handler to handle
     const statusCode = (error as HTTPException).status || 500;
     const loggerMethod = statusCode >= 500 ? "error" : "info";
     LOGGER[loggerMethod]("Error in API request", error);
     throw error; // Re-throw to let Hono handle it
-  }
-
-  LOGGER.info("end request", {
-    requestId,
-    status: c.res.status,
-  });
-  if (config.isLocal) {
-    Logger.configureOutput();
+  } finally {
+    try {
+      await flushOTel();
+    } finally {
+      if (config.isLocal) {
+        Logger.configureOutput();
+      }
+    }
   }
 };
 
