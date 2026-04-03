@@ -4,6 +4,20 @@ import { LambdaEvent, isApiGatewayProxyEvent } from "./types";
 
 const UNKNOWN_RESULT_TEXT = "UNKOWN";
 
+const parseFriendlyNameFromLambdaName = (
+  name: string | undefined,
+): string | undefined => {
+  if (!name) return undefined;
+
+  const regexMatch = name.match(/(\w+)-\w+-\w+-\w+-(\w+?)[A-Z0-9]*-\w+/);
+  if (regexMatch?.[2]) {
+    return regexMatch[2];
+  }
+
+  const parts = name.split("-").filter(Boolean);
+  return parts.length >= 2 ? parts.at(-2) : name;
+};
+
 const authClaimsSchema = z.object({
   sub: z.string(),
   email: z.string(),
@@ -59,16 +73,9 @@ export const getReleaseVersion = (): string => {
 export const getFriendlyNameAndEnvironment = (
   name: string | undefined = process.env.AWS_LAMBDA_FUNCTION_NAME,
 ) => {
-  const matches = (name ?? "").match(/(\w+)-\w+-\w+-\w+-(\w+?)[A-Z0-9]*-\w+/);
-  const matchResults =
-    matches && matches.length === 3
-      ? { environment: matches[1], friendlyName: matches[2] }
-      : {};
-
-  const environment =
-    process.env.SENTRY_ENVIRONMENT ?? matchResults.environment ?? "UNKNOWN";
+  const environment = process.env.SENTRY_ENVIRONMENT ?? "UNKNOWN";
   const friendlyName =
-    process.env.FRIENDLY_NAME ?? matchResults.friendlyName ?? "UNKNOWN";
+    process.env.FRIENDLY_NAME ?? parseFriendlyNameFromLambdaName(name) ?? "UNKNOWN";
 
   if (environment === "UNKNOWN" || friendlyName === "UNKNOWN") {
     // Cannot use Logger here because it'll create a cyclical dependency
