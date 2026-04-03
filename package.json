@@ -19,7 +19,7 @@
     "test:e2e": "vitest run .e2e.ts",
     "test:watch": "vitest watch .spec.ts",
     "test:claude": "CI=true vitest run .spec.ts --reporter=default --no-color",
-    "typecheck": "tsc -p ./tsconfig.json -noEmit && pnpm run -r typecheck",
+    "typecheck": "tsgo -p ./tsconfig.json --noEmit && pnpm run -r typecheck",
     "db:generate": "sst shell -- drizzle-kit generate --config=packages/domain/drizzle.config.ts",
     "db:migrate": "sst shell -- drizzle-kit migrate --config=packages/domain/drizzle.config.ts",
     "dev:db:migrate": "sst shell --stage dev -- drizzle-kit migrate --config=packages/domain/drizzle.config.ts"
@@ -27,6 +27,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@octokit/webhooks-types": "^7.6.1",
+    "@typescript/native-preview": "7.0.0-dev.20260401.1",
     "@tsconfig/node18": "^18.2.6",
     "@types/node": "20.19.0",
     "@types/aws-lambda": "8.10.147",

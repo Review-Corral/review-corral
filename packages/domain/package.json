@@ -4,7 +4,7 @@
   "type": "module",
   "scripts": {
     "test": "sst bind vitest",
-    "typecheck": "tsc -noEmit"
+    "typecheck": "tsgo --noEmit"
   },
   "devDependencies": {
     "@middy/core": "^6.4.5",
