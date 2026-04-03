@@ -1,4 +1,6 @@
 import { Button } from "@components/shadcn/button";
+import { SlackDmMock } from "@/components/landing/SlackDmMock";
+import { SlackMock } from "@/components/landing/SlackMock";
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 
@@ -51,13 +53,9 @@ function LandingPage() {
             </div>
           </div>
 
-          {/* Right: Screenshot */}
+          {/* Right: Slack Mock */}
           <div className="md:w-1/2 flex justify-center">
-            <img
-              src="/rc-main-example.png"
-              alt="Review Corral threaded notifications example"
-              className="rounded-lg shadow-lg max-w-full h-auto"
-            />
+            <SlackDmMock />
           </div>
         </div>
 
