@@ -20,10 +20,10 @@ const DEFAULT_LOG_OUTPUT_OPTIONS: LogOutputOptions = {
 
 function createDefaultOutput(): LogOutput {
   const colorize = !!process.env.COLORIZE_LOGS;
-  const console = new ConsoleOutput(colorize);
+  const consoleOutput = new ConsoleOutput(colorize);
   try {
     if (initOTel()) {
-      return new CompositeOutput([console, new OTelOutput()]);
+      return new CompositeOutput([consoleOutput, new OTelOutput()]);
     }
   } catch (error) {
     console.error(
@@ -31,7 +31,7 @@ function createDefaultOutput(): LogOutput {
       error,
     );
   }
-  return console;
+  return consoleOutput;
 }
 
 export class Logger implements LoggerMethods {
