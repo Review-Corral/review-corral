@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "build": "sst build",
     "build:core": "tsc -p ./packages/core/tsconfig.json",
@@ -28,8 +31,8 @@
     "@biomejs/biome": "^1.9.4",
     "@octokit/webhooks-types": "^7.6.1",
     "@typescript/native-preview": "7.0.0-dev.20260401.1",
-    "@tsconfig/node18": "^18.2.6",
-    "@types/node": "20.19.0",
+    "@tsconfig/node24": "^24.0.1",
+    "@types/node": "24.3.1",
     "@types/aws-lambda": "8.10.147",
     "aws-cdk-lib": "2.184.0",
     "constructs": "10.4.2",

@@ -1,13 +1,31 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Source NVM
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-nvm use # Use the version of node specified in .nvmrc
+if [ -f ".node-version" ]; then
+  NODE_VERSION_FILE=".node-version"
+elif [ -f ".nvmrc" ]; then
+  NODE_VERSION_FILE=".nvmrc"
+else
+  echo "Unable to find .node-version or .nvmrc in $(pwd)." >&2
+  exit 1
+fi
 
-PNPM_BINARY="$NVM_BIN/pnpm"
-echo "Using Pnpm binary: $PNPM_BINARY"
-echo "Running using the NVM version of Pnpm"
+NODE_VERSION="$(tr -d '[:space:]' < "$NODE_VERSION_FILE")"
+NODE_VERSION="${NODE_VERSION#v}"
 
-$PNPM_BINARY run "$@"
+if command -v fnm >/dev/null 2>&1; then
+  echo "Running pnpm with fnm and Node $NODE_VERSION"
+  exec fnm exec --using "$NODE_VERSION" pnpm run "$@"
+fi
+
+export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+if [ -s "$NVM_DIR/nvm.sh" ]; then
+  # shellcheck disable=SC1090
+  . "$NVM_DIR/nvm.sh"
+  nvm use "$NODE_VERSION" >/dev/null
+  echo "Running pnpm with nvm and Node $(node -v)"
+  exec pnpm run "$@"
+fi
+
+echo "Unable to find fnm or nvm to run pnpm with Node $NODE_VERSION." >&2
+exit 1
