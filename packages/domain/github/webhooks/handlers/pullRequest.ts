@@ -1,8 +1,8 @@
 import { postCommentsForNewPR } from "@domain/selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "@domain/selectors/pullRequests/getRequiredApprovals";
 import {
-  PullRequestDequeuedEvent,
   PullRequestConvertedToDraftEvent,
+  PullRequestDequeuedEvent,
   PullRequestEditedEvent,
   PullRequestEvent,
 } from "@octokit/webhooks-types";
