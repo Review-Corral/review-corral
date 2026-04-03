@@ -1,6 +1,7 @@
 import { postCommentsForNewPR } from "@domain/selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "@domain/selectors/pullRequests/getRequiredApprovals";
 import {
+  PullRequestDequeuedEvent,
   PullRequestConvertedToDraftEvent,
   PullRequestEditedEvent,
   PullRequestEvent,
@@ -447,9 +448,15 @@ const handleQueueStatusChange = async (
 
   // This branch only runs for GitHub's `pull_request` `dequeued` action because
   // the caller passes `isEnqueued = false` exclusively from that switch case.
-  // It does not prove our stored PR state was previously queued, so duplicate
-  // deliveries or missed prior events would still send this DM.
-  if (!isEnqueued) {
+  // GitHub also dequeues PRs as part of a successful merge, and those events
+  // include `reason: "merged"`. Those should update queue state but not DM the
+  // author that the PR was removed from the queue.
+  const wasDequeuedBecauseMerged =
+    !isEnqueued &&
+    "reason" in event &&
+    (event as PullRequestDequeuedEvent).reason === "merged";
+
+  if (!isEnqueued && !wasDequeuedBecauseMerged) {
     const authorSlackId = await getSlackUserId(event.pull_request.user.login, props);
 
     if (authorSlackId) {

@@ -235,6 +235,7 @@ describe("handlePullRequestEvent", () => {
       const dequeuedEvent = {
         ...mockEvent,
         action: "dequeued",
+        reason: "dequeued",
         pull_request: {
           ...mockEvent.pull_request,
           number: 42,
@@ -276,6 +277,53 @@ describe("handlePullRequestEvent", () => {
           attachments: [{ color: "#0066ff" }],
         },
       });
+    });
+
+    it("should not DM when dequeued because the PR was merged", async () => {
+      const mockSlackClientWithDm = {
+        ...mockSlackClient,
+        postDirectMessage: vi.fn(),
+      } as unknown as SlackClient;
+
+      const dequeuedEvent = {
+        ...mockEvent,
+        action: "dequeued",
+        reason: "merged",
+        pull_request: {
+          ...mockEvent.pull_request,
+          number: 42,
+          html_url: "https://github.com/test/repo/pull/42",
+        },
+        sender: {
+          login: "testuser",
+        },
+      };
+
+      await handlePullRequestEvent({
+        event: dequeuedEvent,
+        slackClient: mockSlackClientWithDm,
+        organizationId: 789,
+        installationId: 101112,
+      });
+
+      expect(updatePullRequest).toHaveBeenCalledWith({
+        pullRequestId: prItem.id,
+        repoId: prItem.repoId,
+        isQueuedToMerge: false,
+      });
+
+      expect(mockSlackClient.updateMainMessage).toHaveBeenCalledWith(
+        {
+          body: convertPrEventToBaseProps(dequeuedEvent),
+          threadTs: "thread-ts-123",
+          slackUsername: "@testuser",
+          pullRequestItem: { ...prItem, isQueuedToMerge: false },
+          requiredApprovals: null,
+        },
+        "pr-dequeued",
+      );
+
+      expect(mockSlackClientWithDm.postDirectMessage).not.toHaveBeenCalled();
     });
   });
 
