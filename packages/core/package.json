@@ -1,6 +1,9 @@
 {
   "name": "@review-corral/core",
   "version": "0.0.0",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "test": "sst bind vitest",
     "typecheck": "tsgo --noEmit"
@@ -10,7 +13,7 @@
     "@octokit/types": "^13.10.0",
     "@octokit/webhooks-types": "^7.6.1",
     "@types/aws-lambda": "^8.10.161",
-    "@types/node": "^22.19.15",
+    "@types/node": "^24.3.1",
     "@types/pg": "^8.18.0",
     "dotenv": "^16.6.1",
     "drizzle-kit": "^0.30.6",

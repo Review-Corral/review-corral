@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
   "scripts": {
     "dev": "vite dev",
     "build": "vite build",
@@ -41,7 +44,7 @@
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.1",
     "@types/js-cookie": "^3.0.6",
-    "@types/node": "^22.19.15",
+    "@types/node": "^24.3.1",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.2.0",
