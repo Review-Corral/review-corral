@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 const {
   buildPrReminderMessageMock,
   fetchOutstandingPrsForRemindersMock,
+  flushOTelMock,
   getInstallationAccessTokenMock,
   getPullRequestInfoMock,
   groupPrsByOrgAndSlackMock,
@@ -15,6 +16,7 @@ const {
 } = vi.hoisted(() => ({
   buildPrReminderMessageMock: vi.fn(),
   fetchOutstandingPrsForRemindersMock: vi.fn(),
+  flushOTelMock: vi.fn(),
   getInstallationAccessTokenMock: vi.fn(),
   getPullRequestInfoMock: vi.fn(),
   groupPrsByOrgAndSlackMock: vi.fn(),
@@ -31,6 +33,7 @@ vi.mock("@domain/github/fetchers", () => ({
 }));
 
 vi.mock("@domain/logging", () => ({
+  flushOTel: flushOTelMock,
   Logger: vi.fn().mockImplementation(function MockLogger() {
     return {
       info: loggerInfoMock,
@@ -159,6 +162,7 @@ describe("cron/prReminders", () => {
     vi.clearAllMocks();
 
     fetchOutstandingPrsForRemindersMock.mockResolvedValue([]);
+    flushOTelMock.mockResolvedValue(undefined);
     groupPrsByOrgAndSlackMock.mockReturnValue(new Map());
     getInstallationAccessTokenMock.mockResolvedValue({ token: "gh-install-token" });
     buildPrReminderMessageMock.mockReturnValue({
