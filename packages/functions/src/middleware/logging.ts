@@ -1,5 +1,5 @@
 import path from "node:path";
-import { flushOTel, Logger } from "@domain/logging";
+import { Logger, flushOTel } from "@domain/logging";
 import config from "@domain/utils/config";
 import { format } from "date-fns";
 import { Context, MiddlewareHandler } from "hono";
