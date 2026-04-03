@@ -6,6 +6,7 @@ import {
   addPrCommentParticipant,
   getPrCommentParticipants,
 } from "@domain/postgres/fetchers/pr-comment-participants";
+import { slackCommentDmTargetType } from "@domain/postgres/schema/slack-comment-dm-mappings";
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
@@ -14,6 +15,7 @@ import {
   getDmAttachment,
   getSlackUserId,
   getSlackUserName,
+  persistCommentDmMapping,
 } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
@@ -73,7 +75,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
         (async () => {
           const mentionedUserSlackId = await getSlackUserId(githubUsername, props);
           if (mentionedUserSlackId) {
-            await slackClient.postDirectMessage({
+            const dmResult = await slackClient.postDirectMessage({
               slackUserId: mentionedUserSlackId,
               message: {
                 text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment`,
@@ -92,6 +94,19 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
                 ],
               },
             });
+
+            await persistCommentDmMapping({
+              dmResult,
+              args: props,
+              targetType: slackCommentDmTargetType.issueComment,
+              repositoryFullName: event.repository.full_name,
+              githubCommentId: event.comment.id,
+              commentAuthorGithubUsername: event.comment.user.login,
+              commentBody: event.comment.body,
+              prTitle: event.issue.title,
+              prNumber: event.issue.number,
+              commentUrl: event.comment.html_url,
+            });
           }
         })(),
       );
@@ -106,7 +121,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
         (async () => {
           const authorSlackId = await getSlackUserId(prInfo.user.login, props);
           if (authorSlackId) {
-            await slackClient.postDirectMessage({
+            const dmResult = await slackClient.postDirectMessage({
               slackUserId: authorSlackId,
               message: {
                 text: `💬 ${await getSlackUserName(event.sender.login, props)} commented on your PR`,
@@ -129,6 +144,19 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
                 ],
               },
             });
+
+            await persistCommentDmMapping({
+              dmResult,
+              args: props,
+              targetType: slackCommentDmTargetType.issueComment,
+              repositoryFullName: event.repository.full_name,
+              githubCommentId: event.comment.id,
+              commentAuthorGithubUsername: event.comment.user.login,
+              commentBody: event.comment.body,
+              prTitle: event.issue.title,
+              prNumber: event.issue.number,
+              commentUrl: event.comment.html_url,
+            });
           }
         })(),
       );
@@ -149,7 +177,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
         (async () => {
           const participantSlackId = await getSlackUserId(participantUsername, props);
           if (participantSlackId) {
-            await slackClient.postDirectMessage({
+            const dmResult = await slackClient.postDirectMessage({
               slackUserId: participantSlackId,
               message: {
                 text: `↩️ ${await getSlackUserName(event.sender.login, props)} replied in a thread you're in`,
@@ -171,6 +199,19 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
                     : []),
                 ],
               },
+            });
+
+            await persistCommentDmMapping({
+              dmResult,
+              args: props,
+              targetType: slackCommentDmTargetType.issueComment,
+              repositoryFullName: event.repository.full_name,
+              githubCommentId: event.comment.id,
+              commentAuthorGithubUsername: event.comment.user.login,
+              commentBody: event.comment.body,
+              prTitle: event.issue.title,
+              prNumber: event.issue.number,
+              commentUrl: event.comment.html_url,
             });
           }
         })(),

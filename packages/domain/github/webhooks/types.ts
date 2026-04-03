@@ -14,6 +14,7 @@ export interface GithubWebhookEventHanderArgs<EventT> {
   slackClient: SlackClient;
   organizationId: number;
   installationId: number;
+  slackTeamId?: string;
 }
 
 export type BaseGithubWebhookEventHanderArgs = Omit<

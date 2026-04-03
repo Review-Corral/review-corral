@@ -137,6 +137,7 @@ export const handleGithubWebhookEvent = async ({
       slackClient,
       installationId: organization.installationId,
       organizationId: organization.id,
+      slackTeamId: slackIntegration.slackTeamId,
     });
   } else {
     LOGGER.debug("Recieved event we're not handling", { eventName });

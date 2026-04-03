@@ -4,16 +4,17 @@ import {
   addReviewThreadParticipant,
   getReviewThreadParticipants,
 } from "@domain/postgres/fetchers/review-thread-participants";
+import { slackCommentDmTargetType } from "@domain/postgres/schema/slack-comment-dm-mappings";
 import { PullRequestReviewCommentCreatedEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { SlackClient } from "../../../slack/SlackClient";
-import { BaseGithubWebhookEventHanderArgs } from "../types";
-import { GithubWebhookEventHander } from "../types";
+import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
 import {
   extractMentions,
   getDmAttachment,
   getSlackUserId,
   getSlackUserName,
+  persistCommentDmMapping,
 } from "./shared";
 
 const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
@@ -46,12 +47,10 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
       ? await getReviewThreadParticipants({ threadId: replyThreadId })
       : [];
 
-    // Send DMs to mentioned users and PR author
     const mentions = extractMentions(event.comment.body);
     const dmPromises: Promise<void>[] = [];
 
     for (const githubUsername of mentions) {
-      // Skip if the commenter mentioned themselves
       if (githubUsername === event.sender.login) {
         continue;
       }
@@ -59,35 +58,47 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
       dmPromises.push(
         (async () => {
           const mentionedUserSlackId = await getSlackUserId(githubUsername, args);
-          if (mentionedUserSlackId) {
-            await slackClient.postDirectMessage({
-              slackUserId: mentionedUserSlackId,
-              message: {
-                text: `💬 ${await getSlackUserName(event.sender.login, args)} mentioned you in a comment`,
-                attachments: [
-                  getDmAttachment(
-                    {
-                      title: event.pull_request.title,
-                      number: event.pull_request.number,
-                      html_url: event.pull_request.html_url,
-                    },
-                    "gray",
-                  ),
-                  {
-                    text: event.comment.body,
-                    color: COLOURS.gray,
-                  },
-                ],
-              },
-            });
+          if (!mentionedUserSlackId) {
+            return;
           }
+
+          const dmResult = await slackClient.postDirectMessage({
+            slackUserId: mentionedUserSlackId,
+            message: {
+              text: `💬 ${await getSlackUserName(event.sender.login, args)} mentioned you in a comment`,
+              attachments: [
+                getDmAttachment(
+                  {
+                    title: event.pull_request.title,
+                    number: event.pull_request.number,
+                    html_url: event.pull_request.html_url,
+                  },
+                  "gray",
+                ),
+                {
+                  text: event.comment.body,
+                  color: COLOURS.gray,
+                },
+              ],
+            },
+          });
+
+          await persistCommentDmMapping({
+            dmResult,
+            args,
+            targetType: slackCommentDmTargetType.pullRequestReviewComment,
+            repositoryFullName: event.repository.full_name,
+            githubCommentId: event.comment.id,
+            commentAuthorGithubUsername: event.comment.user.login,
+            commentBody: event.comment.body,
+            prTitle: event.pull_request.title,
+            prNumber: event.pull_request.number,
+            commentUrl: event.comment.html_url,
+          });
         })(),
       );
     }
 
-    // DM the PR author (if they weren't the commenter and weren't already mentioned)
-    // For replies, avoid duplicating the thread reply notification if the author
-    // is already a thread participant.
     if (
       event.pull_request.user.login !== event.sender.login &&
       !mentions.includes(event.pull_request.user.login) &&
@@ -95,44 +106,53 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
     ) {
       dmPromises.push(
         (async () => {
-          const authorSlackId = await getSlackUserId(
-            event.pull_request.user.login,
-            args,
-          );
-          if (authorSlackId) {
-            await slackClient.postDirectMessage({
-              slackUserId: authorSlackId,
-              message: {
-                text: `💬 ${await getSlackUserName(event.sender.login, args)} commented on your PR`,
-                attachments: [
-                  getDmAttachment(
-                    {
-                      title: event.pull_request.title,
-                      number: event.pull_request.number,
-                      html_url: event.pull_request.html_url,
-                    },
-                    "gray",
-                  ),
-                  {
-                    text: event.comment.body,
-                    color: COLOURS.gray,
-                  },
-                ],
-              },
-            });
+          const authorSlackId = await getSlackUserId(event.pull_request.user.login, args);
+          if (!authorSlackId) {
+            return;
           }
+
+          const dmResult = await slackClient.postDirectMessage({
+            slackUserId: authorSlackId,
+            message: {
+              text: `💬 ${await getSlackUserName(event.sender.login, args)} commented on your PR`,
+              attachments: [
+                getDmAttachment(
+                  {
+                    title: event.pull_request.title,
+                    number: event.pull_request.number,
+                    html_url: event.pull_request.html_url,
+                  },
+                  "gray",
+                ),
+                {
+                  text: event.comment.body,
+                  color: COLOURS.gray,
+                },
+              ],
+            },
+          });
+
+          await persistCommentDmMapping({
+            dmResult,
+            args,
+            targetType: slackCommentDmTargetType.pullRequestReviewComment,
+            repositoryFullName: event.repository.full_name,
+            githubCommentId: event.comment.id,
+            commentAuthorGithubUsername: event.comment.user.login,
+            commentBody: event.comment.body,
+            prTitle: event.pull_request.title,
+            prNumber: event.pull_request.number,
+            commentUrl: event.comment.html_url,
+          });
         })(),
       );
     }
 
-    // Notify other thread participants if this is a reply
     if (isReply) {
       dmPromises.push(
         notifyThreadParticipants({
           participants: threadParticipants,
-          senderLogin: event.sender.login,
-          pullRequest: event.pull_request,
-          comment: event.comment,
+          event,
           slackClient,
           args,
         }),
@@ -141,62 +161,69 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
 
     await Promise.all(dmPromises);
 
-    // Record this commenter as a thread participant
-    // Use in_reply_to_id as thread ID if it's a reply, otherwise use the comment's own ID
     const threadId = event.comment.in_reply_to_id ?? event.comment.id;
     await addReviewThreadParticipant({
       threadId,
       githubUsername: event.sender.login,
     });
-
-    return;
   }
 };
 
-/**
- * Notifies all previous participants in a review comment thread (except the sender).
- */
 async function notifyThreadParticipants({
   participants,
-  senderLogin,
-  pullRequest,
-  comment,
+  event,
   slackClient,
   args,
 }: {
   participants: string[];
-  senderLogin: string;
-  pullRequest: { title: string; number: number };
-  comment: { html_url: string; body: string };
+  event: PullRequestReviewCommentCreatedEvent;
   slackClient: SlackClient;
-  args: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">;
+  args: Pick<
+    BaseGithubWebhookEventHanderArgs,
+    "organizationId" | "slackTeamId"
+  >;
 }): Promise<void> {
   const notifyPromises = participants
-    .filter((username) => username !== senderLogin)
+    .filter((username) => username !== event.sender.login)
     .map(async (username) => {
       const slackId = await getSlackUserId(username, args);
-      if (slackId) {
-        await slackClient.postDirectMessage({
-          slackUserId: slackId,
-          message: {
-            text: `↩️ ${await getSlackUserName(senderLogin, args)} replied to a thread you're in`,
-            attachments: [
-              getDmAttachment(
-                {
-                  title: pullRequest.title,
-                  number: pullRequest.number,
-                  html_url: comment.html_url,
-                },
-                "gray",
-              ),
-              {
-                text: comment.body,
-                color: COLOURS.gray,
-              },
-            ],
-          },
-        });
+      if (!slackId) {
+        return;
       }
+
+      const dmResult = await slackClient.postDirectMessage({
+        slackUserId: slackId,
+        message: {
+          text: `↩️ ${await getSlackUserName(event.sender.login, args)} replied to a thread you're in`,
+          attachments: [
+            getDmAttachment(
+              {
+                title: event.pull_request.title,
+                number: event.pull_request.number,
+                html_url: event.comment.html_url,
+              },
+              "gray",
+            ),
+            {
+              text: event.comment.body,
+              color: COLOURS.gray,
+            },
+          ],
+        },
+      });
+
+      await persistCommentDmMapping({
+        dmResult,
+        args,
+        targetType: slackCommentDmTargetType.pullRequestReviewComment,
+        repositoryFullName: event.repository.full_name,
+        githubCommentId: event.comment.id,
+        commentAuthorGithubUsername: event.comment.user.login,
+        commentBody: event.comment.body,
+        prTitle: event.pull_request.title,
+        prNumber: event.pull_request.number,
+        commentUrl: event.comment.html_url,
+      });
     });
 
   await Promise.all(notifyPromises);
