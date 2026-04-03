@@ -2,7 +2,7 @@ import {
   getInstallationAccessToken,
   getPullRequestInfo,
 } from "@domain/github/fetchers";
-import { flushOTel, Logger } from "@domain/logging";
+import { Logger, flushOTel } from "@domain/logging";
 import {
   type OrgSlackReminders,
   type PrReminder,

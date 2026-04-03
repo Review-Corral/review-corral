@@ -30,7 +30,11 @@ function buildPostHogLogsUrl(host: string): string {
   return new URL("/i/v1/logs", trimmedHost).toString();
 }
 
-function withTimeout<T>(promise: Promise<T>, timeoutMs: number, operation: string): Promise<T> {
+function withTimeout<T>(
+  promise: Promise<T>,
+  timeoutMs: number,
+  operation: string,
+): Promise<T> {
   return Promise.race([
     promise,
     new Promise<T>((_, reject) => {
@@ -79,7 +83,10 @@ export function initOTel(): boolean {
       try {
         await shutdownOTel();
       } catch (error) {
-        console.error("Failed to shut down OpenTelemetry logging during process exit", error);
+        console.error(
+          "Failed to shut down OpenTelemetry logging during process exit",
+          error,
+        );
       }
     });
 
@@ -95,7 +102,11 @@ export async function flushOTel(): Promise<void> {
   if (!loggerProvider) return;
 
   try {
-    await withTimeout(loggerProvider.forceFlush(), FLUSH_TIMEOUT_MS, "OpenTelemetry force flush");
+    await withTimeout(
+      loggerProvider.forceFlush(),
+      FLUSH_TIMEOUT_MS,
+      "OpenTelemetry force flush",
+    );
   } catch (error) {
     console.error("Failed to flush OpenTelemetry logs", error);
   }
@@ -107,7 +118,11 @@ export async function shutdownOTel(): Promise<void> {
 
   shutdownPromise = (async () => {
     try {
-      await withTimeout(loggerProvider.shutdown(), SHUTDOWN_TIMEOUT_MS, "OpenTelemetry shutdown");
+      await withTimeout(
+        loggerProvider.shutdown(),
+        SHUTDOWN_TIMEOUT_MS,
+        "OpenTelemetry shutdown",
+      );
     } finally {
       loggerProvider = undefined;
       shutdownPromise = undefined;

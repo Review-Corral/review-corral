@@ -26,7 +26,10 @@ function createDefaultOutput(): LogOutput {
       return new CompositeOutput([console, new OTelOutput()]);
     }
   } catch (error) {
-    console.error("Failed to create OpenTelemetry log output, falling back to console logging", error);
+    console.error(
+      "Failed to create OpenTelemetry log output, falling back to console logging",
+      error,
+    );
   }
   return console;
 }
