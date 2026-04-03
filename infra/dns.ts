@@ -1,5 +1,6 @@
 export const HOSTED_ZONE = "reviewcorral.com";
 export const PROD_STAGE = "prod";
+const CLOUDFLARE_ZONE_ID = process.env.CLOUDFLARE_ZONE_ID;
 
 export const getDomain = (service: "api" | "frontend") => {
   const isProd = $app.stage === "prod";
@@ -29,9 +30,8 @@ export const getDns = (service: "api" | "frontend") => {
     ...($app.stage === "prod" && service === "frontend"
       ? { redirects: [`www.${domain}`] }
       : {}),
-    dns: sst.aws.dns({
-      override: true,
-      zone: "Z0854557GLD532VHXK6N",
-    }),
+    dns: sst.cloudflare.dns(
+      CLOUDFLARE_ZONE_ID ? { zone: CLOUDFLARE_ZONE_ID } : undefined,
+    ),
   };
 };

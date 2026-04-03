@@ -27,6 +27,9 @@ export default $config({
           region: "us-east-1",
           ...(process.env.CI ? {} : { profile: "rc" }),
         },
+        cloudflare: {
+          apiToken: process.env.CLOUDFLARE_API_TOKEN,
+        },
       },
     };
   },

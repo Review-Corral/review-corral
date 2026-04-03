@@ -46,10 +46,15 @@ jobs:
 
       - name: Run database migrations
         run: pnpm sst shell --stage dev -- drizzle-kit migrate --config=packages/domain/drizzle.config.ts
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
 
       - name: Deploy to dev
         run: pnpm sst deploy --stage dev
         env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
           SENTRY_RELEASE: ${{ github.sha }}
 
       - name: Upload sourcemaps to Sentry
