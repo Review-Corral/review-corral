@@ -36,7 +36,7 @@ export const Navbar: FC<NavbarProps> = ({ dark = false }) => {
               variant="outline"
               className={
                 dark
-                  ? "text-gray-300 border-gray-600 bg-transparent hover:bg-gray-800 hover:text-white gap-2"
+                  ? "text-stone-300 border-stone-600 bg-transparent hover:bg-stone-800 hover:text-white gap-2"
                   : "text-black gap-2"
               }
             >
@@ -77,7 +77,7 @@ export const Navbar: FC<NavbarProps> = ({ dark = false }) => {
         <div className="md:hidden">
           <div
             className={`px-2 pt-2 pb-3 space-y-3 shadow-lg rounded-lg mt-2 ${
-              dark ? "bg-gray-900" : "bg-white"
+              dark ? "bg-stone-900" : "bg-white"
             }`}
           >
             <a
@@ -90,7 +90,7 @@ export const Navbar: FC<NavbarProps> = ({ dark = false }) => {
                 variant="outline"
                 className={`w-full ${
                   dark
-                    ? "text-gray-300 border-gray-600 bg-transparent hover:bg-gray-800 gap-2"
+                    ? "text-stone-300 border-stone-600 bg-transparent hover:bg-stone-800 gap-2"
                     : "text-black gap-2"
                 }`}
               >

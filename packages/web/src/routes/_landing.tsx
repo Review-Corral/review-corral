@@ -18,7 +18,7 @@ function LandingLayout() {
 
   return (
     <div
-      className={`h-dvh flex flex-col ${isDark ? "bg-gray-950" : ""}`}
+      className={`min-h-dvh flex flex-col ${isDark ? "landing-dark" : ""}`}
     >
       <Navbar dark={isDark} />
       <div className="grow flex flex-col">
@@ -27,7 +27,7 @@ function LandingLayout() {
         </main>
         <footer
           className={`text-xs md:text-sm container mx-auto px-4 py-8 text-center ${
-            isDark ? "text-gray-400" : "text-gray-600"
+            isDark ? "text-stone-400" : "text-gray-600"
           }`}
         >
           <div className="flex justify-center items-center gap-4">
@@ -36,7 +36,7 @@ function LandingLayout() {
               rights reserved.
             </p>
             <p
-              className={isDark ? "text-gray-600" : "text-gray-300"}
+              className={isDark ? "text-stone-600" : "text-gray-300"}
             >
               {" "}
               |{" "}
@@ -50,7 +50,7 @@ function LandingLayout() {
               </Link>
             </p>
             <p
-              className={isDark ? "text-gray-600" : "text-gray-300"}
+              className={isDark ? "text-stone-600" : "text-gray-300"}
             >
               {" "}
               |{" "}
