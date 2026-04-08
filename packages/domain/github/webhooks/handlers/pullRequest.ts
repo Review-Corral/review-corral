@@ -1,8 +1,9 @@
 import { postCommentsForNewPR } from "@domain/selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "@domain/selectors/pullRequests/getRequiredApprovals";
+import { tryCatch } from "@core/utils/errors/tryCatch";
 import {
-  PullRequestConvertedToDraftEvent,
   PullRequestDequeuedEvent,
+  PullRequestConvertedToDraftEvent,
   PullRequestEditedEvent,
   PullRequestEvent,
 } from "@octokit/webhooks-types";
@@ -28,6 +29,7 @@ import {
   getSlackUserName,
 } from "./shared";
 import { convertPrEventToBaseProps, extractReviewerLogins } from "./utils";
+import { getPullRequestInfo } from "../../fetchers";
 
 export const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
@@ -448,13 +450,17 @@ const handleQueueStatusChange = async (
 
   // This branch only runs for GitHub's `pull_request` `dequeued` action because
   // the caller passes `isEnqueued = false` exclusively from that switch case.
-  // GitHub also dequeues PRs as part of a successful merge, and those events
-  // include `reason: "merged"`. Those should update queue state but not DM the
-  // author that the PR was removed from the queue.
+  // GitHub also dequeues PRs as part of a successful merge. We need to skip the
+  // "removed from queue" DM when the dequeue is merge-driven, even if the
+  // webhook payload omits the original `reason` or arrives after the PR state
+  // has already changed elsewhere.
   const wasDequeuedBecauseMerged =
     !isEnqueued &&
-    "reason" in event &&
-    (event as PullRequestDequeuedEvent).reason === "merged";
+    (await shouldSkipDequeuedDmBecausePrMerged({
+      event,
+      pullRequestItem,
+      installationId: props.installationId,
+    }));
 
   if (!isEnqueued && !wasDequeuedBecauseMerged) {
     const authorSlackId = await getSlackUserId(event.pull_request.user.login, props);
@@ -478,6 +484,54 @@ const handleQueueStatusChange = async (
       });
     }
   }
+};
+
+const shouldSkipDequeuedDmBecausePrMerged = async ({
+  event,
+  pullRequestItem,
+  installationId,
+}: {
+  event: PullRequestEvent;
+  pullRequestItem: PullRequest;
+  installationId: number;
+}): Promise<boolean> => {
+  if (
+    ("reason" in event &&
+      (event as PullRequestDequeuedEvent).reason === "merged") ||
+    event.pull_request.merged ||
+    pullRequestItem.status === PullRequestStatus.MERGED ||
+    Boolean(pullRequestItem.mergedAt)
+  ) {
+    return true;
+  }
+
+  const prUrl = "url" in event.pull_request ? event.pull_request.url : undefined;
+  if (!prUrl) {
+    return false;
+  }
+
+  const pullRequestInfoResult = await tryCatch(
+    getInstallationAccessToken(installationId).then((installationAccessToken) =>
+      getPullRequestInfo({
+        url: prUrl,
+        accessToken: installationAccessToken.token,
+      }),
+    ),
+  );
+
+  if (!pullRequestInfoResult.ok) {
+    LOGGER.warn("Failed to verify merged state for dequeued PR", {
+      error: pullRequestInfoResult.error,
+      prId: event.pull_request.id,
+      installationId,
+    });
+    return false;
+  }
+
+  return (
+    pullRequestInfoResult.data.merged ||
+    Boolean(pullRequestInfoResult.data.merged_at)
+  );
 };
 
 const handleNewPr = async (

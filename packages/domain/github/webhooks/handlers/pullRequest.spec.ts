@@ -33,13 +33,23 @@ vi.mock("@domain/postgres/fetchers/review-request-dms", () => ({
   insertReviewRequestDm: vi.fn(),
 }));
 
+vi.mock("../../fetchers", () => ({
+  getInstallationAccessToken: vi.fn(),
+  getPullRequestInfo: vi.fn(),
+}));
+
 // Import after mocks are set up
 import {
   PullRequestWithAlias,
   fetchPrItem,
   updatePullRequest,
 } from "@domain/postgres/fetchers/pull-requests";
+import { PullRequestStatus } from "@domain/postgres/schema";
 import { SlackClient } from "@domain/slack/SlackClient";
+import {
+  getInstallationAccessToken,
+  getPullRequestInfo,
+} from "../../fetchers";
 import { handlePullRequestEvent } from "./pullRequest";
 import {
   getDmAttachment,
@@ -90,6 +100,9 @@ describe("handlePullRequestEvent", () => {
       isQueuedToMerge: false,
       requestedReviewers: [],
       reviewerStatuses: [],
+      status: PullRequestStatus.OPEN,
+      mergedAt: null,
+      closedAt: null,
     });
 
     vi.mocked(getSlackUserName).mockResolvedValue("@testuser");
@@ -97,6 +110,13 @@ describe("handlePullRequestEvent", () => {
     vi.mocked(getDmAttachment).mockReturnValue({ color: "#0066ff" });
     vi.mocked(getReviewRequestDmAttachment).mockReturnValue({ color: "#0066ff" });
     vi.mocked(fetchPrItem).mockResolvedValue(prItem);
+    vi.mocked(getInstallationAccessToken).mockResolvedValue({
+      token: "github-token",
+    } as Awaited<ReturnType<typeof getInstallationAccessToken>>);
+    vi.mocked(getPullRequestInfo).mockResolvedValue({
+      merged: false,
+      merged_at: null,
+    } as Awaited<ReturnType<typeof getPullRequestInfo>>);
   });
 
   it("should call slackClient.postDirectMessage when review_request_removed", async () => {
@@ -264,7 +284,10 @@ describe("handlePullRequestEvent", () => {
           body: convertPrEventToBaseProps(dequeuedEvent),
           threadTs: "thread-ts-123",
           slackUsername: "@testuser",
-          pullRequestItem: { ...prItem, isQueuedToMerge: false },
+          pullRequestItem: expect.objectContaining({
+            ...prItem,
+            isQueuedToMerge: false,
+          }),
           requiredApprovals: null,
         },
         "pr-dequeued",
@@ -317,12 +340,56 @@ describe("handlePullRequestEvent", () => {
           body: convertPrEventToBaseProps(dequeuedEvent),
           threadTs: "thread-ts-123",
           slackUsername: "@testuser",
-          pullRequestItem: { ...prItem, isQueuedToMerge: false },
+          pullRequestItem: expect.objectContaining({
+            ...prItem,
+            isQueuedToMerge: false,
+          }),
           requiredApprovals: null,
         },
         "pr-dequeued",
       );
 
+      expect(mockSlackClientWithDm.postDirectMessage).not.toHaveBeenCalled();
+    });
+
+    it("should not DM when GitHub shows the PR is merged even without a merged reason", async () => {
+      const mockSlackClientWithDm = {
+        ...mockSlackClient,
+        postDirectMessage: vi.fn(),
+      } as unknown as SlackClient;
+
+      vi.mocked(getPullRequestInfo).mockResolvedValue({
+        merged: true,
+        merged_at: "2026-04-07T12:00:00Z",
+      } as Awaited<ReturnType<typeof getPullRequestInfo>>);
+
+      const dequeuedEvent = {
+        ...mockEvent,
+        action: "dequeued",
+        pull_request: {
+          ...mockEvent.pull_request,
+          merged: false,
+          url: "https://api.github.com/repos/test/repo/pulls/42",
+          number: 42,
+          html_url: "https://github.com/test/repo/pull/42",
+        },
+        sender: {
+          login: "testuser",
+        },
+      };
+
+      await handlePullRequestEvent({
+        event: dequeuedEvent,
+        slackClient: mockSlackClientWithDm,
+        organizationId: 789,
+        installationId: 101112,
+      });
+
+      expect(getInstallationAccessToken).toHaveBeenCalledWith(101112);
+      expect(getPullRequestInfo).toHaveBeenCalledWith({
+        url: "https://api.github.com/repos/test/repo/pulls/42",
+        accessToken: "github-token",
+      });
       expect(mockSlackClientWithDm.postDirectMessage).not.toHaveBeenCalled();
     });
   });
