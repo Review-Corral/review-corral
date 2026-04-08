@@ -6,6 +6,7 @@ import {
   addPrCommentParticipant,
   getPrCommentParticipants,
 } from "@domain/postgres/fetchers/pr-comment-participants";
+import { fetchPrItem } from "@domain/postgres/fetchers/pull-requests";
 import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
@@ -48,16 +49,28 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
       accessToken: accessToken.token,
     });
 
-    // Get previous participants before adding the current commenter
-    const previousParticipants = await getPrCommentParticipants({
-      prId: prInfo.id,
+    const trackedPullRequest = await fetchPrItem({
+      pullRequestId: prInfo.id,
+      repoId: event.repository.id,
     });
 
-    // Record this commenter as a participant
-    await addPrCommentParticipant({
-      prId: prInfo.id,
-      githubUsername: event.sender.login,
-    });
+    const previousParticipants = trackedPullRequest
+      ? await getPrCommentParticipants({
+          prId: prInfo.id,
+        })
+      : [];
+
+    if (trackedPullRequest) {
+      await addPrCommentParticipant({
+        prId: prInfo.id,
+        githubUsername: event.sender.login,
+      });
+    } else {
+      LOGGER.warn("Skipping PR comment participant tracking for untracked PR", {
+        prId: prInfo.id,
+        repoId: event.repository.id,
+      });
+    }
 
     // Send DMs to mentioned users and PR author
     const mentions = extractMentions(event.comment.body);
