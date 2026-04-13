@@ -1,30 +1,65 @@
 import { Navbar } from "@/components/landing/Navbar";
-import { Link, Outlet, createFileRoute } from "@tanstack/react-router";
+import {
+  Link,
+  Outlet,
+  createFileRoute,
+  useRouterState,
+} from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_landing")({
   component: LandingLayout,
 });
 
 function LandingLayout() {
+  const pathname = useRouterState({
+    select: (s) => s.location.pathname,
+  });
+  const isDark = pathname === "/";
+
   return (
-    <div className="h-dvh flex flex-col">
-      <Navbar />
+    <div
+      className={`min-h-dvh flex flex-col ${isDark ? "landing-dark" : ""}`}
+    >
+      <Navbar dark={isDark} />
       <div className="grow flex flex-col">
         <main className="grow">
           <Outlet />
         </main>
-        <footer className="text-xs md:text-sm container mx-auto px-4 py-8 text-center text-gray-600">
+        <footer
+          className={`text-xs md:text-sm container mx-auto px-4 py-8 text-center ${
+            isDark ? "text-stone-400" : "text-gray-600"
+          }`}
+        >
           <div className="flex justify-center items-center gap-4">
-            <p>&copy; {new Date().getFullYear()} Review Corral. All rights reserved.</p>
-            <p className="text-gray-300"> | </p>
             <p>
-              <Link to="/privacy" className="underline">
+              &copy; {new Date().getFullYear()} Review Corral. All
+              rights reserved.
+            </p>
+            <p
+              className={isDark ? "text-stone-600" : "text-gray-300"}
+            >
+              {" "}
+              |{" "}
+            </p>
+            <p>
+              <Link
+                to="/privacy"
+                className={`underline ${isDark ? "hover:text-white" : ""}`}
+              >
                 Privacy Policy
               </Link>
             </p>
-            <p className="text-gray-300"> | </p>
+            <p
+              className={isDark ? "text-stone-600" : "text-gray-300"}
+            >
+              {" "}
+              |{" "}
+            </p>
             <p>
-              <a href="mailto:alex.mclean25+rc@gmail.com" className="underline">
+              <a
+                href="mailto:alex.mclean25+rc@gmail.com"
+                className={`underline ${isDark ? "hover:text-white" : ""}`}
+              >
                 Contact
               </a>
             </p>

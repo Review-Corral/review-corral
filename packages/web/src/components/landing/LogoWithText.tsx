@@ -1,4 +1,10 @@
-export const LogoWithText: React.FC = () => {
+interface LogoWithTextProps {
+  dark?: boolean;
+}
+
+export const LogoWithText: React.FC<LogoWithTextProps> = ({
+  dark,
+}) => {
   return (
     <div className="flex items-center space-x-2">
       <img
@@ -7,7 +13,11 @@ export const LogoWithText: React.FC = () => {
         src="/review_corral_logo-min.png"
         alt="Review Corral logo"
       />
-      <span className="text-2xl font-bold text-gray-900">Review Corral</span>
+      <span
+        className={`text-2xl font-bold ${dark ? "text-white" : "text-gray-900"}`}
+      >
+        Review Corral
+      </span>
     </div>
   );
 };

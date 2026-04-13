@@ -24,32 +24,35 @@ const GithubLoginButton: React.FC = () => {
   });
 
   return (
-    <div>
-      <BetterButton
-        isLoading={isLoading}
-        onClick={() => {
-          console.log("logging in");
-          window.open(
-            `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${redirectUri}`,
-            "_self",
-          );
-        }}
+    <BetterButton
+      className="w-full bg-white text-gray-900 hover:bg-gray-100"
+      isLoading={isLoading}
+      onClick={() => {
+        window.open(
+          `https://github.com/login/oauth/authorize?client_id=${GITHUB_CLIENT_ID}&scope=user:email&redirect_uri=${redirectUri}`,
+          "_self",
+        );
+      }}
+    >
+      <div
+        className={cn(
+          "flex items-center justify-center gap-3",
+          isLoading && "pl-2",
+        )}
       >
-        <div
-          className={cn("flex items-center justify-left gap-8", isLoading && "pl-6")}
-        >
-          {!isLoading && (
-            <img
-              src="/github-mark/github-mark-white.svg"
-              alt="Github Login"
-              height={8}
-              width={20}
-            />
-          )}
-          {!isLoading ? "Sign in with Github" : "Signing into Github"}
-        </div>
-      </BetterButton>
-    </div>
+        {!isLoading && (
+          <img
+            src="/github-mark/github-mark.svg"
+            alt="Github Login"
+            height={8}
+            width={20}
+          />
+        )}
+        {!isLoading
+          ? "Sign in with Github"
+          : "Signing into Github"}
+      </div>
+    </BetterButton>
   );
 };
 

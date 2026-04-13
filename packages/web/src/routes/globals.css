@@ -166,6 +166,15 @@
   }
 }
 
+.landing-dark {
+  background: radial-gradient(
+      ellipse 80% 60% at 50% 0%,
+      rgba(55, 48, 40, 0.7) 0%,
+      transparent 70%
+    ),
+    #1c1a17;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;
