@@ -25,7 +25,7 @@
     "@sentry/aws-serverless": "^10.44.0",
     "aws-lambda": "^1.0.7",
     "date-fns": "^4.1.0",
-    "hono": "^4.12.8",
+    "hono": "^4.12.14",
     "jsonwebtoken": "^9.0.3",
     "ky": "^1.14.3",
     "stripe": "^15.12.0",
