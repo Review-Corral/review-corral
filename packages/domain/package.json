@@ -35,7 +35,7 @@
     "@opentelemetry/exporter-logs-otlp-http": "^0.57.2",
     "@opentelemetry/resources": "^1.30.1",
     "@opentelemetry/sdk-logs": "^0.57.2",
-    "@opentelemetry/sdk-node": "^0.57.2",
+    "@opentelemetry/sdk-node": "^0.217.0",
     "@opentelemetry/semantic-conventions": "^1.40.0",
     "@slack/web-api": "^6.13.0",
     "date-fns": "^4.1.0",
