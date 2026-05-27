@@ -46,10 +46,7 @@ import {
 } from "@domain/postgres/fetchers/pull-requests";
 import { PullRequestStatus } from "@domain/postgres/schema";
 import { SlackClient } from "@domain/slack/SlackClient";
-import {
-  getInstallationAccessToken,
-  getPullRequestInfo,
-} from "../../fetchers";
+import { getInstallationAccessToken, getPullRequestInfo } from "../../fetchers";
 import { handlePullRequestEvent } from "./pullRequest";
 import {
   getDmAttachment,
@@ -390,6 +387,40 @@ describe("handlePullRequestEvent", () => {
         url: "https://api.github.com/repos/test/repo/pulls/42",
         accessToken: "github-token",
       });
+      expect(mockSlackClientWithDm.postDirectMessage).not.toHaveBeenCalled();
+    });
+
+    it("should not DM when the dequeued payload has a merged timestamp", async () => {
+      const mockSlackClientWithDm = {
+        ...mockSlackClient,
+        postDirectMessage: vi.fn(),
+      } as unknown as SlackClient;
+
+      const dequeuedEvent = {
+        ...mockEvent,
+        action: "dequeued",
+        reason: "dequeued",
+        pull_request: {
+          ...mockEvent.pull_request,
+          merged: false,
+          merged_at: "2026-04-07T12:00:00Z",
+          number: 42,
+          html_url: "https://github.com/test/repo/pull/42",
+        },
+        sender: {
+          login: "testuser",
+        },
+      };
+
+      await handlePullRequestEvent({
+        event: dequeuedEvent,
+        slackClient: mockSlackClientWithDm,
+        organizationId: 789,
+        installationId: 101112,
+      });
+
+      expect(getInstallationAccessToken).not.toHaveBeenCalled();
+      expect(getPullRequestInfo).not.toHaveBeenCalled();
       expect(mockSlackClientWithDm.postDirectMessage).not.toHaveBeenCalled();
     });
   });

@@ -1,9 +1,9 @@
+import { tryCatch } from "@core/utils/errors/tryCatch";
 import { postCommentsForNewPR } from "@domain/selectors/pullRequests/getCommentsForPr";
 import { tryGetPrRequiredApprovalsCount } from "@domain/selectors/pullRequests/getRequiredApprovals";
-import { tryCatch } from "@core/utils/errors/tryCatch";
 import {
-  PullRequestDequeuedEvent,
   PullRequestConvertedToDraftEvent,
+  PullRequestDequeuedEvent,
   PullRequestEditedEvent,
   PullRequestEvent,
 } from "@octokit/webhooks-types";
@@ -16,7 +16,7 @@ import {
 import { insertReviewRequestDm } from "../../../postgres/fetchers/review-request-dms";
 import { type PullRequest, PullRequestStatus } from "../../../postgres/schema";
 import { PullRequestEventOpenedOrReadyForReview } from "../../../slack/SlackClient";
-import { getInstallationAccessToken } from "../../fetchers";
+import { getInstallationAccessToken, getPullRequestInfo } from "../../fetchers";
 import { BaseGithubWebhookEventHanderArgs, GithubWebhookEventHander } from "../types";
 import {
   markReviewerRequested,
@@ -29,7 +29,6 @@ import {
   getSlackUserName,
 } from "./shared";
 import { convertPrEventToBaseProps, extractReviewerLogins } from "./utils";
-import { getPullRequestInfo } from "../../fetchers";
 
 export const LOGGER = new Logger("core.github.webhooks.handlers.pullRequest");
 
@@ -496,9 +495,9 @@ const shouldSkipDequeuedDmBecausePrMerged = async ({
   installationId: number;
 }): Promise<boolean> => {
   if (
-    ("reason" in event &&
-      (event as PullRequestDequeuedEvent).reason === "merged") ||
+    ("reason" in event && isMergedDequeueReason(event.reason)) ||
     event.pull_request.merged ||
+    Boolean(event.pull_request.merged_at) ||
     pullRequestItem.status === PullRequestStatus.MERGED ||
     Boolean(pullRequestItem.mergedAt)
   ) {
@@ -529,10 +528,12 @@ const shouldSkipDequeuedDmBecausePrMerged = async ({
   }
 
   return (
-    pullRequestInfoResult.data.merged ||
-    Boolean(pullRequestInfoResult.data.merged_at)
+    pullRequestInfoResult.data.merged || Boolean(pullRequestInfoResult.data.merged_at)
   );
 };
+
+const isMergedDequeueReason = (reason: PullRequestDequeuedEvent["reason"]) =>
+  reason.trim().toLowerCase() === "merged";
 
 const handleNewPr = async (
   payload: PullRequestEventOpenedOrReadyForReview,
