@@ -17,29 +17,7 @@ export function getDmAttachment(
 ): MessageAttachment {
   return {
     color: COLOURS[colour],
-    blocks: [
-      {
-        type: "header",
-        text: {
-          type: "plain_text",
-          text: `${pr.title} #${pr.number}`,
-        },
-      },
-
-      {
-        type: "actions",
-        elements: [
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: "View",
-            },
-            url: pr.html_url,
-          },
-        ],
-      },
-    ],
+    blocks: [getLinkedTitleBlock(pr)],
   };
 }
 
@@ -68,26 +46,7 @@ export function getReviewRequestDmAttachment(
   return {
     color: COLOURS[colour],
     blocks: [
-      {
-        type: "header",
-        text: {
-          type: "plain_text",
-          text: `${pr.title} #${pr.number}`,
-        },
-      },
-      {
-        type: "actions",
-        elements: [
-          {
-            type: "button",
-            text: {
-              type: "plain_text",
-              text: "View",
-            },
-            url: pr.html_url,
-          },
-        ],
-      },
+      getLinkedTitleBlock(pr),
       ...(pr.body
         ? [
             {
@@ -141,3 +100,22 @@ export function getReviewRequestDmAttachment(
     ],
   };
 }
+
+const getLinkedTitleBlock = (pr: {
+  title: string;
+  number: number;
+  html_url: string;
+}): SectionBlock => ({
+  type: "section",
+  text: {
+    type: "mrkdwn",
+    text: `*<${pr.html_url}|${escapeSlackLinkText(`${pr.title} #${pr.number}`)}>*`,
+  },
+});
+
+const escapeSlackLinkText = (text: string) =>
+  text
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll("|", "¦");
