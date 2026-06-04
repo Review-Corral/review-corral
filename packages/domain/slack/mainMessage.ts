@@ -45,7 +45,7 @@ export const getBaseChatUpdateArguments = async ({
 }> => {
   return {
     ts: threadTs,
-    text: await getPrOpenedMessage(slackUsername),
+    text: getPrOpenedMessage(body),
     attachments: buidMainMessageAttachements({
       body,
       slackUsername,
@@ -57,7 +57,6 @@ export const getBaseChatUpdateArguments = async ({
 
 export const buidMainMessageAttachements = ({
   body,
-  slackUsername,
   pullRequestItem,
   requiredApprovals,
 }: {
@@ -67,7 +66,7 @@ export const buidMainMessageAttachements = ({
   requiredApprovals: RequiredApprovalsQueryPayloadArg;
 }) => {
   const base = [
-    getPrOpenedBaseAttachment(body, slackUsername),
+    getPrOpenedBaseAttachment(body),
     ...buildRequiredApprovalsAttachment({ pullRequestItem, requiredApprovals }),
     ...buildRequestedReviewersAttachment({
       reviewerStatuses: pullRequestItem?.reviewerStatuses ?? [],
@@ -330,7 +329,6 @@ const getRequiredApprovalsAttatchment = ({
 
 const getPrOpenedBaseAttachment = (
   body: BasePullRequestProperties,
-  slackUsername: string,
 ): MessageAttachment => {
   // Convert <img> tags to markdown links (GitHub image URLs aren't publicly
   // accessible, so we can't render them as Slack image blocks)
@@ -394,7 +392,7 @@ const getPrOpenedBaseAttachment = (
           },
           {
             type: "mrkdwn",
-            text: `${slackUsername}`,
+            text: body.pull_request.user.login,
           },
           {
             type: "image",
@@ -419,6 +417,6 @@ const getPrOpenedBaseAttachment = (
   };
 };
 
-async function getPrOpenedMessage(slackUsername: string): Promise<string> {
-  return `Pull request opened by ${slackUsername}`;
+export function getPrOpenedMessage(body: BasePullRequestProperties): string {
+  return `Pull request opened by ${body.pull_request.user.login}`;
 }

@@ -4,6 +4,8 @@ import { mock } from "vitest-mock-extended";
 import {
   RequiredApprovalsQueryPayloadArg,
   buidMainMessageAttachements,
+  getBaseChatUpdateArguments,
+  getPrOpenedMessage,
   getQueuedToMergeAttachment,
 } from "./mainMessage";
 
@@ -58,6 +60,36 @@ describe("mainMessage", () => {
   });
 
   describe("buidMainMessageAttachements", () => {
+    it("should render the PR author as a GitHub login instead of a Slack mention", () => {
+      const attachments = buidMainMessageAttachements({
+        body: mockBody,
+        slackUsername: "<@U123456>",
+        pullRequestItem: mockPullRequestItem,
+        requiredApprovals: null,
+      });
+
+      const contextBlock = attachments[0].blocks?.find(
+        (block) => block.type === "context",
+      );
+
+      expect(contextBlock).toBeDefined();
+      if (contextBlock && "elements" in contextBlock) {
+        expect(contextBlock.elements).toEqual(
+          expect.arrayContaining([
+            expect.objectContaining({
+              type: "mrkdwn",
+              text: "test/repo",
+            }),
+            expect.objectContaining({
+              type: "mrkdwn",
+              text: "testuser",
+            }),
+          ]),
+        );
+        expect(JSON.stringify(contextBlock.elements)).not.toContain("<@U123456>");
+      }
+    });
+
     it("should include queued to merge attachment when PR is queued", () => {
       const queuedPrItem = {
         ...mockPullRequestItem,
@@ -228,6 +260,28 @@ describe("mainMessage", () => {
       );
 
       expect(approvalAttachment).toBeDefined();
+    });
+  });
+
+  describe("getBaseChatUpdateArguments", () => {
+    it("should not tag the PR author in the main message fallback text", async () => {
+      await expect(
+        getBaseChatUpdateArguments({
+          body: mockBody,
+          threadTs: "thread-ts-123",
+          slackUsername: "<@U123456>",
+          pullRequestItem: mockPullRequestItem,
+          requiredApprovals: null,
+        }),
+      ).resolves.toMatchObject({
+        text: "Pull request opened by testuser",
+      });
+    });
+  });
+
+  describe("getPrOpenedMessage", () => {
+    it("should use the GitHub login for the channel-facing PR opened text", () => {
+      expect(getPrOpenedMessage(mockBody)).toBe("Pull request opened by testuser");
     });
   });
 

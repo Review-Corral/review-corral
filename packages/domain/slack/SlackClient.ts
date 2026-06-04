@@ -24,6 +24,7 @@ import {
   getConvertedToDraftAttachment,
   getMergedAttachment,
   getPrClosedAttatchment,
+  getPrOpenedMessage,
   getPrReopenedAttachment,
 } from "./mainMessage";
 
@@ -398,10 +399,6 @@ export class SlackClient {
     });
   }
 
-  private async getPrOpenedMessage(slackUsername: string): Promise<string> {
-    return `Pull request opened by ${slackUsername}`;
-  }
-
   /**
    * Called when are first writing the main message for a PR to the channel
    */
@@ -417,11 +414,12 @@ export class SlackClient {
     requiredApprovals: RequiredApprovalsQueryPayloadArg;
   }): Promise<ChatPostMessageResponse | undefined> {
     try {
+      const baseBody = convertPrEventToBaseProps(body);
       return this.postMessage({
         message: {
-          text: await this.getPrOpenedMessage(slackUsername),
+          text: getPrOpenedMessage(baseBody),
           attachments: buidMainMessageAttachements({
-            body: convertPrEventToBaseProps(body),
+            body: baseBody,
             slackUsername,
             pullRequestItem,
             requiredApprovals,
