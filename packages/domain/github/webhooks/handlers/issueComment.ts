@@ -11,6 +11,7 @@ import { IssueCommentEvent } from "@octokit/webhooks-types";
 import { Logger } from "../../../logging";
 import { GithubWebhookEventHander } from "../types";
 import {
+  areSameGithubUser,
   extractMentions,
   getDmAttachment,
   getSlackUserId,
@@ -35,6 +36,8 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
   }
 
   if (event.action === "created") {
+    const commentAuthorLogin = event.comment.user.login;
+
     LOGGER.debug("Issue comment created", { issue: event.issue });
 
     LOGGER.debug("Issue comment is on a pull request", {
@@ -63,7 +66,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
     if (trackedPullRequest) {
       await addPrCommentParticipant({
         prId: prInfo.id,
-        githubUsername: event.sender.login,
+        githubUsername: commentAuthorLogin,
       });
     } else {
       LOGGER.warn("Skipping PR comment participant tracking for untracked PR", {
@@ -78,7 +81,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
 
     for (const githubUsername of mentions) {
       // Skip if the commenter mentioned themselves
-      if (githubUsername === event.sender.login) {
+      if (areSameGithubUser(githubUsername, commentAuthorLogin)) {
         continue;
       }
 
@@ -89,7 +92,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
             await slackClient.postDirectMessage({
               slackUserId: mentionedUserSlackId,
               message: {
-                text: `💬 ${await getSlackUserName(event.sender.login, props)} mentioned you in a comment`,
+                text: `💬 ${await getSlackUserName(commentAuthorLogin, props)} mentioned you in a comment`,
                 attachments: [
                   getDmAttachment(
                     {
@@ -112,8 +115,8 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
 
     // DM the PR author (if they weren't the commenter and weren't already mentioned)
     if (
-      prInfo.user.login !== event.sender.login &&
-      !mentions.includes(prInfo.user.login)
+      !areSameGithubUser(prInfo.user.login, commentAuthorLogin) &&
+      !mentions.some((mention) => areSameGithubUser(mention, prInfo.user.login))
     ) {
       dmPromises.push(
         (async () => {
@@ -122,7 +125,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
             await slackClient.postDirectMessage({
               slackUserId: authorSlackId,
               message: {
-                text: `💬 ${await getSlackUserName(event.sender.login, props)} commented on your PR`,
+                text: `💬 ${await getSlackUserName(commentAuthorLogin, props)} commented on your PR`,
                 attachments: [
                   getDmAttachment(
                     {
@@ -151,9 +154,9 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
     for (const participantUsername of previousParticipants) {
       // Skip: self, PR author (already notified above), @mentioned (already notified above)
       if (
-        participantUsername === event.sender.login ||
-        participantUsername === prInfo.user.login ||
-        mentions.includes(participantUsername)
+        areSameGithubUser(participantUsername, commentAuthorLogin) ||
+        areSameGithubUser(participantUsername, prInfo.user.login) ||
+        mentions.some((mention) => areSameGithubUser(mention, participantUsername))
       ) {
         continue;
       }
@@ -165,7 +168,7 @@ export const handleIssueCommentEvent: GithubWebhookEventHander<
             await slackClient.postDirectMessage({
               slackUserId: participantSlackId,
               message: {
-                text: `↩️ ${await getSlackUserName(event.sender.login, props)} replied in a thread you're in`,
+                text: `↩️ ${await getSlackUserName(commentAuthorLogin, props)} replied in a thread you're in`,
                 attachments: [
                   getDmAttachment(
                     {

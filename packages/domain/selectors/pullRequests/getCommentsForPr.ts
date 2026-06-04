@@ -3,6 +3,7 @@ import { PullRequestReviewCommentsResponse } from "@domain/github/endpointTypes"
 import { getInstallationAccessToken } from "@domain/github/fetchers";
 import { LOGGER } from "@domain/github/webhooks/handlers/pullRequest";
 import {
+  areSameGithubUser,
   extractMentions,
   getDmAttachment,
   getSlackUserId,
@@ -38,7 +39,7 @@ export async function postCommentsForNewPR(
         // Send DM to each mentioned user
         for (const githubUsername of mentions) {
           // Skip if the commenter mentioned themselves
-          if (githubUsername === comment.user.login) {
+          if (areSameGithubUser(githubUsername, comment.user.login)) {
             continue;
           }
 
@@ -74,45 +75,50 @@ export async function postCommentsForNewPR(
           );
         }
 
-        // DM the PR author (if they weren't the commenter)
-        // if (body.pull_request.user.login !== comment.user.login || true) {
-        dmPromises.push(
-          (async () => {
-            const authorSlackId = await getSlackUserId(
-              body.pull_request.user.login,
-              baseProps,
-            );
-            if (authorSlackId) {
-              await baseProps.slackClient.postDirectMessage({
-                slackUserId: authorSlackId,
-                message: {
-                  text: `💬 ${await getSlackUserName(comment.user.login, baseProps)} commented on your PR`,
-                  attachments: [
-                    getDmAttachment(
+        // DM the PR author (if they weren't the commenter and weren't already mentioned)
+        if (
+          !areSameGithubUser(body.pull_request.user.login, comment.user.login) &&
+          !mentions.some((mention) =>
+            areSameGithubUser(mention, body.pull_request.user.login),
+          )
+        ) {
+          dmPromises.push(
+            (async () => {
+              const authorSlackId = await getSlackUserId(
+                body.pull_request.user.login,
+                baseProps,
+              );
+              if (authorSlackId) {
+                await baseProps.slackClient.postDirectMessage({
+                  slackUserId: authorSlackId,
+                  message: {
+                    text: `💬 ${await getSlackUserName(comment.user.login, baseProps)} commented on your PR`,
+                    attachments: [
+                      getDmAttachment(
+                        {
+                          title: body.pull_request.title,
+                          number: body.pull_request.number,
+                          html_url: body.pull_request.html_url,
+                        },
+                        "gray",
+                      ),
                       {
-                        title: body.pull_request.title,
-                        number: body.pull_request.number,
-                        html_url: body.pull_request.html_url,
+                        text: comment.body,
+                        color: COLOURS.gray,
                       },
-                      "gray",
-                    ),
-                    {
-                      text: comment.body,
-                      color: COLOURS.gray,
-                    },
-                  ],
-                },
-              });
-            } else {
-              LOGGER.warn("No Slack ID found for PR author", {
-                prId: body.pull_request.id,
-                author: body.pull_request.user.login,
-              });
-            }
-          })(),
-        );
+                    ],
+                  },
+                });
+              } else {
+                LOGGER.warn("No Slack ID found for PR author", {
+                  prId: body.pull_request.id,
+                  author: body.pull_request.user.login,
+                });
+              }
+            })(),
+          );
+        }
       }
-      // }
     }
 
     await Promise.all(dmPromises);

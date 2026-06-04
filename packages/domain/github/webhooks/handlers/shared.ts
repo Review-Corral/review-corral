@@ -36,6 +36,17 @@ export async function getSlackUserId(
   return member?.slackId ?? null;
 }
 
+export function areSameGithubUser(
+  firstLogin: string | null | undefined,
+  secondLogin: string | null | undefined,
+): boolean {
+  if (!firstLogin || !secondLogin) {
+    return false;
+  }
+
+  return firstLogin.toLowerCase() === secondLogin.toLowerCase();
+}
+
 /**
  * Extracts GitHub username mentions (@username) from a comment body
  */

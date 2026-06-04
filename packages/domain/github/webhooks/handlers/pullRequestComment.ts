@@ -10,6 +10,7 @@ import { SlackClient } from "../../../slack/SlackClient";
 import { BaseGithubWebhookEventHanderArgs } from "../types";
 import { GithubWebhookEventHander } from "../types";
 import {
+  areSameGithubUser,
   extractMentions,
   getDmAttachment,
   getSlackUserId,
@@ -27,6 +28,8 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
   }
 
   if (event.action === "created") {
+    const commentAuthorLogin = event.comment.user.login;
+
     const pullRequestItem = await fetchPrItem({
       pullRequestId: event.pull_request.id,
       repoId: event.repository.id,
@@ -52,7 +55,7 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
 
     for (const githubUsername of mentions) {
       // Skip if the commenter mentioned themselves
-      if (githubUsername === event.sender.login) {
+      if (areSameGithubUser(githubUsername, commentAuthorLogin)) {
         continue;
       }
 
@@ -63,7 +66,7 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
             await slackClient.postDirectMessage({
               slackUserId: mentionedUserSlackId,
               message: {
-                text: `💬 ${await getSlackUserName(event.sender.login, args)} mentioned you in a comment`,
+                text: `💬 ${await getSlackUserName(commentAuthorLogin, args)} mentioned you in a comment`,
                 attachments: [
                   getDmAttachment(
                     {
@@ -89,9 +92,14 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
     // For replies, avoid duplicating the thread reply notification if the author
     // is already a thread participant.
     if (
-      event.pull_request.user.login !== event.sender.login &&
-      !mentions.includes(event.pull_request.user.login) &&
-      (!isReply || !threadParticipants.includes(event.pull_request.user.login))
+      !areSameGithubUser(event.pull_request.user.login, commentAuthorLogin) &&
+      !mentions.some((mention) =>
+        areSameGithubUser(mention, event.pull_request.user.login),
+      ) &&
+      (!isReply ||
+        !threadParticipants.some((participant) =>
+          areSameGithubUser(participant, event.pull_request.user.login),
+        ))
     ) {
       dmPromises.push(
         (async () => {
@@ -103,7 +111,7 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
             await slackClient.postDirectMessage({
               slackUserId: authorSlackId,
               message: {
-                text: `💬 ${await getSlackUserName(event.sender.login, args)} commented on your PR`,
+                text: `💬 ${await getSlackUserName(commentAuthorLogin, args)} commented on your PR`,
                 attachments: [
                   getDmAttachment(
                     {
@@ -130,7 +138,7 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
       dmPromises.push(
         notifyThreadParticipants({
           participants: threadParticipants,
-          senderLogin: event.sender.login,
+          senderLogin: commentAuthorLogin,
           pullRequest: event.pull_request,
           comment: event.comment,
           slackClient,
@@ -146,7 +154,7 @@ export const handlePullRequestCommentEvent: GithubWebhookEventHander<
     const threadId = event.comment.in_reply_to_id ?? event.comment.id;
     await addReviewThreadParticipant({
       threadId,
-      githubUsername: event.sender.login,
+      githubUsername: commentAuthorLogin,
     });
 
     return;
@@ -172,7 +180,7 @@ async function notifyThreadParticipants({
   args: Pick<BaseGithubWebhookEventHanderArgs, "organizationId">;
 }): Promise<void> {
   const notifyPromises = participants
-    .filter((username) => username !== senderLogin)
+    .filter((username) => !areSameGithubUser(username, senderLogin))
     .map(async (username) => {
       const slackId = await getSlackUserId(username, args);
       if (slackId) {
