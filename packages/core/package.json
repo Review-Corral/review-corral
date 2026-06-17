@@ -31,7 +31,7 @@
     "@aws-sdk/client-secrets-manager": "^3.1011.0",
     "@slack/web-api": "^6.13.0",
     "date-fns": "^4.1.0",
-    "drizzle-orm": "^0.40.1",
+    "drizzle-orm": "^0.45.2",
     "electrodb": "^3.7.2",
     "ky": "^1.14.3",
     "middy": "^0.36.0",
