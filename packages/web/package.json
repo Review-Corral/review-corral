@@ -27,7 +27,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "i": "^0.3.7",
-    "js-cookie": "^3.0.5",
+    "js-cookie": "^3.0.7",
     "ky": "^1.14.3",
     "lucide-react": "^0.479.0",
     "posthog-js": "^1.361.1",
